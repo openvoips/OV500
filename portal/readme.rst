@@ -35,7 +35,7 @@ License
 *******
 
 Please see the `license
-agreement <https://github.com/openvoips/OV500/edit/master/license.rst>`_.
+agreement <https://github.com/openvoips/OV500/blob/master/LICENSE>`_.
 
 *********
 Resources
