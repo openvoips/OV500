@@ -1,0 +1,10 @@
+# $Id$
+# dispatcher destination sets
+# setit(int) destination(sip uri) flags(int,opt) priority(int,opt) attributes(str,opt)
+
+# Freeswitch IPS
+2 sip:127.0.0.1:5050
+#Allw incoming calls from Freeswitch IP  
+4 sip:127.0.0.1:5050
+#List of carrier DID provider
+5 sip:10.10.10.10
