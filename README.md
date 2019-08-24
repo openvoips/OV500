@@ -17,7 +17,7 @@ OV500 is an Open Source VoIP Billing Switching and rating Solution for Kamailio 
 - Tariff / Bundle Traiff (Package) Management 
 - Monitoring & Repoting 
 
-and many more…
+and many more
 
 OV500 Installation documentation
 --------------------------
