@@ -7,7 +7,7 @@
     <!--    <param name="cred" value="user:pass"/> -->
 
     <!-- the total number of retries (not counting the first 'try') to post to webserver incase of failure -->
-    <param name="retries" value="2"/>
+    <!-- <param name="retries" value="2"/> -->
 
     <!-- delay between retries in seconds, default is 5 seconds -->
     <!-- <param name="delay" value="1"/> -->

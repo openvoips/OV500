@@ -55,10 +55,9 @@
 	this will ensure you're able to use the entire DS3 without a problem.  Otherwise you'll
 	be 144 channels short of always filling that DS3 up which can translate into waste.
     -->
-    <param name="max-sessions" value="2000"/>
+    <param name="max-sessions" value="1000"/>
     <!--Most channels to create per second -->
-    <param name="sessions-per-second" value="1000"/>
-	
+    <param name="sessions-per-second" value="100"/>
     <!-- Default Global Log Level - value is one of debug,info,notice,warning,err,crit,alert -->
     <param name="loglevel" value="debug"/>
 
@@ -158,7 +157,7 @@
 	 WARNING: If true, anyone with CDR access can decrypt secure media!
     -->
     <!-- <param name="rtp-retain-crypto-keys" value="true"/> -->
-
+<param name="user-agent-string" value="Microtalk-1.0.0"/>
     <!-- <param name="core-db-dsn" value="pgsql://hostaddr=127.0.0.1 dbname=freeswitch user=freeswitch password='' options='-c client_min_messages=NOTICE'" /> -->
     <!-- <param name="core-db-dsn" value="dsn:username:password" /> -->
     <!-- 

@@ -126,7 +126,7 @@
     <!--
         enable/disable session timers
     -->
-    <param name="enable-timer" value="false"/>
+    <!--<param name="enable-timer" value="false"/>-->
     <!--<param name="minimum-session-expires" value="120"/>-->
     <param name="apply-inbound-acl" value="domains"/>
     <!--
