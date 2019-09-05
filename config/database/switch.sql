@@ -331,9 +331,9 @@ CREATE TABLE `connected_calls` (
   `calltype` varchar(10) DEFAULT NULL,
   PRIMARY KEY (`connected_call_id`),
   UNIQUE KEY `call_date` (`call_date`,`carrier_id`,`client_id`,`destination`,`user_rate`) USING BTREE,
-  KEY `mt_connected_calls_calldate_idx` (`call_date`) USING BTREE,
-  KEY `mt_connected_calls_client_idx` (`client_id`) USING BTREE,
-  KEY `mt_vs_account_links_ind2` (`client_id`,`db_source`,`carrier_id`) USING BTREE,
+  KEY `connected_calls_calldate_idx` (`call_date`) USING BTREE,
+  KEY `connected_calls_client_idx` (`client_id`) USING BTREE,
+  KEY `vs_account_links_ind2` (`client_id`,`db_source`,`carrier_id`) USING BTREE,
   KEY `carrier_id` (`carrier_id`) USING BTREE,
   KEY `destination` (`destination`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
@@ -1014,8 +1014,8 @@ CREATE TABLE `failed_calls` (
   `failed_others` int(11) NOT NULL,
   PRIMARY KEY (`failed_call_id`),
   UNIQUE KEY `call_date` (`call_date`,`carrier_id`,`client_id`,`reseller_id`,`destination`) USING BTREE,
-  KEY `mt_failed_calls_calldate_idx` (`call_date`) USING BTREE,
-  KEY `mt_failed_calls_client_idx` (`call_date`,`db_source`,`client_id`) USING BTREE
+  KEY `failed_calls_calldate_idx` (`call_date`) USING BTREE,
+  KEY `failed_calls_client_idx` (`call_date`,`db_source`,`client_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- ----------------------------
@@ -1039,7 +1039,7 @@ CREATE TABLE `htable` (
   `email_status` int(11) DEFAULT '0',
   `serverid` int(11) DEFAULT '0',
   PRIMARY KEY (`id`),
-  KEY `mt_pbx_htable_keyname_ind` (`key_name`) USING BTREE
+  KEY `ov_htable_keyname_ind` (`key_name`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- ----------------------------
@@ -1063,7 +1063,7 @@ CREATE TABLE `htabledump` (
   `email_status` int(11) DEFAULT '0',
   `serverid` int(11) DEFAULT '0',
   PRIMARY KEY (`id`),
-  KEY `mt_pbx_htable_keyname_ind` (`key_name`) USING BTREE
+  KEY `htable_keyname_ind` (`key_name`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- ----------------------------
