@@ -1,7 +1,7 @@
 ![logo](https://openvoips.org/v2/wp-content/uploads/2019/07/header.png)
 # OV500
 
-OV500 is an Open Source VoIP Billing Switching and rating Solution for Kamailio & Freeswitch. 
+<a href="https://ov500.openvoips.org/">OV500</a> is an Open Source VoIP Billing Switching and rating Solution for Kamailio & Freeswitch. 
 
 - Prepaid / Postpaid Billing
 - GUI design in CodeIgniter Web Framework
@@ -19,7 +19,7 @@ OV500 is an Open Source VoIP Billing Switching and rating Solution for Kamailio 
 
 and many more
 
-OV500 Installation documentation
+<a href="https://ov500.openvoips.org/">OV500</a> Installation documentation
 --------------------------
 For a standard installation please follow the <a href="https://ov500.openvoips.org/documentation/installation/">Setup instructions</a>
 from the documentation.
