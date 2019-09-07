@@ -15,6 +15,7 @@
 - Multi level Reseller account Management
 - DID billing
 - Tariff / Bundle Traiff (Package) Management 
+- Integrated online payment process option
 - Monitoring & Repoting 
 
 and many more
