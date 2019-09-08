@@ -26,8 +26,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 
 
-$config['base_url'] = 'http://openvoips.org/portal/';
-date_default_timezone_set("Europe/London");
+$config['base_url'] = "http://".$_SERVER['HTTP_HOST'].'/portal/';
+date_default_timezone_set("Asia/Kolkata");
 
 /*
   |--------------------------------------------------------------------------
