@@ -39,7 +39,7 @@ class Page extends CI_Controller {
 	{
 		$page_code = 'page';
 		$data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-		//die("SS");
+		
 		
 		if(!check_is_loggedin())
 		{//not looged in
