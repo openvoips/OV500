@@ -14,6 +14,7 @@
 - IP and SIP User, Dialprefix and Caller ID based authentication
 - Multi level Reseller account Management
 - DID billing
+- Smart and dynamic routing
 - Tariff / Bundle Traiff (Package) Management 
 - Integrated online payment process option
 - Monitoring & Repoting 
