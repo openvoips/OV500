@@ -28,16 +28,13 @@
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
-class Logout extends CI_Controller {
+class logout extends CI_Controller {
 
     function __construct() {
         parent::__construct();
-       
     }
 
     public function index() {
-
-        
 
         $userdata = array(
             'session_current_user_id' => '',
