@@ -494,7 +494,8 @@ function generate_key($name, $type = '') {
 
 function callSdrAPI($data, $method = 'GET') { 
    // $url = SDR_API_URL;
-    $url = "http://localhost/ardent/api/";
+    //$url = "http://localhost/ardent/api/";
+	$url =  site_url('api');
     $curl = curl_init();
     switch ($method) {
         case "POST":
