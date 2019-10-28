@@ -100,8 +100,9 @@ CREATE TABLE `tickets` (
   `created_by` varchar(30) NOT NULL,
   `created_by_name` varchar(30) NOT NULL,
   `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_by_ip` varchar(150) DEFAULT NULL,
   PRIMARY KEY (`ticket_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Records of tickets
