@@ -540,7 +540,7 @@ function callSdrAPI($data, $method = 'GET') {
     $log_data_insert_array['response_data'] = $result_raw;
     $log_data_insert_array['function_return'] = $result;
     //$str = $CI->db->insert('activity_api_log', $log_data_insert_array); 
-    $DB1 = $CI->load->database('cdrdb', true);
+    $DB1 = $CI->load->database('default', true);
     $str = $DB1->insert('activity_api_log', $log_data_insert_array);
     //var_dump($str);
     //////////////////////////
