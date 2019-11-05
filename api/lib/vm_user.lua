@@ -37,7 +37,7 @@ end
 
 --assert (req_domain and req_key and req_user, "This example script only supports generating directory xml for a single user !\n")
  
-local dbh = freeswitch.Dbh("odbc://freeswitch:USERNAME:PASSWORD")
+local dbh = freeswitch.Dbh("odbc://freeswitch:ovswitch:ovswitch123")
 if dbh:connected() == false then
   freeswitch.consoleLog("notice", "vm_user.lua cannot connect to database" .. dsn .. "\n")
   return
