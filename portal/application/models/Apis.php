@@ -29,7 +29,7 @@
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
-class Api extends CI_Controller {
+class Apis extends CI_Controller {
 
     function __construct() {
         parent::__construct();
@@ -41,9 +41,7 @@ class Api extends CI_Controller {
         try {
             $page_name = "api";
             $result = '';
-			$success_message = 'Request is submited';
-			$error_message = 'Request submission failed';
-			
+
             if ($data['request'] == 'REMOVEBALANCE' or $data['request'] == 'ADDBALANCE' or $data['request'] == 'ADDCREDIT' or $data['request'] == 'REMOVECREDIT' or $data['request'] == 'ADDTESTBALANCE' or $data['request'] == 'REMOVETESTBALANCE' or $data['request'] == 'BALANCETRANSFERADD' or $data['request'] == 'BALANCETRANSFERREMOVE') {
                 $result = $this->api_mod->save_payment($data);
             } elseif ($data['request'] == 'TARIFFCHARGES' or $data['request'] == 'SERVICES' or $data['request'] == 'NEWDIDSETUP' or $data['request'] == 'DIDSETUP' or $data['request'] == 'DIDRENTAL' or $data['request'] == 'DIDCANCEL' or $data['request'] == 'DIDEXTRACHRENTAL') {

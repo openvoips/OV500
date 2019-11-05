@@ -374,12 +374,6 @@
                 $menu_system = '';
                 if (check_logged_account_type(array('ADMIN', 'SUBADMIN', 'ACCOUNTS'))) {
                     $class = '';
-                    if (in_array($page_name, array('payment_trace')))
-                        $class = 'class="current-page"';
-                    $menu_system .= '<li ' . $class . '><a href="' . base_url() . 'payment/trace">Payment Tracking</a></li>';
-                }
-                if (check_logged_account_type(array('ADMIN', 'SUBADMIN', 'ACCOUNTS'))) {
-                    $class = '';
                     if (in_array($page_name, array('Currency')))
                         $class = 'class="current-page"';
                     $menu_system .= '<li ' . $class . '><a href="' . base_url() . 'currency">Currency & Exchange Rate</a></li>';

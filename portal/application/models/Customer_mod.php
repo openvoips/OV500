@@ -387,7 +387,7 @@ class Customer_mod extends CI_Model {
     function add($data) {
         $api_log_data_array = array();
         $log_data_array = array();
-        $account_type = 'CUSTOMER';
+       $data['account_type'] = $account_type = 'CUSTOMER';
         try {
             $sql = "SELECT  username  FROM web_access WHERE username ='" . $data['username'] . "' ";
 
@@ -406,7 +406,6 @@ class Customer_mod extends CI_Model {
                 elseif (isset($data['input_account_id']) && $row->account_id == $key)
                     return 'Account Code already exists';
             }
-
             $account_access_data_array = $account_data_array = $account_access_array = $billing_cust_data_array = array();
             $account_data_array['account_id'] = $key;
             $account_data_array['account_type'] = $account_type;
@@ -422,7 +421,9 @@ class Customer_mod extends CI_Model {
 
             $account_data_array['account_status'] = $data['account_status'];
             if (isset($data['account_type'])) {
-                $account_data_array['account_type'] = $data['account_type'];
+				if(strlen(trim($data['account_type']))> 0){
+					$account_data_array['account_type'] = $data['account_type'];
+				}
                 if ($data['account_type'] == 'DEMO') {
                     $account_data_array['account_status'] = '1';
                 }

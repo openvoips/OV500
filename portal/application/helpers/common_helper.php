@@ -494,8 +494,9 @@ function generate_key($name, $type = '') {
 
 function callSdrAPI($data, $method = 'GET') { 
    // $url = SDR_API_URL;
-    //$url = "http://localhost/ardent/api/";
-	$url =  site_url('api');
+    //$url = "https://localhost/apis/";
+
+	$url =  site_url('apis');
     $curl = curl_init();
     switch ($method) {
         case "POST":
@@ -517,6 +518,8 @@ function callSdrAPI($data, $method = 'GET') {
     //echo $url.'<br><br><br>';
     // OPTIONS:
     curl_setopt($curl, CURLOPT_URL, $url);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
     curl_setopt($curl, CURLOPT_HTTPHEADER, array(
         'APIKEY: SWITCH_KEY',
         'Content-Type: application/json',
@@ -525,8 +528,12 @@ function callSdrAPI($data, $method = 'GET') {
     curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
     // EXECUTE:
     $result_raw = $result = curl_exec($curl);
+   if (curl_errno($curl)) {
+     $error_msg = curl_error($curl);
+   }
+
     if (!$result) {
-        $return_array = array('error' => 0, 'message' => 'Connection Failure');
+        $return_array = array('error' => 0, 'message' =>  $error_msg);
         $result = json_encode($return_array);
         //die("Connection Failure");
     }

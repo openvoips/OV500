@@ -59,7 +59,7 @@ class dashboard extends CI_Controller {
 
         if (check_logged_account_type(array('RESELLER', 'CUSTOMER'))) {
             $option_param = array('balance' => true, 'currency' => true);
-            $user_result = $this->member_mod->get_account_by_key('user_access_id_name', $account_id, $option_param);
+            $user_result = $this->member_mod->get_account_by_key('account_id', $account_id, $option_param);
             $data['user_result'] = $user_result;
 
             //////////////////

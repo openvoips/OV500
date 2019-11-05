@@ -46,6 +46,25 @@ CREATE TABLE `account` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
+DROP TABLE IF EXISTS `account_card_details`;
+CREATE TABLE `account_card_details` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` varchar(30) NOT NULL,
+  `card_name` varchar(30) NOT NULL,
+  `card_data` text NOT NULL,
+  `dt_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+DROP TABLE IF EXISTS `account_payment_credentials`;
+CREATE TABLE `account_payment_credentials` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` varchar(30) NOT NULL,
+  `payment_method` enum('paypal-client','paypal-sdk','ccavenue','secure-trading') NOT NULL,
+  `credentials` text NOT NULL,
+  `status` enum('Y','N') NOT NULL DEFAULT 'Y',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
 -- Table structure for `activity_api_log`
 -- ----------------------------
 DROP TABLE IF EXISTS `activity_api_log`;

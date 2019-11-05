@@ -272,11 +272,7 @@ class Payment extends CI_Controller {
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
         $view_page = "make_payment";
 
-        $account_id = get_logged_account_id();
-        /* if(!in_array($account_id, array('EN000007690','EN000210311')))
-          {
-          show_404('under_maintaaince');
-          } */
+        $account_id = get_logged_account_id();       
         $option_param = array('currency' => true);
         $account_result = $this->member_mod->get_account_by_key('account_id', $account_id, $option_param);
 
