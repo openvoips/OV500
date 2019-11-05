@@ -43,9 +43,7 @@ CREATE TABLE `account` (
   `update_dt` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `key_account_id` (`account_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=latin1;
-
-
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Table structure for `activity_api_log`
@@ -58,11 +56,7 @@ CREATE TABLE `activity_api_log` (
   `function_return` text NOT NULL,
   `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- ----------------------------
--- Records of activity_api_log
--- ----------------------------
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Table structure for `activity_log`
@@ -78,8 +72,7 @@ CREATE TABLE `activity_log` (
   `account_id` varchar(30) NOT NULL,
   `dt_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2057 DEFAULT CHARSET=latin1;
-
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Table structure for `autosystem_report_tmp`
@@ -130,7 +123,9 @@ CREATE TABLE `carrier` (
   `tax_number` varchar(30) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `key_carrier_id_name` (`carrier_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+
+
 
 
 -- ----------------------------
@@ -148,9 +143,7 @@ CREATE TABLE `carrier_callerid` (
   `route` enum('INBOUND','OUTBOUND') DEFAULT 'OUTBOUND',
   PRIMARY KEY (`id`),
   UNIQUE KEY `carrier_callerid_key` (`carrier_id`,`maching_string`,`route`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=latin1;
-
-
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Table structure for `carrier_daily_usage`
@@ -188,8 +181,7 @@ CREATE TABLE `carrier_daily_usage` (
   `code480` int(11) DEFAULT '0',
   PRIMARY KEY (`carrier_daily_usage_id`),
   UNIQUE KEY `carrier_account` (`carrier_account`,`prefix`,`calls_date`,`destination`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
-
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 
 -- ----------------------------
@@ -210,7 +202,7 @@ CREATE TABLE `carrier_ips` (
   `passwd` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `carrier_id` (`carrier_id`,`ipaddress_name`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 
 -- ----------------------------
@@ -227,7 +219,7 @@ CREATE TABLE `carrier_prefix` (
   `route` enum('INBOUND','OUTBOUND') DEFAULT 'INBOUND',
   PRIMARY KEY (`id`),
   UNIQUE KEY `carrier_prefix_id_key` (`carrier_id`,`maching_string`,`route`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=47 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 
 -- ----------------------------
@@ -257,7 +249,7 @@ CREATE TABLE `carrier_rates` (
   UNIQUE KEY `pt` (`ratecard_id`,`prefix`) USING BTREE,
   KEY `prefix` (`prefix`) USING BTREE,
   KEY `tariff_id` (`ratecard_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=577 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 
 -- ----------------------------
@@ -336,8 +328,7 @@ CREATE TABLE `connected_calls` (
   KEY `vs_account_links_ind2` (`client_id`,`db_source`,`carrier_id`) USING BTREE,
   KEY `carrier_id` (`carrier_id`) USING BTREE,
   KEY `destination` (`destination`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
-
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 
 -- ----------------------------
@@ -372,7 +363,7 @@ CREATE TABLE `customer_balance` (
   `update_dt` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id_account_id` (`account_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 
 -- ----------------------------
@@ -403,7 +394,7 @@ CREATE TABLE `customer_bundle_sdr` (
   `action_date` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `usersdr_id` (`account_id`,`rule_type`,`yearmonth`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 
 -- ----------------------------
@@ -422,8 +413,7 @@ CREATE TABLE `customer_callerid` (
   `route` enum('INBOUND','OUTBOUND','DTSBASEDCLI') DEFAULT 'OUTBOUND',
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_callerid_key` (`account_id`,`maching_string`,`route`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=93 DEFAULT CHARSET=latin1;
-
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Table structure for `customer_card_details`
@@ -571,7 +561,7 @@ CREATE TABLE `customer_daily_usages` (
   `entry_type` int(11) DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `account_id` (`account_id`,`action_date`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Table structure for `customer_default_permissions`
@@ -589,7 +579,7 @@ CREATE TABLE `customer_default_permissions` (
 -- ----------------------------
 INSERT INTO `customer_default_permissions` VALUES ('1', 'RESELLER', 'a:6:{s:8:\"reseller\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:8:\"customer\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:8:\"ratecard\";a:5:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";i:4;s:6:\"upload\";}s:4:\"rate\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:6:\"tariff\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:7:\"reports\";a:9:{i:0;s:3:\"cdr\";i:1;s:10:\"fail_calls\";i:2;s:11:\"call_report\";i:3;s:12:\"report_topup\";i:4;s:20:\"report_topup_monthly\";i:5;s:22:\"customer_topup_summery\";i:6;s:18:\"report_daily_sales\";i:7;s:26:\"report_daily_sales_monthly\";i:8;s:22:\"customer_sales_summery\";}}');
 INSERT INTO `customer_default_permissions` VALUES ('2', 'SUBADMIN', 'a:10:{s:5:\"admin\";a:3:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";}s:8:\"reseller\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:7:\"carrier\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:7:\"routing\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:8:\"dialplan\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:8:\"ratecard\";a:5:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";i:4;s:6:\"upload\";}s:4:\"rate\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:6:\"tariff\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:7:\"service\";a:3:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";}s:7:\"reports\";a:7:{i:0;s:3:\"cdr\";i:1;s:10:\"fail_calls\";i:2;s:4:\"live\";i:3;s:17:\"analytics_carrier\";i:4;s:18:\"accounting_billing\";i:5;s:7:\"summary\";i:6;s:11:\"call_report\";}}');
-INSERT INTO `customer_default_permissions` VALUES ('3', 'CUSTOMER', 'a:2:{s:8:\"customer\";a:2:{i:0;s:4:\"view\";i:1;s:7:\"cliedit\";}s:7:\"reports\";a:5:{i:0;s:3:\"cdr\";i:1;s:10:\"fail_calls\";i:2;s:9:\"statement\";i:3;s:9:\"myinvoice\";i:4;s:16:\"report_statement\";}}');
+INSERT INTO `customer_default_permissions` VALUES ('3', 'CUSTOMER', 'a:4:{s:8:\"customer\";a:2:{i:0;s:4:\"view\";i:1;s:7:\"cliedit\";}s:7:\"routing\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:7:\"service\";a:1:{i:0;s:4:\"view\";}s:7:\"reports\";a:6:{i:0;s:3:\"cdr\";i:1;s:10:\"fail_calls\";i:2;s:4:\"live\";i:3;s:9:\"statement\";i:4;s:9:\"myinvoice\";i:5;s:16:\"report_statement\";}}');
 INSERT INTO `customer_default_permissions` VALUES ('4', 'ACCOUNTS', 'a:8:{s:8:\"reseller\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:8:\"customer\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:7:\"carrier\";a:1:{i:0;s:6:\"delete\";}s:8:\"ratecard\";a:5:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";i:4;s:6:\"upload\";}s:4:\"rate\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:6:\"tariff\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:7:\"service\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:7:\"reports\";a:15:{i:0;s:3:\"cdr\";i:1;s:10:\"fail_calls\";i:2;s:5:\"monin\";i:3;s:8:\"CustQOSR\";i:4;s:12:\"monitCarrier\";i:5;s:17:\"analytics_carrier\";i:6;s:18:\"accounting_billing\";i:7;s:7:\"summary\";i:8;s:11:\"call_report\";i:9;s:12:\"report_topup\";i:10;s:20:\"report_topup_monthly\";i:11;s:22:\"customer_topup_summery\";i:12;s:18:\"report_daily_sales\";i:13;s:26:\"report_daily_sales_monthly\";i:14;s:22:\"customer_sales_summery\";}}');
 
 -- ----------------------------
@@ -608,8 +598,7 @@ CREATE TABLE `customer_dialpattern` (
   `route` enum('INBOUND','OUTBOUND') DEFAULT 'OUTBOUND',
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_dialplan_key` (`account_id`,`maching_string`,`route`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=84 DEFAULT CHARSET=latin1;
-
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Table structure for `customer_dialplan`
@@ -626,8 +615,7 @@ CREATE TABLE `customer_dialplan` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_carrier_dialplan_key` (`account_id`,`maching_string`) USING BTREE,
   KEY `maching_string_key` (`maching_string`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
-
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Table structure for `customer_ips`
@@ -647,7 +635,7 @@ CREATE TABLE `customer_ips` (
   UNIQUE KEY `user_ips_ipaddress_key` (`ipaddress`,`dialprefix`) USING BTREE,
   KEY `account_id` (`account_id`) USING BTREE,
   KEY `ipaddress` (`ipaddress`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 
 -- ----------------------------
@@ -665,7 +653,7 @@ CREATE TABLE `customer_notification` (
   `update_dt` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `account_id` (`account_id`,`notify_name`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Table structure for `customer_payment_credentials`
@@ -779,8 +767,7 @@ CREATE TABLE `customer_sdr` (
   `actiondate` date DEFAULT NULL,
   PRIMARY KEY (`user_sdr_id`),
   KEY `usersdr_id` (`account_id`,`rule_type`,`yearmonth`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=latin1;
-
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Table structure for `customer_sip_account`
@@ -809,7 +796,7 @@ CREATE TABLE `customer_sip_account` (
   UNIQUE KEY `account_id_2` (`account_id`,`extension_no`) USING BTREE,
   UNIQUE KEY `callingcard_pin` (`callingcard_pin`) USING BTREE,
   KEY `account_id` (`account_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 
 -- ----------------------------
@@ -818,11 +805,22 @@ CREATE TABLE `customer_sip_account` (
 DROP TABLE IF EXISTS `customer_type_permissions`;
 CREATE TABLE `customer_type_permissions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_type` enum('RESELLER','USER','ADMIN','SUBADMIN','NOC','CARRIER','ACCOUNTMANAGER','CREDITCONTROL','SALESMANAGER') NOT NULL,
+  `user_type` enum('RESELLER','CUSTOMER','ADMIN','SUBADMIN','NOC','CARRIER','ACCOUNTMANAGER','CREDITCONTROL','SALESMANAGER') NOT NULL,
   `permissions` text NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
 
+-- ----------------------------
+-- Records of customer_type_permissions
+-- ----------------------------
+INSERT INTO `customer_type_permissions` VALUES ('1', 'ACCOUNTMANAGER', 'a:10:{s:8:\"reseller\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:7:\"enduser\";a:3:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";}s:7:\"carrier\";a:1:{i:0;s:4:\"view\";}s:7:\"routing\";a:2:{i:0;s:4:\"view\";i:1;s:3:\"add\";}s:8:\"dialplan\";a:1:{i:0;s:4:\"view\";}s:8:\"ratecard\";a:1:{i:0;s:4:\"view\";}s:4:\"rate\";a:1:{i:0;s:4:\"view\";}s:6:\"tariff\";a:1:{i:0;s:4:\"view\";}s:7:\"service\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:7:\"reports\";a:9:{i:0;s:3:\"cdr\";i:1;s:10:\"fail_calls\";i:2;s:4:\"live\";i:3;s:16:\"analytics_system\";i:4;s:18:\"analytics_customer\";i:5;s:17:\"analytics_carrier\";i:6;s:18:\"accounting_billing\";i:7;s:7:\"summary\";i:8;s:11:\"call_report\";}}');
+INSERT INTO `customer_type_permissions` VALUES ('2', 'RESELLER', 'a:6:{s:8:\"reseller\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:7:\"enduser\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:8:\"ratecard\";a:5:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";i:4;s:6:\"upload\";}s:4:\"rate\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:6:\"tariff\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:7:\"reports\";a:2:{i:0;s:3:\"cdr\";i:1;s:10:\"fail_calls\";}}');
+INSERT INTO `customer_type_permissions` VALUES ('3', 'SUBADMIN', 'a:11:{s:5:\"admin\";a:3:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";}s:8:\"reseller\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:7:\"enduser\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:7:\"carrier\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:7:\"routing\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:8:\"dialplan\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:8:\"ratecard\";a:5:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";i:4;s:6:\"upload\";}s:4:\"rate\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:6:\"tariff\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:7:\"service\";a:3:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";}s:7:\"reports\";a:9:{i:0;s:3:\"cdr\";i:1;s:10:\"fail_calls\";i:2;s:4:\"live\";i:3;s:16:\"analytics_system\";i:4;s:18:\"analytics_customer\";i:5;s:17:\"analytics_carrier\";i:6;s:18:\"accounting_billing\";i:7;s:7:\"summary\";i:8;s:11:\"call_report\";}}');
+INSERT INTO `customer_type_permissions` VALUES ('4', 'NOC', 'a:11:{s:5:\"admin\";a:3:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";}s:8:\"reseller\";a:3:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";}s:7:\"enduser\";a:3:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";}s:7:\"carrier\";a:3:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";}s:7:\"routing\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:8:\"dialplan\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:8:\"ratecard\";a:5:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";i:4;s:6:\"upload\";}s:4:\"rate\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:6:\"tariff\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:7:\"service\";a:4:{i:0;s:4:\"view\";i:1;s:3:\"add\";i:2;s:4:\"edit\";i:3;s:6:\"delete\";}s:7:\"reports\";a:9:{i:0;s:3:\"cdr\";i:1;s:10:\"fail_calls\";i:2;s:4:\"live\";i:3;s:16:\"analytics_system\";i:4;s:18:\"analytics_customer\";i:5;s:17:\"analytics_carrier\";i:6;s:18:\"accounting_billing\";i:7;s:7:\"summary\";i:8;s:11:\"call_report\";}}');
+INSERT INTO `customer_type_permissions` VALUES ('5', 'CUSTOMER', 'a:1:{s:7:\"reports\";a:1:{i:0;s:3:\"cdr\";}}');
+INSERT INTO `customer_type_permissions` VALUES ('6', 'CREDITCONTROL', 'a:7:{s:8:\"reseller\";a:2:{i:0;s:4:\"view\";i:1;s:4:\"edit\";}s:7:\"enduser\";a:2:{i:0;s:4:\"view\";i:1;s:4:\"edit\";}s:8:\"ratecard\";a:2:{i:0;s:4:\"view\";i:1;s:4:\"edit\";}s:4:\"rate\";a:2:{i:0;s:4:\"view\";i:1;s:4:\"edit\";}s:6:\"tariff\";a:1:{i:0;s:4:\"view\";}s:7:\"service\";a:3:{i:0;s:4:\"view\";i:1;s:4:\"edit\";i:2;s:6:\"delete\";}s:7:\"reports\";a:2:{i:0;s:18:\"analytics_customer\";i:1;s:17:\"analytics_carrier\";}}');
+INSERT INTO `customer_type_permissions` VALUES ('7', 'SALESMANAGER', 'a:5:{s:5:\"admin\";a:1:{i:0;s:4:\"view\";}s:7:\"enduser\";a:2:{i:0;s:4:\"view\";i:1;s:4:\"edit\";}s:4:\"rate\";a:1:{i:0;s:4:\"view\";}s:7:\"service\";a:1:{i:0;s:4:\"view\";}s:7:\"reports\";a:9:{i:0;s:3:\"cdr\";i:1;s:10:\"fail_calls\";i:2;s:4:\"live\";i:3;s:16:\"analytics_system\";i:4;s:18:\"analytics_customer\";i:5;s:17:\"analytics_carrier\";i:6;s:18:\"accounting_billing\";i:7;s:7:\"summary\";i:8;s:11:\"call_report\";}}');
+INSERT INTO `customer_type_permissions` VALUES ('8', 'CARRIER', 'a:0:{}');
 
 -- ----------------------------
 -- Table structure for `customers`
@@ -852,7 +850,7 @@ CREATE TABLE `customers` (
   `update_dt` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `created_by` varchar(30) DEFAULT NULL,
   PRIMARY KEY (`customer_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=537 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Records of customers
@@ -871,8 +869,7 @@ CREATE TABLE `delete_history` (
   `delete_code` varchar(30) NOT NULL,
   `deleted_by` varchar(30) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
-
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 
 -- ----------------------------
@@ -890,7 +887,8 @@ CREATE TABLE `dialplan` (
   `update_dt` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `dialplan_id_name` (`dialplan_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+
 
 -- ----------------------------
 -- Table structure for `dialplan_prefix_list`
@@ -915,7 +913,9 @@ CREATE TABLE `dialplan_prefix_list` (
   KEY `dialplan_id_name` (`dialplan_id`) USING BTREE,
   KEY `dial_prefix` (`dial_prefix`) USING BTREE,
   KEY `route_status` (`route_status`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=latin7;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin7;
+
+
 
 -- ----------------------------
 -- Table structure for `did`
@@ -941,8 +941,7 @@ CREATE TABLE `did` (
   PRIMARY KEY (`did_id`),
   UNIQUE KEY `did_number` (`did_number`) USING BTREE,
   UNIQUE KEY `did_number_2` (`did_number`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
-
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Table structure for `did_dst`
@@ -1146,7 +1145,7 @@ CREATE TABLE `livecalls` (
   KEY `reseller1_account_id` (`reseller1_account_id`) USING BTREE,
   KEY `reseller2_account_id` (`reseller2_account_id`) USING BTREE,
   KEY `reseller3_account_id` (`reseller3_account_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1817 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Records of livecalls
@@ -1187,7 +1186,7 @@ CREATE TABLE `payment_history` (
   `created_by` varchar(30) NOT NULL,
   `create_dt` datetime NOT NULL,
   PRIMARY KEY (`payment_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 
 -- ----------------------------
@@ -1222,7 +1221,7 @@ CREATE TABLE `payment_tracking` (
   `order_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `attempt_check` enum('Y','N') NOT NULL DEFAULT 'Y',
   PRIMARY KEY (`payment_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 
 -- ----------------------------
@@ -1241,7 +1240,7 @@ CREATE TABLE `providers` (
   `modify_by` varchar(30) NOT NULL,
   `modify_date` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 
 -- ----------------------------
@@ -1258,7 +1257,7 @@ CREATE TABLE `ratecard` (
   `ratecard_for` enum('INCOMING','OUTGOING') DEFAULT 'OUTGOING',
   PRIMARY KEY (`id`),
   UNIQUE KEY `ratecard_id` (`ratecard_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 
 -- ----------------------------
@@ -1272,7 +1271,7 @@ CREATE TABLE `reseller_dialplan` (
   `create_dt` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `reseller_dialplan_key` (`account_id`,`dialplan_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 
 
@@ -1628,7 +1627,7 @@ CREATE TABLE `sys_currencies_conversions` (
   `date` datetime NOT NULL,
   PRIMARY KEY (`id`),
   KEY `id_currency` (`currency_id`,`date`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=451 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=454 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of sys_currencies_conversions
@@ -1656,12 +1655,8 @@ CREATE TABLE `sys_invoice_config` (
   `update_dt` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `account_id` (`account_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
--- ----------------------------
--- Records of sys_invoice_config
--- ----------------------------
-INSERT INTO `sys_invoice_config` VALUES ('1', 'ADMIN', 'ADSW000001.jpg', 'Configuration Management', 'Configuration Management', 'Configuration Management', ' Configuration Management', 'Configuration Management', null, '2019-06-05 18:34:24');
 
 -- ----------------------------
 -- Table structure for `sys_payment_credentials`
@@ -1675,7 +1670,7 @@ CREATE TABLE `sys_payment_credentials` (
   `status` enum('Y','N') NOT NULL DEFAULT 'Y',
   PRIMARY KEY (`id`),
   UNIQUE KEY `account_id` (`account_id`,`payment_method`)
-) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Records of sys_payment_credentials
@@ -1696,6 +1691,37 @@ CREATE TABLE `sys_rule_options` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=latin1;
 
+-- ----------------------------
+-- Records of sys_rule_options
+-- ----------------------------
+INSERT INTO `sys_rule_options` VALUES ('1', 'ADDBALANCE', 'Add Balance', 'payment', '1');
+INSERT INTO `sys_rule_options` VALUES ('2', 'ADDCREDIT', 'Add Credit', 'payment', '1');
+INSERT INTO `sys_rule_options` VALUES ('3', 'REMOVEBALANCE', 'Refund Balance', 'payment', '1');
+INSERT INTO `sys_rule_options` VALUES ('4', 'REMOVECREDIT', 'Reduce Credit', 'payment', '1');
+INSERT INTO `sys_rule_options` VALUES ('5', 'daily-balance', 'Daily Email', 'notification', '1');
+INSERT INTO `sys_rule_options` VALUES ('6', 'low-balance', 'Low Balance', 'notification', '1');
+INSERT INTO `sys_rule_options` VALUES ('11', 'biz-certificate-incorporation-company', 'Certificate of incorporation of company', 'kyc-biz-customer', '1');
+INSERT INTO `sys_rule_options` VALUES ('12', 'biz-board-resolution-com-letterhead', 'Board resolution on company letterhead', 'kyc-biz-customer', '1');
+INSERT INTO `sys_rule_options` VALUES ('13', 'biz-latest-list-directors', 'Latest List of Directors', 'kyc-biz-customer', '1');
+INSERT INTO `sys_rule_options` VALUES ('14', 'biz-trade-license', 'Trade License', 'kyc-biz-customer', '1');
+INSERT INTO `sys_rule_options` VALUES ('15', 'biz-pan-card', 'Pan Card', 'kyc-biz-customer', '1');
+INSERT INTO `sys_rule_options` VALUES ('16', 'biz-signatory-aadhar-card', 'Authorised Signatory\'s Aadhar Card/Voter Card', 'kyc-biz-customer', '1');
+INSERT INTO `sys_rule_options` VALUES ('17', 'biz-signatory-pan-card', 'Authorised Signatory\'s Pan Card', 'kyc-biz-customer', '1');
+INSERT INTO `sys_rule_options` VALUES ('18', 'biz-signatory-photo', 'Authorised Signatory\'s Photo', 'kyc-biz-customer', '1');
+INSERT INTO `sys_rule_options` VALUES ('19', 'biz-gstin-ertificate', 'GSTIN Certificate (Optional)', 'kyc-biz-customer', '1');
+INSERT INTO `sys_rule_options` VALUES ('20', 'biz-dot-license', 'DOT License', 'kyc-biz-customer', '1');
+INSERT INTO `sys_rule_options` VALUES ('21', 'resident-subscriber-aadhar', 'Subscriber\'s Aadhar card/Voter ID', 'kyc-resident-customer', '1');
+INSERT INTO `sys_rule_options` VALUES ('22', 'resident-subscriber-pan-card', 'Subscriber\'s PAN Card', 'kyc-resident-customer', '1');
+INSERT INTO `sys_rule_options` VALUES ('23', 'resident-subscriber-photo-order-form', 'Subscriber\'s Photo on Order form', 'kyc-resident-customer', '1');
+INSERT INTO `sys_rule_options` VALUES ('24', 'resident-dot-license', 'DOT License(For International Minute Services)', 'kyc-resident-customer', '1');
+INSERT INTO `sys_rule_options` VALUES ('25', 'biz-customer-order-form', 'Customer Order Form', 'kyc-biz-customer', '1');
+INSERT INTO `sys_rule_options` VALUES ('26', 'biz-network-diagram', 'Network Diagram ', 'kyc-biz-customer', '1');
+INSERT INTO `sys_rule_options` VALUES ('29', 'CREDITNOTES', 'Credit Notes', 'payment', '1');
+INSERT INTO `sys_rule_options` VALUES ('30', 'DEBITNOTES', 'Debit Notes', 'payment', '1');
+INSERT INTO `sys_rule_options` VALUES ('31', 'ADDNETOFFBALANCE', 'Add Net-Off Balance', 'payment', '1');
+INSERT INTO `sys_rule_options` VALUES ('32', 'REMOVENETOFFBALANCE', 'Refund Net-Off Balance', 'payment', '1');
+INSERT INTO `sys_rule_options` VALUES ('35', 'BALANCETRANSFERADD', 'Balance Transfer to System (From Telco to UKS)', 'payment', '1');
+INSERT INTO `sys_rule_options` VALUES ('36', 'BALANCETRANSFERREMOVE', 'Balance Transfer from System (From UKS to Telco)', 'payment', '1');
 
 -- ----------------------------
 -- Table structure for `sys_sdr_terms`
@@ -1710,6 +1736,29 @@ CREATE TABLE `sys_sdr_terms` (
   PRIMARY KEY (`term_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=latin1;
 
+-- ----------------------------
+-- Records of sys_sdr_terms
+-- ----------------------------
+INSERT INTO `sys_sdr_terms` VALUES ('1', 'balance', 'ADDBALANCE', 'Payment Received', '+');
+INSERT INTO `sys_sdr_terms` VALUES ('2', 'balance', 'ADDCREDIT', 'Credit Added', '');
+INSERT INTO `sys_sdr_terms` VALUES ('3', 'balance', 'REMOVEBALANCE', 'Payment Refund', '-');
+INSERT INTO `sys_sdr_terms` VALUES ('4', 'balance', 'REMOVECREDIT', 'Credit Reduced', '');
+INSERT INTO `sys_sdr_terms` VALUES ('5', 'usage', 'DIDEXTRACHRENTAL', 'Extra Channels in DID/Line Charge', '-');
+INSERT INTO `sys_sdr_terms` VALUES ('6', 'usage', 'DIDRENTAL', 'DID / Line Rental', '-');
+INSERT INTO `sys_sdr_terms` VALUES ('7', 'usage', 'DIDSETUP', 'DID / Line Rental Setup Charge', '-');
+INSERT INTO `sys_sdr_terms` VALUES ('8', 'usage', 'TARIFFCHARGES', 'Service Plan Charge', '-');
+INSERT INTO `sys_sdr_terms` VALUES ('9', 'usage', 'DAILYUSAGE', 'Outbound Calls Call usages', '-');
+INSERT INTO `sys_sdr_terms` VALUES ('10', 'usage', 'DAILYUSAGEIN', 'Inbound Calls Call usages', '-');
+INSERT INTO `sys_sdr_terms` VALUES ('11', 'opening', 'OPENINGBALANCE', 'Opening Balance', '+');
+INSERT INTO `sys_sdr_terms` VALUES ('14', 'usage', 'DIDCANCEL', 'DID / Line Cancellation', '-');
+INSERT INTO `sys_sdr_terms` VALUES ('18', 'balance', 'ADDTESTBALANCE', 'Test Balance', '+');
+INSERT INTO `sys_sdr_terms` VALUES ('19', 'balance', 'REMOVETESTBALANCE', 'Reduce Test Balance', '-');
+INSERT INTO `sys_sdr_terms` VALUES ('20', 'balance', 'ADDNETOFFBALANCE', 'Add Net-Off transaction', '+');
+INSERT INTO `sys_sdr_terms` VALUES ('21', 'balance', 'REMOVENETOFFBALANCE', 'Refund Net-Off transaction', '-');
+INSERT INTO `sys_sdr_terms` VALUES ('22', 'balance', 'CREDITNOTES', 'Credit Notes', '+');
+INSERT INTO `sys_sdr_terms` VALUES ('23', 'balance', 'DEBITNOTES', 'Debit Notes', '-');
+INSERT INTO `sys_sdr_terms` VALUES ('26', 'balance', 'BALANCETRANSFERREMOVE', 'Balance Transfer from System', '-');
+INSERT INTO `sys_sdr_terms` VALUES ('27', 'balance', 'BALANCETRANSFERADD', 'Balance Transfer to System', '+');
 
 -- ----------------------------
 -- Table structure for `sys_sitesetup`
@@ -1805,7 +1854,7 @@ CREATE TABLE `tariff` (
   `bundle3_value` double(12,6) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `tariff_id_name` (`tariff_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 
 -- ----------------------------
@@ -1840,8 +1889,7 @@ CREATE TABLE `tariff_ratecard_map` (
   PRIMARY KEY (`id`),
   KEY `ratecard_id` (`ratecard_id`) USING BTREE,
   KEY `tariff_id` (`tariff_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=latin1;
-
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Table structure for `version`
