@@ -1718,10 +1718,7 @@ INSERT INTO `sys_rule_options` VALUES ('25', 'biz-customer-order-form', 'Custome
 INSERT INTO `sys_rule_options` VALUES ('26', 'biz-network-diagram', 'Network Diagram ', 'kyc-biz-customer', '1');
 INSERT INTO `sys_rule_options` VALUES ('29', 'CREDITNOTES', 'Credit Notes', 'payment', '1');
 INSERT INTO `sys_rule_options` VALUES ('30', 'DEBITNOTES', 'Debit Notes', 'payment', '1');
-INSERT INTO `sys_rule_options` VALUES ('31', 'ADDNETOFFBALANCE', 'Add Net-Off Balance', 'payment', '1');
-INSERT INTO `sys_rule_options` VALUES ('32', 'REMOVENETOFFBALANCE', 'Refund Net-Off Balance', 'payment', '1');
-INSERT INTO `sys_rule_options` VALUES ('35', 'BALANCETRANSFERADD', 'Balance Transfer to System (From Telco to UKS)', 'payment', '1');
-INSERT INTO `sys_rule_options` VALUES ('36', 'BALANCETRANSFERREMOVE', 'Balance Transfer from System (From UKS to Telco)', 'payment', '1');
+
 
 -- ----------------------------
 -- Table structure for `sys_sdr_terms`
@@ -1757,9 +1754,6 @@ INSERT INTO `sys_sdr_terms` VALUES ('20', 'balance', 'ADDNETOFFBALANCE', 'Add Ne
 INSERT INTO `sys_sdr_terms` VALUES ('21', 'balance', 'REMOVENETOFFBALANCE', 'Refund Net-Off transaction', '-');
 INSERT INTO `sys_sdr_terms` VALUES ('22', 'balance', 'CREDITNOTES', 'Credit Notes', '+');
 INSERT INTO `sys_sdr_terms` VALUES ('23', 'balance', 'DEBITNOTES', 'Debit Notes', '-');
-INSERT INTO `sys_sdr_terms` VALUES ('26', 'balance', 'BALANCETRANSFERREMOVE', 'Balance Transfer from System', '-');
-INSERT INTO `sys_sdr_terms` VALUES ('27', 'balance', 'BALANCETRANSFERADD', 'Balance Transfer to System', '+');
-
 -- ----------------------------
 -- Table structure for `sys_sitesetup`
 -- ----------------------------
