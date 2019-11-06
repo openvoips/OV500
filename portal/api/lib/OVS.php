@@ -1563,8 +1563,6 @@ class OVS extends PDO {
         if ($this->is_vmaccess_internalcall == '0') {
             if ($this->is_internalcall == '0') {
                 $this->PSTN_Call_route_check();
-
-
                 /*
                  * Routing is not available for dialed number
                  */
@@ -1643,9 +1641,9 @@ class OVS extends PDO {
             $this->Gateway_XML .= "\n<action application=\"set\" data=\"continue_on_fail=true\"/>";
             $this->Gateway_XML .= "\n<action application=\"set\" data=\"hangup_after_bridge=true\"/>";
 
-            $this->Gateway_XML .= "\n<action application=\"set\" data=\"voicemail_authorized=true\"/>";           
-            $this->Gateway_XML .= "\n   <action application=\"voicemail\" data=\"check default  \$\${domain} " . $destination_number . "\" />";           
-                
+            $this->Gateway_XML .= "\n<action application=\"set\" data=\"voicemail_authorized=true\"/>";
+            $this->Gateway_XML .= "\n   <action application=\"voicemail\" data=\"check default  \$\${domain} " . $destination_number . "\" />";
+
             $this->directory = "
                 <section name=\"directory\">
                 <domain name=\" \$\${domain}\"> 
@@ -1686,6 +1684,15 @@ class OVS extends PDO {
 
         $this->writelog($query);
         $this->query('SWITCH', $query);
+        $rs = $this->resultset();
+        foreach ($rs[0] as $key => $value) {
+            $this->customers[$key] = $value;
+            $this->is_internalcall = '1';
+        }
+
+        $query2 = sprintf("select extension_no as dst_extension_no as dst_extension_no from customer_sip_account where id = '%s';", $this->account_device_id);
+        $this->writelog($query2);
+        $this->query('SWITCH', $query2);
         $rs = $this->resultset();
         foreach ($rs[0] as $key => $value) {
             $this->customers[$key] = $value;
@@ -2368,9 +2375,25 @@ class OVS extends PDO {
         $lb = $this->Hunt_Network_Addr;
         $this->destination_number;
         $destination_number = $this->customers['username'];
-        $this->Gateway_XML .= "\n <action application=\"set\" data=\"sip_h_X-MEDIATRA=0\"/>";
-        $this->Gateway_XML .= "\n <action application=\"set\" data=\"sip_h_X-MEDIATRA=0\"/>";
-        $this->Gateway_XML .= "\n<action application=\"set\" data=\"bypass_media=false\"/>";
+
+        if ($this->customers['media_transcoding'] == '1') {
+            $this->Gateway_XML .= "\n <action application=\"set\" data=\"sip_h_X-MEDIATRA=1\"/>";
+            $this->Gateway_XML .= "\n <action application=\"export\" data=\"sip_h_X-MEDIATRA=1\"/>";
+            $this->Gateway_XML .= "\n<action application=\"set\" data=\"bypass_media=false\"/>";
+        } else {
+            $this->Gateway_XML .= "\n <action application=\"set\" data=\"sip_h_X-MEDIATRA=0\"/>";
+            $this->Gateway_XML .= "\n <action application=\"set\" data=\"sip_h_X-MEDIATRA=0\"/>";
+            $this->Gateway_XML .= "\n<action application=\"set\" data=\"bypass_media=true\"/>";
+        }
+
+        $route_callid = $this->customers['dst_extension_no'];
+
+        $this->Gateway_XML .= "\n<action application=\"export\" data=\"effective_caller_id_number=" . $route_callid . "\"/>";
+        $this->Gateway_XML .= "\n<action application=\"export\" data=\"effective_caller_id_name=" . $route_callid . "\"/>";
+        $this->Gateway_XML .= "\n<action application=\"set\" data=\"effective_caller_id_number=" . $route_callid . "\"/>";
+        $this->Gateway_XML .= "\n<action application=\"set\" data=\"effective_caller_id_name=" . $route_callid . "\"/>";
+        $this->Gateway_XML .= "\n <action application=\"set\" data=\"sip_h_X-FROMURI=" . $route_callid . "\"/>";
+        $this->Gateway_XML .= "\n <action application=\"export\"  data=\"nolocal:absolute_codec_string=\${ep_codec_string}\"/>";
         $this->Gateway_XML .= "\n<action application=\"set\" data=\"call_timeout=20\"/>";
         $this->Gateway_XML .= "\n<action application=\"set\" data=\"continue_on_fail=true\"/>";
         $this->Gateway_XML .= "\n<action application=\"set\" data=\"hangup_after_bridge=true\"/>";
