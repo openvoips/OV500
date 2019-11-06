@@ -543,7 +543,7 @@ class Payment_mod extends CI_Model {
     function get_payment_gateways($account_id) {
         $final_return_array = array();
         try {
-            $sql = "SELECT * FROM account_payment_credentials WHERE account_id ='" . $account_id . "'  AND status='Y' ORDER BY `payment_method` ASC ";
+            $sql = "SELECT * FROM sys_payment_credentials WHERE account_id ='" . $account_id . "'  AND status='Y' ORDER BY `payment_method` ASC ";
             //echo $sql;
             $query = $this->db->query($sql);
             if (!$query) {

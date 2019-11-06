@@ -1226,18 +1226,7 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
                 /////////////
                 $sql .= " AND customer_account_id IN(" . $account_id_str . ")";
             } elseif (isset($search_data['s_parent_account_id']) && $search_data['s_parent_account_id'] != '') {
-                /* $sub_sql = "SELECT GROUP_CONCAT(\"'\",account_id,\"'\") account_ids FROM ".$this->db->dbprefix('user')." WHERE parent_account_id='".$search_data['s_account_manager']."'";						
-                  /////////////
-                  $query = $this->db->query($sub_sql);
-                  if(!$query)
-                  {
-                  $error_array = $this->db->error();
-                  throw new Exception($error_array['message']);
-                  }
-                  $row =  $query->row();
-                  $account_id_str = $row->account_ids;
-                  /////////////
-                  $sql .=" AND customer_account_id IN(".$account_id_str.")"; */
+                /* $sub_sql = ""; */
             }
 
 
@@ -1807,8 +1796,8 @@ code403 ,code404 ,code407, code500, code503, code487, code488, code501, code483,
 
 
 
-            $sql = " SELECT payment_option_id, SUM(amount) sum_amount, DATE_FORMAT(`paid_on`,'%d-%m-%Y') date_formatted, u.customer_currency_id 
-			FROM " . $this->db->dbprefix('payment_history') . " ph INNER JOIN " . $this->db->dbprefix('user') . " u ON ph.account_id =u.account_id
+            $sql = " SELECT payment_option_id, SUM(amount) sum_amount, DATE_FORMAT(`paid_on`,'%d-%m-%Y') date_formatted, u.currency_id customer_currency_id 
+			FROM payment_history ph INNER JOIN  account u ON ph.account_id =u.account_id
 			WHERE `payment_option_id` IN ('ADDBALANCE','REMOVEBALANCE') AND paid_on BETWEEN '$start_dt' AND '$end_dt'";
             if (count($search_data) > 0) {
                 foreach ($search_data as $key => $value) {
@@ -1824,44 +1813,16 @@ code403 ,code404 ,code407, code500, code503, code487, code488, code501, code483,
 
 
             $where = '';
-            if (isset($search_data['sales_manager']) && $search_data['sales_manager'] != '') {
-                $sub_sub_sql = "SELECT customer_access_id_name FROM " . $this->db->dbprefix('customer_access') . " WHERE customer_type='ACCOUNTMANAGER' AND sales_manager='" . $search_data['sales_manager'] . "'";
-                if (isset($search_data['am_under_sm']) && $search_data['am_under_sm'] != '') {
-                    $sub_sub_sql .= " AND customer_access_id_name='" . $search_data['am_under_sm'] . "'";
-                }
-                $sub_sql = "SELECT customer_access_id_name FROM " . $this->db->dbprefix('customer_access') . " WHERE account_manager IN(" . $sub_sub_sql . ")";
-
-                $sub_query = $this->db->query($sub_sql);
-                if (!$sub_query) {
-                    $error_array = $this->db->error();
-                    throw new Exception($error_array['message']);
-                }
-                $customer_access_id_name_array = array();
-                if ($sub_query->row() > 0) {
-                    foreach ($sub_query->result_array() as $row) {
-                        $customer_access_id_name_array[] = $row['customer_access_id_name'];
-                    }
-                }
-                $account_id_str = implode("','", $customer_access_id_name_array);
-                $account_id_str = "'" . $account_id_str . "'";
-
-                $where .= " AND ph.account_id IN(" . $account_id_str . ")";
-            } elseif (isset($search_data['account_manager']) && $search_data['account_manager'] != '') {
-                $sub_sql = "SELECT customer_access_id_name FROM " . $this->db->dbprefix('customer_access') . " WHERE account_manager='" . $search_data['account_manager'] . "'";
-
-                $where .= " AND ph.account_id IN(" . $sub_sql . ")";
-            } elseif (isset($search_data['parent_account_id']) && $search_data['parent_account_id'] != '') {
-                $sub_sql = "SELECT account_id FROM " . $this->db->dbprefix('user') . " WHERE parent_account_id='" . $search_data['parent_account_id'] . "' ";
+           if (isset($search_data['parent_account_id']) && $search_data['parent_account_id'] != '') {
+                $sub_sql = "SELECT account_id FROM account WHERE parent_account_id='" . $search_data['parent_account_id'] . "' ";
                 $where .= " AND ph.account_id IN(" . $sub_sql . ")";
             } else {
-                $sub_sql = "SELECT account_id FROM " . $this->db->dbprefix('user') . " WHERE parent_account_id='' ";
+                $sub_sql = "SELECT account_id FROM account WHERE parent_account_id='' ";
                 $where .= " AND ph.account_id IN(" . $sub_sql . ")";
             }
 
-
-
             $sql .= $where;
-            $sql .= " GROUP BY date_formatted, u.customer_currency_id, payment_option_id ";
+            $sql .= " GROUP BY date_formatted, u.currency_id, payment_option_id ";
             $sql .= " ORDER BY paid_on";
 
             //echo $sql;
@@ -1911,9 +1872,7 @@ code403 ,code404 ,code407, code500, code503, code487, code488, code501, code483,
 
 
 
-            $sql = " SELECT payment_option_id, SUM(amount) sum_amount, DATE_FORMAT(`paid_on`,'%Y-%m') date_formatted, u.customer_currency_id 
-			FROM " . $this->db->dbprefix('payment_history') . " ph INNER JOIN " . $this->db->dbprefix('user') . " u ON ph.account_id =u.account_id
-			WHERE `payment_option_id` IN ('ADDBALANCE','REMOVEBALANCE') AND paid_on BETWEEN '$start_dt' AND '$end_dt'";
+            $sql = " SELECT payment_option_id, SUM(amount) sum_amount, DATE_FORMAT(`paid_on`,'%Y-%m') date_formatted, u.currency_id customer_currency_id  FROM payment_history ph INNER JOIN account u ON ph.account_id =u.account_id WHERE `payment_option_id` IN ('ADDBALANCE','REMOVEBALANCE') AND paid_on BETWEEN '$start_dt' AND '$end_dt'";
             if (count($search_data) > 0) {
                 foreach ($search_data as $key => $value) {
                     if ($value != '') {
@@ -1928,93 +1887,18 @@ code403 ,code404 ,code407, code500, code503, code487, code488, code501, code483,
 
 
             $where = '';
-            if (isset($search_data['sales_manager']) && $search_data['sales_manager'] != '') {
-                /* $sub_sub_sql = "SELECT customer_access_id_name FROM ".$this->db->dbprefix('customer_access')." WHERE customer_type='ACCOUNTMANAGER' AND sales_manager='".$search_data['sales_manager']."'";			
-
-                  $sub_sql = "SELECT customer_access_id_name FROM ".$this->db->dbprefix('customer_access')." WHERE account_manager IN(".$sub_sub_sql.")";
-
-                  $where .=" AND ph.account_id IN(".$sub_sql.")"; */
-
-
-                ///////////////////
-                $sub_sub_sql = "SELECT customer_access_id_name FROM " . $this->db->dbprefix('customer_access') . " WHERE customer_type='ACCOUNTMANAGER' AND sales_manager='" . $search_data['sales_manager'] . "'";
-                if (isset($search_data['am_under_sm']) && $search_data['am_under_sm'] != '') {
-                    $sub_sub_sql .= " AND customer_access_id_name='" . $search_data['am_under_sm'] . "'";
-                }
-                $sub_sql = "SELECT customer_access_id_name FROM " . $this->db->dbprefix('customer_access') . " WHERE account_manager IN(" . $sub_sub_sql . ")";
-                //	echo	$sub_sql.'<br><br>';	//die;
-
-                $sub_query = $this->db->query($sub_sql);
-                if (!$sub_query) {
-                    $error_array = $this->db->error();
-                    throw new Exception($error_array['message']);
-                }
-                $customer_access_id_name_array = array();
-                if ($sub_query->row() > 0) {
-                    foreach ($sub_query->result_array() as $row) {
-                        $customer_access_id_name_array[] = $row['customer_access_id_name'];
-                    }
-                }
-                $account_id_str = implode("','", $customer_access_id_name_array);
-                $account_id_str = "'" . $account_id_str . "'";
-
-                $where .= " AND ph.account_id IN(" . $account_id_str . ")";
-            } elseif (isset($search_data['account_manager']) && $search_data['account_manager'] != '') {
-                /* $sub_sql = "SELECT GROUP_CONCAT(\"'\",customer_access_id_name,\"'\") account_ids FROM ".$this->db->dbprefix('customer_access')." WHERE account_manager='".$search_data['account_manager']."'";						
-
-                  $query = $this->db->query($sub_sql);
-                  if(!$query)
-                  {
-                  $error_array = $this->db->error();
-                  throw new Exception($error_array['message']);
-                  }
-                  $row =  $query->row();
-                  $account_id_str = $row->account_ids;
-                  $where .=" AND ph.account_id IN(".$account_id_str.")";
-                 */
-
-
-                $sub_sql = "SELECT customer_access_id_name FROM " . $this->db->dbprefix('customer_access') . " WHERE account_manager='" . $search_data['account_manager'] . "'";
-
-                $where .= " AND ph.account_id IN(" . $sub_sql . ")";
-            } elseif (isset($search_data['parent_account_id']) && $search_data['parent_account_id'] != '') {
-                /* $sub_sql = "SELECT GROUP_CONCAT(\"'\",account_id,\"'\") account_ids FROM ".$this->db->dbprefix('user')." WHERE parent_account_id='".$search_data['parent_account_id']."'";						
-                  $query = $this->db->query($sub_sql);
-                  if(!$query)
-                  {
-                  $error_array = $this->db->error();
-                  throw new Exception($error_array['message']);
-                  }
-                  $row =  $query->row();
-                  $account_id_str = $row->account_ids;
-
-                  $where .=" AND ph.account_id IN(".$account_id_str.")"; */
-
-
-                $sub_sql = "SELECT account_id FROM " . $this->db->dbprefix('user') . " WHERE parent_account_id='" . $search_data['parent_account_id'] . "' ";
+            if (isset($search_data['parent_account_id']) && $search_data['parent_account_id'] != '') {
+                /* $sub_sql = ""; */
+                $sub_sql = "SELECT account_id FROM account WHERE parent_account_id='" . $search_data['parent_account_id'] . "' ";
                 $where .= " AND ph.account_id IN(" . $sub_sql . ")";
             } else {
-                /* $sub_sql = "SELECT GROUP_CONCAT(\"'\",account_id,\"'\") account_ids FROM ".$this->db->dbprefix('user')." WHERE parent_account_id !=''";						
-                  $query = $this->db->query($sub_sql);
-                  if(!$query)
-                  {
-                  $error_array = $this->db->error();
-                  throw new Exception($error_array['message']);
-                  }
-                  $row =  $query->row();
-                  $account_id_str = $row->account_ids;
-
-                  $where .=" AND ph.account_id NOT IN(".$account_id_str.")"; */
-
-
-                $sub_sql = "SELECT account_id FROM " . $this->db->dbprefix('user') . " WHERE parent_account_id='' ";
+                /* $sub_sql = ""; */
+                $sub_sql = "SELECT account_id FROM account WHERE parent_account_id='' ";
                 $where .= " AND ph.account_id IN(" . $sub_sql . ")";
             }
 
-
-
             $sql .= $where;
-            $sql .= " GROUP BY date_formatted, u.customer_currency_id, payment_option_id ";
+            $sql .= " GROUP BY date_formatted, u.currency_id, payment_option_id ";
             $sql .= " ORDER BY paid_on";
 
             //echo $sql;
@@ -2886,17 +2770,17 @@ code403 ,code404 ,code407, code500, code503, code487, code488, code501, code483,
 				SUM(ROUND(acd,2)) 'acd_out',
 				
 				ROUND(SUM(answeredcalls)) 'calls_out',
-				ROUND(SUM(customer_duration)/60) 'mins_out', 
+				ROUND(SUM(account_duration)/60) 'mins_out', 
 				ROUND(SUM(callcost_net),2) 'customer_cost_out', 
 				ROUND(SUM(callcost_net_carrier),2) 'carrier_cost_out', 					
 								
 				ROUND(SUM(answeredcalls_in)) 'calls_in', 
-				ROUND(SUM(customer_duration_in)/60) 'mins_in', 
+				ROUND(SUM(account_duration_in)/60) 'mins_in', 
 				ROUND(SUM(callcost_net_in),2) 'customer_cost_in', 
 				ROUND(SUM(callcost_net_carrier_in),2) 'carrier_cost_in', 				
 				
-				ROUND(SUM(customer_cost),2) usercost_out,
-				ROUND(SUM(customer_cost_in),2) usercost_in,			
+				ROUND(SUM(account_cost),2) usercost_out,
+				ROUND(SUM(account_cost_in),2) usercost_in,			
 				
 ROUND(SUM(did_extra_channel_cost_net + did_rental_cost_net + did_setup_cost_net),2) 'did_setup_rental_customer_cost', 
 ROUND(SUM(did_extra_channel_cost_net_carrier + did_rental_cost_net_carrier + did_setup_cost_net_carrier),2) 'did_setup_rental_carrier_cost', 
@@ -2929,19 +2813,19 @@ ROUND(SUM(did_extra_channel_cost_net_carrier + did_rental_cost_net_carrier + did
 				action_date record_date, 
 				DATE_FORMAT(action_date, '%m-%Y') record_date_month,
 				
-				ROUND(customer_cost,2) usercost_out,
-				ROUND(customer_cost_in,2) usercost_in,				
+				ROUND(account_cost,2) usercost_out,
+				ROUND(account_cost_in,2) usercost_in,				
 				 
 				ROUND(asr,2) 'asr_out', 
 				ROUND(acd,2) 'acd_out', 
 				
 				ROUND(answeredcalls) 'calls_out',
-				ROUND(customer_duration/60) 'mins_out', 
+				ROUND(account_duration/60) 'mins_out', 
 				ROUND(callcost_net,2) 'customer_cost_out', 
 				ROUND(callcost_net_carrier,2) 'carrier_cost_out',				
 								
 				ROUND(answeredcalls_in) 'calls_in', 
-				ROUND(customer_duration_in/60) 'mins_in', 
+				ROUND(account_duration_in/60) 'mins_in', 
 				ROUND(callcost_net_in,2) 'customer_cost_in', 
 				ROUND(callcost_net_carrier_in,2) 'carrier_cost_in', 				
 				
@@ -3005,243 +2889,7 @@ ROUND(SUM(did_extra_channel_cost_net_carrier + did_rental_cost_net_carrier + did
             return $return;
         }
     }
-
-    /* uses switch_daily_usage table */
-
-    function old_get_businesHistory($search_data, $limit_to = '', $limit_from = '') {
-        try {
-
-
-            $group_by = '';
-            $where = '';
-            if (count($search_data) > 0) {
-                foreach ($search_data as $key => $value) {
-                    if ($value != '') {
-                        if (in_array($key, array('g_account_id', 'g_rec_date', 'g_rec_month'))) {
-                            if ($value == 'Y') {
-                                if ($group_by != '')
-                                    $group_by .= ', ';
-                                if ($key == 'g_account_id')
-                                    $group_by .= 'account_id';
-                                if ($key == 'g_rec_date')
-                                    $group_by .= 'record_date';
-                                if ($key == 'g_rec_month') {
-                                    $group_by .= " DATE_FORMAT(record_date, '%Y-%m') ";
-                                }
-                            }
-
-                            continue;
-                        }
-
-
-                        if ($key == 'currency_id' || $key == 'account_id') {
-                            if ($where != '')
-                                $where .= ' AND ';
-                            $where .= " $key ='" . $value . "' ";
-                        }
-                        elseif (in_array($key, array('s_account_manager', 's_parent_account_id', 's_sales_manager', 'am_under_sm'))) {
-                            continue;
-                        } elseif ($key == 'record_date') {
-                            if ($where != '')
-                                $where .= ' AND ';
-                            $range = explode(' - ', $search_data['record_date']);
-                            $range_from = explode(' ', $range[0]);
-                            $range_to = explode(' ', $range[1]);
-                            $where .= " record_date BETWEEN '" . $range_from[0] . "' AND '" . $range_to[0] . "' ";
-                        } else
-                            $where .= " $key LIKE '%" . $value . "%' ";
-                    }
-                }
-            }
-
-
-
-
-            if ($group_by != '') {
-                $group_by = ' GROUP BY ' . $group_by;
-
-                $sql = "SELECT SQL_CALC_FOUND_ROWS daily_usagedata_id,
-				account_id,company_name,username,currency_id,currency, 
-				SUM(mins_out) mins_out,SUM(calls_out) calls_out,
-				round((SUM(mins_out)* 60) / SUM(calls_out),0) acd_out,
-round((SUM(calls_out)/(SUM(calls_out/asr_out)*100))*100,2) asr_out,
-				SUM(usercost_out) usercost_out,SUM(carriercost_out) carriercost_out,SUM(profit_out) profit_out,SUM(calls_in) calls_in,SUM(mins_in) mins_in,
-				SUM(usercost_in) usercost_in,SUM(carriercost_in) carriercost_in,SUM(did_rental_user) did_rental_user,SUM(did_setup_user) did_setup_user,
-				SUM(didrental_carrier) didrental_carrier,	SUM(didsetup_carrier) didsetup_carrier,SUM(other_services) other_services,SUM(profit_in) profit_in,
-				SUM(total_profit) total_profit,SUM(payment) payment,SUM(reimburse) reimburse,SUM(credit_added) credit_added,SUM(credit_remove) credit_remove
-				,record_date, DATE_FORMAT(record_date, '%m-%Y') record_date_month
-				  FROM " . $this->db->dbprefix('daily_usage') . " ";
-
-                $orderby = ' ORDER BY record_date_month desc ';
-            } else {
-                $sql = "SELECT SQL_CALC_FOUND_ROWS daily_usagedata_id,
-				account_id,company_name,username,record_date,currency_id,currency,mins_out,calls_out,acd_out,
-				asr_out,usercost_out,carriercost_out,profit_out,calls_in,mins_in,usercost_in,carriercost_in,
-				did_rental_user,did_setup_user,didrental_carrier,didsetup_carrier,other_services,profit_in,
-				total_profit,payment,reimburse,credit_added,credit_remove
-				,record_date, DATE_FORMAT(record_date, '%m-%Y') record_date_month
-				FROM " . $this->db->dbprefix('daily_usage') . " ";
-
-                $orderby = ' ORDER BY daily_usagedata_id desc ';
-            }
-
-            /////////////
-            if (isset($search_data['s_sales_manager']) && $search_data['s_sales_manager'] != '') {
-                /*
-                  $sub_sub_sql = "SELECT customer_access_id_name FROM ".$this->db->dbprefix('customer_access')." WHERE customer_type='ACCOUNTMANAGER' AND sales_manager='".$search_data['s_sales_manager']."'";
-
-                  $sub_sql = "SELECT GROUP_CONCAT(\"'\",customer_access_id_name,\"'\") account_ids FROM ".$this->db->dbprefix('customer_access')." WHERE account_manager IN(".$sub_sub_sql.")";
-
-                  $query = $this->db->query($sub_sql);
-                  if(!$query)
-                  {
-                  $error_array = $this->db->error();
-                  throw new Exception($error_array['message']);
-                  }
-                  $row =  $query->row();
-                  $account_id_str = $row->account_ids;
-
-                  if($where !='')
-                  $where .=' AND ';
-                  $where .=" account_id IN(".$account_id_str.")"; */
-                /*
-                  $sub_sub_sql = "SELECT customer_access_id_name FROM ".$this->db->dbprefix('customer_access')." WHERE customer_type='ACCOUNTMANAGER' AND sales_manager='".$search_data['s_sales_manager']."'";
-                  $sub_sql = "SELECT customer_access_id_name FROM ".$this->db->dbprefix('customer_access')." WHERE account_manager IN(".$sub_sub_sql.")";
-                  if($where !='')
-                  $where .=' AND ';
-                  $where .=" account_id IN(".$sub_sql.")";
-                 */
-
-
-
-                $sub_sub_sql = "SELECT customer_access_id_name FROM " . $this->db->dbprefix('customer_access') . " WHERE customer_type='ACCOUNTMANAGER' AND sales_manager='" . $search_data['s_sales_manager'] . "'";
-                if (isset($search_data['am_under_sm']) && $search_data['am_under_sm'] != '') {
-                    $sub_sub_sql .= " AND customer_access_id_name='" . $search_data['am_under_sm'] . "'";
-                }
-                $sub_sql = "SELECT customer_access_id_name FROM " . $this->db->dbprefix('customer_access') . " WHERE account_manager IN(" . $sub_sub_sql . ")";
-
-                $sub_query = $this->db->query($sub_sql);
-                if (!$sub_query) {
-                    $error_array = $this->db->error();
-                    throw new Exception($error_array['message']);
-                }
-                $customer_access_id_name_array = array();
-                if ($sub_query->row() > 0) {
-                    foreach ($sub_query->result_array() as $row) {
-                        $customer_access_id_name_array[] = $row['customer_access_id_name'];
-                    }
-                }
-                $account_id_str = implode("','", $customer_access_id_name_array);
-                $account_id_str = "'" . $account_id_str . "'";
-                if ($where != '')
-                    $where .= ' AND ';
-                $where .= " account_id IN(" . $account_id_str . ")";
-            }
-            elseif (isset($search_data['s_account_manager']) && $search_data['s_account_manager'] != '') {
-                /* $sub_sql = "SELECT GROUP_CONCAT(\"'\",customer_access_id_name,\"'\") account_ids FROM ".$this->db->dbprefix('customer_access')." WHERE account_manager='".$search_data['s_account_manager']."'";						
-
-                  $query = $this->db->query($sub_sql);
-                  if(!$query)
-                  {
-                  $error_array = $this->db->error();
-                  throw new Exception($error_array['message']);
-                  }
-                  $row =  $query->row();
-                  $account_id_str = $row->account_ids;
-
-                  if($where !='')
-                  $where .=' AND ';
-                  $where .=" account_id IN(".$account_id_str.")"; */
-
-
-                $sub_sql = "SELECT customer_access_id_name FROM " . $this->db->dbprefix('customer_access') . " WHERE account_manager='" . $search_data['s_account_manager'] . "'";
-                if ($where != '')
-                    $where .= ' AND ';
-                $where .= " account_id IN(" . $sub_sql . ")";
-            }
-            elseif (isset($search_data['s_parent_account_id'])) {   //&& $search_data['s_parent_account_id']!=''
-
-                /* $limit_sql ="SET SESSION group_concat_max_len =1000000";				
-                  $limit_query = $this->db->query($limit_sql);
-
-
-
-                  $sub_sql = "SELECT GROUP_CONCAT(\"'\",account_id,\"'\") account_ids FROM ".$this->db->dbprefix('user')." WHERE parent_account_id='".$search_data['s_parent_account_id']."' ";
-                  $query = $this->db->query($sub_sql);
-                  if(!$query)
-                  {
-                  $error_array = $this->db->error();
-                  throw new Exception($error_array['message']);
-                  }
-                  $row =  $query->row();
-                  $account_id_str = $row->account_ids;
-
-                  if($where !='')
-                  $where .=' AND ';
-                  $where .=" account_id IN(".$account_id_str.")"; */
-
-                $sub_sql = "SELECT account_id FROM " . $this->db->dbprefix('user') . " WHERE parent_account_id='" . $search_data['s_parent_account_id'] . "' ";
-                if ($where != '')
-                    $where .= ' AND ';
-                $where .= " account_id IN(" . $sub_sql . ")";
-            }
-            ////////////
-
-
-
-
-
-
-            if ($where != '') {
-                $sql = $sql . ' WHERE ' . $where;
-            }
-
-
-            if ($group_by != '')
-                $group_by .= ', currency  ';
-
-
-            $query = $sql . $group_by . $orderby;
-
-            $limit_from = intval($limit_from);
-            if ($limit_to != '')
-                $query .= " LIMIT $limit_from, $limit_to";
-            else
-                $query .= "";
-
-
-            //echo $query; //die;
-            $result = $this->db->query($query);
-            if (!$result) {
-                $error_array = $this->db->error();
-                throw new Exception($error_array['message']);
-            }
-
-            $sql = "SELECT FOUND_ROWS() as total";
-            $query_count = $this->db->query($sql);
-            $row_count = $query_count->row();
-            $this->total_count = $row_count->total;
-
-
-
-            /* $sql = "SELECT COUNT(*) as total FROM ".$this->db->dbprefix('daily_usage')." WHERE 1 ";
-              $query_count = $this->db->query($sql);
-
-              $return['all_total']=$query_count->row(); */
-            //$return['total'] = $result->num_rows();
-            $return['result'] = $result->result_array();
-            $return['status'] = 'success';
-            $return['sql'] = $query;
-
-
-            return $return;
-        } catch (Exception $e) {
-            $return['status'] = 'failed';
-            $return['message'] = $e->getMessage();
-            return $return;
-        }
-    }
-
+   
     function supplier_netting($supplier_id_name, $from_date, $to_date) {
         $final_return_array = array();
         try {

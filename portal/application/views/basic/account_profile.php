@@ -441,88 +441,6 @@
                         </div>
                     </fieldset>
 
-
-
-
-                    <fieldset class="scheduler-border"> 
-                        <legend class="scheduler-border">Billing Address</legend>
-
-                        <div class="form-group">
-                            <label class="col-md-4 col-sm-3 col-xs-12" for="first-name">Name </label>
-                            <div class="col-md-7 col-sm-6 col-xs-12">                 
-<?php echo $data['billing_name']; ?>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="col-md-4 col-sm-3 col-xs-12" for="last-name">Company </label>
-                            <div class="col-md-7 col-sm-6 col-xs-12">              
-<?php echo $data['billing_company_name']; ?>                  
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="col-md-4 col-sm-3 col-xs-12" for="last-name">Email Address </label>
-                            <div class="col-md-7 col-sm-6 col-xs-12">
-<?php echo $data['billing_emailaddress']; ?>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="col-md-4 col-sm-3 col-xs-12" for="last-name">Address </label>
-                            <div class="col-md-7 col-sm-6 col-xs-12">                
-<?php echo $data['billing_address']; ?>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="col-md-4 col-sm-3 col-xs-12" for="first-name">Phone Number </label>
-                            <div class="col-md-7 col-sm-6 col-xs-12">                              
-<?php echo $data['billing_phone']; ?>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-md-4 col-sm-3 col-xs-12" for="first-name">Country </label>
-                            <div class="col-md-7 col-sm-6 col-xs-12">                                    
-                                <?php
-                                $str = '';
-                                foreach ($country_options as $key => $country_array) {
-                                    if ($data['billing_country_id'] == $country_array->country_id) {
-                                        $str = $country_array->country_name;
-                                        break;
-                                    }
-                                }
-                                echo $str;
-                                ?>                    
-                            </div>
-                        </div>              
-
-<?php if ($data['billing_country_id'] == '100') { ?>
-                            <div class="form-group" id="id_state_div">
-                                <label class="col-md-4 col-sm-3 col-xs-12" for="first-name">State </label>
-                                <div class="col-md-7 col-sm-6 col-xs-12">                                
-                                    <?php
-                                    $str = '';
-                                    foreach ($state_options as $key => $state_array) {
-                                        if ($data['billing_state_code_id'] == $state_array['state_code_id']) {
-                                            $str = $state_array['state_name'];
-                                            break;
-                                        }
-                                    }
-                                    echo $str;
-                                    ?>
-
-                                </div>
-                            </div>
-<?php } ?>    
-                        <div class="form-group">
-                            <label class="col-md-4 col-sm-3 col-xs-12" for="first-name">PIN</label>
-                            <div class="col-md-7 col-sm-6 col-xs-12">  
-<?php echo $data['billing_pincode']; ?> 
-                            </div>
-                        </div>
-
-                    </fieldset>  
                 </form>
                 <?php
                 $logged_user_type = get_logged_account_type();
@@ -536,7 +454,7 @@
                     '-2' => array(0, 1, -3),
                     '-3' => array(0, -2, 1),
                 );
-                $status_update_options_array['CREDITCONTROL'] = array(
+                $status_update_options_array['ACCOUNTS'] = array(
                     '-1' => array(1),
                     '1' => array(0, -2, -3),
                     '0' => array(),

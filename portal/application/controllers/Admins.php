@@ -37,7 +37,7 @@ class Admins extends CI_Controller {
         $this->form_validation->set_error_delimiters('', '');
         if (!check_is_loggedin())
             redirect(base_url(), 'refresh');
-        $this->output->enable_profiler(ENABLE_PROFILE);
+       // $this->output->enable_profiler(ENABLE_PROFILE);
     }
 
     function index($arg1 = '', $format = '') {
@@ -304,6 +304,8 @@ class Admins extends CI_Controller {
     }
 
     public function profile() {
+        
+      
         $page_name = "account_profile";
         $data['page_name'] = $page_name;
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
@@ -326,7 +328,7 @@ class Admins extends CI_Controller {
             if ($this->form_validation->run() == FALSE) {// error
                 $data['err_msgs'] = validation_errors();
             } else {
-                $_POST['account_access_id_name'] = $account_id;
+                $_POST['account_id'] = $account_id;
                 $result = $this->member_mod->update_profile($_POST);
                 if ($result === true) {
 
@@ -343,7 +345,6 @@ class Admins extends CI_Controller {
         }
         ///////////////////////////		
         if (check_logged_account_type(array('CUSTOMER'))) {
-
             if (isset($_POST['action']) && $_POST['action'] == 'OkSaveData') {//print_r($_POST);// die;
                 //	$this->form_validation->set_rules('name', 'Name', 'trim|required');	
                 //	$this->form_validation->set_rules('emailaddress', 'Email Address', 'trim|required');//callback_users_email_check			
@@ -361,7 +362,7 @@ class Admins extends CI_Controller {
                 if ($this->form_validation->run() == FALSE) {// error
                     $data['err_msgs'] = validation_errors();
                 } else {
-                    $_POST['account_access_id_name'] = $account_id;
+                    $_POST['account_id'] = $account_id;
                     $result = $this->member_mod->update_profile($_POST);
                     if ($result === true) {
 
@@ -374,10 +375,9 @@ class Admins extends CI_Controller {
                         $err_msgs = $result;
                         $data['err_msgs'] = $err_msgs;
                     }
-                }//if
+                }
             }
-
-
+            
             $option_param = array('ip' => true, 'callerid' => true, 'sipuser' => true, 'tariff' => false, 'user' => false, 'prefix' => true, 'dialplan' => true, 'translation_rules' => true, 'callerid_incoming' => true, 'translation_rules_incoming' => true, 'notification' => true, 'service' => true);
             $view = 'account_profile';
             $data['notification_options'] = $this->utils_model->get_rule_options('notification');
@@ -399,7 +399,7 @@ class Admins extends CI_Controller {
                 if ($this->form_validation->run() == FALSE) {// error
                     $data['err_msgs'] = validation_errors();
                 } else {
-                    $_POST['account_access_id_name'] = $account_id;
+                    $_POST['account_id'] = $account_id;
                     $result = $this->member_mod->update_profile($_POST);
                     if ($result === true) {
 
@@ -421,7 +421,7 @@ class Admins extends CI_Controller {
 
 
 
-        $result = $this->member_mod->get_account_by_key('account_access_id_name', $account_id, $option_param);
+        $result = $this->member_mod->get_account_by_key('account_id', $account_id, $option_param);
 
 
         /*         * **** pagination code ends  here ********* */
@@ -432,7 +432,6 @@ class Admins extends CI_Controller {
         $data['currency_options'] = $this->utils_model->get_currencies();
         $data['country_options'] = $this->utils_model->get_countries();
         $data['state_options'] = $this->utils_model->get_states();
-
 
         $this->load->view('basic/header', $data);
         $this->load->view('basic/' . $view, $data);
@@ -583,7 +582,7 @@ class Admins extends CI_Controller {
 
             /* fetch user details and permissions */
             $option_param = array('user' => true);
-            $account_result = $this->member_mod->get_account_by_key('account_access_id_name', $account_id, $option_param);
+            $account_result = $this->member_mod->get_account_by_key('account_id', $account_id, $option_param);
             //echo '<pre>';print_r( $account_result);echo '</pre>';
             if ($account_result === false) {
                 $data['err_msgs'] = 'User Not Found';
@@ -594,7 +593,7 @@ class Admins extends CI_Controller {
 
 
                 if ($account_result['parent_account_id'] != '') {
-                    $parent_result = $this->member_mod->get_account_by_key('account_access_id_name', $account_result['parent_account_id']);
+                    $parent_result = $this->member_mod->get_account_by_key('account_id', $account_result['parent_account_id']);
                     if ($parent_result === false) {
                         $data['err_msgs'] = 'Parent Account Not Found';
                     } else {

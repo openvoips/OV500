@@ -1,4 +1,5 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
@@ -362,7 +363,8 @@ class Member_mod extends CI_Model {
             else
                 return 'account id missing';
 
-            $sql = "SELECT a.user_access_id, ua.account_id, ua.name, ua.user_type, ua.emailaddress FROM  customers ua  WHERE  user_access_id_name ='" . $account_id . "' LIMIT 0,1";
+            $sql = "SELECT ua.customer_id, ua.account_id, ua.name, ua.account_type user_type, ua.emailaddress FROM  customers ua  WHERE  account_id ='" . $account_id . "' LIMIT 0,1";
+           
             $query = $this->db->query($sql);
             if ($query == null)
                 return false;

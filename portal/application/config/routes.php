@@ -52,7 +52,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 $route['default_controller'] = 'login';
 $route['404_override'] = 'page'; ///custom404';
-$route['profile'] = 'customers/profile';
+$route['profile'] = 'admins/profile';
 $route['my_balance'] = 'payment/my_balance';
 $route['MyRates'] = 'rates/MyRates';
 $route['MyPlan/(:any)'] = 'customers/myplan/$1';

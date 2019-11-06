@@ -2883,10 +2883,8 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
         } else {
             die;
         }
-
-
-
-        if (isset($_POST['search_action'])) {// coming from search button								
+        
+        if (isset($_POST['search_action'])) {								
             $_SESSION['search_topup_cust_data']['s_cdr_record_date'] = $_POST['time_range'];
             $_SESSION['search_topup_cust_data']['s_account_id'] = $_POST['account_id'];
         } elseif (!isset($_SESSION['search_topup_cust_data']['s_cdr_record_date'])) {
@@ -2917,7 +2915,7 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
         if (check_logged_account_type(array('RESELLER')))
             $reseller_search_data['parent_account_id'] = get_logged_account_id();
         else
-            $reseller_search_data['customer_level'] = '1';
+            $reseller_search_data['account_level'] = '1';
 
         $resellers_data = $this->reseller_mod->get_data('', '', '', $reseller_search_data, array());
         $data['resellers_data'] = $resellers_data['result'];

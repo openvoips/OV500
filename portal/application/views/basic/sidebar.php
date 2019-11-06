@@ -263,12 +263,6 @@
                             $class = 'class="current-page"';
                         $menu_user .= '<li ' . $class . '><a href="' . base_url() . 'customers/statement">Account Statement</a></li>';
                     }
-                    if (check_account_permission('reports', 'myinvoice')) {
-                        $class = '';
-                        if (in_array($page_name, array('report_statement')))
-                            $class = 'class="current-page"';
-                        $menu_user .= '<li ' . $class . '><a href="' . base_url() . 'customers/invoices">My Invoices</a></li>';
-                    }
                 }
 
                 if (check_logged_account_type(array('ADMIN', 'SUBADMIN', 'ACCOUNTS'))) {
