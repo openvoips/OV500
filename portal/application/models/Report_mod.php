@@ -1663,10 +1663,8 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
 
     function CarrierUsage($search_data, $limit_to = '', $limit_from = '') {
         try {
-
             $group_by = '';
             $where = '';
-
             if (count($search_data) > 0) {
                 foreach ($search_data as $key => $value) {
                     if ($value != '') {
@@ -1691,7 +1689,7 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
                                 $where .= ' AND ';
                             $where .= " $key ='" . $value . "' ";
                         }
-                        elseif (in_array($key, array('s_account_manager', 's_parent_account_id', 's_sales_manager'))) {
+                        elseif (in_array($key, array('s_parent_account_id'))) {
                             continue;
                         } elseif ($key == 'calls_date') {
                             if ($where != '')
@@ -1813,7 +1811,7 @@ code403 ,code404 ,code407, code500, code503, code487, code488, code501, code483,
 
 
             $where = '';
-           if (isset($search_data['parent_account_id']) && $search_data['parent_account_id'] != '') {
+            if (isset($search_data['parent_account_id']) && $search_data['parent_account_id'] != '') {
                 $sub_sql = "SELECT account_id FROM account WHERE parent_account_id='" . $search_data['parent_account_id'] . "' ";
                 $where .= " AND ph.account_id IN(" . $sub_sql . ")";
             } else {
@@ -2738,7 +2736,7 @@ code403 ,code404 ,code407, code500, code503, code487, code488, code501, code483,
                                 $where .= ' AND ';
                             $where .= " $key ='" . $value . "' ";
                         }
-                        elseif (in_array($key, array('s_account_manager', 's_parent_account_id', 's_sales_manager', 'am_under_sm'))) {
+                        elseif (in_array($key, array('s_parent_account_id'))) {
                             continue;
                         } elseif ($key == 'record_date') {
                             if ($where != '')
@@ -2761,38 +2759,23 @@ code403 ,code404 ,code407, code500, code503, code487, code488, code501, code483,
 				account_id, 
 				company_name,
 				customer_currency_id currency_id,
-				customer_currency_id_name currency,
-				
+				customer_currency_id_name currency,				
 				action_date record_date, 
-				DATE_FORMAT(action_date, '%m-%Y') record_date_month,										
-				
-				SUM(ROUND(asr,2)) 'asr_out', 
-				SUM(ROUND(acd,2)) 'acd_out',
-				
+				DATE_FORMAT(action_date, '%m-%Y') record_date_month,
+                                  ROUND(tariff_net_cost,2) 'tariff_net_cost',
 				ROUND(SUM(answeredcalls)) 'calls_out',
 				ROUND(SUM(account_duration)/60) 'mins_out', 
 				ROUND(SUM(callcost_net),2) 'customer_cost_out', 
-				ROUND(SUM(callcost_net_carrier),2) 'carrier_cost_out', 					
-								
+				ROUND(SUM(callcost_net_carrier),2) 'carrier_cost_out',
 				ROUND(SUM(answeredcalls_in)) 'calls_in', 
 				ROUND(SUM(account_duration_in)/60) 'mins_in', 
 				ROUND(SUM(callcost_net_in),2) 'customer_cost_in', 
 				ROUND(SUM(callcost_net_carrier_in),2) 'carrier_cost_in', 				
-				
-				ROUND(SUM(account_cost),2) usercost_out,
-				ROUND(SUM(account_cost_in),2) usercost_in,			
-				
 ROUND(SUM(did_extra_channel_cost_net + did_rental_cost_net + did_setup_cost_net),2) 'did_setup_rental_customer_cost', 
-ROUND(SUM(did_extra_channel_cost_net_carrier + did_rental_cost_net_carrier + did_setup_cost_net_carrier),2) 'did_setup_rental_carrier_cost', 
- 
+ROUND(SUM(did_extra_channel_cost_net_carrier + did_rental_cost_net_carrier + did_setup_cost_net_carrier),2) 'did_setup_rental_carrier_cost',  	
 
-								
-				
-				ROUND(SUM(callcost_net - callcost_net_carrier), 2) 'profit_out',
-				ROUND(
-				SUM(
-				(callcost_net_in + did_extra_channel_cost_net + did_rental_cost_net + did_setup_cost_net) - (callcost_net_carrier_in + did_extra_channel_cost_net_carrier + did_rental_cost_net_carrier + did_setup_cost_net_carrier)
-				),2) 'profit_in' , 
+
+				ROUND(SUM(tariff_net_cost+callcost_net_in + callcost_net + callcost_net_in + did_extra_channel_cost_net + did_rental_cost_net + did_setup_cost_net) - sum(callcost_net_carrier + callcost_net_carrier_in + callcost_net_carrier_in + did_extra_channel_cost_net_carrier + did_rental_cost_net_carrier + did_setup_cost_net_carrier),2) 'profit' , 
 				
 				SUM(credit) credit_added,
 				SUM(credit_remove) credit_remove,
@@ -2804,38 +2787,25 @@ ROUND(SUM(did_extra_channel_cost_net_carrier + did_rental_cost_net_carrier + did
                 $sql = "SELECT SQL_CALC_FOUND_ROWS 
 				id,
 				account_id, 
-				company_name,
-				managername,
-				
+				company_name,				
 				customer_currency_id currency_id,
-				customer_currency_id_name currency,
-				
+				customer_currency_id_name currency,				
 				action_date record_date, 
 				DATE_FORMAT(action_date, '%m-%Y') record_date_month,
-				
-				ROUND(account_cost,2) usercost_out,
-				ROUND(account_cost_in,2) usercost_in,				
-				 
-				ROUND(asr,2) 'asr_out', 
-				ROUND(acd,2) 'acd_out', 
-				
+                                ROUND(tariff_net_cost,2) 'tariff_net_cost',
 				ROUND(answeredcalls) 'calls_out',
 				ROUND(account_duration/60) 'mins_out', 
 				ROUND(callcost_net,2) 'customer_cost_out', 
-				ROUND(callcost_net_carrier,2) 'carrier_cost_out',				
-								
+				ROUND(callcost_net_carrier,2) 'carrier_cost_out',
 				ROUND(answeredcalls_in) 'calls_in', 
 				ROUND(account_duration_in/60) 'mins_in', 
 				ROUND(callcost_net_in,2) 'customer_cost_in', 
-				ROUND(callcost_net_carrier_in,2) 'carrier_cost_in', 				
-				
-				ROUND(callcost_net - callcost_net_carrier, 2) 'profit_out',				
-				
+				ROUND(callcost_net_carrier_in,2) 'carrier_cost_in',
 				ROUND((did_extra_channel_cost_net + did_rental_cost_net + did_setup_cost_net),2) 'did_setup_rental_customer_cost', 
-				ROUND((did_extra_channel_cost_net_carrier + did_rental_cost_net_carrier + did_setup_cost_net_carrier),2) 'did_setup_rental_carrier_cost', 
+				ROUND((tariff_net_cost+did_extra_channel_cost_net_carrier + did_rental_cost_net_carrier + did_setup_cost_net_carrier),2) 'did_setup_rental_carrier_cost', 
 				
 				
-				ROUND((callcost_net_in + did_extra_channel_cost_net + did_rental_cost_net + did_setup_cost_net) - (callcost_net_carrier_in + did_extra_channel_cost_net_carrier + did_rental_cost_net_carrier + did_setup_cost_net_carrier),2) 'profit_in' , 
+				ROUND(SUM(callcost_net_in + callcost_net + callcost_net_in + did_extra_channel_cost_net + did_rental_cost_net + did_setup_cost_net) - sum(callcost_net_carrier + callcost_net_carrier_in + callcost_net_carrier_in + did_extra_channel_cost_net_carrier + did_rental_cost_net_carrier + did_setup_cost_net_carrier),2) 'profit' , 
 				
 				credit credit_added,
 				credit_remove,
@@ -2851,6 +2821,10 @@ ROUND(SUM(did_extra_channel_cost_net_carrier + did_rental_cost_net_carrier + did
                 if ($where != '')
                     $where .= ' AND ';
                 $where .= " account_id IN(" . $sub_sql . ")";
+            }else{
+               if ($where != '')
+                    $where .= ' AND ';
+                $where .= " parent_account_id is null or parent_account_id = '' ";  
             }
 
             if ($where != '') {

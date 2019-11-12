@@ -2266,8 +2266,7 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
         //print_r($_POST);
         if (isset($_POST['search_action'])) {
             $_SESSION['search_businesHistory_data'] = array(
-                's_cdr_username' => $_POST['username'],
-                's_cdr_customer_account' => $_POST['customer_account'],
+                's_cdr_customer_account_id' => $_POST['customer_account_id'],
                 's_cdr_company' => $_POST['company'],
                 's_cdr_currency' => $_POST['currency'],
                 's_cdr_record_date' => $_POST['record_date'],
@@ -2284,7 +2283,7 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
             $time_range = $today . ' 00:00 - ' . $today . ' 23:59';
 
             $_SESSION['search_businesHistory_data']['s_cdr_username'] = isset($_SESSION['search_businesHistory_data']['s_cdr_username']) ? $_SESSION['search_businesHistory_data']['s_cdr_username'] : '';
-            $_SESSION['search_businesHistory_data']['s_cdr_customer_account'] = isset($_SESSION['search_businesHistory_data']['s_cdr_customer_account']) ? $_SESSION['search_businesHistory_data']['s_cdr_customer_account'] : '';
+            $_SESSION['search_businesHistory_data']['s_cdr_customer_account_id'] = isset($_SESSION['search_businesHistory_data']['s_cdr_customer_account_id']) ? $_SESSION['search_businesHistory_data']['s_cdr_customer_account_id'] : '';
             $_SESSION['search_businesHistory_data']['s_cdr_company'] = isset($_SESSION['search_businesHistory_data']['s_cdr_company']) ? $_SESSION['search_businesHistory_data']['s_cdr_company'] : '';
             $_SESSION['search_businesHistory_data']['s_cdr_currency'] = isset($_SESSION['search_businesHistory_data']['s_cdr_currency']) ? $_SESSION['search_businesHistory_data']['s_cdr_currency'] : '';
             $_SESSION['search_businesHistory_data']['s_cdr_record_date'] = isset($_SESSION['search_businesHistory_data']['s_cdr_record_date']) ? $_SESSION['search_businesHistory_data']['s_cdr_record_date'] : $time_range;
@@ -2297,10 +2296,9 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
         }
 
         $search_data = array(
-            'username' => $_SESSION['search_businesHistory_data']['s_cdr_username'],
             'company_name' => $_SESSION['search_businesHistory_data']['s_cdr_company'],
             'currency_id' => $_SESSION['search_businesHistory_data']['s_cdr_currency'],
-            'account_id' => $_SESSION['search_businesHistory_data']['s_cdr_customer_account'],
+            'account_id' => $_SESSION['search_businesHistory_data']['s_cdr_customer_account_id'],
             'record_date' => $_SESSION['search_businesHistory_data']['s_cdr_record_date'],
         );
 
@@ -2322,24 +2320,21 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
             , 'record_date' => 'Record Date'
             , 'record_date_month' => 'Record Month'
             , 'currency' => 'Currency'
-            , 'mins_out' => 'Mins Out'
-            , 'calls_out' => 'Calls Out'
-            , 'acd_out' => 'ACD Out'
-            , 'asr_out' => 'ASR Out'
-            , 'customer_cost_out' => 'User Cost Out'
-            , 'carrier_cost_out' => 'Carriercost Out'
-            , 'profit_out' => 'Profit Out'
-            , 'calls_in' => 'Calls In'
-            , 'mins_in' => 'Mins In'
-            , 'usercost_in' => 'User Cost In'
-            , 'carrier_cost_in' => 'Carrier Cost In'
-            , 'did_setup_rental_customer_cost' => 'Did Setup & Rental User'
-            , 'did_setup_rental_carrier_cost' => 'Did Setup & Rental Carrier'
-            , 'profit_out' => 'Profit Out'
-            , 'profit_in' => 'Profit In'
+            , 'tariff_net_cost' => 'Tariff Cost'
+            , 'calls_out' => 'Total Call-Out'
+            , 'mins_out' => 'Mins-Out'
+            , 'customer_cost_out' => 'Customer Cost-Out'
+            , 'carrier_cost_out' => 'Carrier Cost-Out'
+            , 'calls_in' => 'Total Calls-In'
+            , 'mins_in' => 'Total Mins-In'
+            , 'customer_cost_in' => 'Customer Cost-In'
+            , 'carrier_cost_in' => 'Carrier Cost-In'
+            , 'did_setup_rental_customer_cost' => 'Customer DID-Cost'
+            , 'did_setup_rental_carrier_cost' => 'Carrier DID-Cost'
             , 'payment' => 'Payment'
             , 'credit_added' => 'Credit Added'
             , 'credit_remove' => 'Credit Remove'
+            , 'profit' => 'Profit'
         );
 
 
@@ -2545,12 +2540,7 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
             $search_data['grp_calls_date'] = $_SESSION['search_CarrierUsage_data']['carrier_grp_calls_date'];
         }
 
-
-        if (check_logged_account_type(array('ACCOUNTMANAGER')))
-            $search_data['s_account_manager'] = $logged_account_id;
-        elseif (check_logged_account_type(array('SALESMANAGER')))
-            $search_data['s_sales_manager'] = $logged_account_id;
-        elseif (check_logged_account_type(array('RESELLER')))
+        if (check_logged_account_type(array('RESELLER')))
             $search_data['s_parent_account_id'] = $logged_account_id;
 
 
@@ -2637,15 +2627,10 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
                 $export_header[] = $field_lebel;
             }
 
-            $per_page = 1000;
+            $per_page = 40000;
             $segment = 0;
-
-
             $response = $this->report_mod->CarrierUsage($search_data, $per_page, $segment);
-
             $data['listing_data'] = $response['result'];
-
-
             $export_data = array();
             if (count($data['listing_data']) > 0) {
                 $export_data_temp = array('');
@@ -2969,23 +2954,13 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
         $data['page_name'] = $page_name;
         $this->load->model('report_mod');
 
-        //if(!check_logged_account_type(array('ACCOUNTMANAGER')) )
-        {
-            //not permitted
-            //show_404('403');
-        }
-
         $logged_account_id = get_logged_account_id();
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-        ////////////////////////////////////////////////
 
-
-        if (isset($_POST['search_action'])) {// coming from search button								
+        if (isset($_POST['search_action'])) {
             $_SESSION['search_sales_monthly_data']['s_account_id'] = $_POST['account_id'];
-            $_SESSION['search_sales_monthly_data']['s_account_manager'] = $_POST['account_manager'];
         } else {
             $_SESSION['search_sales_monthly_data']['s_account_id'] = isset($_SESSION['search_sales_monthly_data']['s_account_id']) ? $_SESSION['search_sales_monthly_data']['s_account_id'] : '';
-            $_SESSION['search_sales_monthly_data']['s_account_manager'] = isset($_SESSION['search_sales_monthly_data']['s_account_manager']) ? $_SESSION['search_sales_monthly_data']['s_account_manager'] : '';
         }
 
         $start_timestamp = strtotime("- 11 month");
@@ -3004,31 +2979,15 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
             'record_date' => $_SESSION['search_sales_monthly_data']['s_cdr_record_date'],
             'g_rec_month' => 'Y');
 
-        if (check_logged_account_type(array('ACCOUNTMANAGER')))
-            $search_data['s_account_manager'] = $logged_account_id;
-        elseif (check_logged_account_type(array('SALESMANAGER'))) {
-            $search_data['s_sales_manager'] = $logged_account_id;
-            $search_data['am_under_sm'] = $_SESSION['search_sales_monthly_data']['s_account_manager'];
-        } elseif (check_logged_account_type(array('RESELLER')))
+        if (check_logged_account_type(array('RESELLER')))
             $search_data['s_parent_account_id'] = $logged_account_id;
         elseif (check_logged_account_type(array('CUSTOMER')))
             $search_data['account_id'] = $logged_account_id;
         else {
             $search_data['s_parent_account_id'] = '';
         }
-        /* elseif(check_logged_account_type(array('ADMIN')))	
-          {
-          }
-          else
-          {
-          show_404('403');
-          } */
-        if (check_logged_account_type(array('SALESMANAGER'))) {
-            $ac_search_data = array();
-            $ac_search_data['sales_manager'] = $logged_account_id;
-            $ac_mngrs_data = $this->member_mod->get_data('', '', '', $ac_search_data);
-            $data['ac_mngrs_data'] = $ac_mngrs_data;
-        }
+
+
 
         $data['currency_options'] = $this->utils_model->get_currencies();
         $report_data = $this->report_mod->get_businesHistory($search_data, '', '');
@@ -3057,24 +3016,13 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
         $page_name = "report_daily_sales";
         $data['page_name'] = $page_name;
         $this->load->model('report_mod');
-
-        //if(!check_logged_account_type(array('ACCOUNTMANAGER')) )
-        {
-            //not permitted
-            //show_404('403');
-        }
-
         $logged_account_id = get_logged_account_id();
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-        ////////////////////////////////////////////////
-
-
-        if (isset($_POST['search_action'])) {// coming from search button								
+        if (isset($_POST['search_action'])) {
             $_SESSION['search_sales_day_data']['s_cdr_record_date'] = $_POST['time_range'];
             $_SESSION['search_sales_day_data']['s_account_id'] = $_POST['account_id'];
             $_SESSION['search_sales_day_data']['s_account_manager'] = $_POST['account_manager'];
         } elseif (!isset($_SESSION['search_sales_day_data']['s_cdr_record_date'])) {
-            //default date is todays date
             $today_timestamp = strtotime("yesterday");
             $today = date('Y-m-d', $today_timestamp);
 
@@ -3094,12 +3042,7 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
             'record_date' => $_SESSION['search_sales_day_data']['s_cdr_record_date'],
             'g_rec_date' => 'Y');
 
-        if (check_logged_account_type(array('ACCOUNTMANAGER')))
-            $search_data['s_account_manager'] = $logged_account_id;
-        elseif (check_logged_account_type(array('SALESMANAGER'))) {
-            $search_data['s_sales_manager'] = $logged_account_id;
-            $search_data['am_under_sm'] = $_SESSION['search_sales_day_data']['s_account_manager'];
-        } elseif (check_logged_account_type(array('RESELLER')))
+      if (check_logged_account_type(array('RESELLER')))
             $search_data['s_parent_account_id'] = $logged_account_id;
         elseif (check_logged_account_type(array('CUSTOMER')))
             $search_data['account_id'] = $logged_account_id;
@@ -3111,12 +3054,7 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
             show_404('403');
         }
 
-        if (check_logged_account_type(array('SALESMANAGER'))) {
-            $ac_search_data = array();
-            $ac_search_data['sales_manager'] = $logged_account_id;
-            $ac_mngrs_data = $this->member_mod->get_data('', '', '', $ac_search_data);
-            $data['ac_mngrs_data'] = $ac_mngrs_data;
-        }
+     
 
         $data['currency_options'] = $this->utils_model->get_currencies();
         $report_data = $this->report_mod->get_businesHistory($search_data, '', '');
@@ -3152,15 +3090,11 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
         $logged_account_id = get_logged_account_id();
 
         ////////////get customer data///////////////////
-        if (check_logged_account_type(array('ACCOUNTMANAGER')))
-            $customer_search_data['account_manager'] = get_logged_account_id();
-        elseif (check_logged_account_type(array('SALESMANAGER')))
-            $customer_search_data['sales_manager'] = get_logged_account_id();
-        elseif (check_logged_account_type(array('RESELLER', 'CUSTOMER')))
+      if (check_logged_account_type(array('RESELLER', 'CUSTOMER')))
             $customer_search_data['parent_account_id'] = get_logged_account_id();
         elseif (check_logged_account_type(array('ADMIN', 'SUBADMIN')))
             $customer_search_data['parent_account_id'] = '';
-        elseif (check_logged_account_type(array('CREDITCONTROL'))) {
+        elseif (check_logged_account_type(array('ACCOUNTS'))) {
             $customer_search_data['parent_account_id'] = '';
         } else {
             die;
@@ -3196,9 +3130,7 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
         $reseller_search_data = array();
         $reseller_search_data['account_id'] = $_SESSION['search_sales_cust_data']['s_account_id'];
 
-        if (check_logged_account_type(array('ACCOUNTMANAGER')))
-            $reseller_search_data['account_manager'] = get_logged_account_id();
-        elseif (check_logged_account_type(array('RESELLER')))
+        if (check_logged_account_type(array('RESELLER')))
             $reseller_search_data['parent_account_id'] = get_logged_account_id();
         else
             $reseller_search_data['customer_level'] = '1';
@@ -3211,12 +3143,7 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
         $report_search_data = array('account_id' => $_SESSION['search_sales_cust_data']['s_account_id'],
             'record_date' => $_SESSION['search_sales_cust_data']['s_cdr_record_date'],
             'g_account_id' => 'Y');
-
-        if (check_logged_account_type(array('ACCOUNTMANAGER')))
-            $report_search_data['s_account_manager'] = $logged_account_id;
-        elseif (check_logged_account_type(array('SALESMANAGER')))
-            $report_search_data['s_sales_manager'] = $logged_account_id;
-        elseif (check_logged_account_type(array('RESELLER')))
+if (check_logged_account_type(array('RESELLER')))
             $report_search_data['s_parent_account_id'] = $logged_account_id;
         elseif (check_logged_account_type(array('CUSTOMER')))
             $report_search_data['account_id'] = $logged_account_id;

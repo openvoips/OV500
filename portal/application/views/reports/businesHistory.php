@@ -25,13 +25,15 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 // ##############################################################################
 -->
-<?php // echo '<pre>'; print_r($listing_data[0]); 
+<?php
+// echo '<pre>'; print_r($listing_data[0]); 
 //print_r($currency_data);
-//echo '</pre>'; ?>
+//echo '</pre>'; 
+?>
 <div class="col-md-12 col-sm-12 col-xs-12">
     <div class="x_panel">
         <div class="x_title">
-            <h2>CDR Reporting : Daily Usage</h2>			
+            <h2>Daily Usage Summary</h2>			
             <div class="clearfix"></div>
 
         </div>
@@ -43,7 +45,7 @@
 
                     <label class="control-label col-md-2 col-sm-3 col-xs-12">Account Id</label>
                     <div class="col-md-2 col-sm-8 col-xs-12">
-                        <input type="text" name="user_account" id="user_account" value="<?php echo $_SESSION['search_businesHistory_data']['s_cdr_user_account']; ?>" class="form-control data-search-field" placeholder="Account ID">
+                        <input type="text" name="user_account_id" id="user_account_id" value="<?php echo $_SESSION['search_businesHistory_data']['s_cdr_customer_account_id']; ?>" class="form-control data-search-field" placeholder="Account ID">
                     </div>	
 
                     <label class="control-label col-md-2 col-sm-3 col-xs-12">Company Name</label>
@@ -68,8 +70,8 @@
                                     <option value="<?php echo $currency_data[$i]['currency_id']; ?>" <?php if ($_SESSION['search_businesHistory_data']['s_cdr_currency'] == $currency_data[$i]['currency_id']) echo 'selected'; ?>><?php echo $currency_data[$i]['name']; ?></option>
                                 <?php elseif (get_logged_account_level() != 0 && get_logged_account_currency() == $currency_data[$i]['currency_id']): ?>
                                     <option value="<?php echo $currency_data[$i]['currency_id']; ?>" <?php if ($_SESSION['search_businesHistory_data']['s_cdr_currency'] == $currency_data[$i]['currency_id']) echo 'selected'; ?>><?php echo $currency_data[$i]['name']; ?></option>
-                                <?php endif; ?>
-                            <?php } ?>
+    <?php endif; ?>
+<?php } ?>
                         </select>
                     </div>
 
@@ -144,32 +146,32 @@
                     </thead>	
                     <tfoot>
                         <tr class="headings thc">                            
-<?php
-foreach ($all_field_array as $field_lebel) {
-    echo '<th class="column-title">' . $field_lebel . '</th>';
-}
-?>							
+                            <?php
+                            foreach ($all_field_array as $field_lebel) {
+                                echo '<th class="column-title">' . $field_lebel . '</th>';
+                            }
+                            ?>							
                         </tr>
                     </tfoot>		
                     <tbody>
-<?php
-if (count($listing_data) > 0) {
-    foreach ($listing_data as $listing_row) {
-        echo '<tr>';
-        foreach ($all_field_array as $field_name => $field_lebel) {
-            $display_value = $listing_row[$field_name];
-            if ($field_name == 'record_date') {
-                $display_value = date(DATE_FORMAT_1, strtotime($display_value));
-            }
+                        <?php
+                        if (count($listing_data) > 0) {
+                            foreach ($listing_data as $listing_row) {
+                                echo '<tr>';
+                                foreach ($all_field_array as $field_name => $field_lebel) {
+                                    $display_value = $listing_row[$field_name];
+                                    if ($field_name == 'record_date') {
+                                        $display_value = date(DATE_FORMAT_1, strtotime($display_value));
+                                    }
 
-            echo '<td><nobr>';
-            echo $display_value;
-            echo '</nobr></td>';
-        }
-        echo '</tr>';
-    }
-} else {
-    ?>
+                                    echo '<td><nobr>';
+                                    echo $display_value;
+                                    echo '</nobr></td>';
+                                }
+                                echo '</tr>';
+                            }
+                        } else {
+                            ?>
                             <tr>
                                 <td colspan="27" ><strong>No Record Found</strong></td>
                             </tr>
@@ -179,15 +181,9 @@ if (count($listing_data) > 0) {
                     </tbody>
                 </table>
             </div>
-                        <?php
-                        echo '<div class="btn-toolbar" role="toolbar">
-							  <div class="btn-group col-md-5 col-sm-12 col-xs-12">
-							  </div>						
-							  <div class="btn-group pull-right navigation-bar col-md-6 col-sm-12 col-xs-12 text-right">
-									   ' . $pagination . '
-							  </div>
-					  </div>';
-                        ?>
+            <?php
+            echo '<div class="btn-toolbar" role="toolbar"><div class="btn-group col-md-5 col-sm-12 col-xs-12"> </div> <div class="btn-group pull-right navigation-bar col-md-6 col-sm-12 col-xs-12 text-right">  ' . $pagination . '  </div></div>';
+            ?>
         </div>
 
         <div class="clearfix"></div>
