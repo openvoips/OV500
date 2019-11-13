@@ -4648,7 +4648,7 @@ class OVS extends PDO {
         }
 
         if ($this->leg == 'A') {
-            $query = sprintf("delete from livecalls where common_uuid = '%s' or carrier_gateway_ipaddress = '' or carrier_gateway_ipaddress is null ", addslashes($this->cdr_variable['common_uuid']));
+            $query = sprintf("delete from livecalls where common_uuid = '%s' or carrier_ipaddress_name = '' or carrier_ipaddress_name is null ", addslashes($this->cdr_variable['common_uuid']));
             $this->query('SWITCH', $query);
             $this->execute();			
         }

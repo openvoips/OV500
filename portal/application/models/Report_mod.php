@@ -1100,6 +1100,11 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
             //  echo $query;
             $result = $DB1->query($query);
 
+            if (!$result){
+                $error_array = $this->db->error();
+                throw new Exception($error_array['message']);
+            }
+
             ///find total
             $sql = "SELECT FOUND_ROWS() as total";
             $query_count = $DB1->query($sql);
@@ -2821,10 +2826,10 @@ ROUND(SUM(did_extra_channel_cost_net_carrier + did_rental_cost_net_carrier + did
                 if ($where != '')
                     $where .= ' AND ';
                 $where .= " account_id IN(" . $sub_sql . ")";
-            }else{
-               if ($where != '')
+            }else {
+                if ($where != '')
                     $where .= ' AND ';
-                $where .= " parent_account_id is null or parent_account_id = '' ";  
+                $where .= " parent_account_id is null or parent_account_id = '' ";
             }
 
             if ($where != '') {
@@ -2863,7 +2868,7 @@ ROUND(SUM(did_extra_channel_cost_net_carrier + did_rental_cost_net_carrier + did
             return $return;
         }
     }
-   
+
     function supplier_netting($supplier_id_name, $from_date, $to_date) {
         $final_return_array = array();
         try {
