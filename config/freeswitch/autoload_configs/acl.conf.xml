@@ -17,8 +17,8 @@
       <!-- domain= is special it scans the domain from the directory to build the ACL -->
       <node type="allow" domain="$${domain}"/>	
       <node type="allow" cidr="192.168.1.20/32"/>      
-      <node type="allow" cidr="127.0.0.1"/>
-	  <node type="allow" cidr="LBSERVERIP"/>
+      <node type="allow" cidr="127.0.0.1/32"/>
+	  <node type="allow" cidr="LBSERVERIP/32"/>
 
 
     </list>
