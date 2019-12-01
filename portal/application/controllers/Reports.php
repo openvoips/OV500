@@ -1419,55 +1419,6 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
         $this->load->view('basic/footer', $data);
     }
 
-    function summary() {
-        $page_name = "report_summary";
-        $data['page_name'] = $page_name;
-        $this->load->model('report_mod');
-
-        //if(!check_logged_account_type(array('ACCOUNTMANAGER')) )
-        {
-            //not permitted
-            //show_404('403');
-        }
-
-        $account_id = get_logged_account_id();
-
-
-        $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-        ////////////////////////////////////////////////
-
-
-        if (isset($_POST['search_action'])) {// coming from search button							
-            $_SESSION['search_sdr_summ_data'] = array('s_yearmonth' => $_POST['yearmonth']);
-            $_SESSION['search_sdr_summ_data']['s_account_id'] = $_POST['account_id'];
-        } else {
-            $_SESSION['search_sdr_summ_data']['s_yearmonth'] = isset($_SESSION['search_sdr_summ_data']['s_yearmonth']) ? $_SESSION['search_sdr_summ_data']['s_yearmonth'] : date("Y-m");
-
-            $_SESSION['search_sdr_summ_data']['s_account_id'] = isset($_SESSION['search_sdr_summ_data']['s_account_id']) ? $_SESSION['search_sdr_summ_data']['s_account_id'] : '';
-        }
-        $search_data = array('account_id' => $_SESSION['search_sdr_summ_data']['s_account_id'], 'yearmonth' => $_SESSION['search_sdr_summ_data']['s_yearmonth']);
-        if (check_logged_account_type(array('ACCOUNTMANAGER')))
-            $search_data['account_manager'] = $account_id;
-        elseif (check_logged_account_type(array('RESELLER')))
-            $search_data['parent_account_id'] = $account_id;
-        elseif (check_logged_account_type(array('CUSTOMER')))
-            $search_data['account_id'] = $account_id;
-        elseif (check_logged_account_type(array('ADMIN'))) {
-            
-        } else {
-            show_404('403');
-        }
-
-
-        $report_data = $this->report_mod->sdr_summary($search_data);
-
-        $data['data'] = $report_data;
-
-        $this->load->view('basic/header', $data);
-        $this->load->view('reports/sdr_summary', $data);
-        $this->load->view('basic/footer', $data);
-    }
-
     function call_report($account_id_temp = '') {
         $page_name = "report_call";
         $data['page_name'] = $page_name;

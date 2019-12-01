@@ -36,96 +36,103 @@ class Report_mod extends CI_Model {
     }
 
     function CarrQOSR($search_data) {
-        $DB1 = $this->load->database('cdrdb', true);
-        $range = explode(' - ', $search_data['timerange']);
-        $range_from = explode(' ', $range[0]);
-        $range_to = explode(' ', $range[1]);
-        $start_dt = $range_from[0];
-        $date = $start_dt . " 00:00:00";
-        $table = date('Ym', strtotime($date)) . "_carrierstate";
-        $start_hh = substr($range_from[1], 0, strpos($range_from[1], ':'));
-        $start_mm = substr($range_from[1], strpos($range_from[1], ':') + 1);
-        $end_dt = $range_to[0];
-        $end_hh = substr($range_to[1], 0, strpos($range_to[1], ':'));
-        $end_mm = substr($range_to[1], strpos($range_to[1], ':') + 1);
-        $str = "select sum(totalcalls) as total_calls, sum(answeredcalls) as answered_calls , round((sum(answeredcalls)/sum(totalcalls))*100,2) as asr, ifnull(round((sum(carrier_duration)/sum(answeredcalls))/60,2),0.00) as acd, ifnull(round(sum(pdd)/sum(totalcalls),2),0.00) as pdd, ";
-        $str .= " round(sum(carrier_duration)/60,2) as total_duration ";
-        if ($search_data['group_by_ip'] == 'Y')
-            $str .= " ,carrier_ipaddress  as ip_address ";
-        if ($search_data['group_by_carrier'] == 'Y')
-            $str .= " ,concat(carrier_name,'(',carrier_id,')') carrier_id";
-        if ($search_data['group_by_date'] == 'Y')
-            $str .= " ,call_date ";
-        if ($search_data['group_by_hour'] == 'Y')
-            $str .= " ,calltime_h ";
-        if ($search_data['group_by_minute'] == 'Y')
-            $str .= " ,calltime_m ";
-        if ($search_data['group_by_prefix'] == 'Y')
-            $str .= " ,carrier_prefix as prefix";
-        if ($search_data['group_by_destination'] == 'Y')
-            $str .= " ,carrier_prefix_name as prefix_name";
-        if ($search_data['group_by_sip'] == 'Y')
-            $str .= " ,SIPCODE ";
-        if ($search_data['group_by_q850'] == 'Y')
-            $str .= " ,Q850CODE ";
+        try {
+            $DB1 = $this->load->database('cdrdb', true);
+            $range = explode(' - ', $search_data['timerange']);
+            $range_from = explode(' ', $range[0]);
+            $range_to = explode(' ', $range[1]);
+            $start_dt = $range_from[0];
+            $date = $start_dt . " 00:00:00";
+            $table = date('Ym', strtotime($date)) . "_carrierstate";
+            $start_hh = substr($range_from[1], 0, strpos($range_from[1], ':'));
+            $start_mm = substr($range_from[1], strpos($range_from[1], ':') + 1);
+            $end_dt = $range_to[0];
+            $end_hh = substr($range_to[1], 0, strpos($range_to[1], ':'));
+            $end_mm = substr($range_to[1], strpos($range_to[1], ':') + 1);
+            $str = "select sum(totalcalls) as total_calls, sum(answeredcalls) as answered_calls , round((sum(answeredcalls)/sum(totalcalls))*100,2) as asr, ifnull(round((sum(carrier_duration)/sum(answeredcalls))/60,2),0.00) as acd, ifnull(round(sum(pdd)/sum(totalcalls),2),0.00) as pdd, ";
+            $str .= " round(sum(carrier_duration)/60,2) as total_duration ";
+            if ($search_data['group_by_ip'] == 'Y')
+                $str .= " ,carrier_ipaddress  as ip_address ";
+            if ($search_data['group_by_carrier'] == 'Y')
+                $str .= " ,concat(carrier_name,'(',carrier_id,')') carrier_id";
+            if ($search_data['group_by_date'] == 'Y')
+                $str .= " ,call_date ";
+            if ($search_data['group_by_hour'] == 'Y')
+                $str .= " ,calltime_h ";
+            if ($search_data['group_by_minute'] == 'Y')
+                $str .= " ,calltime_m ";
+            if ($search_data['group_by_prefix'] == 'Y')
+                $str .= " ,carrier_prefix as prefix";
+            if ($search_data['group_by_destination'] == 'Y')
+                $str .= " ,carrier_prefix_name as prefix_name";
+            if ($search_data['group_by_sip'] == 'Y')
+                $str .= " ,SIPCODE ";
+            if ($search_data['group_by_q850'] == 'Y')
+                $str .= " ,Q850CODE ";
 
-        //////////////////////////////
-        /// showing account's cost///	
-        if ($search_data['group_by_carrier'] == 'Y' || $search_data['carrier_id'] != '') {
-            $str .= " ,round(sum(carrier_cost)*1.0000000000000000,2)  as cost ,carrier_currency_id as currency_id";
-        }
-        /// showing account's cost///	
-        //////////////////////////////
-        $str .= " from $table where date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) >= '" . $start_dt . " " . $start_hh . ":" . $start_mm . "'
+            //////////////////////////////
+            /// showing account's cost///	
+            if ($search_data['group_by_carrier'] == 'Y' || $search_data['carrier_id'] != '') {
+                $str .= " ,round(sum(carrier_cost)*1.0000000000000000,2)  as cost ,carrier_currency_id as currency_id";
+            }
+            /// showing account's cost///	
+            //////////////////////////////
+            $str .= " from $table where date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) >= '" . $start_dt . " " . $start_hh . ":" . $start_mm . "'
 and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) <= '" . $end_dt . " " . $end_hh . ":" . $end_mm . "'";
-        if ($search_data['ip'] != '')
-            $str .= " and carrier_ipaddress = '" . $search_data['ip'] . "'";
-        if ($search_data['carrier_id'] != '')
-            $str .= " and carrier_id like '%" . $search_data['carrier_id'] . "%'";
-        if ($search_data['prefix'] != '')
-            $str .= " and carrier_prefix like '" . $search_data['prefix'] . "'";
-        if ($search_data['destination'] != '')
-            $str .= " and carrier_prefix_name like '" . $search_data['destination'] . "'";
-        if ($search_data['sip'] != '')
-            $str .= " and SIPCODE = '" . $search_data['sip'] . "'";
-        if ($search_data['q850'] != '')
-            $str .= " and Q850CODE = '" . $search_data['q850'] . "'";
+            if ($search_data['ip'] != '')
+                $str .= " and carrier_ipaddress = '" . $search_data['ip'] . "'";
+            if ($search_data['carrier_id'] != '')
+                $str .= " and carrier_id like '%" . $search_data['carrier_id'] . "%'";
+            if ($search_data['prefix'] != '')
+                $str .= " and carrier_prefix like '" . $search_data['prefix'] . "'";
+            if ($search_data['destination'] != '')
+                $str .= " and carrier_prefix_name like '" . $search_data['destination'] . "'";
+            if ($search_data['sip'] != '')
+                $str .= " and SIPCODE = '" . $search_data['sip'] . "'";
+            if ($search_data['q850'] != '')
+                $str .= " and Q850CODE = '" . $search_data['q850'] . "'";
 
-        $group_by = "";
+            $group_by = "";
 
-        if ($search_data['group_by_ip'] == 'Y')
-            $group_by .= " carrier_ipaddress ,";
-        if ($search_data['group_by_carrier'] == 'Y')
-            $group_by .= " carrier_id ,";
-        if ($search_data['group_by_date'] == 'Y')
-            $group_by .= " call_date ,";
-        if ($search_data['group_by_hour'] == 'Y')
-            $group_by .= " calltime_h ,";
-        if ($search_data['group_by_minute'] == 'Y')
-            $group_by .= " calltime_m ,";
-        if ($search_data['group_by_prefix'] == 'Y')
-            $group_by .= " carrier_prefix ,";
-        if ($search_data['group_by_destination'] == 'Y')
-            $group_by .= " carrier_prefix_name ,";
-        if ($search_data['group_by_sip'] == 'Y')
-            $group_by .= " SIPCODE ,";
-        if ($search_data['group_by_q850'] == 'Y')
-            $group_by .= " Q850CODE ,";
+            if ($search_data['group_by_ip'] == 'Y')
+                $group_by .= " carrier_ipaddress ,";
+            if ($search_data['group_by_carrier'] == 'Y')
+                $group_by .= " carrier_id ,";
+            if ($search_data['group_by_date'] == 'Y')
+                $group_by .= " call_date ,";
+            if ($search_data['group_by_hour'] == 'Y')
+                $group_by .= " calltime_h ,";
+            if ($search_data['group_by_minute'] == 'Y')
+                $group_by .= " calltime_m ,";
+            if ($search_data['group_by_prefix'] == 'Y')
+                $group_by .= " carrier_prefix ,";
+            if ($search_data['group_by_destination'] == 'Y')
+                $group_by .= " carrier_prefix_name ,";
+            if ($search_data['group_by_sip'] == 'Y')
+                $group_by .= " SIPCODE ,";
+            if ($search_data['group_by_q850'] == 'Y')
+                $group_by .= " Q850CODE ,";
 
 
-        if ($group_by != '')
-            $group_by = " group by " . rtrim($group_by, ',');
+            if ($group_by != '')
+                $group_by = " group by " . rtrim($group_by, ',');
 
-        $orderby = " order by date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) desc ";
-        $query = $str . $group_by . $orderby;
-//        die($query);
-        $result = $DB1->query($query);
+            $orderby = " order by date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) desc ";
+            $query = $str . $group_by . $orderby;
 
-        $return['total'] = $result->num_rows();
-        $return['result'] = $result->result_array();
-
-        //var_dump($return);
-        return $return;
+            $result = $DB1->query($query);
+            if (!$result) {
+                $error_array = $this->db->error();
+                throw new Exception($error_array['message']);
+            }
+            $return['total'] = $result->num_rows();
+            $return['result'] = $result->result_array();
+            return $return;
+        } catch (Exception $e) {
+            $return['status'] = 'failed';
+            $return['message'] = $e->getMessage();
+            return $return;
+        }
     }
 
     public function monin_data($incoming_calls = 'Y', $outgoing_calls = 'Y', $incoming_duration = 'Y', $outgoing_duration = 'Y', $gateway_calls = 'Y', $customer_calls = 'Y', $show_usage = 'Y', $customer_call_stat = 'N', $carrier_call_stat = 'N', $livecalls_destination = 'N') {
@@ -301,7 +308,6 @@ group by reseller1_account_id order by total_calls desc ";
     function ProfitLoss($search_data) {
 
         if ($search_data['logged_customer_type'] == 'RESELLER' && in_array($search_data['logged_customer_level'], array(1, 2, 3))) {
-
             if ($search_data['logged_customer_level'] == '1')
                 return $this->ProfitLossR1($search_data);
             if ($search_data['logged_customer_level'] == '2')
@@ -314,142 +320,161 @@ group by reseller1_account_id order by total_calls desc ";
     }
 
     function ProfitLossAdmin($search_data) {
+        try {
+            $range = explode(' - ', $search_data['call_date']);
+            $range_from = explode(' ', $range[0]);
+            $range_to = explode(' ', $range[1]);
+            $start_dt = $range_from[0];
+            $start_hh = substr($range_from[1], 0, strpos($range_from[1], ':'));
+            $start_mm = substr($range_from[1], strpos($range_from[1], ':') + 1);
+            $end_dt = $range_to[0];
+            $end_hh = substr($range_to[1], 0, strpos($range_to[1], ':'));
+            $end_mm = substr($range_to[1], strpos($range_to[1], ':') + 1);
+            $table = date('Ym', strtotime($start_dt)) . "_customerstate";
 
-        $range = explode(' - ', $search_data['call_date']);
-        $range_from = explode(' ', $range[0]);
-        $range_to = explode(' ', $range[1]);
-        $start_dt = $range_from[0];
-        $start_hh = substr($range_from[1], 0, strpos($range_from[1], ':'));
-        $start_mm = substr($range_from[1], strpos($range_from[1], ':') + 1);
-        $end_dt = $range_to[0];
-        $end_hh = substr($range_to[1], 0, strpos($range_to[1], ':'));
-        $end_mm = substr($range_to[1], strpos($range_to[1], ':') + 1);
-        $table = date('Ym', strtotime($start_dt)) . "_customerstate";
+            $str = "   select sum(totalcalls) as total_calls, sum(answeredcalls) as answered_calls ,if(r1_account_id is null or r1_account_id = '' , round(sum(customer_duration)/60,2),  round(sum(r1_duration)/60,2)) as total_duration,  if(r1_account_id is null or r1_account_id = '' , concat(if(customer_company_name = '',account_id, customer_company_name ),' (',account_id,')'), r1_account_id)  as account_code , sum(carrier_callcost_total_usercurrency) carrier_cost, if(r1_account_id is null or r1_account_id = '', round(sum(customer_cost)*1.0000000000000000,4),round(sum(r1_cost)*1.0000000000000000,4)) as cost, customer_currency_id as currency_id ";
 
-        $str = "   select sum(totalcalls) as total_calls, sum(answeredcalls) as answered_calls ,if(r1_account_id is null or r1_account_id = '' , round(sum(customer_duration)/60,2),  round(sum(r1_duration)/60,2)) as total_duration,  if(r1_account_id is null or r1_account_id = '' , concat(if(customer_company_name = '',account_id, customer_company_name ),' (',account_id,')'), r1_account_id)  as account_code , sum(carrier_callcost_total_usercurrency) carrier_cost, if(r1_account_id is null or r1_account_id = '', round(sum(customer_cost)*1.0000000000000000,4),round(sum(r1_cost)*1.0000000000000000,4)) as cost, customer_currency_id as currency_id ";
+            if ($search_data['group_by_carrier'] == 'Y')
+                $str .= " ,carrier_id ";
+            if ($search_data['group_by_date'] == 'Y')
+                $str .= " ,call_date ";
+            if ($search_data['group_by_hour'] == 'Y')
+                $str .= " ,calltime_h ";
+            if ($search_data['group_by_minute'] == 'Y')
+                $str .= " ,calltime_m ";
+            if ($search_data['group_by_prefix'] == 'Y')
+                $str .= " ,prefix ";
+            if ($search_data['group_by_destination'] == 'Y')
+                $str .= " ,prefix_name ";
 
-        if ($search_data['group_by_carrier'] == 'Y')
-            $str .= " ,carrier_id ";
-        if ($search_data['group_by_date'] == 'Y')
-            $str .= " ,call_date ";
-        if ($search_data['group_by_hour'] == 'Y')
-            $str .= " ,calltime_h ";
-        if ($search_data['group_by_minute'] == 'Y')
-            $str .= " ,calltime_m ";
-        if ($search_data['group_by_prefix'] == 'Y')
-            $str .= " ,prefix ";
-        if ($search_data['group_by_destination'] == 'Y')
-            $str .= " ,prefix_name ";
+            //  $str .= " from $table WHERE 1 and ((r2_account_id = '' or r2_account_id is null ) and (r3_account_id = '' or r3_account_id is null)) and answeredcalls > 0 ";
 
-        //  $str .= " from $table WHERE 1 and ((r2_account_id = '' or r2_account_id is null ) and (r3_account_id = '' or r3_account_id is null)) and answeredcalls > 0 ";
+            $str .= " from $table WHERE 1  and answeredcalls > 0 ";
 
-        $str .= " from $table WHERE 1  and answeredcalls > 0 ";
-
-        if ($search_data['account_type'] == 'U') {
-            if ($search_data['account_id'] != '') {
-                $str .= " and account_id = '" . $search_data['account_id'] . "'";
+            if ($search_data['account_type'] == 'U') {
+                if ($search_data['account_id'] != '') {
+                    $str .= " and account_id = '" . $search_data['account_id'] . "'";
+                }
+            } else if ($search_data['account_type'] == 'R') {
+                if ($search_data['account_id'] != '') {
+                    $str .= " and r1_account_id = '" . $search_data['account_id'] . "'";
+                }
             }
-        } else if ($search_data['account_type'] == 'R') {
-            if ($search_data['account_id'] != '') {
-                $str .= " and r1_account_id = '" . $search_data['account_id'] . "'";
+
+            $str .= " and  date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) >= '" . $start_dt . " " . $start_hh . ":" . $start_mm . "' and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) <= '" . $end_dt . " " . $end_hh . ":" . $end_mm . "'";
+
+            if (trim($search_data['company_name']) != '') {
+                $str .= " AND customer_company_name LIKE '%" . trim($search_data['company_name']) . "%' ";
             }
-        }
 
-        $str .= " and  date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) >= '" . $start_dt . " " . $start_hh . ":" . $start_mm . "' and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) <= '" . $end_dt . " " . $end_hh . ":" . $end_mm . "'";
-
-        if (trim($search_data['company_name']) != '') {
-            $str .= " AND customer_company_name LIKE '%" . trim($search_data['company_name']) . "%' ";
-        }
-
-        if (isset($search_data['logged_customer_type']) && isset($search_data['logged_customer_account_id']) && isset($search_data['logged_customer_level']) && $search_data['logged_customer_type'] == 'RESELLER' && in_array($search_data['logged_customer_level'], array(1, 2, 3))) {
-            $level = $search_data['logged_customer_level'];
-            $field_name = 'r' . $level . '_account_id';
-            $str .= " AND `" . $field_name . "` = '" . $search_data['logged_customer_account_id'] . "'";
-        }
-        if ($search_data['carrier_id'] != '')
-            $str .= " and carrier_id like '%" . $search_data['carrier_id'] . "%'";
-        if ($search_data['prefix'] != '')
-            $str .= " and prefix like '" . $search_data['prefix'] . "'";
-        if ($search_data['destination'] != '')
-            $str .= " and prefix_name like '" . $search_data['destination'] . "'";
-
-        $group_by = "";
-
-        if ($search_data['group_by_user'] == 'Y') {
-            if ($search_data['account_type'] == 'U')
-                $group_by .= " account_code ,";
-            else {
-                $group_by .= " account_code ,";
+            if (isset($search_data['logged_customer_type']) && isset($search_data['logged_customer_account_id']) && isset($search_data['logged_customer_level']) && $search_data['logged_customer_type'] == 'RESELLER' && in_array($search_data['logged_customer_level'], array(1, 2, 3))) {
+                $level = $search_data['logged_customer_level'];
+                $field_name = 'r' . $level . '_account_id';
+                $str .= " AND `" . $field_name . "` = '" . $search_data['logged_customer_account_id'] . "'";
             }
-        }
-        if ($search_data['group_by_carrier'] == 'Y')
-            $group_by .= " carrier_id ,";
-        if ($search_data['group_by_date'] == 'Y')
-            $group_by .= " call_date ,";
-        if ($search_data['group_by_hour'] == 'Y')
-            $group_by .= " calltime_h ,";
-        if ($search_data['group_by_minute'] == 'Y')
-            $group_by .= " calltime_m ,";
-        if ($search_data['group_by_prefix'] == 'Y')
-            $group_by .= " prefix ,";
-        if ($search_data['group_by_destination'] == 'Y')
-            $group_by .= " prefix_name ,";
-        if ($group_by != '')
-            $group_by = " group by customer_currency_id," . rtrim($group_by, ',');
+            if ($search_data['carrier_id'] != '')
+                $str .= " and carrier_id like '%" . $search_data['carrier_id'] . "%'";
+            if ($search_data['prefix'] != '')
+                $str .= " and prefix like '" . $search_data['prefix'] . "'";
+            if ($search_data['destination'] != '')
+                $str .= " and prefix_name like '" . $search_data['destination'] . "'";
 
-        $orderby = " order by date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) desc ";
-        $query = $str . $group_by . $orderby;
-        $DB1 = $this->load->database('cdrdb', true);
-        $result = $DB1->query($query);
-        // echo $DB1->last_query();
-        $return['total'] = $result->num_rows();
-        if ($return['total'] == '')
-            $return['total'] = 0;
-        $return['result'] = $result->result_array();
-        return $return;
+            $group_by = "";
+
+            if ($search_data['group_by_user'] == 'Y') {
+                if ($search_data['account_type'] == 'U')
+                    $group_by .= " account_code ,";
+                else {
+                    $group_by .= " account_code ,";
+                }
+            }
+            if ($search_data['group_by_carrier'] == 'Y')
+                $group_by .= " carrier_id ,";
+            if ($search_data['group_by_date'] == 'Y')
+                $group_by .= " call_date ,";
+            if ($search_data['group_by_hour'] == 'Y')
+                $group_by .= " calltime_h ,";
+            if ($search_data['group_by_minute'] == 'Y')
+                $group_by .= " calltime_m ,";
+            if ($search_data['group_by_prefix'] == 'Y')
+                $group_by .= " prefix ,";
+            if ($search_data['group_by_destination'] == 'Y')
+                $group_by .= " prefix_name ,";
+            if ($group_by != '')
+                $group_by = " group by customer_currency_id," . rtrim($group_by, ',');
+
+            $orderby = " order by date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) desc ";
+            $query = $str . $group_by . $orderby;
+            $DB1 = $this->load->database('cdrdb', true);
+            $result = $DB1->query($query);
+            if (!$result) {
+                $error_array = $this->db->error();
+                throw new Exception($error_array['message']);
+            }
+
+            // echo $DB1->last_query();
+            $return['total'] = $result->num_rows();
+            if ($return['total'] == '')
+                $return['total'] = 0;
+            $return['result'] = $result->result_array();
+
+
+
+            if (!$result) {
+                $error_array = $this->db->error();
+                throw new Exception($error_array['message']);
+            }
+
+            return $return;
+        } catch (Exception $e) {
+            $return['status'] = 'failed';
+            $return['message'] = $e->getMessage();
+            return $return;
+        }
     }
 
     function ProfitLossR1($search_data) {
-        $range = explode(' - ', $search_data['call_date']);
-        $range_from = explode(' ', $range[0]);
-        $range_to = explode(' ', $range[1]);
-        $start_dt = $range_from[0];
-        $start_hh = substr($range_from[1], 0, strpos($range_from[1], ':'));
-        $start_mm = substr($range_from[1], strpos($range_from[1], ':') + 1);
-        $end_dt = $range_to[0];
-        $end_hh = substr($range_to[1], 0, strpos($range_to[1], ':'));
-        $end_mm = substr($range_to[1], strpos($range_to[1], ':') + 1);
-        $table = date('Ym', strtotime($start_dt)) . "_customerstate";
-        $str = "   select sum(totalcalls) as total_calls, sum(answeredcalls) as answered_calls ,if(r2_account_id is null or r2_account_id = '' , round(sum(customer_duration)/60,2),  round(sum(r2_duration)/60,2)) as total_duration,  if(r2_account_id is null or r2_account_id = '' , concat(if(customer_company_name = '',account_id, customer_company_name ),' (',account_id,')'), r2_account_id)  as account_code , sum(r1_cost) carrier_cost, if(r2_account_id is null or r2_account_id = '', round(sum(customer_cost)*1.0000000000000000,4),round(sum(r2_cost)*1.0000000000000000,4)) as cost, customer_currency_id as currency_id ";
+        try {
+            $range = explode(' - ', $search_data['call_date']);
+            $range_from = explode(' ', $range[0]);
+            $range_to = explode(' ', $range[1]);
+            $start_dt = $range_from[0];
+            $start_hh = substr($range_from[1], 0, strpos($range_from[1], ':'));
+            $start_mm = substr($range_from[1], strpos($range_from[1], ':') + 1);
+            $end_dt = $range_to[0];
+            $end_hh = substr($range_to[1], 0, strpos($range_to[1], ':'));
+            $end_mm = substr($range_to[1], strpos($range_to[1], ':') + 1);
+            $table = date('Ym', strtotime($start_dt)) . "_customerstate";
+            $str = "   select sum(totalcalls) as total_calls, sum(answeredcalls) as answered_calls ,if(r2_account_id is null or r2_account_id = '' , round(sum(customer_duration)/60,2),  round(sum(r2_duration)/60,2)) as total_duration,  if(r2_account_id is null or r2_account_id = '' , concat(if(customer_company_name = '',account_id, customer_company_name ),' (',account_id,')'), r2_account_id)  as account_code , sum(r1_cost) carrier_cost, if(r2_account_id is null or r2_account_id = '', round(sum(customer_cost)*1.0000000000000000,4),round(sum(r2_cost)*1.0000000000000000,4)) as cost, customer_currency_id as currency_id ";
 
-        if ($search_data['group_by_carrier'] == 'Y')
-            $str .= " ,carrier_id ";
-        if ($search_data['group_by_date'] == 'Y')
-            $str .= " ,call_date ";
-        if ($search_data['group_by_hour'] == 'Y')
-            $str .= " ,calltime_h ";
-        if ($search_data['group_by_minute'] == 'Y')
-            $str .= " ,calltime_m ";
-        if ($search_data['group_by_prefix'] == 'Y')
-            $str .= " ,prefix ";
-        if ($search_data['group_by_destination'] == 'Y')
-            $str .= " ,prefix_name ";
+            if ($search_data['group_by_carrier'] == 'Y')
+                $str .= " ,carrier_id ";
+            if ($search_data['group_by_date'] == 'Y')
+                $str .= " ,call_date ";
+            if ($search_data['group_by_hour'] == 'Y')
+                $str .= " ,calltime_h ";
+            if ($search_data['group_by_minute'] == 'Y')
+                $str .= " ,calltime_m ";
+            if ($search_data['group_by_prefix'] == 'Y')
+                $str .= " ,prefix ";
+            if ($search_data['group_by_destination'] == 'Y')
+                $str .= " ,prefix_name ";
 
-        $str .= " from $table WHERE 1 and answeredcalls > 0 ";
-        if ($search_data['account_type'] == 'U') {
-            if ($search_data['account_id'] != '') {
-                $str .= " and account_id = '" . $search_data['account_id'] . "'";
-            }
-        } else {
-            if (isset($search_data['logged_customer_type']) && isset($search_data['logged_customer_level']) && $search_data['logged_customer_type'] == 'RESELLER' && in_array($search_data['logged_customer_level'], array(1, 2, 3))) {
-                $level = $search_data['logged_customer_level'] + 1;
-                $field_name = 'r' . $level . '_account_id';
-                $str .= " AND `" . $field_name . "` = '" . $search_data['account_id'] . "'";
+            $str .= " from $table WHERE 1 and answeredcalls > 0 ";
+            if ($search_data['account_type'] == 'U') {
+                if ($search_data['account_id'] != '') {
+                    $str .= " and account_id = '" . $search_data['account_id'] . "'";
+                }
             } else {
-                $str .= " and r2_account_id = '" . $search_data['account_id'] . "'";
+                if (isset($search_data['logged_customer_type']) && isset($search_data['logged_customer_level']) && $search_data['logged_customer_type'] == 'RESELLER' && in_array($search_data['logged_customer_level'], array(1, 2, 3))) {
+                    $level = $search_data['logged_customer_level'] + 1;
+                    $field_name = 'r' . $level . '_account_id';
+                    $str .= " AND `" . $field_name . "` = '" . $search_data['account_id'] . "'";
+                } else {
+                    $str .= " and r2_account_id = '" . $search_data['account_id'] . "'";
+                }
             }
-        }
-        $str .= " and r1_account_id = '" . $search_data['logged_customer_account_id'] . "'";
+            $str .= " and r1_account_id = '" . $search_data['logged_customer_account_id'] . "'";
 
 
         $str .= " and  date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) >= '" . $start_dt . " " . $start_hh . ":" . $start_mm . "' and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) <= '" . $end_dt . " " . $end_hh . ":" . $end_mm . "'";
@@ -494,30 +519,46 @@ group by reseller1_account_id order by total_calls desc ";
         if ($group_by != '')
             $group_by = " group by customer_currency_id," . rtrim($group_by, ',');
 
-        $orderby = " order by date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) desc ";
-        $query = $str . $group_by . $orderby;
-        $DB1 = $this->load->database('cdrdb', true);
-        $result = $DB1->query($query);
-        //   echo $DB1->last_query();
-        $return['total'] = $result->num_rows();
-        if ($return['total'] == '')
-            $return['total'] = 0;
-        $return['result'] = $result->result_array();
-        return $return;
+            $orderby = " order by date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) desc ";
+            $query = $str . $group_by . $orderby;
+            $DB1 = $this->load->database('cdrdb', true);
+            $result = $DB1->query($query);
+
+            if (!$result) {
+                $error_array = $this->db->error();
+                throw new Exception($error_array['message']);
+            }
+
+            $return['total'] = $result->num_rows();
+            if ($return['total'] == '')
+                $return['total'] = 0;
+            $return['result'] = $result->result_array();
+            if (!$result) {
+                $error_array = $this->db->error();
+                throw new Exception($error_array['message']);
+            }
+
+            return $return;
+        } catch (Exception $e) {
+            $return['status'] = 'failed';
+            $return['message'] = $e->getMessage();
+            return $return;
+        }
     }
 
     function ProfitLossR2($search_data) {
-        $range = explode(' - ', $search_data['call_date']);
-        $range_from = explode(' ', $range[0]);
-        $range_to = explode(' ', $range[1]);
-        $start_dt = $range_from[0];
-        $start_hh = substr($range_from[1], 0, strpos($range_from[1], ':'));
-        $start_mm = substr($range_from[1], strpos($range_from[1], ':') + 1);
-        $end_dt = $range_to[0];
-        $end_hh = substr($range_to[1], 0, strpos($range_to[1], ':'));
-        $end_mm = substr($range_to[1], strpos($range_to[1], ':') + 1);
-        $table = date('Ym', strtotime($start_dt)) . "_customerstate";
-        $str = "   select sum(totalcalls) as total_calls, sum(answeredcalls) as answered_calls ,if(r3_account_id is null or r3_account_id = '' , round(sum(customer_duration)/60,2),  round(sum(r3_duration)/60,2)) as total_duration,  if(r3_account_id is null or r3_account_id = '' , concat(if(customer_company_name = '',account_id, customer_company_name ),' (',account_id,')'), r3_account_id)  as account_code , sum(r2_cost) carrier_cost, if(r3_account_id is null or r3_account_id = '', round(sum(customer_cost)*1.0000000000000000,4),round(sum(r3_cost)*1.0000000000000000,4)) as cost, customer_currency_id as currency_id ";
+        try {
+            $range = explode(' - ', $search_data['call_date']);
+            $range_from = explode(' ', $range[0]);
+            $range_to = explode(' ', $range[1]);
+            $start_dt = $range_from[0];
+            $start_hh = substr($range_from[1], 0, strpos($range_from[1], ':'));
+            $start_mm = substr($range_from[1], strpos($range_from[1], ':') + 1);
+            $end_dt = $range_to[0];
+            $end_hh = substr($range_to[1], 0, strpos($range_to[1], ':'));
+            $end_mm = substr($range_to[1], strpos($range_to[1], ':') + 1);
+            $table = date('Ym', strtotime($start_dt)) . "_customerstate";
+            $str = "   select sum(totalcalls) as total_calls, sum(answeredcalls) as answered_calls ,if(r3_account_id is null or r3_account_id = '' , round(sum(customer_duration)/60,2),  round(sum(r3_duration)/60,2)) as total_duration,  if(r3_account_id is null or r3_account_id = '' , concat(if(customer_company_name = '',account_id, customer_company_name ),' (',account_id,')'), r3_account_id)  as account_code , sum(r2_cost) carrier_cost, if(r3_account_id is null or r3_account_id = '', round(sum(customer_cost)*1.0000000000000000,4),round(sum(r3_cost)*1.0000000000000000,4)) as cost, customer_currency_id as currency_id ";
 
         if ($search_data['group_by_carrier'] == 'Y')
             $str .= " ,carrier_id ";
@@ -588,16 +629,29 @@ group by reseller1_account_id order by total_calls desc ";
         if ($group_by != '')
             $group_by = " group by customer_currency_id," . rtrim($group_by, ',');
 
-        $orderby = " order by date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) desc ";
-        $query = $str . $group_by . $orderby;
-        $DB1 = $this->load->database('cdrdb', true);
-        $result = $DB1->query($query);
-        //echo $DB1->last_query();
-        $return['total'] = $result->num_rows();
-        if ($return['total'] == '')
-            $return['total'] = 0;
-        $return['result'] = $result->result_array();
-        return $return;
+            $orderby = " order by date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) desc ";
+            $query = $str . $group_by . $orderby;
+            $DB1 = $this->load->database('cdrdb', true);
+            $result = $DB1->query($query);
+            if (!$result) {
+                $error_array = $this->db->error();
+                throw new Exception($error_array['message']);
+            }
+            $return['total'] = $result->num_rows();
+            if ($return['total'] == '')
+                $return['total'] = 0;
+            $return['result'] = $result->result_array();
+            if (!$result) {
+                $error_array = $this->db->error();
+                throw new Exception($error_array['message']);
+            }
+
+            return $return;
+        } catch (Exception $e) {
+            $return['status'] = 'failed';
+            $return['message'] = $e->getMessage();
+            return $return;
+        }
     }
 
     function ProfitLossR3($search_data) {
@@ -687,7 +741,10 @@ group by reseller1_account_id order by total_calls desc ";
         $query = $str . $group_by . $orderby;
         $DB1 = $this->load->database('cdrdb', true);
         $result = $DB1->query($query);
-        //  echo $DB1->last_query();
+        if (!$result) {
+            $error_array = $this->db->error();
+            throw new Exception($error_array['message']);
+        }
         $return['total'] = $result->num_rows();
         if ($return['total'] == '')
             $return['total'] = 0;
@@ -696,6 +753,7 @@ group by reseller1_account_id order by total_calls desc ";
     }
 
     function CustQOSR($search_data) {
+        try {
 
         $range = explode(' - ', $search_data['call_date']);
         $range_from = explode(' ', $range[0]);
@@ -777,14 +835,7 @@ group by reseller1_account_id order by total_calls desc ";
         }
 
 
-        ////////datetime/////////////
-//        if (trim($search_data['call_date']) != '') {
-//            $str .= " AND call_date ='" . trim($search_data['call_date']) . "' ";
-//        }
-//        if (trim($search_data['calltime_from']) != '' && trim($search_data['calltime_to']) != '') {
-//            $str .= " AND concat(calltime_h,':',calltime_m,':00') BETWEEN '" . trim($search_data['calltime_from']) . "' AND '" . trim($search_data['calltime_to']) . "'";
-//        }
-        //////////////
+
 
         $str .= " and  date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) >= '" . $start_dt . " " . $start_hh . ":" . $start_mm . "'
 and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) <= '" . $end_dt . " " . $end_hh . ":" . $end_mm . "'";
@@ -795,13 +846,9 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
         if (trim($search_data['company_name']) != '')
             $str .= " AND customer_company_name LIKE '%" . trim($search_data['company_name']) . "%' ";
 
-        /* ------------------------------ */
-
-
-        ////
-        if (isset($search_data['logged_account_type']) && isset($search_data['logged_customer_account_id']) && isset($search_data['logged_account_level']) && $search_data['logged_account_type'] == 'RESELLER' && in_array($search_data['logged_account_level'], array(1, 2, 3))) {
-            $level = $search_data['logged_account_level'];
-            $field_name = 'r' . $level . '_account_id';
+           if (isset($search_data['logged_account_type']) && isset($search_data['logged_customer_account_id']) && isset($search_data['logged_account_level']) && $search_data['logged_account_type'] == 'RESELLER' && in_array($search_data['logged_account_level'], array(1, 2, 3))) {
+                $level = $search_data['logged_account_level'];
+                $field_name = 'r' . $level . '_account_id';
 
             $str .= " AND `" . $field_name . "` = '" . $search_data['logged_customer_account_id'] . "'";
         }
@@ -855,13 +902,22 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
         $DB1 = $this->load->database('cdrdb', true);
         $result = $DB1->query($query);
 //echo $DB1->last_query();
-        $return['total'] = $result->num_rows();
-        if ($return['total'] == '')
-            $return['total'] = 0;
-        $return['result'] = $result->result_array();
 
 
-        return $return;
+            if (!$result) {
+                $error_array = $this->db->error();
+                throw new Exception($error_array['message']);
+            }
+            $return['total'] = $result->num_rows();
+            if ($return['total'] == '')
+                $return['total'] = 0;
+            $return['result'] = $result->result_array();
+            return $return;
+        } catch (Exception $e) {
+            $return['status'] = 'failed';
+            $return['message'] = $e->getMessage();
+            return $return;
+        }
     }
 
     function ConnectedCalls($search_data, $limit_to = '', $limit_from = '') {
@@ -874,6 +930,8 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
 
             $start_dt = $range[0];
             $end_dt = $range[1];
+
+            $table = date('Ym', strtotime($start_dt)) . "_ratedcdr";
 
             //start_time 'Start Time', answer_time 'Answer Time',	end_time 'End time',
             $sql = "SELECT SQL_CALC_FOUND_ROWS
@@ -980,10 +1038,23 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
             //echo $query;
             $result = $DB1->query($query);
 
+            if (!$result) {
+                $error_array = $this->db->error();
+                throw new Exception($error_array['message']);
+            }
+
+
             ///find total
             $sql = "SELECT FOUND_ROWS() as total";
             $query_count = $DB1->query($sql);
             $row_count = $query_count->row();
+
+
+
+            if (!$result) {
+                $error_array = $this->db->error();
+                throw new Exception($error_array['message']);
+            }
 
             $return['all_total'] = $row_count->total;
             //////////////
@@ -1009,10 +1080,10 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
             $range = explode(' - ', $search_data['s_time_range']);
             $range_from = explode(' ', $range[0]);
             $range_to = explode(' ', $range[1]);
-
             $start_dt = $range[0];
             $end_dt = $range[1];
             $table = date('Ym') . '_cdr';
+            $table = date('Ym', strtotime($start_dt)) . "_cdr";
 
             $sql = "SELECT SQL_CALC_FOUND_ROWS
 					id , 
@@ -1099,12 +1170,10 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
 
             //  echo $query;
             $result = $DB1->query($query);
-
-            if (!$result){
+            if (!$result) {
                 $error_array = $this->db->error();
                 throw new Exception($error_array['message']);
             }
-
             ///find total
             $sql = "SELECT FOUND_ROWS() as total";
             $query_count = $DB1->query($sql);
@@ -1135,6 +1204,10 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
             $start_dt = $range[0];
             $end_dt = $range[1];
 
+
+            $table = date('Ym', strtotime($start_dt)) . "_ratedcdr";
+
+
             $sql = "SELECT SQL_CALC_FOUND_ROWS cdr_id, customer_account_id Account,customer_company_name, customer_src_caller 'SRC-CLI', customer_src_callee 'SRC-DST', customer_src_ip 'SRC-IP',customer_incodecs 'Incoming-Codecs',carrier_outcodecs 'Outgoing-Codecs',call_codecs 'Call\'s-Codec',customer_tariff_id_name 'User-Tariff',	customer_prefix 'Prefix', customer_destination 'Destination', customer_duration 'Duration',
 			customer_callcost_total 'Cost',	reseller1_account_id 'R1-Account',	reseller1_tariff_id_name 'R1-Tariff',reseller1_duration 'R1-Duration',
 			reseller1_callcost_total 'R1-Cost',	reseller2_account_id 'R2-Account',	reseller2_tariff_id_name 'R2-Tariff', reseller2_duration 'R2-Duration',
@@ -1143,7 +1216,7 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
 			carrier_src_caller 'USER-CLI',	carrier_src_callee 'User-DST', carrier_dst_caller 'C-CLI', carrier_dst_callee 'C-DST', carrier_tariff_id_name 'C-Tariff',
 			carrier_prefix 'C-Prefix',	carrier_destination 'C-Destination', carrier_duration 'C-Duration',	carrier_callcost_total 'C-Cost',
 			billsec 'Org-Duration',	start_time 'Start Time', answer_time 'Answer Time',	end_time 'End time', Q850CODE, SIPCODE , hangupby,lrn_number
-			FROM " . $DB1->dbprefix('bill_cdrs_incoming') . " WHERE 1 ";
+			FROM " . $table . " WHERE 1 ";
 
             if (trim($search_data['s_cdr_customer_account']) != '') {
                 if ($search_data['s_cdr_customer_type'] == 'U')
@@ -1200,41 +1273,6 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
             if (trim($search_data['s_cdr_customer_company_name']) != '')
                 $sql .= " AND customer_company_name LIKE '%" . trim($search_data['s_cdr_customer_company_name']) . "%' ";
 
-            /* ------------------------------ */
-
-
-            if (isset($search_data['s_sales_manager']) && $search_data['s_sales_manager'] != '') {
-                $sub_sub_sql = "SELECT customer_access_id_name FROM " . $this->db->dbprefix('customer_access') . " WHERE customer_type='ACCOUNTMANAGER' AND sales_manager='" . $search_data['s_sales_manager'] . "'";
-
-                $sub_sql = "SELECT GROUP_CONCAT(\"'\",customer_access_id_name,\"'\") account_ids FROM " . $this->db->dbprefix('customer_access') . " WHERE account_manager IN(" . $sub_sub_sql . ")";
-
-                $query = $this->db->query($sub_sql);
-                if (!$query) {
-                    $error_array = $this->db->error();
-                    throw new Exception($error_array['message']);
-                }
-                $row = $query->row();
-                $account_id_str = $row->account_ids;
-
-                $sql .= " AND customer_account_id IN(" . $account_id_str . ")";
-            } elseif (isset($search_data['s_account_manager']) && $search_data['s_account_manager'] != '') {
-                $sub_sql = "SELECT GROUP_CONCAT(\"'\",customer_access_id_name,\"'\") account_ids FROM " . $this->db->dbprefix('customer_access') . " WHERE account_manager='" . $search_data['s_account_manager'] . "'";
-
-                /////////////
-                $query = $this->db->query($sub_sql);
-                if (!$query) {
-                    $error_array = $this->db->error();
-                    throw new Exception($error_array['message']);
-                }
-                $row = $query->row();
-                $account_id_str = $row->account_ids;
-                /////////////
-                $sql .= " AND customer_account_id IN(" . $account_id_str . ")";
-            } elseif (isset($search_data['s_parent_account_id']) && $search_data['s_parent_account_id'] != '') {
-                /* $sub_sql = ""; */
-            }
-
-
             $group_by = '';
             $orderby = ' order by cdr_id desc ';
 
@@ -1281,7 +1319,7 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
 
             $start_dt = $range[0];
             $end_dt = $range[1];
-
+            $table = date('Ym', strtotime($start_dt)) . "_cdr";
 
             $sql = "SELECT SQL_CALC_FOUND_ROWS cdr_id, 
 					customer_account_id 'Account',customer_company_name,customer_src_ip 'SRC-IP',customer_src_caller 'SRC-CLI',customer_src_callee 'SRC-DST',
@@ -1293,7 +1331,7 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
 					carrier_id  'Carrier',carrier_tariff_id_name 'C-Tariff', carrier_prefix 'C-Prefix',carrier_destination 'C-Destination',
 					carrier_gateway_ipaddress 'C-IP',carrier_src_caller 'USER-CLI',carrier_src_callee 'User-DST',
 					carrier_dst_caller 'C-CLI',carrier_dst_callee 'C-DST',start_stamp 'Start Time',duration 'Duration',billsec 'Org-Duration',Q850CODE,SIPCODE,concat(fscause,'<br>',fs_errorcode) 'FS-Cause',hangupby,lrn_number
-					FROM " . $DB1->dbprefix('cdrs_incoming') . " WHERE 1 ";
+					FROM " . $table . " WHERE 1 ";
 
 
             if (trim($search_data['s_cdr_customer_account']) != '') {
@@ -1329,45 +1367,6 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
                 $sql .= " AND Q850CODE = '" . trim($search_data['s_cdr_Q850CODE']) . "' ";
             if (trim($search_data['s_time_range']) != '')
                 $sql .= " AND start_stamp >= '" . $start_dt . "' AND end_stamp <= '" . $end_dt . "' ";
-
-
-            /* ------------------------------ */
-            if (trim($search_data['s_cdr_customer_company_name']) != '')
-                $sql .= " AND customer_company_name LIKE '%" . trim($search_data['s_cdr_customer_company_name']) . "%' ";
-
-            /* ------------------------------ */
-
-            if (isset($search_data['s_sales_manager']) && $search_data['s_sales_manager'] != '') {
-                $sub_sub_sql = "SELECT customer_access_id_name FROM " . $this->db->dbprefix('customer_access') . " WHERE customer_type='ACCOUNTMANAGER' AND sales_manager='" . $search_data['s_sales_manager'] . "'";
-
-                $sub_sql = "SELECT GROUP_CONCAT(\"'\",customer_access_id_name,\"'\") account_ids FROM " . $this->db->dbprefix('customer_access') . " WHERE account_manager IN(" . $sub_sub_sql . ")";
-
-                $query = $this->db->query($sub_sql);
-                if (!$query) {
-                    $error_array = $this->db->error();
-                    throw new Exception($error_array['message']);
-                }
-                $row = $query->row();
-                $account_id_str = $row->account_ids;
-
-                $sql .= " AND customer_account_id IN(" . $account_id_str . ")";
-            } elseif (isset($search_data['s_account_manager']) && $search_data['s_account_manager'] != '') {
-                $sub_sql = "SELECT GROUP_CONCAT(\"'\",customer_access_id_name,\"'\") account_ids FROM " . $this->db->dbprefix('customer_access') . " WHERE account_manager='" . $search_data['s_account_manager'] . "'";
-
-                /////////////
-                $query = $this->db->query($sub_sql);
-                if (!$query) {
-                    $error_array = $this->db->error();
-                    throw new Exception($error_array['message']);
-                }
-                $row = $query->row();
-                $account_id_str = $row->account_ids;
-                /////////////
-                $sql .= " AND customer_account_id IN(" . $account_id_str . ")";
-            } elseif (isset($search_data['s_parent_account_id']) && $search_data['s_parent_account_id'] != '') {
-                
-            }
-
 
             $orderby = ' ORDER BY cdr_id DESC ';
             $query = $sql . $orderby;
@@ -1415,8 +1414,7 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
 						customer_sdr.total_cost,
 						customer_sdr.service_startdate,
 						customer_sdr.service_stopdate
-						FROM " . $this->db->dbprefix('customer_sdr') . "
-						WHERE `account_id`='" . $account_id . "' ";
+						FROM customer_sdr						WHERE `account_id`='" . $account_id . "' ";
 
             if (count($filter_data) > 0) {
                 foreach ($filter_data as $key => $value) {
@@ -1441,68 +1439,6 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
 
             $final_return_array['status'] = 'success';
             $final_return_array['message'] = 'SDR statement fetched successfully';
-
-            return $final_return_array;
-        } catch (Exception $e) {
-            $final_return_array['status'] = 'failed';
-            $final_return_array['message'] = $e->getMessage();
-            return $final_return_array;
-        }
-    }
-
-    function sdr_summary($filter_data) {
-        $final_return_array = array();
-        try {
-            $sql = "SELECT us.account_id, us.rule_type, DATE_FORMAT(us.action_date,'%d/%m/%Y') date_formatted, SUM(us.total_cost) sum_total_cost, SUM(us.total_seller_cost) sum_total_seller_cost, ua.company_name
-			FROM " . $this->db->dbprefix('customer_sdr') . " us LEFT JOIN " . $this->db->dbprefix('customer_access') . " ua ON us.account_id=ua.customer_access_id_name
-			WHERE 
-			 rule_type IN('DAILYUSAGE', 'DAILYUSAGEIN', 'DIDEXTRACHRENTAL', 'DIDRENTAL', 'DIDSETUP', 'TARIFFCHARGES', 'ADDBALANCE', 'REMOVEBALANCE', 'ADDCREDIT', 'REMOVECREDIT')
-			AND (total_cost >0 OR total_seller_cost>0)";
-
-            if (count($filter_data) > 0) {
-                foreach ($filter_data as $key => $value) {
-                    if ($key == 'account_manager') {
-                        $sub_sql = "SELECT customer_access_id_name FROM " . $this->db->dbprefix('customer_access') . " WHERE account_manager='" . $value . "'";
-                        $sql .= " AND account_id IN(" . $sub_sql . ")";
-                    } elseif ($key == 'parent_account_id') {
-                        $sub_sql = "SELECT account_id FROM " . $this->db->dbprefix('user') . " WHERE parent_account_id='" . $value . "'";
-                        $sql .= " AND account_id IN(" . $sub_sql . ")";
-                    } elseif ($key == 'yearmonth') {
-                        $sql .= " AND DATE_FORMAT(action_date, '%Y-%m')='" . $value . "' ";
-                    } elseif ($value != '') {
-                        $sql .= " AND $key LIKE '%" . $value . "%' ";
-                    }
-                }
-            }
-
-            $sql .= " GROUP BY account_id, DATE_FORMAT(`action_date`,'%d %c %Y'), rule_type";
-
-            $sql .= " ORDER BY `account_id` , date_formatted ";
-            //echo $sql;
-            $query = $this->db->query($sql);
-            if (!$query) {
-                $error_array = $this->db->error();
-                throw new Exception($error_array['message']);
-            }
-            $row_count = $query->row();
-
-            $final_return_array['result'] = array();
-
-            if ($row_count > 0) {
-                foreach ($query->result_array() as $row) {
-                    $account_id = $row['account_id'];
-                    $rule_type = $row['rule_type'];
-                    $date_formatted = $row['date_formatted'];
-                    $sum_total_cost = $row['sum_total_cost'];
-
-                    $final_return_array['result'][$account_id][$date_formatted][$rule_type] = $row;
-                }
-            }
-
-
-
-            $final_return_array['status'] = 'success';
-            $final_return_array['message'] = 'SDR summary fetched successfully';
 
             return $final_return_array;
         } catch (Exception $e) {
