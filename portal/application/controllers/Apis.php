@@ -44,26 +44,26 @@ class Apis extends CI_Controller {
         try {
             $page_name = "api";
             $result = '';
-
             if ($data['request'] == 'REMOVEBALANCE' or $data['request'] == 'ADDBALANCE' or $data['request'] == 'ADDCREDIT' or $data['request'] == 'REMOVECREDIT' or $data['request'] == 'ADDTESTBALANCE' or $data['request'] == 'REMOVETESTBALANCE' or $data['request'] == 'BALANCETRANSFERADD' or $data['request'] == 'BALANCETRANSFERREMOVE') {
                 $result = $this->api_mod->save_payment($data);
             } elseif ($data['request'] == 'TARIFFCHARGES' or $data['request'] == 'SERVICES' or $data['request'] == 'NEWDIDSETUP' or $data['request'] == 'DIDSETUP' or $data['request'] == 'DIDRENTAL' or $data['request'] == 'DIDCANCEL' or $data['request'] == 'DIDEXTRACHRENTAL') {
-                $result = $this->api_mod->didsetupcharge($data);
+                $date = date('Y-m-d');
+                $result = $this->api_mod->didsetupcharge($data, $date);
             }
             if ($result) {
                 header('Content-Type: application/json');
-                $op = array('status' => 'SUCCESS', 'message' => $success_message);
+                $op = array('status' => 'SUCCESS', 'message' => "DID added successfully",'error'=>0);
                 echo json_encode($op);
             } else {
-                $error_message = $result;
+                $error_message = "";
                 header('Content-Type: application/json');
-                $op = array('status' => 'FAILED', 'message' => $error_message);
+                $op = array('status' => 'FAILED', 'message' => $error_message,'error'=>1);
                 echo json_encode($op);
             }
         } catch (Exception $e) {
             $error_message = $e->getMessage();
             header('Content-Type: application/json');
-            $op = array('status' => 'FAILED', 'message' => $error_message);
+            $op = array('status' => 'FAILED', 'message' => $error_message,'error'=>1);
             echo json_encode($op);
         }
     }
