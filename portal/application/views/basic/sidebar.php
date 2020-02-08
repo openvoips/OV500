@@ -384,12 +384,12 @@
                         $class = 'class="current-page"';
                     $menu_system .= '<li ' . $class . '><a href="' . base_url() . 'sysconfig/pGConfig">Payment Gateway Config</a></li>';
                 }
-//                if (check_logged_account_type(array('ADMIN', 'SUBADMIN', 'ACCOUNTS'))) {
-//                    $class = '';
-//                    if (in_array($page_name, array('invoice_config')))
-//                        $class = 'class="current-page"';
-//                    $menu_system .= '<li ' . $class . '><a href="' . base_url() . 'sysconfig/inConfig">Invoice Config</a></li>';
-//                }
+                if (check_logged_account_type(array('ADMIN', 'SUBADMIN', 'ACCOUNTS'))) {
+                    $class = '';
+                    if (in_array($page_name, array('invoice_config')))
+                        $class = 'class="current-page"';
+                    $menu_system .= '<li ' . $class . '><a href="' . base_url() . 'sysconfig/inConfig">Invoice Config</a></li>';
+                }
 
 
 
