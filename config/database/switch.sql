@@ -1945,7 +1945,24 @@ CREATE TABLE `web_access` (
   `create_dt` datetime DEFAULT NULL,
   `update_dt` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=70 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+
+
+DROP TABLE IF EXISTS `sys_signup`;
+CREATE TABLE `sys_signup` (
+`id`  int(11) NOT NULL AUTO_INCREMENT ,
+`signupkey`  varchar(50) NULL DEFAULT NULL ,
+`tariff_id`  varchar(30) NULL DEFAULT NULL ,
+`dialplan_id`  varchar(30) NULL DEFAULT NULL ,
+`business_holder`  enum('ADMIN','RESELLER1','RESELLER2','RESELLER3') NULL DEFAULT NULL ,
+`business_holder_account_id`  varchar(30) NULL DEFAULT NULL ,
+`default_balance`  double(16,6) NULL DEFAULT NULL ,
+`status_id`  enum('0','1') NULL DEFAULT '1' ,
+`signup_plan`  varchar(150) NULL DEFAULT NULL ,
+PRIMARY KEY (`id`)
+)ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+
+ALTER TABLE `sys_invoice_config` ADD UNIQUE(`account_id`);
 
 -- ----------------------------
 -- Records of web_access

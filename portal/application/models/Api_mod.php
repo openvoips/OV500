@@ -38,7 +38,6 @@ class Api_mod extends CI_Model {
     }
 
     function didsetupcharge($data, $date) {
-        // $date =date('%Y-%m-%d');
         try {
             $didcharge_data_array = array();
             $this->db->trans_begin();
@@ -49,19 +48,21 @@ class Api_mod extends CI_Model {
             $didcharge_data_array['created_by'] = $data['created_by'];
             $didcharge_data_array['create_dt'] = date('Y-m-d H:s:i');
             $didcharge_data_array['notes'] = $data['service_number'];
-
             $yearmonth = date('Ym');
             $total_cost = $data['amount'];
             $service_startdate = date('Y-m-d h:s:i');
             $service_stopdate = date('Y-m-d h:s:i');
             $date = date('Y-m-d h:s:i');
-            $query = sprintf("INSERT INTO customer_sdr( account_id, rule_type, yearmonth, service_number, service_charges, detail, otherdata, action_date, tax1_cost, tax2_cost, tax3_cost, cost, total_cost, total_tax, service_startdate, service_stopdate,tax1,tax2,tax3,actiondate) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', Now(), '%s','%s', '%s', '%s', '%s', '%s', '%s', '%s','%s', '%s', '%s', '%s');", $account_id, $data['request'], $yearmonth, $didcharge_data_array['notes'], 0, 0, 0, 0, 0, 0, 0, $total_cost, 0, $service_startdate, $service_stopdate, 0, 0, 0, $date);
-
-            $this->db->query($query);
-            //  echo $this->db->last_query();
-
+            if ($data['request'] == 'NEWDIDSETUP') {
+                $request = 'DIDSETUP';
+                $query = sprintf("INSERT INTO customer_sdr( account_id, rule_type, yearmonth, service_number, service_charges, detail, otherdata, action_date, tax1_cost, tax2_cost, tax3_cost, cost, total_cost, total_tax, service_startdate, service_stopdate,tax1,tax2,tax3,actiondate) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', Now(), '%s','%s', '%s', '%s', '%s', '%s', '%s', '%s','%s', '%s', '%s', '%s');", $didcharge_data_array['account_id'], $request, $yearmonth, $didcharge_data_array['notes'], 0, 0, 0, 0, 0, 0, 0, $total_cost, 0, $service_startdate, $service_stopdate, 0, 0, 0, $date);
+                $this->db->query($query);
+                $request = 'DIDRENTAL';
+                $query = sprintf("INSERT INTO customer_sdr( account_id, rule_type, yearmonth, service_number, service_charges, detail, otherdata, action_date, tax1_cost, tax2_cost, tax3_cost, cost, total_cost, total_tax, service_startdate, service_stopdate,tax1,tax2,tax3,actiondate) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', Now(), '%s','%s', '%s', '%s', '%s', '%s', '%s', '%s','%s', '%s', '%s', '%s');", $didcharge_data_array['account_id'], $request, $yearmonth, $didcharge_data_array['notes'], 0, 0, 0, 0, 0, 0, 0, $total_cost, 0, $service_startdate, $service_stopdate, 0, 0, 0, $date);
+                $this->db->query($query);
+            }
             if ($this->db->trans_status() === FALSE) {
-                $error_message = 'transaction failed';
+                $error_message = 'transaction failed ' . $query;
                 $this->db->trans_rollback();
                 return $error_message;
             } else {

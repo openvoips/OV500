@@ -53,8 +53,7 @@ class Customer_mod extends CI_Model {
                             $sql .= " AND $key ='" . $value . "' ";
                         } elseif ( $key == 'account_status' ){
                             $sql .= " AND u.$key ='" . $value . "' ";
-                        
-                        } elseif ($key == 'ipaddress' and strlen($value)> 0) {
+                        } elseif ($key == 'ipaddress' and strlen($value) > 0) {
                             $sql .= " AND ua.account_id IN( SELECT account_id FROM customer_ips WHERE $key LIKE '%" . $value . "%' )";
                         } elseif ($key == 'sip_username' and strlen($value)> 0) {
                             $sql .= " AND ua.account_id IN( SELECT account_id FROM customer_sip_account WHERE username LIKE '%" . $value . "%' )";
@@ -90,7 +89,8 @@ class Customer_mod extends CI_Model {
             $query_count = $this->db->query($sql);
             $row_count = $query_count->row();
             $this->total_count = $row_count->total;
-
+            $final_return_array['result'] = Array();
+            $tariff_id_array=Array();
             foreach ($query->result_array() as $row) {
                 $account_id = $row['account_id'];
                 $tariff_id = $row['tariff_id'];

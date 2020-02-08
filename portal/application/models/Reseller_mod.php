@@ -86,7 +86,7 @@ class Reseller_mod extends CI_Model {
             $row_count = $query_count->row();
             $this->total_count = $row_count->total;
             $tariff_id_array = Array();
-            $final_return_array['result'] = '';
+            $final_return_array['result'] = Array();
             foreach ($query->result_array() as $row) {
                 $account_id = $row['account_id'];
                 $tariff_id = $row['tariff_id'];

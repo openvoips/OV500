@@ -1067,6 +1067,9 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
             //var_dump($return);die;
             return $return;
         } catch (Exception $e) {
+            $return['all_total'] = 0;
+            $return['total'] = 0;
+            $return['result'] = Array();
             $return['status'] = 'failed';
             $return['message'] = $e->getMessage();
             return $return;
@@ -1187,6 +1190,9 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
             //var_dump($return);die;
             return $return;
         } catch (Exception $e) {
+            $return['all_total'] = 0;
+            $return['total'] = 0;
+            $return['result'] = Array();
             $return['status'] = 'failed';
             $return['message'] = $e->getMessage();
             return $return;
@@ -1429,7 +1435,7 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
             }
 
             $sql .= " ORDER BY `action_date` ASC ";
-//           echo $sql;
+                  
             $query = $this->db->query($sql);
             if (!$query) {
                 $error_array = $this->db->error();

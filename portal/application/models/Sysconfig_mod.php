@@ -144,60 +144,37 @@ class Sysconfig_mod extends CI_Model {
             return array('status' => false, 'msg' => $error_array['message']);
         }
     }
-
-    function inConfig($data) {
-//        print_r($data);
-//        die;
-           $table_name = 'sys_invoice_config';          
-        try {            
-            if ($data['action'] == 'search') {
-                if ($data['logged_user_type'] == 'ADMIN' or $data['logged_user_type'] == 'SUBADMIN' or $data['logged_user_type'] == 'ACCOUNTS') {
-                    $account_id = 'ADMIN';
-                } else {
-                    $account_id = $data['logged_current_customer_id'];
-                }
-                $this->db->select("SQL_CALC_FOUND_ROWS *, '$table_name' as table_name", FALSE);
-                $this->db->where('account_id', $account_id);               
-                $q = $this->db->get($table_name);
-                $final_return_array['result'] = $q->result_array();
-                $query = $this->db->query('SELECT FOUND_ROWS() AS Count');
-                $final_return_array["total"] = $query->row()->Count;
-                $final_return_array['status'] = 'success';
-                $final_return_array['message'] = 'Payment List fetched successfully';
-                return $final_return_array;
-            } else if ($data['action'] == 'OkSaveData') {
-                if ($data['logged_user_type'] == 'ADMIN' or $data['logged_user_type'] == 'SUBADMIN' or $data['logged_user_type'] == 'ACCOUNTS') {
-                    $account_id = 'ADMIN';
-                } else {
-                    $account_id = $data['logged_current_customer_id'];
-                }
-                
-                $subquery = '';
-                $subquery2 = '';
-                if(strlen($data['logo'])> 0){
-                    $subquery = ", logo ='" . $data['logo'] ."'";
-                    $subquery2 = ", logo = values(logo)";
-                }
-                $SQl = "insert into " . $table_name . " set  account_id ='" . $account_id . "', company_name = '".$data['company_name']."', address= '" . $data['address'] . "', bank_detail='" . $data['bank_detail'] . "', support_text='" . $data['support_text'] . "', footer_text='" . $data['footer_text'] . "' $subquery ON DUPLICATE KEY UPDATE  company_name=values(company_name), address=values(address), bank_detail=values(bank_detail), support_text=values(support_text), footer_text=values(footer_text) $subquery2";
-                $query = $this->db->query($SQl);
-                
-               // echo $SQl;
-                return true;
-            }
-        } catch (Exception $e) {
-            $final_return_array['status'] = 'failed';
-            $final_return_array['message'] = $e->getMessage();
-            return $final_return_array;
-        }
-        
-        
+	
+	
+	
+	function inConfig_data($account_id) {
+		$table_name = 'sys_invoice_config';
+		$sql = "SELECT * FROM ".$table_name." WHERE  account_id ='".$account_id."'";
+		$query = $this->db->query($sql);
+		$row = $query->row_array();      
+        return $row;
     }
+	
+	function inConfig_update($data) {
+		$table_name = 'sys_invoice_config';
+		$result = $this->db->replace($table_name, $data);
+        if(!$result) {
+            $error_array = $this->db->error();
+            return array('status' => false, 'msg' => $error_array['message']);
+        }
+		else
+		{
+			return array('status' => true, 'msg' => 'Updated Successfully');
+		}      
+    }
+	
+  
 
     function pGConfig($data) {
         $table_name = 'sys_payment_credentials';
-        try {            
+        try {
             if ($data['action'] == 'search') {
-                if ($data['logged_user_type'] == 'ADMIN' or $data['logged_user_type'] == 'SUBADMIN' or $data['logged_user_type'] == 'ACCOUNTS') {
+                if ($data['logged_account_type'] == 'ADMIN' or $data['logged_account_type'] == 'SUBADMIN' or $data['logged_account_type'] == 'ACCOUNTS') {
                     $account_id = 'ADMIN';
                 } else {
                     $account_id = $data['logged_current_customer_id'];
@@ -214,7 +191,7 @@ class Sysconfig_mod extends CI_Model {
                 $final_return_array['message'] = 'Payment List fetched successfully';
                 return $final_return_array;
             } else if ($data['action'] == 'OkSaveData') {
-                if ($data['logged_user_type'] == 'ADMIN' or $data['logged_user_type'] == 'SUBADMIN' or $data['logged_user_type'] == 'ACCOUNTS') {
+                if ($data['logged_account_type'] == 'ADMIN' or $data['logged_account_type'] == 'SUBADMIN' or $data['logged_account_type'] == 'ACCOUNTS') {
                     $account_id = 'ADMIN';
                 } else {
                     $account_id = $data['logged_current_customer_id'];
@@ -235,6 +212,183 @@ class Sysconfig_mod extends CI_Model {
                 $query = $this->db->query($SQl);
                 return true;
             }
+        } catch (Exception $e) {
+            $final_return_array['status'] = 'failed';
+            $final_return_array['message'] = $e->getMessage();
+            return $final_return_array;
+        }
+    }
+
+    function signupConfig_add($data) {
+        $table_name = 'sys_signup';
+        try {
+            if (isset($data['signupkey']))
+                $data_array['signupkey'] = $data['signupkey'];
+				
+                $data_array['signup_plan'] = $data['signup_plan'];
+                $data_array['tariff_id'] = $data['tariff_id'];
+                $data_array['dialplan_id'] = $data['dialplan_id'];
+				
+				
+            if (isset($data['business_holder']))
+                $data_array['business_holder'] = $data['business_holder'];
+            if (isset($data['business_holder_account_id']))
+                $data_array['business_holder_account_id'] = $data['business_holder_account_id'];
+            if (isset($data['default_balance']))
+                $data_array['default_balance'] = $data['default_balance'];
+            if (isset($data['status_id']))
+                $data_array['status_id'] = $data['status_id'];
+
+            $this->db->trans_begin();
+			
+			do
+			{
+				$new_key = $data_array['signupkey'] = strtoupper(generateRandom(6));
+				
+				$sql = "SELECT signupkey FROM " . $table_name . " WHERE  signupkey ='" . $new_key . "'";
+                $query = $this->db->query($sql);
+                $num_rows = $query->num_rows();
+                if ($num_rows > 0) {
+                    
+                } else {
+                    break;
+                }
+				
+			
+			}while(1);
+			
+			
+			
+			
+            if (count($data_array) > 0) {
+                $str = $this->db->insert_string($table_name, $data_array);
+                $result = $this->db->query($str);
+                if ($this->db->trans_status() === FALSE) {
+                    $error_array = $this->db->error();
+                    $this->db->trans_rollback();
+                    return $error_array['message'];
+                }
+                if (!$result) {
+                    $error_array = $this->db->error();
+                    throw new Exception($error_array['message']);
+                }
+                $this->db->trans_commit();
+                $final_return_array['status'] = 'success';
+				$final_return_array['signupkey'] =$data_array['signupkey'];
+                $final_return_array['message'] = 'Added successfully';
+                return $final_return_array;
+            }
+        } catch (Exception $e) {
+            $final_return_array['status'] = 'failed';
+            $final_return_array['message'] = $e->getMessage();
+            return $final_return_array;
+        }
+    }
+	
+	 public function signupConfig_delete($data) {
+        try {
+            $this->db->trans_begin();
+
+            foreach ($data['delete_id'] as $id) {
+				$result = $this->db->delete('sys_signup', array('id' => $id));
+				if (!$result) {
+					$error_array = $this->db->error();
+					throw new Exception($error_array['message']);
+				}
+			
+			}
+
+            if ($this->db->trans_status() === FALSE) {
+                $error_array = $this->db->error();
+                $this->db->trans_rollback();
+                return array('status' => false, 'msg' => 'failed deletion :: ' . $error_array['message']);
+            } else {
+                $this->db->trans_commit();
+                return array('status' => true, 'msg' => 'Successfully deleted');
+            }
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            return array('status' => false, 'msg' => 'failed deletion :: ' . $e->getMessage());
+        }
+    }
+	
+	
+	function signupConfig_update($data) {
+        $table_name = 'sys_signup';
+        try {
+            if (isset($data['signupkey']))
+                $data_array['signupkey'] = $data['signupkey'];
+            if (isset($data['signup_plan']))
+                $data_array['signup_plan'] = $data['signup_plan'];
+            if (isset($data['tariff_id']))
+                $data_array['tariff_id'] = $data['tariff_id'];
+            if (isset($data['dialplan_id']))
+                $data_array['dialplan_id'] = $data['dialplan_id'];
+            if (isset($data['business_holder']))
+                $data_array['business_holder'] = $data['business_holder'];
+            if (isset($data['business_holder_account_id']))
+                $data_array['business_holder_account_id'] = $data['business_holder_account_id'];
+            if (isset($data['default_balance']))
+                $data_array['default_balance'] = $data['default_balance'];
+            if (isset($data['status_id']))
+                $data_array['status_id'] = $data['status_id'];
+
+            $this->db->trans_begin();
+            if (count($data_array) > 0) {
+                $where = "signupkey='" . $data['signupkey'] . "'";
+                $str = $this->db->update_string($table_name, $data_array, $where);
+                $result = $this->db->query($str);
+                if ($this->db->trans_status() === FALSE) {
+                    $error_array = $this->db->error();
+                    $this->db->trans_rollback();
+                    return $error_array['message'];
+                }
+                if (!$result) {
+                    $error_array = $this->db->error();
+                    throw new Exception($error_array['message']);
+                }
+                $this->db->trans_commit();
+                $final_return_array['status'] = 'success';
+                $final_return_array['message'] = 'Updated successfully';
+                return $final_return_array;
+            }
+        } catch (Exception $e) {
+            $final_return_array['status'] = 'failed';
+            $final_return_array['message'] = $e->getMessage();
+            return $final_return_array;
+        }
+    }
+
+    function signupConfig_data($order_by = '', $limit_to = '', $limit_from = '', $data) {
+        $table_name = 'sys_signup';
+        try {
+            $this->db->select("SQL_CALC_FOUND_ROWS *, '$table_name' as table_name", FALSE);
+            if (strlen($data['business_holder']) > 0)
+                $this->db->where('business_holder', $data['business_holder']);
+			if (strlen($data['business_holder_account_id']) > 0)
+                $this->db->where('business_holder_account_id', $data['business_holder_account_id']);
+            if (strlen($data['status_id']) > 0)
+                $this->db->where('status_id', $data['status_id']);
+            if (strlen($data['tariff_id']) > 0)
+                $this->db->where('tariff_id', $data['tariff_id']);
+            if (strlen($data['dialplan_id']) > 0)
+                $this->db->where('dialplan_id', $data['dialplan_id']);
+            if (strlen($data['signup_plan']) > 0)
+                $this->db->like('signup_plan', $data['signup_plan']);
+            if (strlen($data['signupkey']) > 0)
+                $this->db->like('signupkey', $data['signupkey']);
+
+//          if($order_by)
+//     $this->db->order_by('prefix', 'ASC');
+            $this->db->limit(intval($limit_from), intval($limit_to));
+            $q = $this->db->get($table_name);
+            //print_r($data);  echo $this->db->last_query();
+            $final_return_array['result'] = $q->result_array();
+            $query = $this->db->query('SELECT FOUND_ROWS() AS Count');
+            $final_return_array["total"] = $query->row()->Count;
+            $final_return_array['status'] = 'success';
+            $final_return_array['message'] = 'Signup List fetched successfully';
+            return $final_return_array;
         } catch (Exception $e) {
             $final_return_array['status'] = 'failed';
             $final_return_array['message'] = $e->getMessage();
