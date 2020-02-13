@@ -52,7 +52,7 @@ $vatflag_array = array('NONE', 'TAX', 'VAT');
             <h2>Carrier Configuration Management</h2>
             <ul class="nav navbar-right panel_toolbox">             
                 <li>
-                    <a href="<?php echo base_url() ?>carriers"><button class="btn btn-danger" type="button" tabindex="<?php echo $tab_index++; ?>">Back to Customer Listing Page</button></a>
+                    <a href="<?php echo base_url() ?>carriers"><button class="btn btn-danger" type="button" tabindex="<?php echo $tab_index++; ?>">Back to Carrier Listing Page</button></a>
 
                 </li>
             </ul>
@@ -775,8 +775,8 @@ $vatflag_array = array('NONE', 'TAX', 'VAT');
             <h2>Carrier Configuration Management Form Ending</h2>
             <ul class="nav navbar-right panel_toolbox">             
                 <li>
-                    <a href="<?php echo base_url() ?>carriers"><button class="btn btn-danger" type="button" tabindex="<?php echo $tab_index++; ?>">Back to Customer Listing Page</button></a>
-                </li>
+                    <a href="<?php echo base_url() ?>carriers"><button class="btn btn-danger" type="button" tabindex="<?php echo $tab_index++; ?>">Back to Carrier Listing Page </button></a>
+                 </li>
             </ul>
             <div class="clearfix"></div>
         </div>
@@ -788,6 +788,8 @@ $vatflag_array = array('NONE', 'TAX', 'VAT');
     tariff_array[2] = new Array();
     tariff_array[3] = new Array();
     tariff_array[4] = new Array();
+    tariff_array[5] = new Array();
+
 </script>
 <?php
 $k = 0;

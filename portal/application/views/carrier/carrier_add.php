@@ -47,7 +47,7 @@ $vatflag_array = array('NONE', 'TAX', 'VAT');
             <h2>Carrier Configuration Management</h2>
             <ul class="nav navbar-right panel_toolbox">             
                 <li>                    
-                    <a href="<?php echo base_url() ?>carriers"><button class="btn btn-danger" type="button" tabindex="<?php echo $tab_index++; ?>">Back to Customer Listing Page</button></a>
+                    <a href="<?php echo base_url() ?>carriers"><button class="btn btn-danger" type="button" tabindex="<?php echo $tab_index++; ?>">Back to Carrier Listing Page</button></a>
                 </li>
             </ul>
             <div class="clearfix"></div>
@@ -277,7 +277,7 @@ $vatflag_array = array('NONE', 'TAX', 'VAT');
                                 if ($codec == 'G729')
                                     $checked = true;
                                 else
-                                    $checked = false;
+                                    $checked = true;
 
                                 echo '<div class="checkbox">' .
                                 '<label><input type="checkbox" name="codecs[]" id="codec' . $key . '" value="' . $codec . '"  tabindex="' . $tab_index++ . '"' . set_checkbox('codecs[]', $codec, $checked) . '/> ' . $codec . '</label>' .
@@ -297,7 +297,7 @@ $vatflag_array = array('NONE', 'TAX', 'VAT');
                     </div>	
                     <div class="ln_solid"></div>
                     <div class="form-group">
-                        <div class="col-md-12 col-sm-12 col-xs-12 col-md-offset-5">
+                        <div class="col-md-12 col-sm-12 col-xs-12 text-center">
 
                             <button type="button" id="btnSave" class="btn btn-success" tabindex="<?php echo $tab_index++; ?>">Save Carrier Detail</button>
 
@@ -313,10 +313,10 @@ $vatflag_array = array('NONE', 'TAX', 'VAT');
     <div class="col-md-12 col-sm-12 col-xs-12 right">
         <div class="ln_solid"></div>
         <div class="x_title">
-            <h2>Carrier Configuration Management Form Ending</h2>
+            <h2>Carrier Configuration Management Form End</h2>
             <ul class="nav navbar-right panel_toolbox">             
                 <li>                    
-                    <a href="<?php echo base_url() ?>carriers"><button class="btn btn-danger" type="button" tabindex="<?php echo $tab_index++; ?>">Back to Customer Listing Page</button></a>
+                    <a href="<?php echo base_url() ?>carriers"><button class="btn btn-danger" type="button" tabindex="<?php echo $tab_index++; ?>">Back to Carrier Listing Page</button></a>
                 </li>
             </ul>
             <div class="clearfix"></div>
@@ -332,6 +332,7 @@ $vatflag_array = array('NONE', 'TAX', 'VAT');
     tariff_array[2] = new Array();
     tariff_array[3] = new Array();
     tariff_array[4] = new Array();
+    tariff_array[5] = new Array();
 </script>
 <?php
 $k = 0;
