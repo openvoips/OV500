@@ -579,8 +579,8 @@ class Rate_mod extends CI_Model {
             if (isset($data['frm_del'])) {
 
                 if ($ratecard_type == 'CUSTOMER') {
-                    $str = $this->db->where('ratecard_id', $ratecard_id)->get_compiled_delete($this->db->dbprefix('rates'));
-                    $log_data_array[] = array('activity_type' => 'delete', 'sql_table' => $this->db->dbprefix('rates'), 'sql_key' => $where, 'sql_query' => $str);
+                    $str = $this->db->where('ratecard_id', $ratecard_id)->get_compiled_delete('customer_rates');
+                    $log_data_array[] = array('activity_type' => 'delete', 'sql_table' => 'customer_rates', 'sql_key' => $where, 'sql_query' => $str);
                 } else {
                     $str = $this->db->where('ratecard_id', $ratecard_id)->get_compiled_delete($this->db->dbprefix('carrier_rates'));
                     $log_data_array[] = array('activity_type' => 'delete', 'sql_table' => $this->db->dbprefix('carrier_rates'), 'sql_key' => $where, 'sql_query' => $str);
