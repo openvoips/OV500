@@ -150,9 +150,9 @@
                                         else
                                             echo "CARRIER";
                                         if ($listing_row['ratecard_for'] == 'INCOMING')
-                                            echo ' (Outgoing Calls)';
-                                        else
                                             echo ' (DID Incoming Calls)';
+                                        else
+                                            echo ' (Outgoing Calls)';
                                         ?></td>      
 
                                     <td class=" last" >
