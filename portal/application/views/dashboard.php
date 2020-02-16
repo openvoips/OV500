@@ -90,65 +90,7 @@ if (isset($user_result)) {
                             </div>
                         </div>      
 
-                        <div class="x_panel">
-                            <div class="x_title">
-                                <h2>Yesterday Activity</h2>
-                                <ul class="nav navbar-right panel_toolbox">
-
-                                </ul>
-                                <div class="clearfix"></div>
-                            </div>
-
-                            <div class="x_content">
-                                <div class="table-responsive">
-                                    <table class="table table-striped jambo_table bulk_action table-bordered" id="table-sort">
-                                        <thead>
-                                            <tr class="headings thc">
-                                                <th class="column-title">Activity </th>
-                                                <th class="column-title text-right">Amount</th>						
-                                            </tr>
-                                        </thead>		
-                                        <tbody>
-                                            <?php
-                                            if (count($statement_data['result']) > 0) {
-                                                foreach ($statement_data['result'] as $sdr_data) {
-                                                    $debit = $credit = '';
-                                                    $display_text = '';
-                                                    $rule_type = $sdr_data['rule_type'];
-
-                                                    if (isset($sdr_terms[$rule_type])) {
-                                                        $term_array = $sdr_terms[$rule_type];
-
-                                                        $display_text = $term_array['display_text'];
-                                                        $total_cost = round($sdr_data['total_cost'], $dp);
-
-                                                        $tr_html = '<tr>' .
-                                                                '<td>' . $display_text . '</td>' .
-                                                                '<td align="right">' . $total_cost . ' ' . $user_result['currency']['name'] . '</td>' .
-                                                                '</tr>';
-                                                        echo $tr_html;
-                                                    }
-                                                }
-                                            } else {
-                                                ?>
-                                                <tr>
-                                                    <td colspan="3" align="center"><strong>No Record Found</strong></td>
-                                                </tr>
-                                                <?php
-                                            }
-                                            ?>			
-
-                                        </tbody>
-                                    </table>   
-                                </div>
-                                <div class="text-right">
-                                    <a class="title" href="<?php echo base_url('customers/statement'); ?>"><button type="button" class="btn btn-primary btn-lg active"><i class="fa fa-hand-o-right"></i> Account Statement</button></a>
-                                </div> 
-
-
-                            </div>
-
-                        </div>
+                        
 
 
                     </div>
