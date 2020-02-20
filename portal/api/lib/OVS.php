@@ -4554,25 +4554,25 @@ class OVS extends PDO {
 
         if ($this->switch_issue == '0' and addslashes($this->cdr_variable['billsec']) > 0 and $this->switch_balance == '1') {
             if (strlen($this->userdata['account_id']) > 0 and $customer_callcost_total > 0) {
-                $sql = sprintf("update switch_balance set balance =  balance + '%s' where account_id = '%s';", $customer_callcost_total, $this->userdata['account_id']);
+                $sql = sprintf("update customer_balance set balance =  balance + '%s' where account_id = '%s';", $customer_callcost_total, $this->userdata['account_id']);
                 $this->writelog($sql);
                 $this->query('SWITCH', $sql);
                 $this->execute();
             }
             if (strlen($this->reseller1_data['account_id']) > 0 and $reseller1_callcost_total > 0) {
-                $sql = sprintf("update switch_balance set balance = balance + '%s' where account_id = '%s';", $reseller1_callcost_total, $this->reseller1_data['account_id']);
+                $sql = sprintf("update customer_balance set balance = balance + '%s' where account_id = '%s';", $reseller1_callcost_total, $this->reseller1_data['account_id']);
                 $this->writelog($sql);
                 $this->query('SWITCH', $sql);
                 $this->execute();
             }
             if (strlen($this->reseller2_data['account_id']) > 0 and $reseller2_callcost_total > 0) {
-                $sql = sprintf("update switch_balance set balance = balance + '%s' where account_id = '%s';", $reseller2_callcost_total, $this->reseller2_data['account_id']);
+                $sql = sprintf("update customer_balance set balance = balance + '%s' where account_id = '%s';", $reseller2_callcost_total, $this->reseller2_data['account_id']);
                 $this->writelog($sql);
                 $this->query('SWITCH', $sql);
                 $this->execute();
             }
             if (strlen($this->reseller3_data['account_id']) > 0 and $reseller3_callcost_total > 0) {
-                $sql = sprintf("update switch_balance set balance = balance + '%s' where account_id = '%s';", $reseller3_callcost_total, $this->reseller3_data['account_id']);
+                $sql = sprintf("update customer_balance set balance = balance + '%s' where account_id = '%s';", $reseller3_callcost_total, $this->reseller3_data['account_id']);
                 $this->writelog($sql);
                 $this->query('SWITCH', $sql);
                 $this->execute();
