@@ -1080,6 +1080,7 @@ class Customer_mod extends CI_Model {
             $ip_data_array['ip_cc'] = $data['ip_cc'];
             $ip_data_array['ip_cps'] = $data['ip_cps'];
             $ip_data_array['ip_status'] = $data['ip_status'];
+			$ip_data_array['ipauthfrom'] = 'SRC';
 
             $this->db->trans_begin();
             $str = $this->db->insert_string('customer_ips', $ip_data_array);

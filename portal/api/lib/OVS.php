@@ -2752,15 +2752,15 @@ class OVS extends PDO {
 
                     $destination_number1 = preg_replace("/#/", "T", $destination_number);
 
-                    $this->Gateway_XML .= "\n <action application=\"export\" data=\"nolocal:execute_on_ring=curl http://localhost/api/api.php?r=ring&common_uuid=" . $this->uuid . "&gatewayname=" . $gateway_ipaddress_name . "&atime=\${strftime(%Y-%m-%dT%H:%M:%S)}&gateway_ipaddress=" . $route2['ipaddress'] . "&carrier_gateway_ipaddress_name=" . $route2['carrier_ip_id'] . "&routcallerid=" . $route_callid . "&account=" . $this->account_id . "&carrier=" . $route2['carrier_id'] . "&destination_number=" . $destination_number1 . "\"/>";
+                    $this->Gateway_XML .= "\n <action application=\"export\" data=\"nolocal:execute_on_ring=curl https://localhost/api/api.php?r=ring&common_uuid=" . $this->uuid . "&gatewayname=" . $gateway_ipaddress_name . "&atime=\${strftime(%Y-%m-%dT%H:%M:%S)}&gateway_ipaddress=" . $route2['ipaddress'] . "&carrier_gateway_ipaddress_name=" . $route2['carrier_ip_id'] . "&routcallerid=" . $route_callid . "&account=" . $this->account_id . "&carrier=" . $route2['carrier_id'] . "&destination_number=" . $destination_number1 . "\"/>";
 
 
-                    $this->Gateway_XML .= "\n <action application=\"export\" data=\"nolocal:execute_on_pre_answer=curl http://localhost/api/api.php?r=ring&common_uuid=" . $this->uuid . "&gatewayname=" . $gateway_ipaddress_name . "&atime=\${strftime(%Y-%m-%dT%H:%M:%S)}&gateway_ipaddress=" . $route2['ipaddress'] . "&carrier_gateway_ipaddress_name=" . $route2['carrier_ip_id'] . "&routcallerid=" . $route_callid . "&account=" . $this->account_id . "&carrier=" . $route2['carrier_id'] . "&destination_number=" . $destination_number1 . "\"/>";
+                    $this->Gateway_XML .= "\n <action application=\"export\" data=\"nolocal:execute_on_pre_answer=curl https://localhost/api/api.php?r=ring&common_uuid=" . $this->uuid . "&gatewayname=" . $gateway_ipaddress_name . "&atime=\${strftime(%Y-%m-%dT%H:%M:%S)}&gateway_ipaddress=" . $route2['ipaddress'] . "&carrier_gateway_ipaddress_name=" . $route2['carrier_ip_id'] . "&routcallerid=" . $route_callid . "&account=" . $this->account_id . "&carrier=" . $route2['carrier_id'] . "&destination_number=" . $destination_number1 . "\"/>";
 
-                    $this->Gateway_XML .= "\n <action application=\"export\" data=\"nolocal:execute_on_pre_answer=curl http://localhost/api/api.php?r=ring&common_uuid=" . $this->uuid . "&gatewayname=" . $gateway_ipaddress_name . "&atime=\${strftime(%Y-%m-%dT%H:%M:%S)}&gateway_ipaddress=" . $route2['ipaddress'] . "&carrier_gateway_ipaddress_name=" . $route2['carrier_ip_id'] . "&routcallerid=" . $route_callid . "&account=" . $this->account_id . "&carrier=" . $route2['carrier_id'] . "&destination_number=" . $destination_number1 . "\"/>";
+                    $this->Gateway_XML .= "\n <action application=\"export\" data=\"nolocal:execute_on_pre_answer=curl https://localhost/api/api.php?r=ring&common_uuid=" . $this->uuid . "&gatewayname=" . $gateway_ipaddress_name . "&atime=\${strftime(%Y-%m-%dT%H:%M:%S)}&gateway_ipaddress=" . $route2['ipaddress'] . "&carrier_gateway_ipaddress_name=" . $route2['carrier_ip_id'] . "&routcallerid=" . $route_callid . "&account=" . $this->account_id . "&carrier=" . $route2['carrier_id'] . "&destination_number=" . $destination_number1 . "\"/>";
 
 
-                    $this->Gateway_XML .= "\n <action application=\"export\" data=\"nolocal:execute_on_answer=curl http://localhost/api/api.php?r=answer&common_uuid=" . $this->uuid . "&gatewayname=" . $gateway_ipaddress_name . "&atime=\${strftime(%Y-%m-%dT%H:%M:%S)}&gateway_ipaddress=" . $route2['ipaddress'] . "&carrier_gateway_ipaddress_name=" . $route2['carrier_ip_id'] . "&routcallerid=" . $route_callid . "&account=" . $this->account_id . "&carrier=" . $route2['carrier_id'] . "&destination_number=" . $destination_number1 . "\"/>";
+                    $this->Gateway_XML .= "\n <action application=\"export\" data=\"nolocal:execute_on_answer=curl https://localhost/api/api.php?r=answer&common_uuid=" . $this->uuid . "&gatewayname=" . $gateway_ipaddress_name . "&atime=\${strftime(%Y-%m-%dT%H:%M:%S)}&gateway_ipaddress=" . $route2['ipaddress'] . "&carrier_gateway_ipaddress_name=" . $route2['carrier_ip_id'] . "&routcallerid=" . $route_callid . "&account=" . $this->account_id . "&carrier=" . $route2['carrier_id'] . "&destination_number=" . $destination_number1 . "\"/>";
 
                     $gateway_ipaddress_name = '';
                     if ($route2['carrier_ring_timeout'] > 0) {
@@ -3455,6 +3455,7 @@ class OVS extends PDO {
 
         RETURN $responce;
     }
+
 
     function PSTN_route_dialplan_xml() {
         array_push($this->str, 7200);
