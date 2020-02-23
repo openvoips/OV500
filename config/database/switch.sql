@@ -594,7 +594,7 @@ CREATE TABLE `customer_ips` (
   `ip_cps` int(11) DEFAULT '1',
   `description` varchar(30) DEFAULT NULL,
   `dialprefix` varchar(30) DEFAULT NULL,
-  `ipauthfrom` enum('SRC','FROM','NO') DEFAULT 'NO',
+  `ipauthfrom` enum('SRC','FROM','NO') DEFAULT 'SRC',
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_ips_ipaddress_key` (`ipaddress`,`dialprefix`) USING BTREE,
   KEY `account_id` (`account_id`) USING BTREE,
