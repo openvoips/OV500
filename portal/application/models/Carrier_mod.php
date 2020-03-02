@@ -46,6 +46,8 @@ class Carrier_mod extends CI_Model {
             }
         
             $query = $this->db->query($sql);
+            
+         //   echo $this->db->last_query();
             if (!$query) {
                 $error_array = $this->db->error();
                 throw new Exception($error_array['message']);
@@ -603,8 +605,8 @@ class Carrier_mod extends CI_Model {
 
             if (isset($ip_data_array['auth_type']) && $ip_data_array['auth_type'] == "IP") {
                 $ip_data_array['username'] = $ip_data_array['passwd'] = '';
-            } elseif (isset($ip_data_array['auth_type']) && $ip_data_array['auth_type'] == "USER") {
-                $ip_data_array['gateway_username'] = $data['gateway_username'];
+            } elseif (isset($ip_data_array['auth_type']) && $ip_data_array['auth_type'] == "CUSTOMER") {
+                $ip_data_array['username'] = $data['username'];
                 $ip_data_array['passwd'] = $data['secret'];
             } elseif (!isset($ip_data_array['auth_type'])) {
                 return 'Wrong gateway type';

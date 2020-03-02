@@ -1,4 +1,5 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
@@ -37,7 +38,7 @@ class Admins extends CI_Controller {
         $this->form_validation->set_error_delimiters('', '');
         if (!check_is_loggedin())
             redirect(base_url(), 'refresh');
-       // $this->output->enable_profiler(ENABLE_PROFILE);
+        // $this->output->enable_profiler(ENABLE_PROFILE);
     }
 
     function index($arg1 = '', $format = '') {
@@ -81,14 +82,13 @@ class Admins extends CI_Controller {
             $_SESSION['search_account_data']['s_status'] = isset($_SESSION['search_account_data']['s_status']) ? $_SESSION['search_account_data']['s_status'] : '';
             $_SESSION['search_account_data']['s_account_type'] = isset($_SESSION['search_account_data']['s_account_type']) ? $_SESSION['search_account_data']['s_account_type'] : '';
             $_SESSION['search_account_data']['s_account_id'] = isset($_SESSION['search_account_data']['s_account_id']) ? $_SESSION['search_account_data']['s_account_id'] : '';
-             $_SESSION['search_account_data']['s_no_of_records'] = isset($_SESSION['search_account_data']['s_no_of_records']) ? $_SESSION['search_account_data']['s_no_of_records'] : '';
-             
+            $_SESSION['search_account_data']['s_no_of_records'] = isset($_SESSION['search_account_data']['s_no_of_records']) ? $_SESSION['search_account_data']['s_no_of_records'] : '';
         }
 
 
         $search_data = array('name' => $_SESSION['search_account_data']['s_name'], 'username' => $_SESSION['search_account_data']['s_username'], 'account_status' => $_SESSION['search_account_data']['s_status'], 'account_type' => $_SESSION['search_account_data']['s_account_type'], 'account_id' => $_SESSION['search_account_data']['s_account_id']);
 
-       
+
         $this->search_serialize = serialize($search_data);
         $order_by = '';
 
@@ -145,14 +145,14 @@ class Admins extends CI_Controller {
             $data['account_type_array'] = get_account_types($account_group_key);
             $pagination_uri_segment = 3;
             $per_page = RECORDS_PER_PAGE;
-                      
-           
-                       
-             if (isset($_SESSION['search_account_data']['s_no_of_records']) && $_SESSION['search_account_data']['s_no_of_records'] != '')
+
+
+
+            if (isset($_SESSION['search_account_data']['s_no_of_records']) && $_SESSION['search_account_data']['s_no_of_records'] != '')
                 $per_page = $_SESSION['search_account_data']['s_no_of_records'];
             else
                 $per_page = RECORDS_PER_PAGE;
-           
+
             if ($this->uri->segment($pagination_uri_segment) == '') {
                 $segment = 0;
             } else {
@@ -160,7 +160,7 @@ class Admins extends CI_Controller {
             }
 
             $account_data = $this->member_mod->get_data($order_by, $per_page, $segment, $search_data);
-           $data['total_records'] =  $total = $this->member_mod->get_data_total_count();
+            $data['total_records'] = $total = $this->member_mod->get_data_total_count();
 
             $config = array();
             $config = $this->utils_model->setup_pagination_option($total, 'admins/index', $per_page, $pagination_uri_segment);
@@ -216,7 +216,7 @@ class Admins extends CI_Controller {
             }
         }
         $data['country_options'] = $this->utils_model->get_countries();
-        $data['account_type_array'] = get_account_types($account_group_key);                
+        $data['account_type_array'] = get_account_types($account_group_key);
         $this->load->view('basic/header', $data);
         $this->load->view('user/addA', $data);
         $this->load->view('basic/footer', $data);
@@ -297,15 +297,13 @@ class Admins extends CI_Controller {
         $data['account_id'] = $users_id_p;
 
         $data['country_options'] = $this->utils_model->get_countries();
-        $data['account_type_array'] = get_account_types($account_group_key);       
+        $data['account_type_array'] = get_account_types($account_group_key);
         $this->load->view('basic/header', $data);
         $this->load->view('user/editA', $data);
         $this->load->view('basic/footer', $data);
     }
 
     public function profile() {
-        
-      
         $page_name = "account_profile";
         $data['page_name'] = $page_name;
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
@@ -377,7 +375,7 @@ class Admins extends CI_Controller {
                     }
                 }
             }
-            
+
             $option_param = array('ip' => true, 'callerid' => true, 'sipuser' => true, 'tariff' => false, 'user' => false, 'prefix' => true, 'dialplan' => true, 'translation_rules' => true, 'callerid_incoming' => true, 'translation_rules_incoming' => true, 'notification' => true, 'service' => true);
             $view = 'account_profile';
             $data['notification_options'] = $this->utils_model->get_rule_options('notification');
@@ -467,7 +465,7 @@ class Admins extends CI_Controller {
         $account_id = param_decrypt($id);
         $result = $this->member_mod->get_account_by_key('account_id', $account_id);
 
-        $child_account_type = $result['account_type'];  
+        $child_account_type = $result['account_type'];
         if ($result === false)
             show_404();
         if ($login_as == 'self') {
@@ -517,26 +515,23 @@ class Admins extends CI_Controller {
                 'session_account_level' => $row->account_level,
                 'session_account_status' => $row->account_status,
                 'session_permissions' => $row->permissions,
-              
             );
             $this->session->set_userdata($userdata);
             $_SESSION['customer'][$row->account_id] = $userdata_details;
 
             $this->session->set_flashdata('suc_msgs', 'You are switched to ' . get_account_full_name());
-            echo $child_account_type;
-
-
+//            echo $child_account_type;
             if (isset($child_account_type)) {
                 if (in_array($child_account_type, array('CUSTOMER'))) {
                     $redirect_to = 'dashboard';
                     unset($_SESSION['search_customers_data']);
                     $_SESSION['search_customers_data']['s_account_id'] = $result['account_id'];
                 } elseif (in_array($child_account_type, array('RESELLER'))) {
-                   // $redirect_to = 'resellers';
+                    // $redirect_to = 'resellers';
                     $redirect_to = 'dashboard';
                     unset($_SESSION['search_resellers_data']);
                     $_SESSION['search_resellers_data']['s_account_id'] = $result['account_id'];
-                } 
+                }
             }
         }
 //echo '<pre>';print_r($userdata_details);print_r($result);die;

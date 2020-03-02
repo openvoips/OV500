@@ -1,4 +1,5 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
@@ -47,7 +48,7 @@ class Rates extends CI_Controller {
         $this->output->enable_profiler(ENABLE_PROFILE);
     }
 
-    public function index($arg1 = '', $format = '') {       
+    public function index($arg1 = '', $format = '') {
         $page_name = "rate_index";
         $file_name = 'Rate_' . date('Ymd');
         $is_file_downloaded = false;
@@ -172,7 +173,7 @@ class Rates extends CI_Controller {
         $data['tariff_data'] = $this->tariff_mod->get_data(array('tariff_name' => 'ASC'), 0, '', $tariff_search_data);
 
         if ($is_file_downloaded === false) {
-            $data['page_name'] = $page_name;            
+            $data['page_name'] = $page_name;
             $pagination_uri_segment = $this->uri->segment(3, 0);
             if (isset($_SESSION['search_rate_data']['s_no_of_records']) && $_SESSION['search_rate_data']['s_no_of_records'] != '')
                 $per_page = $_SESSION['search_rate_data']['s_no_of_records'];
@@ -185,7 +186,7 @@ class Rates extends CI_Controller {
             $data['searching'] = 1;
             $data['pagination'] = $this->pagination->create_links();
             $data['listing_data'] = $response['result'];
-           $data['total_records']=  $data['listing_count'] = $response['total'];
+            $data['total_records'] = $data['listing_count'] = $response['total'];
 
 
             $this->load->view('basic/header', $data);
@@ -216,6 +217,7 @@ class Rates extends CI_Controller {
 
             $search_data = array('ratecard_id' => $_POST['frm_card']);
             $response_data = $this->ratecard_mod->get_data('', 0, 10, $search_data, array());
+
             if ($response_data['total'] > 0) {
                 $_POST['ratecard_type'] = $response_data["result"][0]["ratecard_type"];
                 $_POST['ratecard_for'] = $response_data["result"][0]["ratecard_for"];

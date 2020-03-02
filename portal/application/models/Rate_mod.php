@@ -94,15 +94,16 @@ class Rate_mod extends CI_Model {
         else
             return array('status' => false, 'msg' => 'Data Mismatch');
 
-        $str = $this->db->insert_string($this->db->dbprefix($rate_table_name), $data_array);
+        $str = $this->db->insert_string($rate_table_name, $data_array);
 
         $result = $this->db->query($str);
+        echo $this->db->last_query();
         if ($result) {
             $insert_id = $this->db->insert_id();
             if ($data['ratecard_type'] == 'CARRIER')
-                $log_data_array[] = array('activity_type' => 'insert', 'sql_table' => $this->db->dbprefix($rate_table_name), 'sql_key' => '', 'sql_query' => $str);
+                $log_data_array[] = array('activity_type' => 'insert', 'sql_table' => $rate_table_name, 'sql_key' => '', 'sql_query' => $str);
             else
-                $log_data_array[] = array('activity_type' => 'insert', 'sql_table' => $this->db->dbprefix($rate_table_name), 'sql_key' => '', 'sql_query' => $str);
+                $log_data_array[] = array('activity_type' => 'insert', 'sql_table' => $rate_table_name, 'sql_key' => '', 'sql_query' => $str);
 
             set_activity_log($log_data_array);
             return array('status' => true, 'id' => $insert_id, 'msg' => 'Successfully added');
@@ -181,9 +182,9 @@ class Rate_mod extends CI_Model {
             if (count($data_array) > 0) {
                 $where = "rate_id='" . $data['frm_id'] . "'";
 
-                $str = $this->db->update_string($this->db->dbprefix($rate_table_name), $data_array, $where);
+                $str = $this->db->update_string($rate_table_name, $data_array, $where);
                 $result = $this->db->query($str);
-                $log_data_array[] = array('activity_type' => 'update', 'sql_table' => $this->db->dbprefix($rate_table_name), 'sql_key' => $where, 'sql_query' => $str);
+                $log_data_array[] = array('activity_type' => 'update', 'sql_table' =>$rate_table_name, 'sql_key' => $where, 'sql_query' => $str);
             }
 
             if ($this->db->trans_status() === FALSE) {
@@ -212,7 +213,7 @@ class Rate_mod extends CI_Model {
                 $ratecard_id = $info[1];
 
                 $log_data_array = array();
-                $q = $this->db->where('ratecard_id', $ratecard_id)->get($this->db->dbprefix('ratecard'));
+                $q = $this->db->where('ratecard_id', $ratecard_id)->get('ratecard');
                 $row = $q->result_array();
                 if (count($row) > 0) {
                     $ratecard_type = $row[0]['ratecard_type'];
@@ -233,27 +234,20 @@ class Rate_mod extends CI_Model {
                     } else {
                         throw new Exception('type & ratecard for mismatch');
                     }
+ 
 
-                    /* if($ratecard_type == 'CUSTOMER') {
-                      $table = 'rates';
-                      $table_type = 'RATE_USER';
-                      }else {
-                      $table = 'carrier_rates';
-                      $table_type = 'RATE_CARRIER';
-                      } */
-
-                    $q1 = $this->db->where('rate_id', $rate_id)->get($this->db->dbprefix($table));
+                    $q1 = $this->db->where('rate_id', $rate_id)->get($table);
                     $row1 = $q1->result_array();
                     $data_dump1 = serialize($row1);
 
-                    $str = $this->db->where('rate_id', $rate_id)->get_compiled_delete($this->db->dbprefix($table));
+                    $str = $this->db->where('rate_id', $rate_id)->get_compiled_delete($table);
                     $result = $this->db->query($str);
                     if (!$result) {
                         $error_array = $this->db->error();
                         throw new Exception($error_array['message']);
                     }
 
-                    $log_data_array[] = array('activity_type' => 'delete', 'sql_table' => $this->db->dbprefix($table), 'sql_key' => $rate_id, 'sql_query' => $data_dump1);
+                    $log_data_array[] = array('activity_type' => 'delete', 'sql_table' => $table, 'sql_key' => $rate_id, 'sql_query' => $data_dump1);
                 }
 
                 $log_data_array[] = array('activity_type' => 'delete_recovery', 'sql_table' => $table_type, 'sql_key' => $rate_id, 'sql_query' => $str);
@@ -274,17 +268,7 @@ class Rate_mod extends CI_Model {
         }
 
 
-        /* $log_data_array=array();
-          $where = '';
-          $str = $this->db->where('rate_id', $data)->get_compiled_delete($this->db->dbprefix('carrier_rates'));
-          $result = $this->db->query($str);
-          if($result){
-          $log_data_array[] =array('activity_type'=>'delete','sql_table'=>$this->db->dbprefix('carrier_rates'),'sql_key'=>$where, 'sql_query'=>$str);
-          set_activity_log($log_data_array);
-          return array('status'=>true,'msg'=>'Successfully deleted');
-          }else{
-          return array('status'=>false,'msg'=>'failed deletion');
-          } */
+        
     }
 
     /* List */
@@ -502,7 +486,7 @@ class Rate_mod extends CI_Model {
                 $str = $this->db->where('ratecard_id', $data['frm_key'])->get_compiled_delete($rate_table_name_to);
                 $result = $this->db->query($str);
 
-                $log_data_array[] = array('activity_type' => 'delete', 'sql_table' => $this->db->dbprefix($rate_table_name_to), 'sql_key' => $where, 'sql_query' => $str);
+                $log_data_array[] = array('activity_type' => 'delete', 'sql_table' => $rate_table_name_to, 'sql_key' => $where, 'sql_query' => $str);
                 set_activity_log($log_data_array);
             }
 
@@ -582,15 +566,13 @@ class Rate_mod extends CI_Model {
                     $str = $this->db->where('ratecard_id', $ratecard_id)->get_compiled_delete('customer_rates');
                     $log_data_array[] = array('activity_type' => 'delete', 'sql_table' => 'customer_rates', 'sql_key' => $where, 'sql_query' => $str);
                 } else {
-                    $str = $this->db->where('ratecard_id', $ratecard_id)->get_compiled_delete($this->db->dbprefix('carrier_rates'));
-                    $log_data_array[] = array('activity_type' => 'delete', 'sql_table' => $this->db->dbprefix('carrier_rates'), 'sql_key' => $where, 'sql_query' => $str);
+                    $str = $this->db->where('ratecard_id', $ratecard_id)->get_compiled_delete('carrier_rates');
+                    $log_data_array[] = array('activity_type' => 'delete', 'sql_table' => 'carrier_rates', 'sql_key' => $where, 'sql_query' => $str);
                 }
 
                 $result = $this->db->query($str);
                 set_activity_log($log_data_array);
             }
-
-
 
             if ($ratecard_type == 'CARRIER')
                 $rate_table_name = 'carrier_rates';

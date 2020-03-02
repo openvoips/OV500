@@ -362,9 +362,7 @@ class Member_mod extends CI_Model {
                 $account_id = strtoupper($data['account_id']);
             else
                 return 'account id missing';
-
             $sql = "SELECT ua.customer_id, ua.account_id, ua.name, ua.account_type user_type, ua.emailaddress FROM  customers ua  WHERE  account_id ='" . $account_id . "' LIMIT 0,1";
-           
             $query = $this->db->query($sql);
             if ($query == null)
                 return false;
@@ -380,11 +378,12 @@ class Member_mod extends CI_Model {
             $final_array = array();
 
             if ($data['emailaddress'] != '') {
-                $sql = "SELECT emailaddress, customer_id FROM  customers WHERE account_id !='" . $account_id . "' AND emailaddress ='" . $data['emailaddress'] . "'";
+                $sql = "SELECT emailaddress, customer_id FROM  customers WHERE account_id !='" . $account_id . "' AND emailaddress ='" . $data['emailaddress'] . "';";
                 $query = $this->db->query($sql);
                 $row = $query->row();
                 if (isset($row)) {
-                    return 'Email address already exists';
+                    if (strlen($row['emailaddress']) > 0)
+                        return 'Email address already exists';
                 }
             }
             $account_detail_array = array();
@@ -411,9 +410,9 @@ class Member_mod extends CI_Model {
                 }
                 $log_data_array[] = array('activity_type' => 'update', 'sql_table' => 'customers', 'sql_key' => $where, 'sql_query' => $str);
             }
-            if (count($user_access_array) > 0) {
-                $where = "cutsomer_id = (select customer_id from customers where account_id='" . account_id . "')";
-                $str = $this->db->update_string('web_access', $user_access_array, $where);
+            if (count($account_access_array) > 0) {
+                $where = "customer_id = (select customer_id from customers where account_id='" . $account_id . "')";
+                $str = $this->db->update_string('web_access', $account_access_array, $where);
                 $result = $this->db->query($str);
                 if (!$result) {
                     $error_array = $this->db->error();
