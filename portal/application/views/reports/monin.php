@@ -520,7 +520,7 @@
                     else
                         tr_class = '';
 
-                    carrier_str += '<tr class="' + tr_class + '"><td>' + single_array.carrier_id_name + '</td><td>' + single_array.tot_calls + '</td><td>' + single_array.tot_answered + '</td><td>' + single_array.asr + '</td><td>' + single_array.acd + '</td><td>' + single_array.tot_cost + '</td></tr>';
+                    carrier_str += '<tr class="' + tr_class + '"><td>' + single_array.carrier_id + '</td><td>' + single_array.tot_calls + '</td><td>' + single_array.tot_answered + '</td><td>' + single_array.asr + '</td><td>' + single_array.acd + '</td><td>' + single_array.tot_cost + '</td></tr>';
 
                 });
             } else
