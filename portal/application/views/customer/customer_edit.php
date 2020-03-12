@@ -907,6 +907,7 @@ $tab_index = 1;
                                 '</div>';
                             }
                             ?>
+							<label>Only possible if G729 codec is installed in system.</label>
                         </div>
                     </div>
 

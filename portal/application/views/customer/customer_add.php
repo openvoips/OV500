@@ -285,6 +285,7 @@ $vatflag_array = array('NONE', 'TAX', 'VAT');
                             <div class="radio">
                                 <label><input type="radio" name="codecs_force" id="codecs_force1" value="1" <?php echo set_radio('codecs_force', '1', TRUE); ?> tabindex="<?php echo $tab_index++; ?>"/> Yes</label>
                                 <label> <input type="radio" name="codecs_force" id="codecs_force2" value="0" <?php echo set_radio('codecs_force', '0'); ?> tabindex="<?php echo $tab_index++; ?>"/> No</label>
+								<label>Only possible if G729 codec is installed in system.</label>
                             </div>                     
                         </div>
                     </div>  
