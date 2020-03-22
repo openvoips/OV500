@@ -346,7 +346,7 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
             $query = $this->db->query($sql);
             $row_carrier = $query->row_array();
             if (!isset($row_carrier)) {
-                return 'Carrier Not Found';
+                return 'Ratecard is not linked in carrier tariff';
             }
 
 
