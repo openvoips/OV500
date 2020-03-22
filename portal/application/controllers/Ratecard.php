@@ -163,7 +163,10 @@ class Ratecard extends CI_Controller {
             $this->form_validation->set_rules('frm_name', 'Name', 'trim|required|min_length[5]|max_length[30]');
             $this->form_validation->set_rules('frm_currency', 'Currency', 'trim|min_length[0]|max_length[10]');
             $this->form_validation->set_rules('ratecard_for', 'Ratecard For', 'trim|required');
-            $_POST['frm_type']='CUSTOMER';
+			if ($_POST['frm_type'] == 'CARRIER')
+                $_POST['frm_type'] = 'CARRIER';
+            else
+                $_POST['frm_type'] = 'CUSTOMER';
             if ($this->form_validation->run() == FALSE) {
                 $data['err_msgs'] = validation_errors();
             } else {
