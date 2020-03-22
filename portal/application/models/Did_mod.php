@@ -349,7 +349,6 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                 return 'Ratecard is not linked in carrier tariff';
             }
 
-
             $incoming_ratecard_id = '';
             foreach ($row_carrier as $key => $value) {
                 $incoming_ratecard_id = "'" . $value . "',";
