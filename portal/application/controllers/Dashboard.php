@@ -1,4 +1,5 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
@@ -54,7 +55,7 @@ class dashboard extends CI_Controller {
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
 
         $account_id = get_logged_account_id();
-       // print_r($_SESSION);
+        // print_r($_SESSION);
 
 
         if (check_logged_account_type(array('RESELLER', 'CUSTOMER'))) {
@@ -120,12 +121,8 @@ class dashboard extends CI_Controller {
             $data['enduser_service_data'] = $enduser_service_data;
             //	echo '<pre>';print_r($enduser_service_data);echo '</pre>';	
         } elseif (check_logged_account_type(array('ADMIN', 'SUBADMIN', 'NOC'))) {
-            /* $this->load->model('cli_audit_mod');
-            $search_data = array('status_id' => '-1');
-            $cli_data = $this->cli_audit_mod->get_data('', 1, '', $search_data);
-            $total_cli_pending = $this->cli_audit_mod->get_data_total_count();
-*/
- $total_cli_pending=Array();
+
+            $total_cli_pending = Array();
             $data['total_cli_pending'] = $total_cli_pending;
         }
 

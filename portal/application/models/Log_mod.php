@@ -41,9 +41,7 @@ class Log_mod extends CI_Model {
     function get_data($order_by = '', $limit_to = '', $limit_from = '', $filter_data = array(), $option_param = array()) {
         $final_return_array = array();
         try {
-            $sql = "SELECT SQL_CALC_FOUND_ROWS 	*
-					FROM " . $this->db->dbprefix('activity_log') . "  
-					  WHERE 1 ";
+            $sql = "SELECT SQL_CALC_FOUND_ROWS 	* FROM activity_log  WHERE 1 ";
 
             if (count($filter_data) > 0) {
                 foreach ($filter_data as $key => $value) {
@@ -160,7 +158,7 @@ class Log_mod extends CI_Model {
             } else {
                 //delete all entry from log for this activity
                 //or status change ???????
-                $result = $this->db->delete($this->db->dbprefix('activity_log'), array('activity_id' => $activity_id));
+                $result = $this->db->delete('activity_log', array('activity_id' => $activity_id));
 
                 $this->db->trans_commit();
                 set_activity_log($log_data_array);
@@ -173,7 +171,7 @@ class Log_mod extends CI_Model {
     }
 
     function get_delete_types() {
-        $sql = "SELECT DISTINCT sql_table FROM " . $this->db->dbprefix('activity_log') . " WHERE activity_type='delete_recovery' ORDER BY sql_table";
+        $sql = "SELECT DISTINCT sql_table FROM activity_log WHERE activity_type='delete_recovery' ORDER BY sql_table";
         $query = $this->db->query($sql);
         $rows = $query->result_array();
         return $rows;
@@ -182,9 +180,7 @@ class Log_mod extends CI_Model {
     function email_get_data($order_by = '', $limit_to = '', $limit_from = '', $filter_data = array()) {
         $final_return_array = array();
         try {
-            $sql = "SELECT SQL_CALC_FOUND_ROWS 	el.*, ua.company_name
-					FROM " . $this->db->dbprefix('emaillog') . " el LEFT JOIN " . $this->db->dbprefix('user_access') . " ua ON el.account_id = ua.user_access_id_name
-					  WHERE 1 ";
+            $sql = "SELECT SQL_CALC_FOUND_ROWS 	el.*, ua.company_name   FROM  emaillog el LEFT JOIN user_access ua ON el.account_id = ua.user_access_id_name   WHERE 1 ";
 
             if (count($filter_data) > 0) {
                 foreach ($filter_data as $key => $value) {
@@ -247,7 +243,7 @@ class Log_mod extends CI_Model {
     }
 
     function get_email_get_types() {
-        $sql = "SELECT DISTINCT actionfrom FROM " . $this->db->dbprefix('emaillog') . " ORDER BY actionfrom";
+        $sql = "SELECT DISTINCT actionfrom FROM emaillog ORDER BY actionfrom";
         $query = $this->db->query($sql);
         $rows = $query->result_array();
         return $rows;

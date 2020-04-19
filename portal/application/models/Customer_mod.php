@@ -766,7 +766,7 @@ class Customer_mod extends CI_Model {
             if (isset($data['billing_pincode']))
                 $account_access_array['billing_pincode'] = $data['billing_pincode'];
 
-            $sql = "SELECT * FROM " . $this->db->dbprefix('account') . " WHERE account_id ='" . $key . "'";
+            $sql = "SELECT * FROM account WHERE account_id ='" . $key . "'";
             $query = $this->db->query($sql);
             $existing_account_row = $query->row_array();
             if (!isset($existing_account_row)) {
@@ -1642,7 +1642,7 @@ class Customer_mod extends CI_Model {
                             throw new Exception($error_array['message']);
                         }
 
-                        $log_data_array[] = array('activity_type' => 'update', 'sql_table' => $this->db->dbprefix('customer_callerid'), 'sql_key' => $where, 'sql_query' => $str);
+                        $log_data_array[] = array('activity_type' => 'update', 'sql_table' => 'customer_callerid', 'sql_key' => $where, 'sql_query' => $str);
                         unset($existing_callerid_array[$maching_string_temp]);
                     } else {
                         $callerid_array_temp['account_id'] = $account_id;
@@ -2090,7 +2090,7 @@ class Customer_mod extends CI_Model {
     }
 
     function get_data_single($key, $value) {
-        $sql = "SELECT * FROM " . $this->db->dbprefix('user') . "  WHERE $key ='" . $value . "'";
+        $sql = "SELECT * FROM account  WHERE $key ='" . $value . "'";
         $query = $this->db->query($sql);
         $row = $query->row();
         return $row;
@@ -2136,7 +2136,7 @@ class Customer_mod extends CI_Model {
                     $error_array = $this->db->error();
                     throw new Exception($error_array['message']);
                 }
-                $log_data_array[] = array('activity_type' => 'delete', 'sql_table' => $this->db->dbprefix('customer_sip_account'), 'sql_key' => $id, 'sql_query' => $this->db->last_query());
+                $log_data_array[] = array('activity_type' => 'delete', 'sql_table' => 'customer_sip_account', 'sql_key' => $id, 'sql_query' => $this->db->last_query());
                 if ($this->db->affected_rows() == 0)
                     throw new Exception('SIP not found');
             }

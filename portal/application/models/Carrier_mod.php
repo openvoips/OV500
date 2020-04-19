@@ -344,13 +344,13 @@ class Carrier_mod extends CI_Model {
                 'action_type' => '1'
             );
 
-            $str = $this->db->insert_string($this->db->dbprefix('carrier_callerid'), $callerid_array_temp);
+            $str = $this->db->insert_string('carrier_callerid', $callerid_array_temp);
             $result = $this->db->query($str);
             if (!$result) {
                 $error_array = $this->db->error();
                 throw new Exception($error_array['message']);
             }
-            $log_data_array[] = array('activity_type' => 'add', 'sql_table' => $this->db->dbprefix('carrier_callerid'), 'sql_key' => $key, 'sql_query' => $str);
+            $log_data_array[] = array('activity_type' => 'add', 'sql_table' => 'carrier_callerid', 'sql_key' => $key, 'sql_query' => $str);
 
             /* INBOUND CLI DEFAULT DATA */
             $callerid_array_temp = array(
@@ -480,7 +480,7 @@ class Carrier_mod extends CI_Model {
             $this->db->trans_begin();
             if (count($carrier_data_array) > 0) {
                 $where = "carrier_id='" . $key . "'";
-                $str = $this->db->update_string($this->db->dbprefix('carrier'), $carrier_data_array, $where);
+                $str = $this->db->update_string('carrier', $carrier_data_array, $where);
                 $result = $this->db->query($str);               
                 if (!$result) {
                     $error_array = $this->db->error();
@@ -1169,12 +1169,12 @@ class Carrier_mod extends CI_Model {
             $log_data_array = array();
             $this->db->trans_begin();
             foreach ($id_array['delete_id'] as $id) {
-                $result = $this->db->delete($this->db->dbprefix('carrier_ips'), array('carrier_id' => $carrier_id, 'carrier_ip_id' => $id));
+                $result = $this->db->delete('carrier_ips', array('carrier_id' => $carrier_id, 'carrier_ip_id' => $id));
                 if (!$result) {
                     $error_array = $this->db->error();
                     throw new Exception($error_array['message']);
                 }
-                $log_data_array[] = array('activity_type' => 'delete', 'sql_table' => $this->db->dbprefix('carrier_ips'), 'sql_key' => $id, 'sql_query' => $this->db->last_query());
+                $log_data_array[] = array('activity_type' => 'delete', 'sql_table' => 'carrier_ips', 'sql_key' => $id, 'sql_query' => $this->db->last_query());
                 if ($this->db->affected_rows() == 0)
                     throw new Exception('IP not found');
             }

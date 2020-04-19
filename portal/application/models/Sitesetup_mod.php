@@ -1,4 +1,5 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
@@ -52,19 +53,10 @@ class Sitesetup_mod extends CI_Model {
     }
 
     function get_sitesetup_data() {
-        /* $sql = "SELECT sitesetup_id, site_name, site_address, site_phone, site_email, mail_reply_to, mail_sent_from, mail_sent_to FROM ".$this->db->dbprefix('sitesetup')." ";
-          $query = $this->db->query($sql);
-          $row = $query->row_array(); */
-//        $row = array(
-//            'site_name' => SITE_NAME,
-//            'mail_sent_from' => SITE_MAIL_FROM,
-//            'mail_sent_to' => SITE_MAIL_TO
-//        );
-
         $row = array(
             'site_name' => 'TEST',
-            'mail_sent_from' => 'kanand81@gmail.com',
-            'mail_sent_to' => 'kanand81@gmail.com',
+            'mail_sent_from' => 'openvoips@gmail.com',
+            'mail_sent_to' => 'openvoips@gmail.com',
         );
         return $row;
     }

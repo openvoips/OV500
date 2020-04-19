@@ -363,7 +363,7 @@ CREATE TABLE `credit_scheduler` (
   `status_id` enum('0','1','2') NOT NULL DEFAULT '0' COMMENT '0=acive,1=executed,2=cancelled',
   `created_by` varchar(30) NOT NULL,
   `create_date` datetime NOT NULL,
-  `modify_date` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,
+  `modify_date` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 
@@ -1123,7 +1123,7 @@ CREATE TABLE `payment_blocking` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `block_text` varchar(50) NOT NULL,
   `reason` text NOT NULL,
-  `dt_updated` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,
+  `dt_updated` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
   `updated_by` varchar(30) NOT NULL DEFAULT 'System',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -1242,8 +1242,8 @@ CREATE TABLE `reseller_dialplan` (
 -- ----------------------------
 -- Table structure for `switch_daily_usage`
 -- ----------------------------
-DROP TABLE IF EXISTS `switch_daily_usage`;
-CREATE TABLE `switch_daily_usage` (
+DROP TABLE IF EXISTS `daily_usage`;
+CREATE TABLE `daily_usage` (
   `daily_usagedata_id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` varchar(30) DEFAULT NULL,
   `company_name` varchar(150) DEFAULT '',
@@ -1280,8 +1280,8 @@ CREATE TABLE `switch_daily_usage` (
 -- ----------------------------
 -- Table structure for `switch_delete_history`
 -- ----------------------------
-DROP TABLE IF EXISTS `switch_delete_history`;
-CREATE TABLE `switch_delete_history` (
+DROP TABLE IF EXISTS `delete_history`;
+CREATE TABLE `delete_history` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `delete_type` varchar(30) NOT NULL,
   `delete_status` varchar(30) NOT NULL,
@@ -1799,8 +1799,8 @@ CREATE TABLE `tariff` (
   `tariff_description` varchar(50) DEFAULT NULL,
   `tariff_type` enum('CARRIER','CUSTOMER') NOT NULL DEFAULT 'CARRIER',
   `created_by` varchar(30) NOT NULL,
-  `create_dt` timestamp NULL DEFAULT NULL,
-  `update_dt` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,
+  `create_dt` DATETIME NULL DEFAULT NULL,
+  `update_dt` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
   `package_option` enum('1','0') DEFAULT '0',
   `monthly_charges` double DEFAULT '0',
   `bundle_option` enum('1','0') DEFAULT '0',

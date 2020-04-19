@@ -918,23 +918,23 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                 $did_data_array['did_number'] = $data['did_number'];
                 $did_data_array['create_date'] = date('Y-m-d');
 
-                $str = $this->db->insert_string($this->db->dbprefix('did_dst'), $did_data_array);
+                $str = $this->db->insert_string('did_dst', $did_data_array);
                 $result = $this->db->query($str);
                 if (!$result) {
                     $error_array = $this->db->error();
                     throw new Exception($error_array['message']);
                 }
                 $did_id = $this->db->insert_id();
-                $log_data_array[] = array('activity_type' => 'add', 'sql_table' => $this->db->dbprefix('did_dst'), 'sql_key' => $did_id, 'sql_query' => $str);
+                $log_data_array[] = array('activity_type' => 'add', 'sql_table' => 'did_dst', 'sql_key' => $did_id, 'sql_query' => $str);
             } else {
                 $where = "did_dst_id = '" . $data['dst_id'] . "'";
-                $str = $this->db->update_string($this->db->dbprefix('did_dst'), $did_data_array, $where);
+                $str = $this->db->update_string('did_dst', $did_data_array, $where);
                 $result = $this->db->query($str);
                 if (!$result) {
                     $error_array = $this->db->error();
                     throw new Exception($error_array['message']);
                 }
-                $log_data_array[] = array('activity_type' => 'update', 'sql_table' => $this->db->dbprefix('did_dst'), 'sql_key' => $where, 'sql_query' => $str);
+                $log_data_array[] = array('activity_type' => 'update', 'sql_table' => 'did_dst', 'sql_key' => $where, 'sql_query' => $str);
             }
 
             if ($this->db->trans_status() === FALSE) {

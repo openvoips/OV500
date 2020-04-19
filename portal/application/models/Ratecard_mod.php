@@ -74,7 +74,7 @@ class Ratecard_mod extends CI_Model {
             $this->db->trans_begin();
             if (count($data_array) > 0) {
                 $where = "ratecard_id='" . $data['frm_id'] . "'";
-                $str = $this->db->update_string($this->db->dbprefix('ratecard'), $data_array, $where);
+                $str = $this->db->update_string('ratecard', $data_array, $where);
 
                 $result = $this->db->query($str);
                 $log_data_array[] = array('activity_type' => 'update', 'sql_table' => 'ratecard', 'sql_key' => $where, 'sql_query' => $str);
@@ -123,7 +123,7 @@ class Ratecard_mod extends CI_Model {
                     $row1 = $q1->result_array();
                     if (count($row1) > 0) {
                         $data_dump = serialize($row1);
-                        $str1 = $this->db->where('ratecard_id', param_decrypt($id))->get_compiled_delete($this->db->dbprefix($rate_table_name));
+                        $str1 = $this->db->where('ratecard_id', param_decrypt($id))->get_compiled_delete($rate_table_name);
                         $result = $this->db->query($str1);
                         if (!$result) {
                             $error_array = $this->db->error();
@@ -248,7 +248,7 @@ class Ratecard_mod extends CI_Model {
         $prefix = 'RC';
         $counter = 0;
         $this->db->like('id', $prefix, 'after')->limit(1)->order_by('id', 'DESC')->select('id');
-        $query = $this->db->get($this->db->dbprefix('ratecard'));
+        $query = $this->db->get('ratecard');
         $result = $query->result_array();
         if (count($result) > 0)
             $counter = strrev((int) strrev($result[0]['id']));
@@ -258,7 +258,7 @@ class Ratecard_mod extends CI_Model {
             $key = $prefix . sprintf('%06d', $counter);
 
             $this->db->like('id', $key)->limit(1)->select('id');
-            $query = $this->db->get($this->db->dbprefix('ratecard'));
+            $query = $this->db->get('ratecard');
             $result = $query->result_array();
             if (count($result) > 0) {
                 

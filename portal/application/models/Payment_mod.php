@@ -1,4 +1,5 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
@@ -149,7 +150,7 @@ class Payment_mod extends CI_Model {
 
             $this->db->trans_begin();
             if (count($payment_tracking_array) > 0) {
-                $str = $this->db->insert_string($this->db->dbprefix('payment_tracking'), $payment_tracking_array);
+                $str = $this->db->insert_string('payment_tracking', $payment_tracking_array);
                 $result = $this->db->query($str);
                 if (!$result) {
                     $error_array = $this->db->error();
@@ -157,7 +158,7 @@ class Payment_mod extends CI_Model {
                 }
                 $payment_id = $this->db->insert_id();
 
-                $log_data_array[] = array('activity_type' => 'add', 'sql_table' => $this->db->dbprefix('payment_tracking'), 'sql_key' => $this->payment_id, 'sql_query' => $str);
+                $log_data_array[] = array('activity_type' => 'add', 'sql_table' => 'payment_tracking', 'sql_key' => $this->payment_id, 'sql_query' => $str);
             }
 
             if ($this->db->trans_status() === FALSE) {
@@ -233,7 +234,7 @@ class Payment_mod extends CI_Model {
                     $scheduler_data_array['is_emergency_credit'] = 'N';
                 // print_r($scheduler_data_array);
                 // die;
-                $str = $this->db->insert_string($this->db->dbprefix('credit_scheduler'), $scheduler_data_array);
+                $str = $this->db->insert_string('credit_scheduler', $scheduler_data_array);
                 $result = $this->db->query($str);
                 if (!$result) {
                     $error_array = $this->db->error();
@@ -241,7 +242,7 @@ class Payment_mod extends CI_Model {
                 }
                 $this->id = $this->db->insert_id();
 
-                $log_data_array[] = array('activity_type' => 'add', 'sql_table' => $this->db->dbprefix('credit_scheduler'), 'sql_key' => $this->id, 'sql_query' => $str);
+                $log_data_array[] = array('activity_type' => 'add', 'sql_table' => 'credit_scheduler', 'sql_key' => $this->id, 'sql_query' => $str);
             }
 
 
@@ -332,7 +333,7 @@ class Payment_mod extends CI_Model {
             $this->db->trans_begin();
 
 
-            $sql = "SELECT * FROM " . $this->db->dbprefix('balance') . " WHERE account_id='" . $data['account_id'] . "'";
+            $sql = "SELECT * FROM " . 'balance' . " WHERE account_id='" . $data['account_id'] . "'";
             $query = $this->db->query($sql);
             if (!$query) {
                 $error_array = $this->db->error();
@@ -390,7 +391,7 @@ class Payment_mod extends CI_Model {
                 $this->db->update('balance');
 
                 $str = $this->db->last_query();
-                $log_data_array[] = array('activity_type' => 'add', 'sql_table' => $this->db->dbprefix('balance'), 'sql_key' => $id, 'sql_query' => $str);
+                $log_data_array[] = array('activity_type' => 'add', 'sql_table' => 'balance', 'sql_key' => $id, 'sql_query' => $str);
             } else {//add
                 $balance_data_array['credit_limit'] = 0;
                 $balance_data_array['balance'] = 0;
@@ -414,7 +415,7 @@ class Payment_mod extends CI_Model {
                 $notes = str_replace('{UPDATED CREDIT}', $balance_data_array['credit_limit'], $notes);
                 $notes = str_replace('{UPDATED BALANCE}', $balance_data_array['balance'], $notes);
 
-                $str = $this->db->insert_string($this->db->dbprefix('balance'), $balance_data_array);
+                $str = $this->db->insert_string('balance', $balance_data_array);
                 $result = $this->db->query($str);
                 if (!$result) {
                     $error_array = $this->db->error();
@@ -422,7 +423,7 @@ class Payment_mod extends CI_Model {
                 }
                 $this->id = $this->db->insert_id();
 
-                $log_data_array[] = array('activity_type' => 'add', 'sql_table' => $this->db->dbprefix('balance'), 'sql_key' => $this->id, 'sql_query' => $str);
+                $log_data_array[] = array('activity_type' => 'add', 'sql_table' => 'balance', 'sql_key' => $this->id, 'sql_query' => $str);
             }
 
 
@@ -433,7 +434,7 @@ class Payment_mod extends CI_Model {
                 $create_dt = date('Y-m-d H:i:s');
                 $payment_data_array['create_dt'] = $create_dt;
 
-                $str = $this->db->insert_string($this->db->dbprefix('payment_history'), $payment_data_array);
+                $str = $this->db->insert_string('payment_history', $payment_data_array);
                 $result = $this->db->query($str);
                 if (!$result) {
                     $error_array = $this->db->error();
@@ -441,7 +442,7 @@ class Payment_mod extends CI_Model {
                 }
                 $this->payment_id = $this->db->insert_id();
 
-                $log_data_array[] = array('activity_type' => 'add', 'sql_table' => $this->db->dbprefix('payment_history'), 'sql_key' => $this->payment_id, 'sql_query' => $str);
+                $log_data_array[] = array('activity_type' => 'add', 'sql_table' => 'payment_history', 'sql_key' => $this->payment_id, 'sql_query' => $str);
             }
 
             if ($this->db->trans_status() === FALSE) {
@@ -474,7 +475,7 @@ class Payment_mod extends CI_Model {
             $this->db->trans_begin();
 
 
-            $sql = "SELECT * FROM " . $this->db->dbprefix('balance') . " WHERE account_id='" . $data['account_id'] . "'";
+            $sql = "SELECT * FROM  balance WHERE account_id='" . $data['account_id'] . "'";
             $query = $this->db->query($sql);
             if (!$query) {
                 $error_array = $this->db->error();
@@ -491,7 +492,7 @@ class Payment_mod extends CI_Model {
                 $this->db->update('balance');
 
                 $str = $this->db->last_query();
-                $log_data_array[] = array('activity_type' => 'add', 'sql_table' => $this->db->dbprefix('balance'), 'sql_key' => $id, 'sql_query' => $str);
+                $log_data_array[] = array('activity_type' => 'add', 'sql_table' => 'balance', 'sql_key' => $id, 'sql_query' => $str);
             } else {
                 return 'No entry at balance found';
             }
@@ -600,10 +601,6 @@ class Payment_mod extends CI_Model {
     function get_data($order_by, $limit_to, $limit_from, $filter_data, $option_param = array()) {
         $final_return_array = array();
         try {
-            /* $sql = "SELECT SQL_CALC_FOUND_ROWS 				
-              ph.payment_id, ph.account_id, ph.payment_option_id, ph.amount, ph.paid_on, ph.notes, ph.created_by, ph.create_dt, po.option_name payment_option, po.option_id_name
-              FROM ".$this->db->dbprefix('payment_history')." ph LEFT JOIN ".$this->db->dbprefix('rule_options')." po ON ph.payment_option_id=po.option_id_name WHERE 1 "; */
-
 
             $sql = "SELECT SQL_CALC_FOUND_ROWS 				
 				ph.payment_id, ph.account_id, ph.payment_option_id, ph.amount, ph.paid_on, ph.notes, ph.created_by, ph.create_dt, 
@@ -632,35 +629,9 @@ class Payment_mod extends CI_Model {
                 }
             }
 
-
-            /////////////
-            if (isset($filter_data['s_superagent']) && $filter_data['s_superagent'] != '') {
-                $sub_sub_sql = "SELECT user_access_id_name FROM " . $this->db->dbprefix('user_access') . " WHERE user_type='ACCOUNTMANAGER' AND superagent='" . $filter_data['s_superagent'] . "'";
-                if (isset($filter_data['am_under_sm']) && $filter_data['am_under_sm'] != '') {
-                    $sub_sub_sql .= " AND user_access_id_name='" . $filter_data['am_under_sm'] . "'";
-                }
-                $sub_sql = "SELECT user_access_id_name FROM " . $this->db->dbprefix('user_access') . " WHERE account_manager IN(" . $sub_sub_sql . ")";
-
-                $sub_query = $this->db->query($sub_sql);
-                if (!$sub_query) {
-                    $error_array = $this->db->error();
-                    throw new Exception($error_array['message']);
-                }
-                $user_access_id_name_array = array();
-                if ($sub_query->row() > 0) {
-                    foreach ($sub_query->result_array() as $row) {
-                        $user_access_id_name_array[] = $row['user_access_id_name'];
-                    }
-                }
-                $account_id_str = implode("','", $user_access_id_name_array);
-                $account_id_str = "'" . $account_id_str . "'";
-
-                $sql .= " AND account_id IN(" . $account_id_str . ")";
-            } elseif (isset($filter_data['s_account_manager']) && $filter_data['s_account_manager'] != '') {
-                $sub_sql = "SELECT user_access_id_name FROM " . $this->db->dbprefix('user_access') . " WHERE account_manager='" . $filter_data['s_account_manager'] . "'";
-                $sql .= " AND account_id IN(" . $sub_sql . ")";
-            } elseif (isset($filter_data['s_parent_account_id'])) {   //&& $filter_data['s_parent_account_id']!=''
-                $sub_sql = "SELECT account_id FROM " . $this->db->dbprefix('user') . " WHERE parent_account_id='" . $filter_data['s_parent_account_id'] . "' ";
+         
+          if (isset($filter_data['s_parent_account_id'])) {   //&& $filter_data['s_parent_account_id']!=''
+                $sub_sql = "SELECT account_id FROM account WHERE parent_account_id='" . $filter_data['s_parent_account_id'] . "' ";
                 $sql .= " AND account_id IN(" . $sub_sql . ")";
             }
             ////////////			
@@ -764,11 +735,9 @@ class Payment_mod extends CI_Model {
         try {
             $final_return_array = array();
 
-            //$sql = "SELECT SQL_CALC_FOUND_ROWS payment_id,order_id,amount,tracking_id,order_status,payment_method,account_id,response_string,order_date FROM ".$this->db->dbprefix('payment_tracking')." WHERE 1";	
+          
 
-            $sql = "SELECT SQL_CALC_FOUND_ROWS payment_id,order_id,amount,tracking_id,order_status,payment_method,account_id,send_string,response_string,order_date,
-			ua.company_name 
-			FROM " . $this->db->dbprefix('payment_tracking') . " pt LEFT JOIN " . $this->db->dbprefix('user_access') . " ua ON pt.account_id=ua.user_access_id_name  WHERE 1";
+            $sql = "SELECT SQL_CALC_FOUND_ROWS payment_id,order_id,amount,tracking_id,order_status,payment_method,account_id,send_string,response_string,order_date,ua.company_name FROM  payment_tracking  pt LEFT JOIN  customers  ua ON pt.account_id=ua.account_id  WHERE 1";
 
             if (count($search_data) > 0) {
                 foreach ($search_data as $key => $value) {
@@ -827,9 +796,7 @@ class Payment_mod extends CI_Model {
     function get_credit_scheduler($filter_data = array()) {
         $final_return_array = array();
         try {
-            $sql = "SELECT *			
-			 FROM " . $this->db->dbprefix('credit_scheduler') . " 
-			 WHERE 1 ";
+            $sql = "SELECT *  FROM  credit_scheduler   WHERE 1 ";
             if (count($filter_data) > 0) {
                 foreach ($filter_data as $key => $value) {
                     if ($value != '') {
@@ -876,19 +843,19 @@ class Payment_mod extends CI_Model {
                 $log_data_array = array();
                 $scheduler_data_array = array();
                 ////delete user ///////
-                $sql = "SELECT * FROM " . $this->db->dbprefix('credit_scheduler') . " WHERE account_id='" . $account_id . "'";
+                $sql = "SELECT * FROM credit_scheduler  WHERE account_id='" . $account_id . "'";
                 $query = $this->db->query($sql);
                 $row = $query->row_array();
                 if (isset($row)) {
                     $scheduler_data_array = array('status_id' => '2');
                     $where = "account_id='" . $account_id . "' AND id='" . $id . "'";
-                    $str = $this->db->update_string($this->db->dbprefix('credit_scheduler'), $scheduler_data_array, $where);
+                    $str = $this->db->update_string( 'credit_scheduler' , $scheduler_data_array, $where);
                     $result = $this->db->query($str);
                     if (!$result) {
                         $error_array = $this->db->error();
                         throw new Exception($error_array['message']);
                     }
-                    $log_data_array[] = array('activity_type' => 'update', 'sql_table' => $this->db->dbprefix('credit_scheduler'), 'sql_key' => $where, 'sql_query' => $str);
+                    $log_data_array[] = array('activity_type' => 'update', 'sql_table' => 'credit_scheduler', 'sql_key' => $where, 'sql_query' => $str);
                 }
 
                 set_activity_log($log_data_array);
@@ -912,8 +879,7 @@ class Payment_mod extends CI_Model {
         try {
             $final_return_array = array();
 
-            $sql = "SELECT id, account_id,card_name,card_data 
-			FROM " . $this->db->dbprefix('account_card_details') . " WHERE account_id='" . $account_id . "'";
+            $sql = "SELECT id, account_id,card_name,card_data  FROM  account_card_details  WHERE account_id='" . $account_id . "'";
             $query = $this->db->query($sql);
             if (!$query) {
                 $error_array = $this->db->error();
@@ -966,7 +932,7 @@ class Payment_mod extends CI_Model {
 
 
             ///check card exists or not
-            $sql = "SELECT id FROM " . $this->db->dbprefix('account_card_details') . " WHERE account_id='" . $data['account_id'] . "' AND card_name='" . $card_name . "'";
+            $sql = "SELECT id FROM account_card_details  WHERE account_id='" . $data['account_id'] . "' AND card_name='" . $card_name . "'";
             $query = $this->db->query($sql);
             $num_rows = $query->num_rows();
             if ($num_rows > 0)
@@ -988,7 +954,7 @@ class Payment_mod extends CI_Model {
                 $card_data_array['card_name'] = $card_name;
 
                 $where = "account_id='" . $data['account_id'] . "' AND card_name='" . $card_name . "'";
-                $str = $this->db->update_string($this->db->dbprefix('account_card_details'), $card_data_array, $where);
+                $str = $this->db->update_string('account_card_details', $card_data_array, $where);
                 $result = $this->db->query($str);
                 if (!$result) {
                     $error_array = $this->db->error();
@@ -1009,7 +975,7 @@ class Payment_mod extends CI_Model {
                 $card_data_array['card_data'] = base64_encode($card_data_en);
 
                 if (count($card_data_array) > 0) {
-                    $str = $this->db->insert_string($this->db->dbprefix('account_card_details'), $card_data_array);
+                    $str = $this->db->insert_string('account_card_details', $card_data_array);
                     $result = $this->db->query($str);
                     if (!$result) {
                         $error_array = $this->db->error();
@@ -1041,17 +1007,17 @@ class Payment_mod extends CI_Model {
                 $log_data_array = array();
 
                 ////delete card ///////
-                $sql = "SELECT * FROM " . $this->db->dbprefix('account_card_details') . " WHERE id='" . $id . "' AND account_id='" . $account_id . "' ";
+                $sql = "SELECT * FROM account_card_details WHERE id='" . $id . "' AND account_id='" . $account_id . "' ";
                 $query = $this->db->query($sql);
                 $row = $query->row_array();
                 if (isset($row)) {
                     $data_dump = serialize($row);
-                    $result = $this->db->delete($this->db->dbprefix('account_card_details'), array('id' => $id, 'account_id' => $account_id));
+                    $result = $this->db->delete('account_card_details', array('id' => $id, 'account_id' => $account_id));
                     if (!$result) {
                         $error_array = $this->db->error();
                         throw new Exception($error_array['message']);
                     }
-                    $log_data_array[] = array('activity_type' => 'delete', 'sql_table' => $this->db->dbprefix('account_card_details'), 'sql_key' => $id, 'sql_query' => $data_dump);
+                    $log_data_array[] = array('activity_type' => 'delete', 'sql_table' => 'account_card_details', 'sql_key' => $id, 'sql_query' => $data_dump);
                 }
 
                 $log_data_array[] = array('activity_type' => 'delete_recovery', 'sql_table' => 'Service', 'sql_key' => $id, 'sql_query' => '');
