@@ -31,6 +31,7 @@ if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
 class Dids extends CI_Controller {
+
     function __construct() {
         parent::__construct();
         $this->load->library('pagination');
@@ -297,8 +298,7 @@ class Dids extends CI_Controller {
                                 redirect(base_url() . 'dids/add/', 'location', '301');
                             elseif ($action == 'save_close')
                                 redirect(base_url() . 'dids', 'location', '301');
-                        }
-                        else {
+                        } else {
                             redirect(base_url() . 'dids', 'location', '301');
                         }
 
@@ -339,8 +339,7 @@ class Dids extends CI_Controller {
                             redirect(base_url() . 'dids/edit/' . param_encrypt($did_id), 'location', '301');
                         elseif ($action == 'save_close')
                             redirect(base_url() . 'dids', 'location', '301');
-                    }
-                    else {
+                    } else {
                         redirect(base_url() . 'dids', 'location', '301');
                     }
 
@@ -399,8 +398,7 @@ class Dids extends CI_Controller {
                             redirect(base_url() . 'dids/edit/' . param_encrypt($did_id), 'location', '301');
                         elseif ($action == 'save_close')
                             redirect(base_url() . 'dids', 'location', '301');
-                    }
-                    else {
+                    } else {
                         redirect(base_url() . 'dids', 'location', '301');
                     }
 
@@ -525,7 +523,7 @@ class Dids extends CI_Controller {
     }
 
     public function purchase_did() {
-        $data['page_name'] = "did_purchase";     
+        $data['page_name'] = "did_purchase";
         if (check_logged_account_type(array('ADMIN', 'SUBADMIN')))
             show_404('403');
 
@@ -628,8 +626,7 @@ class Dids extends CI_Controller {
                             redirect(base_url() . 'dids/config/' . $id, 'location', '301');
                         elseif ($action == 'save_close')
                             redirect(base_url() . 'dids', 'location', '301');
-                    }
-                    else {
+                    } else {
                         redirect(base_url() . 'dids', 'location', '301');
                     }
 
@@ -663,7 +660,7 @@ class Dids extends CI_Controller {
 
                 $this->load->model('Customer_mod');
                 $option_param = array('ip' => true, 'sipuser' => true);
-                $search_data = array('user_access_id_name' => get_logged_account_id());
+                $search_data = array('account_id' => get_logged_account_id());
                 $endusers_data = $this->Customer_mod->get_data('', 1, 0, $search_data, $option_param);
                 //var_dump($endusers_data);
             } else {

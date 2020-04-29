@@ -1,4 +1,5 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
@@ -428,22 +429,7 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                 return $error_array['message'];
             } else {
                 $this->db->trans_commit();
-                set_activity_log($log_data_array);
-                /*
-                  $api_request = array();
-                  $api_request['request'] = 'SUPPILERNEWDID';
-                  $api_request['action'] = 'NEW';
-                  $api_request['service_number'] = array($did_data_array['did_number']);
-                  $api_request['carrier'] = $row_carrier['carrier_id'];
-
-                  $api_response = callSdrAPI($api_request);
-                  $api_result = json_decode($api_response, true);
-                  if (!isset($api_result['error']) || $api_result['error'] == '1') {
-                  throw new Exception('SDR Problem:(' . $api_result['message'] . ')');
-                  ;
-                  }
-                 * 
-                 */
+                set_activity_log($log_data_array);              
             }
             return true;
         } catch (Exception $e) {
@@ -851,7 +837,7 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                 else
                     $sql = "update did set did_status = 'USED', reseller3_account_id = '" . $account_id . "', reseller3_assign_date = now() WHERE did_number = '" . $did . "'";
             }
-            
+
             $result = $this->db->query($sql);
             if (!$result) {
                 $error_array = $this->db->error();

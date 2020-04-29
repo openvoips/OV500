@@ -29,7 +29,7 @@
 //echo '<pre>';
 //print_r($listing_data);
 //echo '</pre>';
-$delete_option='';
+$delete_option = '';
 ?>
 <div class="col-md-12 col-sm-6 col-xs-12">
     <div class="x_panel">
@@ -122,7 +122,7 @@ $delete_option='';
                 ?>    
             </div>
             <div class="table-responsive">
-                 <table class="table table-striped jambo_table bulk_action table-bordered" id="table-sort">
+                <table class="table table-striped jambo_table bulk_action table-bordered" id="table-sort">
                     <thead>
                         <tr class="headings thc">                          
                             <th class="column-title">Tariff Name</th>                            
@@ -149,6 +149,14 @@ $delete_option='';
                                     $status = '<span class="label label-success">Active</span>';
                                 else
                                     $status = '<span class="label label-danger">Inactive</span>';
+
+
+
+
+                                if ($listing_row['tariff_count'] == 0)
+                                    $delete_option = true;
+                                else
+                                    $delete_option = false;
                                 ?>
                                 <tr>                                    
                                     <td><?php echo $listing_row['tariff_name'] . " (" . $listing_row['tariff_id'] . ")"; ?></td>
@@ -196,7 +204,7 @@ $delete_option='';
                                             <a href="javascript:void(0);" data-id="<?php echo $listing_row['tariff_id']; ?>" title="View Rates" class="rates"><i class="fa fa-list"></i></a>
                                         <?php endif; ?>	
 
-                                        <?php //if(check_account_permission('tariff','delete')):   ?>
+                                        <?php //if(check_account_permission('tariff','delete')):    ?>
                                         <?php if ($delete_option) { ?>
                                             <a href="javascript:doConfirmDelete('<?php echo param_encrypt($listing_row['tariff_id']); ?>','tariffs');" title="Delete" class="delete"><i class="fa fa-trash"></i></a>						
                                         <?php } else { ?>
@@ -207,8 +215,8 @@ $delete_option='';
                                                                     styling: 'bootstrap3',
                                                                     addclass: 'dark'
                                                                 });" title="Delete" class="text-dark"><i class="fa fa-trash"></i><a/>
-                                            <?php } ?>
-                                            <?php //endif; ?>	
+        <?php } ?>
+        <?php //endif;  ?>	
 
                                     </td>
                                 </tr>
@@ -249,7 +257,7 @@ $delete_option='';
 </div>
 <script language="javascript" type="text/javascript">
     $(document).ready(function () {
-         showDatatable('table-sort', [6], [1, "asc"]);
+        showDatatable('table-sort', [6], [1, "asc"]);
         $('#OkFilter').click(function () {
             var no_of_records = $('#no_of_records').val();
             $('#no_of_rows').val(no_of_records);

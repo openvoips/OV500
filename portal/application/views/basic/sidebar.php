@@ -257,28 +257,31 @@
                             $class = 'class="current-page"';
                         $menu_user .= '<li ' . $class . '><a href="' . base_url() . 'reports/FailCalls">Failed Calls</a></li>';
                     }
-                    if (check_account_permission('reports', 'report_statement')) {
-                        $class = '';
-                        if (in_array($page_name, array('report_statement')))
-                            $class = 'class="current-page"';
-                        $menu_user .= '<li ' . $class . '><a href="' . base_url() . 'customers/statement">Account Statement</a></li>';
-                    }
+                    /*
+                      if (check_account_permission('reports', 'report_statement')) {
+                      $class = '';
+                      if (in_array($page_name, array('report_statement')))
+                      $class = 'class="current-page"';
+                      $menu_user .= '<li ' . $class . '><a href="' . base_url() . 'customers/statement">Account Statement</a></li>';
+                      }
+                     */
                 }
 
-                if (check_logged_account_type(array('ADMIN', 'SUBADMIN', 'ACCOUNTS'))) {
-                    $class = '';
-                    if (in_array($page_name, array('report_daily_usage')))
-                        $class = 'class="current-page"';
-                    $menu_user .= '<li ' . $class . '><a href="' . base_url() . 'reports/businesHistory">Daily Usage </a></li>';
-                }
-                if (check_logged_account_type(array('ADMIN', 'SUBADMIN', 'ACCOUNTS'))) {
-                    $class = '';
-                    if (in_array($page_name, array('CarrierUsage')))
-                        $class = 'class="current-page"';
-                    $menu_user .= '<li ' . $class . '><a href="' . base_url() . 'reports/CarrierUsage">Carrier Daily Usage</a></li>';
-                }
+                /*
+                  if (check_logged_account_type(array('ADMIN', 'SUBADMIN', 'ACCOUNTS'))) {
+                  $class = '';
+                  if (in_array($page_name, array('report_daily_usage')))
+                  $class = 'class="current-page"';
+                  $menu_user .= '<li ' . $class . '><a href="' . base_url() . 'reports/businesHistory">Daily Usage </a></li>';
+                  }
+                  if (check_logged_account_type(array('ADMIN', 'SUBADMIN', 'ACCOUNTS'))) {
+                  $class = '';
+                  if (in_array($page_name, array('CarrierUsage')))
+                  $class = 'class="current-page"';
+                  $menu_user .= '<li ' . $class . '><a href="' . base_url() . 'reports/CarrierUsage">Carrier Daily Usage</a></li>';
+                  }
 
-
+                 */
                 if (check_logged_account_type(array('ADMIN', 'RESELLER', 'SUBADMIN', 'ACCOUNTS'))) {
                     $class = '';
                     if (in_array($page_name, array('ProfitLoss')))
@@ -304,18 +307,20 @@
                         $class = 'class="current-page"';
                     $menu_user .= '<li ' . $class . '><a href="' . base_url() . 'reports/CRecharge">Topup Customer Summary</a></li>';
                 }
-                if (check_logged_account_type(array('ADMIN', 'RESELLER', 'SUBADMIN', 'ACCOUNTS'))) {
-                    $class = '';
-                    if (in_array($page_name, array('report_daily_sales')))
-                        $class = 'class="current-page"';
-                    $menu_user .= '<li ' . $class . '><a href="' . base_url() . 'reports/daily_sales">Sales Daily Summary</a></li>';
-                }
-                if (check_logged_account_type(array('ADMIN', 'RESELLER', 'SUBADMIN', 'ACCOUNTS'))) {
-                    $class = '';
-                    if (in_array($page_name, array('report_daily_sales_monthly')))
-                        $class = 'class="current-page"';
-                    $menu_user .= '<li ' . $class . '><a href="' . base_url() . 'reports/daily_sales_monthly">Sales Monthly Summary</a></li>';
-                }
+                /*
+                  if (check_logged_account_type(array('ADMIN', 'RESELLER', 'SUBADMIN', 'ACCOUNTS'))) {
+                  $class = '';
+                  if (in_array($page_name, array('report_daily_sales')))
+                  $class = 'class="current-page"';
+                  $menu_user .= '<li ' . $class . '><a href="' . base_url() . 'reports/daily_sales">Sales Daily Summary</a></li>';
+                  }
+                  if (check_logged_account_type(array('ADMIN', 'RESELLER', 'SUBADMIN', 'ACCOUNTS'))) {
+                  $class = '';
+                  if (in_array($page_name, array('report_daily_sales_monthly')))
+                  $class = 'class="current-page"';
+                  $menu_user .= '<li ' . $class . '><a href="' . base_url() . 'reports/daily_sales_monthly">Sales Monthly Summary</a></li>';
+                  }
+                 */
                 if (check_logged_account_type(array('ADMIN', 'RESELLER', 'SUBADMIN', 'ACCOUNTS'))) {
                     if ($menu_user != '') {
                         echo '<li><a><i class="fa fa-bar-chart"></i>Business Report<span class="fa fa-chevron-down"></span></a><ul class="nav child_menu">';

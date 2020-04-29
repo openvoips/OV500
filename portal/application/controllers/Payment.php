@@ -144,7 +144,7 @@ class Payment extends CI_Controller {
                             ////fetch user type//
                             $account_result = $this->member_mod->get_account_by_key('account_id', $account_id);
                             if ($account_result['account_type'] == 'CUSTOMER')
-                                $redirect_page = 'customerss';
+                                $redirect_page = 'customers';
                             elseif ($account_result['account_type'] == 'RESELLER')
                                 $redirect_page = 'resellers';                            
                             else

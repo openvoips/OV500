@@ -1,4 +1,5 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
@@ -29,9 +30,9 @@ function dispay_pagination_row($total_records, $s_no_of_records, $pagination) {
 
     $str = '<div class="col-md-2 col-sm-12 col-xs-12 form-group form-inline">';
     if (isset($total_records))
-        $str .='<label class="label-control"><h5>Records Count : <strong>' . $total_records . '</strong></h5></label>';
+        $str .= '<label class="label-control"><h5>Records Count : <strong>' . $total_records . '</strong></h5></label>';
 
-    $str .='</div>
+    $str .= '</div>
             <div class=" col-md-3 col-sm-12 col-xs-12 form-group form-inline">
                   <label><h5>No of Records : </h5></label>
                   <select name="no_of_records" id="no_of_records" class="form-control data-search-field">';
@@ -45,7 +46,7 @@ function dispay_pagination_row($total_records, $s_no_of_records, $pagination) {
         $str .= '<option value="' . $records_per_page . '" ' . $selected . '>' . $records_per_page . '</option>';
     }
 
-    $str .=' </select>          
+    $str .= ' </select>          
             </div>            
 			<div class=" navigation-bar col-md-7 col-sm-12 col-xs-12 text-right">' .
             $pagination .
@@ -151,8 +152,7 @@ function check_logged_account_type($account_types) {
             return true;
         else
             return false;
-    }
-    else {
+    } else {
         if ($session_type == $account_types)
             return true;
         else
@@ -321,8 +321,7 @@ function generate_rule_fields($rule_string_temp, $checking_type = '2_way') {
             $remove_string = strstr($rule_string_array[0], '|', true);
 
         $add_string = str_replace(array('|'), '', $rule_string_array[1]);
-    }
-    else {//1_way //disallowed
+    } else {//1_way //disallowed
         if (preg_match($pattern, $rule_string_temp)) {
             return array('status' => false, 'message' => 'Unsupported characters at ' . $rule_string_temp);
         }
@@ -492,11 +491,11 @@ function generate_key($name, $type = '') {
     return $abbr . $sum . $type;
 }
 
-function callSdrAPI($data, $method = 'GET') { 
-   // $url = SDR_API_URL;
+function callSdrAPI($data, $method = 'GET') {
+    // $url = SDR_API_URL;
     //$url = "https://localhost/apis/";
 
-	$url =  site_url('apis');
+    $url = site_url('apis');
     $curl = curl_init();
     switch ($method) {
         case "POST":
@@ -527,16 +526,20 @@ function callSdrAPI($data, $method = 'GET') {
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
     // EXECUTE:
-    $result_raw = $result = curl_exec($curl);
-   if (curl_errno($curl)) {
-     $error_msg = curl_error($curl);
-   }
+    $result = curl_exec($curl);
+    $result_raw = $result;
+    if (curl_errno($curl)) {
+        $error_msg = curl_error($curl);
+    }
 
     if (!$result) {
-        $return_array = array('error' => 0, 'message' =>  $error_msg);
+        $return_array = array('error' => 0, 'message' => $error_msg);
         $result = json_encode($return_array);
         //die("Connection Failure");
     }
+    
+    var_dump($result);
+    
     curl_close($curl);
 
 
@@ -546,7 +549,7 @@ function callSdrAPI($data, $method = 'GET') {
     $log_data_insert_array['request_data'] = json_encode($data);
     $log_data_insert_array['response_data'] = $result_raw;
     $log_data_insert_array['function_return'] = $result;
-    $str = $CI->db->insert('activity_api_log', $log_data_insert_array); 
+    $str = $CI->db->insert('activity_api_log', $log_data_insert_array);
     $DB1 = $CI->load->database('default', true);
     $str = $DB1->insert('activity_api_log', $log_data_insert_array);
     //var_dump($str);
@@ -858,8 +861,7 @@ function strip_slashes($data_array, $escape_field_array = array()) {
                         elseif ($sub_var_type == 'integer' || $sub_var_type == 'double')
                             $arg[$key][$sub_key] = stripslashes(trim($sub_val));
                     }
-                }
-                else {
+                } else {
                     $arg[$key] = $val;
                     //echo $val; die;
                 }

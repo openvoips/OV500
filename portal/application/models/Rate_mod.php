@@ -1,4 +1,5 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
@@ -97,7 +98,7 @@ class Rate_mod extends CI_Model {
         $str = $this->db->insert_string($rate_table_name, $data_array);
 
         $result = $this->db->query($str);
-        echo $this->db->last_query();
+        //  echo $this->db->last_query();
         if ($result) {
             $insert_id = $this->db->insert_id();
             if ($data['ratecard_type'] == 'CARRIER')
@@ -107,10 +108,10 @@ class Rate_mod extends CI_Model {
 
             set_activity_log($log_data_array);
             return array('status' => true, 'id' => $insert_id, 'msg' => 'Successfully added');
-        }
-        else {
+        } else {
             $error_array = $this->db->error();
-            return array('status' => false, 'msg' => $error_array['message']);
+            return array('status' => false, 'msg' => 'Rate exist');
+            //return array('status' => false, 'msg' => $error_array['message']);
         }
     }
 
@@ -184,7 +185,7 @@ class Rate_mod extends CI_Model {
 
                 $str = $this->db->update_string($rate_table_name, $data_array, $where);
                 $result = $this->db->query($str);
-                $log_data_array[] = array('activity_type' => 'update', 'sql_table' =>$rate_table_name, 'sql_key' => $where, 'sql_query' => $str);
+                $log_data_array[] = array('activity_type' => 'update', 'sql_table' => $rate_table_name, 'sql_key' => $where, 'sql_query' => $str);
             }
 
             if ($this->db->trans_status() === FALSE) {
@@ -234,7 +235,7 @@ class Rate_mod extends CI_Model {
                     } else {
                         throw new Exception('type & ratecard for mismatch');
                     }
- 
+
 
                     $q1 = $this->db->where('rate_id', $rate_id)->get($table);
                     $row1 = $q1->result_array();
@@ -266,9 +267,6 @@ class Rate_mod extends CI_Model {
             $this->db->trans_rollback();
             return array('status' => false, 'msg' => 'failed deletion :: ' . $e->getMessage());
         }
-
-
-        
     }
 
     /* List */
@@ -439,13 +437,13 @@ class Rate_mod extends CI_Model {
 // echo $this->db->last_query();
 
             $final_return_array['result'] = $q->result_array();
-           
+
 
             $query = $this->db->query('SELECT FOUND_ROWS() AS Count');
-             $row_count = $q->row();
-           // $this->total_count = $row_count->total;
-            
-           $this->total_count =  $final_return_array["total"] = $query->row()->Count;
+            $row_count = $q->row();
+            // $this->total_count = $row_count->total;
+
+            $this->total_count = $final_return_array["total"] = $query->row()->Count;
 
             $final_return_array['status'] = 'success';
             $final_return_array['message'] = 'Rate List fetched successfully';

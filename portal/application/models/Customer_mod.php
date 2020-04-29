@@ -1,4 +1,5 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
@@ -49,13 +50,13 @@ class Customer_mod extends CI_Model {
                     } elseif ($value != '') {
                         if ($key == 'account_id') {
                             $sql .= " AND u.account_id ='" . $value . "' ";
-                        } elseif ($key == 'id' || $key == 'tariff_id'){
+                        } elseif ($key == 'id' || $key == 'tariff_id') {
                             $sql .= " AND $key ='" . $value . "' ";
-                        } elseif ( $key == 'account_status' ){
+                        } elseif ($key == 'account_status') {
                             $sql .= " AND u.$key ='" . $value . "' ";
                         } elseif ($key == 'ipaddress' and strlen($value) > 0) {
                             $sql .= " AND ua.account_id IN( SELECT account_id FROM customer_ips WHERE $key LIKE '%" . $value . "%' )";
-                        } elseif ($key == 'sip_username' and strlen($value)> 0) {
+                        } elseif ($key == 'sip_username' and strlen($value) > 0) {
                             $sql .= " AND ua.account_id IN( SELECT account_id FROM customer_sip_account WHERE username LIKE '%" . $value . "%' )";
                         } elseif ($key == 'account_type') {
                             if (is_array($filter_data[$key])) {
@@ -70,7 +71,7 @@ class Customer_mod extends CI_Model {
                     }
                 }
             }
-  
+
 
             if ($order_by != '') {
                 $sql .= " ORDER BY $order_by ";
@@ -90,7 +91,7 @@ class Customer_mod extends CI_Model {
             $row_count = $query_count->row();
             $this->total_count = $row_count->total;
             $final_return_array['result'] = Array();
-            $tariff_id_array=Array();
+            $tariff_id_array = Array();
             foreach ($query->result_array() as $row) {
                 $account_id = $row['account_id'];
                 $tariff_id = $row['tariff_id'];
@@ -387,7 +388,7 @@ class Customer_mod extends CI_Model {
     function add($data) {
         $api_log_data_array = array();
         $log_data_array = array();
-       $data['account_type'] = $account_type = 'CUSTOMER';
+        $data['account_type'] = $account_type = 'CUSTOMER';
         try {
             $sql = "SELECT  username  FROM web_access WHERE username ='" . $data['username'] . "' ";
 
@@ -421,9 +422,9 @@ class Customer_mod extends CI_Model {
 
             $account_data_array['account_status'] = $data['account_status'];
             if (isset($data['account_type'])) {
-				if(strlen(trim($data['account_type']))> 0){
-					$account_data_array['account_type'] = $data['account_type'];
-				}
+                if (strlen(trim($data['account_type'])) > 0) {
+                    $account_data_array['account_type'] = $data['account_type'];
+                }
                 if ($data['account_type'] == 'DEMO') {
                     $account_data_array['account_status'] = '1';
                 }
@@ -620,46 +621,44 @@ class Customer_mod extends CI_Model {
                 $this->db->trans_commit();
                 set_activity_log($log_data_array);
 
-                /*
-                  /////////SDR API////
-                  $api_request['account_id'] = $account_access_array['account_id'];
-                  $api_request['account_type'] = 'CUSTOMER';
-                  $api_request['account_level'] = '';
-                  $api_request['is_new_account'] = 'Y';
-                  $api_request['service_number'] = $account_data_array['tariff_id']; //tariff
-                  $api_request['request'] = 'TARIFFCHARGES';
+                $api_request['account_id'] = $account_access_array['account_id'];
+                $api_request['account_type'] = 'CUSTOMER';
+                $api_request['account_level'] = '';
+                $api_request['is_new_account'] = 'Y';
+                $api_request['service_number'] = $account_data_array['tariff_id'];
+                $api_request['request'] = 'TARIFFCHARGES';
 
-                  $api_response = callSdrAPI($api_request);
-                  $api_result = json_decode($api_response, true);
-                  $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['request'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
+                $api_response = callSdrAPI($api_request);
+                $api_result = json_decode($api_response, true);
+                $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['request'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
 
-                  if (!isset($api_result['error']) || $api_result['error'] == '1') {
-                  //echo '<pre>';print_r($api_result);die;
-                  //$this->db->trans_rollback();
-                  //throw new Exception('SDR Problem:('.$api_request['account_id'].')'.$api_result['message']);
-                  }
-                  ///////////////
-                  //////////////sdr api ADDCREDIT///////
-                  if ($data['credit_limit'] > 0) {
-                  $api_request = array();
-                  $api_request['account_id'] = $account_access_array['account_id'];
-                  $api_request['account_type'] = 'CUSTOMER';
-                  $api_request['service_number'] = 'Increase Credit';
-                  $api_request['amount'] = $data['credit_limit'];
-                  $api_request['paid_on'] = date('Y-m-d h:i:s');
-                  $api_request['notes'] = 'Initial Credit';
-                  $api_request['created_by'] = get_logged_account_id();
-                  $api_request['request'] = 'ADDCREDIT';
+                if (!isset($api_result['error']) || $api_result['error'] == '1') {
+                    //echo '<pre>';print_r($api_result);die;
+                    //$this->db->trans_rollback();
+                    //throw new Exception('SDR Problem:('.$api_request['account_id'].')'.$api_result['message']);
+                }
+                ///////////////
+                //////////////sdr api ADDCREDIT///////
+                if ($data['credit_limit'] > 0) {
+                    $api_request = array();
+                    $api_request['account_id'] = $account_access_array['account_id'];
+                    $api_request['account_type'] = 'CUSTOMER';
+                    $api_request['service_number'] = 'Increase Credit';
+                    $api_request['amount'] = $data['credit_limit'];
+                    $api_request['paid_on'] = date('Y-m-d h:i:s');
+                    $api_request['notes'] = 'Initial Credit';
+                    $api_request['created_by'] = get_logged_account_id();
+                    $api_request['request'] = 'ADDCREDIT';
 
-                  $api_response = callSdrAPI($api_request);
-                  $api_result = json_decode($api_response, true);
-                  $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['request'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
-                  set_activity_log($api_log_data_array); //api log
-                  if (!isset($api_result['error']) || $api_result['error'] == '1') {
+                    $api_response = callSdrAPI($api_request);
+                    $api_result = json_decode($api_response, true);
+                    $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['request'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
+                    set_activity_log($api_log_data_array); //api log
+                    if (!isset($api_result['error']) || $api_result['error'] == '1') {
+                        
+                    }
+                }
 
-                  }
-                  }
-                 */
 
 
                 return true;
@@ -685,7 +684,7 @@ class Customer_mod extends CI_Model {
                 $account_access_data_array['username'] = $data['username'];
             if (isset($data['secret']) && $data['secret'] != '')
                 $account_access_data_array['secret'] = $data['secret'];
-           
+
             if (isset($data['account_status']))
                 $account_data_array['account_status'] = $data['account_status'];
             if (isset($data['account_cc']))
@@ -1080,7 +1079,7 @@ class Customer_mod extends CI_Model {
             $ip_data_array['ip_cc'] = $data['ip_cc'];
             $ip_data_array['ip_cps'] = $data['ip_cps'];
             $ip_data_array['ip_status'] = $data['ip_status'];
-			$ip_data_array['ipauthfrom'] = 'SRC';
+            $ip_data_array['ipauthfrom'] = 'SRC';
 
             $this->db->trans_begin();
             $str = $this->db->insert_string('customer_ips', $ip_data_array);
