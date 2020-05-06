@@ -72,12 +72,12 @@ echo base_url('customers') . '/edit/' . param_encrypt($data['account_id']); ?>">
                             <input type="text" name="account_id_name_display" id="account_id_name_display" value="<?php echo $data['account_id'] . ' (' . $data['name'] . ')'; ?>"  disabled="disabled"  class="form-control col-md-7 col-xs-12">
                         </div>
                     </div>
-                    <div class="form-group">
+<!--                    <div class="form-group">
                         <label class="control-label col-md-4 col-sm-3 col-xs-12" for="callingcard_pin">Calling Card Access PIN </label>
-                        <div class="col-md-7 col-sm-6 col-xs-12">
-                            <input type="text" name="callingcard_pin" id="account_id_name_display" value="<?php echo $account_id_sip_data['callingcard_pin']; ?>"  disabled="disabled"  class="form-control col-md-7 col-xs-12">
-                        </div>
-                    </div>
+                        <div class="col-md-7 col-sm-6 col-xs-12">-->
+                            <input type="hidden" name="callingcard_pin" id="account_id_name_display" value="<?php echo $account_id_sip_data['callingcard_pin']; ?>"  disabled="disabled"  class="form-control col-md-7 col-xs-12">
+<!--                        </div>
+                    </div>-->
 
                     <div class="form-group">
                         <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">SIP Device Login <span class="required">*</span> </label>

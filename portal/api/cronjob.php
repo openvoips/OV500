@@ -1,8 +1,9 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
-// Copyright (C) 2019 Chinna Technologies  
+// Copyright (C) 2019 Chinna Technologies
 // Seema Anand <openvoips@gmail.com>
 // Anand <kanand81@gmail.com>
 // http://www.openvoips.com  http://www.openvoips.org
@@ -23,16 +24,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 // ##############################################################################
-error_reporting(0);
-ini_set('memory_limit', '1024M');
-date_default_timezone_set("GMT");
-define('CDR_DSN', 'mysql:dbname=switchcdr;host=localhost');
-define('CDR_DSN_LOGIN', 'ovswitch');
-define('CDR_DSN_PASSWORD', 'ovswitch123');
-define('SWITCH_DSN', 'mysql:dbname=switch;host=localhost');
-define('SWITCH_DSN_LOGIN', 'ovswitch');
-define('SWITCH_DSN_PASSWORD', 'ovswitch123');
-define('LOGPATH', 'log/');
-define('LOGWRITE', '0');
-define('DBLOGWRITE', '1');
+
+/*
+ * This script is to generate the daily calls sdr and billing  
+ */
+
+
+include_once 'config.php';
+include_once 'lib/APIS.php';        
+$APIS = New APIS();
+$date = date('Y-m-d');
+$date = date('Y-m-d', strtotime($date . ' -1 day'));
+/*
+ * Generating the last day SDR and billing 
+ */
+$APIS->service($date);
 ?>

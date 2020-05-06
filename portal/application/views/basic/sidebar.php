@@ -257,14 +257,13 @@
                             $class = 'class="current-page"';
                         $menu_user .= '<li ' . $class . '><a href="' . base_url() . 'reports/FailCalls">Failed Calls</a></li>';
                     }
-                    /*
-                      if (check_account_permission('reports', 'report_statement')) {
-                      $class = '';
-                      if (in_array($page_name, array('report_statement')))
-                      $class = 'class="current-page"';
-                      $menu_user .= '<li ' . $class . '><a href="' . base_url() . 'customers/statement">Account Statement</a></li>';
-                      }
-                     */
+
+                    if (check_account_permission('reports', 'report_statement')) {
+                        $class = '';
+                        if (in_array($page_name, array('report_statement')))
+                            $class = 'class="current-page"';
+                        $menu_user .= '<li ' . $class . '><a href="' . base_url() . 'customers/statement">Account Statement</a></li>';
+                    }
                 }
 
                 /*

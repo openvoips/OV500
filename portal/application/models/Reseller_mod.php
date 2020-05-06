@@ -69,7 +69,7 @@ class Reseller_mod extends CI_Model {
             if ($order_by != '') {
                 $sql .= " ORDER BY $order_by ";
             } else {
-                $sql .= " ORDER BY `name` ASC ";
+                $sql .= " ORDER BY customer_id desc ";
             }
             $limit_from = intval($limit_from);
             if ($limit_to != '')

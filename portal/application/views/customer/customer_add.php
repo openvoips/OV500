@@ -185,12 +185,12 @@ $vatflag_array = array('NONE', 'TAX', 'VAT');
                     </div>  
 
 
-                    <div class="form-group">
+<!--                    <div class="form-group">
                         <label class="control-label col-md-4 col-sm-3 col-xs-12">Max Credit Limit <span class="required">*</span></label>
                         <div class="col-md-7 col-sm-6 col-xs-10">
                             <input type="text" name="maxcredit_limit" id="maxcredit_limit" value="<?php echo set_value('maxcredit_limit', '0'); ?>" data-parsley-required="" data-parsley-pattern="^[0-9]\d*(\.\d+)?$" class="form-control" tabindex="<?php echo $tab_index++; ?>">
                         </div>
-                    </div>
+                    </div>-->
 
                     <div class="form-group">
                         <label class="control-label col-md-4 col-sm-3 col-xs-12" >Billing in Decimal <span class="required">*</span></label>

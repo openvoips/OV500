@@ -107,8 +107,7 @@ $vatflag_array = array('NONE', 'TAX', 'VAT');
                             </div>
                         </div>
                         <?php
-                    }
-                    else {
+                    } else {
 
                         echo '<input type="hidden" name="currency_id" id="currency_id" value="' . $logged_account_result['currency_id'] . '" data-parsley-required="" class="form-control"  readonly="readonly">';
                     }
@@ -429,14 +428,14 @@ $vatflag_array = array('NONE', 'TAX', 'VAT');
             </div>
         </div>
         <div class="col-md-12 col-sm-12 col-xs-12 center">
-         <div class="ln_solid"></div>
-                    <div class="form-group">
-                        <div class="col-md-12 col-sm-6 col-xs-12 col-md-offset-4">
-                            <!--<a href="<?php echo base_url($reseller_type . 's') ?>"><button class="btn btn-primary" type="button"  tabindex="<?php echo $tab_index++; ?>">Cancel</button></a>-->				
-                            <button type="button" id="btnSave" class="btn btn-success" tabindex="<?php echo $tab_index++; ?>">Save</button>
-                            <button type="button" id="btnSaveClose" class="btn btn-info" tabindex="<?php echo $tab_index++; ?>">Save & Go Back to Listing page</button>
-                        </div>
-                    </div>
+            <div class="ln_solid"></div>
+            <div class="form-group">
+                <div class="col-md-12 col-sm-6 col-xs-12 col-md-offset-4">
+                    <!--<a href="<?php echo base_url($reseller_type . 's') ?>"><button class="btn btn-primary" type="button"  tabindex="<?php echo $tab_index++; ?>">Cancel</button></a>-->				
+                    <button type="button" id="btnSave" class="btn btn-success" tabindex="<?php echo $tab_index++; ?>">Save</button>
+                    <button type="button" id="btnSaveClose" class="btn btn-info" tabindex="<?php echo $tab_index++; ?>">Save & Go Back to Listing page</button>
+                </div>
+            </div>
         </div>
     </form>
 

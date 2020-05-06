@@ -1,4 +1,5 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
@@ -631,7 +632,6 @@ class OVS extends PDO {
         } elseif ($this->carrierdata['dst_type'] == 'CUSTOMER') {
             $this->Gateway_XML_incoming .= "\n <action application=\"bridge\" data=\"sofia/internal/" . $this->carrierdata['dst_destination'] . "@" . $lb . "\"/>";
         } elseif ($this->carrierdata['dst_type'] == 'PSTN') {
-
 
             $this->account_id = $this->carrierdata['account_id'];
             $this->destination_number = $this->carrierdata['dst_destination'];
@@ -1277,6 +1277,13 @@ class OVS extends PDO {
 
 
         /*
+         * Checking CLI based on Destination when this option enabled
+         */
+        if ($this->customers['force_dst_src_cli_prefix'] == '1') {
+            $this->force_dst_src_cli_prefix();
+        }
+
+        /*
          * Checking the user balance
          */
         $query = sprintf("SELECT id, credit_limit - balance as 'balance'  from customer_balance where account_id = '%s';", $user);
@@ -1625,6 +1632,41 @@ class OVS extends PDO {
             $this->PSTN_reseller($this->customers['parent_account_id']);
         }
         $this->rates = str_replace('"', "'", json_encode($this->customersdata));
+        return;
+    }
+
+    function force_dst_src_cli_prefix() {
+        /*
+         *  change the CallerID based on Destination number prefix.       
+         *  Manupulation the callerID number
+         * 44%=>441282777711  Means destination number start with 44 then send the caller ID 441282777711
+          %=>44%  Means any destination except other rules prefix then add the 44 in the front of incoming CLI
+          65%=>% Means any destination number start with 65 then send the callerID as coming from the origuinator or changed by callerID transaltion rules.
+         */
+        $query = sprintf("SELECT maching_string, match_length, remove_string, add_string, account_id, display_string , LENGTH(maching_string) lndata from customer_callerid where route = 'DTSBASEDCLI'  and  account_id = '%s' and '%s' like maching_string ORDER BY lndata desc;", $this->customers['account_id'], $this->destination_number);
+        $this->writelog($query);
+        $this->query('SWITCH', $query);
+        $rs = $this->resultset();
+        foreach ($rs[0] as $key => $value) {
+            $this->dst_src_cli_prefix[$key] = $value;
+        }
+        if (count($this->dst_src_cli_prefix) > 0) {
+            if ($this->dst_src_cli_prefix['add_string'] != null and $this->dst_src_cli_prefix['add_string'] != '' and strlen(trim($this->dst_src_cli_prefix['add_string'])) > 0) {
+                if (strpos($this->dst_src_cli_prefix['add_string'], '|') !== false) {
+                    $clidata = explode('|', $this->dst_src_cli_prefix['add_string']);
+                    $removestar = $clidata[0];
+                    $this->dst_src_cli_prefix['add_string'] = $addstr = $clidata[1];
+                    $this->callernumber = substr($this->callernumber, strlen($removestar), strlen($this->callernumber));
+                }
+                if (substr(trim($this->dst_src_cli_prefix['add_string']), -1) == '%') {
+                    $this->callernumber = trim($this->dst_src_cli_prefix['add_string'] . trim($this->callernumber));
+                    $this->callernumber = preg_replace("/%/", "", $this->callernumber);
+                } else {
+                    $this->callernumber = trim($this->dst_src_cli_prefix['add_string']);
+                }
+            }
+            $this->callernumber_user = $this->callernumber_user_dst_src_cli_prefix = $this->callernumber;
+        }
         return;
     }
 
@@ -3456,16 +3498,15 @@ class OVS extends PDO {
         RETURN $responce;
     }
 
-
     function PSTN_route_dialplan_xml() {
         array_push($this->str, 7200);
         $this->timeout = min($this->str);
-       
+
         $responce .= "<?xml version = \"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>
                             <document type=\"OvSwitch/xml\">";
-                            
-         $responce .= $this->directory;
-         $responce .= "<section name=\"dialplan\" description=\"RE Dial Plan For OvSwitch\">";
+
+        $responce .= $this->directory;
+        $responce .= "<section name=\"dialplan\" description=\"RE Dial Plan For OvSwitch\">";
         $responce .= "\n<context name=\"default\">";
         $responce .= "\n<extension name=\"outbound_international\">
                 <condition field=\"destination_number\" expression=\"^(.+)$\">";
@@ -4651,7 +4692,7 @@ class OVS extends PDO {
         if ($this->leg == 'A') {
             $query = sprintf("delete from livecalls where common_uuid = '%s' or carrier_ipaddress_name = '' or carrier_ipaddress_name is null ", addslashes($this->cdr_variable['common_uuid']));
             $this->query('SWITCH', $query);
-            $this->execute();			
+            $this->execute();
         }
 
         $data = $data . "carrier_ratio= '" . addslashes($this->carrierdata['ratio']) . "',";
@@ -4865,7 +4906,6 @@ r3_rate ) VALUES ('%s', '%s', '%s', '%s', '%s', '%s','%s', '%s', '%s','%s', '%s'
         try {
             $this->dbswitch = null;
             $this->dbcdr = null;
-            $this->dbbackupcdr = null;
         } catch (PDOException $e) {
             exit('App shoutdown');
         }
@@ -5273,4 +5313,5 @@ KEY billsec (billsec) USING BTREE
 
         return $tables;
     }
+
 }

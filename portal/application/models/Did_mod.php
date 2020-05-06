@@ -3,7 +3,7 @@
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
-// Copyright (C) 2019 Chinna Technologies  
+// Copyright (C) 2019 Chinna Technologies
 // Seema Anand <openvoips@gmail.com>
 // Anand <kanand81@gmail.com>
 // http://www.openvoips.com  http://www.openvoips.org
@@ -429,7 +429,7 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                 return $error_array['message'];
             } else {
                 $this->db->trans_commit();
-                set_activity_log($log_data_array);              
+                set_activity_log($log_data_array);
             }
             return true;
         } catch (Exception $e) {
@@ -623,7 +623,7 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
         }
     }
 
-    function delete($id_array) {
+    function delete($account_id, $id_array) {
         try {
             $this->db->trans_begin();
             foreach ($id_array['delete_id'] as $id) {
@@ -644,18 +644,8 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                         $error_array = $this->db->error();
                         throw new Exception($error_array['message']);
                     }
-                    $this->clean_did_related_data($row['did_number']);
-                    $api_request = array();
-                    $api_request['request'] = 'SUPPILERNEWDID';
-                    $api_request['action'] = 'CANCEL';
-                    $api_request['service_number'] = array($row['did_number']);
-                    $api_request['carrier'] = $row['carrier_id'];
-                    $api_response = callSdrAPI($api_request);
-                    $api_result = json_decode($api_response, true);
-                    if (!isset($api_result['error']) || $api_result['error'] == '1') {
-                        throw new Exception('SDR Problem:(' . $api_result['message'] . ')');
-                        ;
-                    }
+                    //$account_id='NEEDTOSET';//you need to pass account_id
+                    $this->clean_did_related_data($row['did_number'],$account_id);                   
                 }
 
                 $log_data_array[] = array('activity_type' => 'delete_recovery', 'sql_table' => 'DID', 'sql_key' => $id, 'sql_query' => '');
@@ -822,11 +812,25 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
     }
 
     function assignment($did, $setup, $rental) {
+
         try {
-            $this->db->trans_begin();
             $account_type = get_logged_account_type();
             $account_id = get_logged_account_id();
             $account_level = get_logged_account_level();
+            ///////////api/////////
+            $api_request['request'] = 'NEWDIDSETUP';
+            $api_request['account_id'] = $account_id;
+            $api_request['service_number'] = $did;
+            $api_request['account_type'] = $account_type;
+            $api_request['account_level'] = $account_level;
+
+            //$request['channels'] = '15';
+            $api_response = callSdrAPI($api_request);
+            $api_result = json_decode($api_response, true);
+            if (!isset($api_result['status']) || $api_result['status'] != 'SUCCESS') {
+                throw new Exception('SDR Problem:' . $api_result['message']);
+            }
+            $this->db->trans_begin();
             if ($account_type == 'CUSTOMER') {
                 $sql = "update did set did_status = 'USED', account_id = '" . $account_id . "', assign_date = now() WHERE did_number = '" . $did . "'";
             } else {
@@ -837,7 +841,6 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                 else
                     $sql = "update did set did_status = 'USED', reseller3_account_id = '" . $account_id . "', reseller3_assign_date = now() WHERE did_number = '" . $did . "'";
             }
-
             $result = $this->db->query($sql);
             if (!$result) {
                 $error_array = $this->db->error();
@@ -846,30 +849,12 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
             if ($this->db->trans_status() === FALSE) {
                 $error_array = $this->db->error();
                 $this->db->trans_rollback();
-                return $error_array['message'];
+                throw new Exception($error_array['message']);
             } else {
-                ///////////api/////////		
-                $api_request['request'] = 'NEWDIDSETUP';
-                $api_request['account_id'] = $account_id;
-                $api_request['service_number'] = $did;
-                $api_request['account_type'] = $account_type;
-                $api_request['account_level'] = $account_level;
-
-
-                //$request['channels'] = '15';			
-                $api_response = callSdrAPI($api_request);
-                $api_result = json_decode($api_response, true);
-                if (!isset($api_result['error']) || $api_result['error'] == '1') {
-                    $this->db->trans_rollback();
-                    throw new Exception('SDR Problem:' . $api_result['message']);
-                }
-                //////////api/////////
-
                 $this->db->trans_commit();
-                return true;
             }
+            return true;
         } catch (Exception $e) {
-            $this->db->trans_rollback();
             return $e->getMessage();
         }
     }

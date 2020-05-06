@@ -181,8 +181,7 @@ $tab_index = 1;
                         <thead>
                             <tr class="headings thc">
                                 <th class="column-title">Username</th>
-                                <th class="column-title">Secret</th>
-                                <th class="column-title">Acess PIN</th>
+                                <th class="column-title">Secret</th>                               
                                 <th class="column-title">Extension No</th>                                
                                 <th class="column-title">Status </th>
                                 <th class="column-title">Action </th>
@@ -205,8 +204,7 @@ $tab_index = 1;
                                     ?>
                                     <tr>
                                         <td><?php echo $sip_data['username']; ?></td>
-                                        <td><?php echo $sip_data['secret']; ?></td> 
-                                        <td><?php echo $sip_data['callingcard_pin']; ?></td>
+                                        <td><?php echo $sip_data['secret']; ?></td>                                      
                                         <td><?php echo $sip_data['extension_no']; ?></td>
 
                  <!--<td><?php echo $voicemail; ?></td>-->

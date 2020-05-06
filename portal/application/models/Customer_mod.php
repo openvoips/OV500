@@ -76,7 +76,7 @@ class Customer_mod extends CI_Model {
             if ($order_by != '') {
                 $sql .= " ORDER BY $order_by ";
             } else {
-                $sql .= " ORDER BY `name` ASC ";
+                $sql .= " ORDER BY ua.customer_id desc ";
             }
             $limit_from = intval($limit_from);
             if ($limit_to != '')
@@ -633,34 +633,10 @@ class Customer_mod extends CI_Model {
                 $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['request'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
 
                 if (!isset($api_result['error']) || $api_result['error'] == '1') {
-                    //echo '<pre>';print_r($api_result);die;
-                    //$this->db->trans_rollback();
-                    //throw new Exception('SDR Problem:('.$api_request['account_id'].')'.$api_result['message']);
-                }
-                ///////////////
-                //////////////sdr api ADDCREDIT///////
-                if ($data['credit_limit'] > 0) {
-                    $api_request = array();
-                    $api_request['account_id'] = $account_access_array['account_id'];
-                    $api_request['account_type'] = 'CUSTOMER';
-                    $api_request['service_number'] = 'Increase Credit';
-                    $api_request['amount'] = $data['credit_limit'];
-                    $api_request['paid_on'] = date('Y-m-d h:i:s');
-                    $api_request['notes'] = 'Initial Credit';
-                    $api_request['created_by'] = get_logged_account_id();
-                    $api_request['request'] = 'ADDCREDIT';
-
-                    $api_response = callSdrAPI($api_request);
-                    $api_result = json_decode($api_response, true);
-                    $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['request'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
-                    set_activity_log($api_log_data_array); //api log
-                    if (!isset($api_result['error']) || $api_result['error'] == '1') {
-                        
-                    }
-                }
-
-
-
+                    echo '<pre>';print_r($api_result);die;
+                    $this->db->trans_rollback();
+                    throw new Exception('SDR Problem:('.$api_request['account_id'].')'.$api_result['message']);
+                }               
                 return true;
             }
         } catch (Exception $e) {
@@ -844,7 +820,7 @@ class Customer_mod extends CI_Model {
                     $api_request['account_type'] = 'CUSTOMER';
                     $api_request['account_level'] = '';
                     $api_request['service_number'] = $data['tariff_id'];
-                    $api_request['request'] = 'TARIFFCHARGES';
+                    $api_request['request'] = 'UPDATETARIFFCHARGES';
 
 
                     $api_response = callSdrAPI($api_request);

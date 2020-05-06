@@ -43,7 +43,7 @@ class Ratecard extends CI_Controller {
     }
 
     public function index($arg1 = '', $format = '') {
-               
+        $data = Array();
         $page_name = "ratecard_index";
         $file_name = 'Ratecard_' . date('Ymd');
         $is_file_downloaded = false;
@@ -110,7 +110,8 @@ class Ratecard extends CI_Controller {
             'logged_account_level' => get_logged_account_level(),
         );
 
-        $order_by = '';
+               
+        $order_by =  array('id'=>'DESC');
         if ($arg1 == 'export' && $format != '') {
             $this->load->library('Export');
             $format = param_decrypt($format);

@@ -1,4 +1,5 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
@@ -214,7 +215,7 @@ class Ratecard_mod extends CI_Model {
                 $this->subquery->end_subquery('created_by', TRUE);
             }
             if (is_string($order_by) && $order_by == '') {
-                $this->db->order_by('ratecard_name', 'ASC');
+                $this->db->order_by('id', 'DESC');
             } else {
                 foreach ($order_by as $k => $v) {
                     $this->db->order_by($k, $v);
@@ -224,8 +225,8 @@ class Ratecard_mod extends CI_Model {
                 $this->db->where_in('ratecard_id', $am_ratecard_id_array);
             }
             $this->db->limit(intval($limit_from), intval($limit_to));
-            $q = $this->db->get('ratecard');       
-           //echo $this->db->last_query();
+            $q = $this->db->get('ratecard');
+            // echo $this->db->last_query();
             if (!$q) {
                 $error_array = $this->db->error();
                 throw new Exception($error_array['message']);

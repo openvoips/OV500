@@ -1,4 +1,5 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
@@ -120,7 +121,7 @@ class Customers extends CI_Controller {
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
 
 
-//==========export pdf start==========================			
+        //==========export pdf start==========================			
         if ($arg1 == 'export' && $format != '') {
 
             if ($id != -1) {
@@ -167,7 +168,7 @@ class Customers extends CI_Controller {
                 $data['err_msgs'] = $downloaded_message;
         }
 
-//================================export pdf end===========================
+        //================================export pdf end===========================
 
 
         if (check_logged_account_type(array('RESELLER', 'CUSTOMER'))) {
@@ -290,7 +291,7 @@ class Customers extends CI_Controller {
                     $suc_msgs .= ' Deleted Successfully';
                     $this->session->set_flashdata('suc_msgs', $suc_msgs);
                     redirect(current_url(), 'location', '301');
-                }else {
+                } else {
                     $err_msgs = $result;
                     $this->session->set_flashdata('err_msgs', $err_msgs);
                     redirect(current_url(), 'location', '301');
@@ -423,7 +424,7 @@ class Customers extends CI_Controller {
             $this->form_validation->set_rules('account_status', 'Status', 'trim|required');
             $this->form_validation->set_rules('dp', 'DP', 'trim|required');
             $this->form_validation->set_rules('billing_type', 'Billing Type', 'trim|required');
-            $this->form_validation->set_rules('maxcredit_limit', 'Max Credit Limit', 'trim|required');
+//            $this->form_validation->set_rules('maxcredit_limit', 'Max Credit Limit', 'trim|required');
             $this->form_validation->set_rules('credit_limit', 'Initial Credit Limit', 'trim|required');
             $this->form_validation->set_rules('tax_type', 'Tax Type', 'trim|required');
             $this->form_validation->set_rules('tax1', 'Tax 1', 'trim|required');
@@ -476,8 +477,7 @@ class Customers extends CI_Controller {
                             redirect(base_url() . 'customers/edit/' . param_encrypt($account_id), 'location', '301');
                         elseif ($action == 'save_close')
                             redirect(base_url() . 'customers', 'location', '301');
-                    }
-                    else {
+                    } else {
                         redirect(base_url() . 'customers', 'location', '301');
                     }
                     redirect(base_url() . 'customers/add', 'location', '301');
@@ -705,8 +705,7 @@ class Customers extends CI_Controller {
                         redirect(base_url($customer_type . 's') . '/edit/' . param_encrypt($account_id), 'location', '301');
                     elseif ($action == 'save_close')
                         redirect(base_url($customer_type . 's'), 'location', '301');
-                }
-                else {
+                } else {
                     redirect(base_url($customer_type . 's'), 'location', '301');
                 }
                 redirect(base_url($customer_type . 's') . '/edit/' . param_encrypt($account_id), 'location', '301');
@@ -752,484 +751,8 @@ class Customers extends CI_Controller {
             $data['logged_account_result'] = $this->member_mod->get_account_by_key('account_id', $logged_account_id, $option_param);
         }
 
-
-        $view_file = 'customer/customer_edit';
-
         $this->load->view('basic/header', $data);
-        $this->load->view($view_file, $data);
-        $this->load->view('basic/footer', $data);
-    }
-
-    public function kyc($id = -1, $customer_type = 'customer') {
-        if ($id == -1)
-            show_404();
-
-        if (!check_account_permission('customer', 'view') && !check_account_permission('customer', 'edit'))
-            show_404('403');
-
-        $page_name = "{$customer_type}_edit";
-        $data['page_name'] = $page_name;
-        $data['customer_type'] = $customer_type;
-
-
-        $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-
-
-        if (isset($_POST['action']) && $_POST['action'] == 'OkUpdateAccountStatus') {
-            $this->form_validation->set_rules('telco_customer_id', 'Telco Customer ID', 'trim|required');
-
-            if ($this->form_validation->run() == FALSE) {// error
-                $data['err_msgs'] = validation_errors();
-            } else {
-
-                $data_array = array('account_status' => 1, 'account_id' => $_POST['account_id'], 'key' => $_POST['account_id'], 'approved_by' => get_logged_account_id());
-                $result = $this->customer_mod->update($data_array);
-                if ($result === true) {
-                    $data_array = array('account_id' => $_POST['account_id'], 'telco_customer_id' => $_POST['telco_customer_id'], 'updated_by' => get_logged_account_id());
-                    $this->member_mod->set_telco_reference($data_array);
-                    $this->session->set_flashdata('suc_msgs', 'User Status Updated Successfully');
-                    redirect(current_url(), 'location', '301');
-                } else {
-                    $err_msgs = $result;
-                    $data['err_msgs'] = $err_msgs;
-                }
-            }
-        } elseif (isset($_POST['action']) && $_POST['action'] == 'OkDeleteData') {
-            $account_account_id = trim($_POST['delete_parameter_two']);
-            $file_name_array = json_decode($_POST['delete_id']);
-            $result = $this->customer_mod->delete_kyc_doc($account_account_id, $file_name_array);
-
-            if ($result === true) {
-                foreach ($file_name_array as $file_name) {
-                    $upload_path = 'uploads/kyc/' . SITE_SUBDOMAIN . '/' . $account_account_id . '/' . $file_name;
-                    if (file_exists($upload_path)) {
-                        unlink($upload_path);
-                    }
-                }
-                $suc_msgs = 'Document Deleted Successfully';
-                $this->session->set_flashdata('suc_msgs', $suc_msgs);
-                redirect(current_url(), 'location', '301');
-            } else {
-                $err_msgs = $result;
-                $this->session->set_flashdata('err_msgs', $err_msgs);
-                redirect(current_url(), 'location', '301');
-            }
-        } elseif (isset($_POST['action']) && $_POST['action'] == 'OkUpdateKycStatus') {
-            $this->form_validation->set_rules('account_id', 'Account ID', 'trim|required');
-            $this->form_validation->set_rules('status_form_kyc', 'KYC', 'trim|required');
-
-            if ($this->form_validation->run() == FALSE) {// error
-                $data['err_msgs'] = validation_errors();
-            } else {
-                $account_id = trim($_POST['account_id']);
-                $data_array = array('account_id' => $account_id, 'option_id_name' => $_POST['status_form_kyc'], 'updated_by' => get_logged_account_id());
-                $result = $this->customer_mod->change_kyc_status($data_array);
-                if ($result === true) {
-                    $this->session->set_flashdata('suc_msgs', 'KYC Status Changed Successfully');
-                    redirect(base_url($customer_type . 's') . '/kyc/' . param_encrypt($account_id), 'location', '301');
-                    exit();
-                } else {
-                    $err_msgs = $result;
-                    $data['err_msgs'] = $err_msgs;
-                }
-            }
-        } elseif (isset($_POST['action']) && $_POST['action'] == 'OkUploadKyc') {
-
-            $this->form_validation->set_rules('upload_form_kyc', 'KYC', 'trim|required');
-            $this->form_validation->set_rules('account_id', 'Account', 'trim|required');
-
-            if ($this->form_validation->run() == FALSE) {// error
-                $data['err_msgs'] = validation_errors();
-            } else {
-                $account_id = trim($_POST['account_id']);
-
-                $upload_path = 'uploads/kyc/' . SITE_SUBDOMAIN . '/' . $account_id;
-                if (!file_exists($upload_path))
-                    mkdir($upload_path);
-
-                $file_name = $account_id . '_kyc_' . $_FILES['kyc_file']['name'];
-                $config['upload_path'] = 'uploads/kyc/' . SITE_SUBDOMAIN . '/' . $account_id;
-                $config['allowed_types'] = 'gif|jpg|png|jpeg|pdf|zip';
-                $config['file_name'] = $file_name;
-                $config['file_ext_tolower'] = TRUE;
-                $config['max_size'] = 0;
-
-                $this->load->library('upload', $config);
-
-                if (!$this->upload->do_upload('kyc_file')) {
-                    $this->session->set_flashdata('err_msgs', $this->upload->display_errors());
-                    redirect(base_url($customer_type . 's') . '/kyc/' . param_encrypt($account_id), 'location', '301');
-                } else {
-                    $file_name = $this->upload->data('file_name');
-                    $add_array = array('account_id' => $account_id, 'option_id_name' => $_POST['upload_form_kyc'], 'file_name' => $file_name, 'updated_by' => get_logged_account_id());
-
-                    $result = $this->customer_mod->add_kyc_doc($add_array);
-                    if ($result === true) {
-                        $this->session->set_flashdata('suc_msgs', 'Document Added Successfully');
-                        redirect(base_url($customer_type . 's') . '/kyc/' . param_encrypt($account_id), 'location', '301');
-                        exit();
-                    } else {
-                        $err_msgs = $result;
-                        $data['err_msgs'] = $err_msgs;
-                    }
-                }
-            }
-        }
-
-
-        $account_id = param_decrypt($id);
-
-        $order_by = '';
-        $per_page = 1;
-        $segment = 0;
-        if (is_numeric($account_id))
-            $search_data = array('account_id' => $account_id);
-        else
-            $search_data = array('account_id' => $account_id);;
-
-        if (check_logged_account_type(array('RESELLER')))
-            $search_data['parent_account_id'] = get_logged_account_id();
-        elseif (check_logged_account_type(array('ADMIN', 'SUBADMIN'))) {
-            
-        }
-
-
-        $option_param = array('kyc' => true, 'kyc_files' => true, 'telco_reference' => true);
-        $customers_data_temp = $this->customer_mod->get_data($order_by, $per_page, $segment, $search_data, $option_param);
-
-        if (isset($customers_data_temp['result']))
-            $customers_data = current($customers_data_temp['result']);
-        else {
-            show_404();
-        }
-
-
-
-        /*         * **** pagination code ends  here ********* */
-        $data['data'] = $customers_data;
-        $data['account_id'] = $account_id;
-
-        $logged_account_type = get_logged_account_type();
-        $logged_account_id = get_logged_account_id();
-        $data['country_options'] = $this->utils_model->get_countries();
-        $data['currency_options'] = $this->utils_model->get_currencies();
-        $data['state_options'] = $this->utils_model->get_states();
-
-
-        $data['kyc_biz_options'] = $this->utils_model->get_rule_options('kyc-biz-customer');
-
-        $data['kyc_resident_options'] = $this->utils_model->get_rule_options('kyc-resident-customer');
-
-        if (check_logged_account_type(array('ADMIN', 'SUBADMIN'))) {
-            
-        } else {
-            //$data['logged_account_result'] = $this->member_mod->get_account_by_key('account_id',$logged_account_id,$option_param);				 
-        }
-
-        $this->load->view('basic/header', $data);
-        $this->load->view('customer/customer_edit_kyc', $data);
-        $this->load->view('basic/footer', $data);
-    }
-
-    function cli_lookup($arg1 = -1, $arg2 = -1, $arg3 = '', $customer_type = 'customer') {
-        //$this->output->enable_profiler(true);		
-        $this->load->model('did_mod');
-        if ($arg1 == -1)
-            show_404();
-
-        if ($arg2 == 'export') {
-            $format = $arg3;
-        }
-
-
-        //if($arg1!='export')	
-        {
-            $account_id_temp = $arg1;
-            $account_id = param_decrypt($account_id_temp);
-        }
-
-        $page_name = "{$customer_type}_index";
-        $data['page_name'] = $page_name;
-        $data['customer_type'] = $customer_type;
-
-        if (!check_account_permission('customer', 'view') && !check_account_permission('customer', 'edit'))
-            show_404('403');
-
-
-
-        $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-        ////////////////////////////////////////////////
-
-
-        if (isset($_POST['action']) && $_POST['action'] == 'OkDeleteData') {
-
-            if (!check_account_permission('customer', 'delete')) {
-                $this->session->set_flashdata('err_msgs', 'Dont have enough permission');
-                redirect(current_url(), 'location', '301');
-            }
-
-            $account_id = trim($_POST['delete_parameter_two']);
-            $delete_id_array = json_decode($_POST['delete_id']);
-            if (isset($_POST['delete_id']) && count($delete_id_array) > 0) {
-                $delete_param_array = array('delete_id' => $delete_id_array);
-                $result = $this->did_mod->delete_cli($account_id, $delete_param_array);
-                if ($result === true) {
-                    $suc_msgs = count($delete_id_array) . ' CLI';
-                    if (count($delete_id_array) > 1)
-                        $suc_msgs .= 's';
-                    $suc_msgs .= ' Deleted Successfully';
-                    $this->session->set_flashdata('suc_msgs', $suc_msgs);
-                    redirect(current_url(), 'location', '301');
-                }
-                else {
-                    $err_msgs = $result;
-                    $this->session->set_flashdata('err_msgs', $err_msgs);
-                    redirect(current_url(), 'location', '301');
-                }
-            } else {
-                $err_msgs = 'Select CLI to delete';
-                $this->session->set_flashdata('err_msgs', $err_msgs);
-                redirect(current_url(), 'location', '301');
-            }
-
-            redirect(current_url(), 'location', '301');
-        }
-
-
-
-
-        if (isset($_POST['search_action'])) {// coming from search button
-            $_SESSION['search_cli_data'] = array('s_group_name' => $_POST['group_name'], 's_did_number' => $_POST['did_number'], 's_prefix' => $_POST['prefix']);
-        } else {
-            $_SESSION['search_cli_data']['s_group_name'] = isset($_SESSION['search_cli_data']['s_group_name']) ? $_SESSION['search_cli_data']['s_group_name'] : '';
-            $_SESSION['search_cli_data']['s_did_number'] = isset($_SESSION['search_cli_data']['s_did_number']) ? $_SESSION['search_cli_data']['s_did_number'] : '';
-            $_SESSION['search_cli_data']['s_prefix'] = isset($_SESSION['search_cli_data']['s_prefix']) ? $_SESSION['search_cli_data']['s_prefix'] : '';
-        }
-
-
-        $search_data = array('account_id' => $account_id, 'group_name' => $_SESSION['search_cli_data']['s_group_name'], 'did_number' => $_SESSION['search_cli_data']['s_did_number'], 'prefix' => $_SESSION['search_cli_data']['s_prefix']);
-
-        $order_by = '';
-
-        $is_file_downloaded = false;
-        if ($arg1 == 'export' && $format != '') {
-            
-        }
-
-        if ($is_file_downloaded === false) {
-            /*             * **** pagination code start here ********* */
-            if ($arg2 == 'page' && $arg3 != '') {
-                $pagination_uri_segment = 5;
-                $segment = $this->uri->segment($pagination_uri_segment);
-            } else
-                $segment = 0;
-
-            //$pagination_uri_segment = 3;
-            $per_page = 100; //RECORDS_PER_PAGE;
-
-            /* if($this->uri->segment($pagination_uri_segment)==''){ $segment= 0; }
-              else{ $segment= $this->uri->segment($pagination_uri_segment); } */
-            //	echo '<pre>';echo $segment; print_r($search_data);echo '</pre>';
-            $data['available_cli_data'] = $this->did_mod->get_available_cli($account_id);
-            $data['assigned_cli_data'] = $this->did_mod->get_cli_data($order_by, $per_page, $segment, $search_data);
-            $total = $this->did_mod->total_cli_count;
-
-
-            $config = array();
-            $config = $this->utils_model->setup_pagination_option($total, 'customers/cli_lookup/' . $arg1 . '/page/', $per_page, $pagination_uri_segment);
-            $this->pagination->initialize($config);
-
-            /*             * **** pagination code ends  here ********* */
-            $data['pagination'] = $this->pagination->create_links();
-            $data['data'] = $customers_data;
-            $data['account_id'] = $account_id;
-
-
-            $this->load->view('basic/header', $data);
-            $this->load->view('customer/customer_cli_lookup', $data);
-            $this->load->view('basic/footer', $data);
-        }
-    }
-
-    public function cli_lookup_add($id = -1, $customer_type = 'customer') /* Edit End User cli lookup */ {
-        $this->load->model('did_mod');
-        if ($id == -1)
-            show_404();
-
-        if (!check_account_permission('customer', 'view') && !check_account_permission('customer', 'edit'))
-            show_404('403');
-
-        $page_name = "{$customer_type}_edit";
-        $data['page_name'] = $page_name;
-        $data['customer_type'] = $customer_type;
-
-        $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-
-
-        if (isset($_POST['action']) && $_POST['action'] == 'OkAddCli') {
-            $this->form_validation->set_rules('country_abbr', 'Country', 'trim|required');
-            $this->form_validation->set_rules('group_name', 'Group name', 'trim|required');
-            $this->form_validation->set_rules('prefixes', 'Prefixes', 'trim|required');
-            $this->form_validation->set_rules('cli[]', 'CLI', 'trim|required');
-
-            if ($this->form_validation->run() == FALSE) {// error
-                $data['err_msgs'] = validation_errors();
-            } else {
-                $prefixes_array = preg_split('/\r\n|\r|\n|,/', $_POST['prefixes']);
-
-
-                $data_array = array('country_abbr' => $_POST['country_abbr'], 'account_id' => $_POST['account_id'], 'group_name' => $_POST['group_name'], 'prefixes' => $prefixes_array, 'cli' => $_POST['cli']);
-
-                $result = $this->did_mod->add_cli($data_array);
-
-                //echo '<pre>'; print_r($data_array);print_r($result);echo '</pre>';die;
-                if ($result === true) {
-                    $this->session->set_flashdata('suc_msgs', 'CLI Added Successfully');
-                    $lookup_id = $this->did_mod->lookup_id;
-                    $action = trim($_POST['button_action']);
-                    if ($action == 'save')
-                        redirect(base_url($customer_type . 's') . '/cli_lookup_edit/' . param_encrypt($_POST['account_id']) . '/' . param_encrypt($lookup_id), 'location', '301');
-                    else
-                        redirect(base_url($customer_type . 's') . '/cli_lookup/' . param_encrypt($_POST['account_id']), 'location', '301');
-                }
-                else {
-                    $err_msgs = $result;
-                    $data['err_msgs'] = $err_msgs;
-                }
-            }
-        }
-
-
-        ///////////////////////////	
-
-        $account_id = param_decrypt($id);
-
-        $order_by = '';
-        $per_page = 1;
-        $segment = 0;
-        $search_data = array('account_id' => $account_id);
-
-        $option_param = array();
-        $customers_data_temp = $this->customer_mod->get_data($order_by, $per_page, $segment, $search_data, $option_param);
-
-        if (isset($customers_data_temp['result']))
-            $customers_data = current($customers_data_temp['result']);
-        else {
-            show_404();
-        }
-
-
-        /*         * **** pagination code ends  here ********* */
-        $data['data'] = $customers_data;
-        $data['account_id'] = $account_id;
-
-
-        $data['country_options'] = $this->did_mod->get_cli_countries($account_id);
-        $data['cli_group_options'] = $this->did_mod->get_cli_groups();
-        $data['available_cli_data'] = $this->did_mod->get_available_cli($account_id);
-
-
-        /* $search_data = array('account_id'=>$account_id);
-          $order_by ='';
-          $per_page = 1000;
-          $segment = '';
-          $data['assigned_cli_data'] = $this->did_mod->get_cli_data($order_by,$per_page, $segment, $search_data ); */
-
-        $this->load->view('basic/header', $data);
-        $this->load->view('customer/customer_cli_lookup_add', $data);
-        $this->load->view('basic/footer', $data);
-    }
-
-    public function cli_lookup_edit($account_id = -1, $lookup_id = -1, $customer_type = 'customer') /* Edit End User cli lookup */ {
-        $this->load->model('did_mod');
-        if ($account_id == -1 || $lookup_id == -1)
-            show_404();
-
-        if (!check_account_permission('customer', 'view') && !check_account_permission('customer', 'edit'))
-            show_404('403');
-
-        $page_name = "{$customer_type}_edit";
-        $data['page_name'] = $page_name;
-        $data['customer_type'] = $customer_type;
-        $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-
-
-        if (isset($_POST['action']) && $_POST['action'] == 'OkUpdateCli') {
-            $this->form_validation->set_rules('group_name', 'Group name', 'trim|required');
-            $this->form_validation->set_rules('prefixes', 'Prefixes', 'trim|required');
-            $this->form_validation->set_rules('cli[]', 'CLI', 'trim|required');
-
-            if ($this->form_validation->run() == FALSE) {// error
-                $data['err_msgs'] = validation_errors();
-            } else {
-                $prefixes_array = preg_split('/\r\n|\r|\n|,/', $_POST['prefixes']);
-                foreach ($prefixes_array as $key => $prefix) {
-                    if ($prefix == '')
-                        unset($prefixes_array[$key]);
-                }
-
-                $data_array = array('account_id' => $_POST['account_id'], 'lookup_id' => $_POST['lookup_id'], 'group_name' => $_POST['group_name'], 'prefixes' => $prefixes_array, 'cli' => $_POST['cli']);
-                //	echo '<pre>'; print_r($data_array);die;
-                $result = $this->did_mod->update_cli($data_array);
-                //	echo '<pre>'; print_r($data_array);print_r($result);echo '</pre>';die;
-
-                if ($result === true) {
-                    $this->session->set_flashdata('suc_msgs', 'CLI Updated Successfully');
-                    $action = trim($_POST['button_action']);
-                    if ($action == 'save')
-                        redirect(base_url($customer_type . 's') . '/cli_lookup_edit/' . param_encrypt($_POST['account_id']) . '/' . param_encrypt($_POST['lookup_id']), 'location', '301');
-                    else
-                        redirect(base_url($customer_type . 's') . '/cli_lookup/' . param_encrypt($_POST['account_id']), 'location', '301');
-                }
-                else {
-                    $err_msgs = $result;
-                    $data['err_msgs'] = $err_msgs;
-                }
-            }
-        }
-
-
-        ///////////////////////////	
-
-        $account_id = param_decrypt($account_id);
-        $lookup_id = param_decrypt($lookup_id);
-
-
-
-        $search_data = array('lookup_id' => $lookup_id);
-        $assigned_cli_data = $this->did_mod->get_cli_data('', '', '', $search_data);
-
-        if (isset($assigned_cli_data['result']))
-            $assigned_cli_data = current($assigned_cli_data['result']);
-        else {
-            show_404();
-        }
-
-        $search_data = array('account_id' => $account_id);
-        $option_param = array();
-        $customers_data_temp = $this->customer_mod->get_data('', '', '', $search_data, $option_param);
-
-        if (isset($customers_data_temp['result']))
-            $customers_data = current($customers_data_temp['result']);
-        else {
-            show_404();
-        }
-
-
-
-        /*         * **** pagination code ends  here ********* */
-        $data['data'] = $customers_data;
-        $data['account_id'] = $account_id;
-        $data['assigned_cli_data'] = $assigned_cli_data;
-
-
-        $data['country_options'] = $this->did_mod->get_cli_countries();
-        $data['cli_group_options'] = $this->did_mod->get_cli_groups();
-        $data['available_cli_data'] = $this->did_mod->get_available_cli($account_id);
-
-
-        $this->load->view('basic/header', $data);
-        $this->load->view('customer/customer_cli_lookup_edit', $data);
+        $this->load->view('customer/customer_edit', $data);
         $this->load->view('basic/footer', $data);
     }
 
@@ -1576,8 +1099,7 @@ class Customers extends CI_Controller {
                             redirect(base_url($customer_type . 's') . '/editSRCNo/' . param_encrypt($account_id), 'location', '301');
                         elseif ($action == 'save_close')
                             redirect(base_url($customer_type . 's') . '/edit/' . param_encrypt($account_id), 'location', '301');
-                    }
-                    else {
+                    } else {
                         redirect(base_url($customer_type . 's'), 'location', '301');
                     }
 
@@ -1655,8 +1177,7 @@ class Customers extends CI_Controller {
                             redirect(base_url($customer_type . 's') . '/editINSRCNo/' . param_encrypt($account_id), 'location', '301');
                         elseif ($action == 'save_close')
                             redirect(base_url($customer_type . 's') . '/edit/' . param_encrypt($account_id), 'location', '301');
-                    }
-                    else {
+                    } else {
                         redirect(base_url($customer_type . 's'), 'location', '301');
                     }
 
@@ -1730,8 +1251,7 @@ class Customers extends CI_Controller {
                             redirect(base_url($customer_type . 's') . '/DSTRule/' . param_encrypt($account_id), 'location', '301');
                         elseif ($action == 'save_close')
                             redirect(base_url($customer_type . 's') . '/edit/' . param_encrypt($account_id), 'location', '301');
-                    }
-                    else {
+                    } else {
                         redirect(base_url($customer_type . 's'), 'location', '301');
                     }
 
@@ -1808,8 +1328,7 @@ class Customers extends CI_Controller {
                             redirect(base_url($customer_type . 's') . '/DIDNumberTRule/' . param_encrypt($account_id), 'location', '301');
                         elseif ($action == 'save_close')
                             redirect(base_url($customer_type . 's') . '/edit/' . param_encrypt($account_id), 'location', '301');
-                    }
-                    else {
+                    } else {
                         redirect(base_url($customer_type . 's'), 'location', '301');
                     }
 
@@ -1957,8 +1476,7 @@ class Customers extends CI_Controller {
                             redirect(base_url($customer_type . 's') . '/editD/' . param_encrypt($account_id) . '/' . param_encrypt($id), 'location', '301');
                         elseif ($action == 'save_close')
                             redirect(base_url($customer_type . 's') . '/edit/' . param_encrypt($account_id), 'location', '301');
-                    }
-                    else {
+                    } else {
                         redirect(base_url($customer_type . 's'), 'location', '301');
                     }
 
@@ -2044,8 +1562,7 @@ class Customers extends CI_Controller {
                         redirect(base_url() . 'my_cli_lookup/edit/' . param_encrypt($_POST['lookup_id']), 'location', '301');
                     else
                         redirect(base_url() . 'my_cli_lookup', 'location', '301');
-                }
-                else {
+                } else {
                     $err_msgs = $result;
                     $data['err_msgs'] = $err_msgs;
                 }

@@ -318,7 +318,8 @@ class Rate_mod extends CI_Model {
                     }
                 }
             }
-            $this->db->order_by('prefix', 'ASC');
+            // $this->db->order_by('prefix', 'ASC');
+           $this->db->order_by('id', 'DESC');
             $this->db->limit(intval($limit_from), intval($limit_to));
             $q = $this->db->get($rate_table_name);
 

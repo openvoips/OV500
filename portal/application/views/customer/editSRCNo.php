@@ -37,8 +37,7 @@ foreach ($callerid_data as $callerid_data_temp) {
         if ($allowed_rules != '')
             $allowed_rules .= "\n";
         $allowed_rules .= $callerid_data_temp['display_string'];
-    }
-    else {
+    } else {
         if ($disallowed_rules != '')
             $disallowed_rules .= "\n";
         $disallowed_rules .= $callerid_data_temp['display_string'];
@@ -59,9 +58,9 @@ foreach ($dst_src_cli_callerid_data as $callerid_data_temp) {
             <h2>Source Number Translation Rules</h2>
             <ul class="nav navbar-right panel_toolbox">             
                 <li><a href="<?php
-                    $tab_index = 0;
-                    echo base_url('customers') . '/edit/' . param_encrypt($data['account_id']);
-                    ?>"><button class="btn btn-danger" type="button" tabindex="<?php echo $tab_index++; ?>">Back to Customer Edit Page</button></a> </li>
+$tab_index = 0;
+echo base_url('customers') . '/edit/' . param_encrypt($data['account_id']);
+?>"><button class="btn btn-danger" type="button" tabindex="<?php echo $tab_index++; ?>">Back to Customer Edit Page</button></a> </li>
             </ul>
             <div class="clearfix"></div>
         </div>
@@ -109,9 +108,9 @@ foreach ($dst_src_cli_callerid_data as $callerid_data_temp) {
 
                         <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Disallowed Rules Notes </label>
                         <div class="col-md-8 col-sm-6 col-xs-12" style="color: blue"> 
-                            44%=>441234567: Convert 44 Destination Number prefix calls source number CLI with 441234567.
-                            <br/>%=>44%: Add the 44 in the source CLI for any Destination Number calls.
-                            <br/>44%=>%: Any incoming call with 44 Destination prefix; incoming calls source number CLI will not change.
+                            44%: Blocked all 44 CLI prefix calls.
+                            <br/>%: Blocked any incoming CLI calls
+                            <br/>44125456987456: Blocked 44125456987456 CLI Calls.
                         </div>
 
 
@@ -125,6 +124,14 @@ foreach ($dst_src_cli_callerid_data as $callerid_data_temp) {
                             </div>
 
                         </div>
+                        <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">DST Prefix Based CLI Rules Notes </label>
+                        <div class="col-md-8 col-sm-6 col-xs-12" style="color: blue"> 
+                            44%=>441234567: Convert 44 Destination Number prefix calls source number CLI with 441234567.
+                            <br/>%=>44%: Add the 44 in the source CLI for any Destination Number calls.
+                            <br/>44%=>%: Any incoming call with 44 Destination prefix; incoming calls source number CLI will not change.
+                        </div>
+                        <br/>
+                        <br/>
                     <?php else: ?>
                         <input type="hidden" name="dst_src_cli_rules" id="dst_src_cli_rules" value="">
                     <?php endif; ?>  

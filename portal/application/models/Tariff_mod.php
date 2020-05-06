@@ -292,7 +292,7 @@ class Tariff_mod extends CI_Model {
                 $this->db->where_in('tariff_id', $am_ratecard_id_name_array);
             }
             if (is_string($order_by) && $order_by == '') {
-                $this->db->order_by('id', 'ASC');
+                $this->db->order_by('id', 'DESC');
             } else {
                 foreach ($order_by as $k => $v)
                     $this->db->order_by($k, $v);

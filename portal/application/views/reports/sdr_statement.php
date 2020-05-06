@@ -58,7 +58,7 @@ $credit_history = array();
     <div class="" role="tabpanel" data-example-id="togglable-tabs">
         <ul id="myTab" class="nav nav-tabs bar_tabs" role="tablist">
             <li role="presentation" class="<?php echo $tab_statement_class; ?>" id="tab1"><a href="#tab_account_statement" id="act_stmts" role="tab" data-toggle="tab" aria-expanded="true">Account Statements</a></li>
-            <li role="presentation" class="<?php echo $tab_invoice_class; ?>" id="tab2"><a href="#tab_invoice" role="tab" id="invoices" data-toggle="tab" aria-expanded="false">Invoices</a></li>
+<!--            <li role="presentation" class="<?php echo $tab_invoice_class; ?>" id="tab2"><a href="#tab_invoice" role="tab" id="invoices" data-toggle="tab" aria-expanded="false">Invoices</a></li>-->
         </ul>	
         <div id="myTabContent" class="tab-content">
             <div role="tabpanel" class="tab-pane fade <?php echo $tab_statement_class; ?>" id="tab_account_statement" aria-labelledby="act_stmts">               
@@ -135,7 +135,7 @@ $credit_history = array();
                             $export_format_array = get_export_formats();
                             foreach ($export_format_array as $export_format) {
                                 if ($export_format == 'pdf' || $export_format == 'xlsx') {
-                                    echo '<li><a href="' . base_url() . 'reports/statement/' . param_encrypt($searched_account_id) . '/export/' . param_encrypt($export_format) . '" id="link_export">' . strtoupper($export_format) . '</a></li>';
+                                    echo '<li><a href="' . base_url() . 'customers/statement/' . param_encrypt($searched_account_id) . '/export/' . param_encrypt($export_format) . '" id="link_export">' . strtoupper($export_format) . '</a></li>';
                                 }
                             }
                             ?>                            
@@ -374,7 +374,7 @@ $credit_history = array();
             </div>
 
 
-            <div role="tabpanel" class="tab-pane fade <?php echo $tab_invoice_class; ?>" id="tab_invoice" aria-labelledby="invoices"> 				<!--invoice section section-->
+<!--            <div role="tabpanel" class="tab-pane fade <?php echo $tab_invoice_class; ?>" id="tab_invoice" aria-labelledby="invoices"> 				invoice section section
 
                 <div class="x_panel ">
                     <div class="x_title">
@@ -429,7 +429,7 @@ if (check_logged_account_type(array('CUSTOMER', 'RESELLER'))) {
 
 
                                 <div class="searchBar">
-                                    <input type="submit" value="Search" name="OkFilter" id="OkFilter" class="btn btn-primary">                    <!--<input type="button" value="Reset" name="search_reset" id="search_reset" class="btn btn-info">-->
+                                    <input type="submit" value="Search" name="OkFilter" id="OkFilter" class="btn btn-primary">                    <input type="button" value="Reset" name="search_reset" id="search_reset" class="btn btn-info">
                                 </div>
                             </div>
                         </form>		
@@ -503,7 +503,7 @@ if (check_logged_account_type(array('CUSTOMER', 'RESELLER'))) {
                         </div>
                     </div>  
                 </div>
-            </div>
+            </div>-->
         </div>  
     </div>
 

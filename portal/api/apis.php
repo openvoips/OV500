@@ -1,8 +1,9 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
-// Copyright (C) 2019 Chinna Technologies  
+// Copyright (C) 2019 Chinna Technologies
 // Seema Anand <openvoips@gmail.com>
 // Anand <kanand81@gmail.com>
 // http://www.openvoips.com  http://www.openvoips.org
@@ -23,16 +24,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 // ##############################################################################
-error_reporting(0);
-ini_set('memory_limit', '1024M');
-date_default_timezone_set("GMT");
-define('CDR_DSN', 'mysql:dbname=switchcdr;host=localhost');
-define('CDR_DSN_LOGIN', 'ovswitch');
-define('CDR_DSN_PASSWORD', 'ovswitch123');
-define('SWITCH_DSN', 'mysql:dbname=switch;host=localhost');
-define('SWITCH_DSN_LOGIN', 'ovswitch');
-define('SWITCH_DSN_PASSWORD', 'ovswitch123');
-define('LOGPATH', 'log/');
-define('LOGWRITE', '0');
-define('DBLOGWRITE', '1');
+
+/*
+ * This  script is producing the Customer/Reseller SDR 
+ * It is one of the interface using that OV500 Portal can add the balance in the system
+ */
+$data = $_REQUEST;
+
+include_once 'config.php';
+include_once 'lib/APIS.php';        
+$APIS = New APIS();
+$APIS->main($data);
 ?>

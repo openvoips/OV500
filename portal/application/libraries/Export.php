@@ -1,4 +1,5 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
@@ -788,24 +789,9 @@ class Export {
         }// end of if 
 
 
+        $com_address = '<tr><td colspan="4"></td></tr>
+							<tr><td colspan="4"><strong>Web:</strong>' . base_url() . '</tr></td>';
 
-        if (SITE_SUBDOMAIN == 'INS') {
-            $com_address = '<tr><td colspan="4" ></td></tr>
-							<tr><td colspan="4">I-Solution COMMUNICATIONS PRIVATE LIMITED, ROOM 501 SHAILA TOWER, TOWER, J-1/16 BLOCK EP,</td></tr>
-							<tr><td colspan="4" >SECTOR V SALT LAKE, KOLKATA 700091</td></tr>';
-
-            $contact_info = '<tr><td colspan="4"><strong>Phone:</strong> +913366236623 </td></tr>
-							<tr><td colspan="4"><strong>Email:</strong> billing@I-Solution.in </td></tr>
-							<tr><td colspan="4"><strong>Web:</strong> http://www.I-Solution.in </td></tr>';
-        } else {
-            $com_address = '<tr><td colspan="4"></td></tr>
-							<tr><td colspan="4" >I-Solution Europe Ltd, 4th Floor West World, West Gate, London, W5 1DT, Company Registration No. 05317737 </td></tr>
-							<tr><td colspan="4" >Registered in England and Wales, VAT Registration No. 882 6793 68 </td></tr>';
-
-            $contact_info = '<tr><td colspan="4"><strong>Phone:</strong> 0800 814 4404 </tr></td>			
-								<tr><td colspan="4"> <strong>Email:</strong> customerservices@macrotalk.co.uk </tr></td>
-								<tr><td colspan="4"><strong>Web:</strong> http://www.I-Solution.co.uk </tr></td>';
-        }
 
 
 
@@ -923,11 +909,7 @@ class Export {
 
         $objPHPExcel = new PHPExcel();
 
-        if (SITE_SUBDOMAIN == 'INS')
-            $logo_name = 'logo-india';
-        else
-            $logo_name = 'logo-europe';
-        $gdImage = imagecreatefromjpeg(base_url() . 'theme/default/images/' . $logo_name . '.jpg');
+        $gdImage = imagecreatefromjpeg(base_url() . '/theme/default/images/logo.png');
 
         $objDrawing = new PHPExcel_Worksheet_MemoryDrawing();
         $objDrawing->setName('Logo Image');

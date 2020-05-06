@@ -55,7 +55,7 @@ class Provider_mod extends CI_Model {
             if ($order_by != '') {
                 $sql .= " ORDER BY $order_by ";
             } else {
-                $sql .= " ORDER BY  `provider_name` ";
+                $sql .= " ORDER BY s.id desc ";
             }
 
             $limit_from = intval($limit_from);

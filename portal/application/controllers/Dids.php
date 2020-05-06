@@ -64,9 +64,8 @@ class Dids extends CI_Controller {
             if (isset($_POST['delete_id']) && count($delete_id_array) > 0) {
                 if ($action_type == 'delete') {
                     $delete_param_array = array('delete_id' => $delete_id_array);
-                    $result = $this->did_mod->delete($delete_param_array);
+                    $result = $this->did_mod->delete($logged_account_id,$delete_param_array);                   
                 } else {
-
                     $result = $this->did_mod->release($delete_id_array[0], $logged_account_id);
                 }
                 if ($result === true) {

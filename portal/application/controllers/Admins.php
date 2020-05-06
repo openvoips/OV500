@@ -259,8 +259,7 @@ class Admins extends CI_Controller {
                             redirect(base_url() . 'admins/editA/' . param_encrypt($account_id), 'location', '301');
                         elseif ($action == 'save_close')
                             redirect(base_url() . 'admins', 'location', '301');
-                    }
-                    else {
+                    } else {
                         redirect(base_url() . 'admins', 'location', '301');
                     }
 
@@ -525,12 +524,12 @@ class Admins extends CI_Controller {
                 if (in_array($child_account_type, array('CUSTOMER'))) {
                     $redirect_to = 'dashboard';
                     unset($_SESSION['search_customers_data']);
-                    $_SESSION['search_customers_data']['s_account_id'] = $result['account_id'];
+                    //  $_SESSION['search_customers_data']['s_account_id'] = $result['account_id'];
                 } elseif (in_array($child_account_type, array('RESELLER'))) {
                     // $redirect_to = 'resellers';
                     $redirect_to = 'dashboard';
                     unset($_SESSION['search_resellers_data']);
-                    $_SESSION['search_resellers_data']['s_account_id'] = $result['account_id'];
+                    //$_SESSION['search_resellers_data']['s_account_id'] = $result['account_id'];
                 }
             }
         }

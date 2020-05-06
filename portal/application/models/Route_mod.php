@@ -1,4 +1,5 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
@@ -100,7 +101,7 @@ class Route_mod extends CI_Model {
         try {
             $this->db->trans_begin();
             foreach ($data['delete_id'] as $id) {
-                $log_data_array = array();         
+                $log_data_array = array();
                 $sql = "SELECT * FROM dialplan WHERE dialplan_id='" . $id . "'";
                 $query = $this->db->query($sql);
                 $row = $query->row_array();
@@ -114,7 +115,7 @@ class Route_mod extends CI_Model {
                     $log_data_array[] = array('activity_type' => 'delete', 'sql_table' => 'dialplan', 'sql_key' => $id, 'sql_query' => $data_dump);
 
                     $result = $this->db->delete('dialplan_prefix_list', array('dialplan_id' => $id));
-                          
+
                     if (!$result) {
                         $error_array = $this->db->error();
                         throw new Exception($error_array['message']);
@@ -123,7 +124,7 @@ class Route_mod extends CI_Model {
                 }
                 set_activity_log($log_data_array);
             }
-         
+
             if ($this->db->trans_status() === FALSE) {
                 $error_array = $this->db->error();
                 $this->db->trans_rollback();
@@ -137,8 +138,9 @@ class Route_mod extends CI_Model {
             return array('status' => false, 'msg' => 'failed deletion :: ' . $e->getMessage());
         }
     }
- function get_data($order_by = '', $limit_to = '', $limit_from = '', $filter_data = array(), $option_param = array()) {
-   // function get_data($order_by, $limit_to, $limit_from, $filter_data, $option_param = array()) {
+
+    function get_data($order_by = '', $limit_to = '', $limit_from = '', $filter_data = array(), $option_param = array()) {
+        // function get_data($order_by, $limit_to, $limit_from, $filter_data, $option_param = array()) {
         try {
             $this->db->select("SQL_CALC_FOUND_ROWS *", FALSE);
             $sub = $this->subquery->start_subquery('select');
@@ -155,6 +157,7 @@ class Route_mod extends CI_Model {
                     }
                 }
             }
+            
             if ($order_by != '') {
                 $this->db->order_by($order_by, 'ASC');
             } else {
@@ -162,7 +165,7 @@ class Route_mod extends CI_Model {
             }
             $this->db->limit(intval($limit_from), intval($limit_to));
             $q = $this->db->get('dialplan');
-          
+
             $final_return_array['result'] = $q->result_array();
 //           echo $this->db->last_query();
             $query = $this->db->query('SELECT FOUND_ROWS() AS Count');

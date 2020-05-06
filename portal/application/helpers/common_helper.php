@@ -495,7 +495,7 @@ function callSdrAPI($data, $method = 'GET') {
     // $url = SDR_API_URL;
     //$url = "https://localhost/apis/";
 
-    $url = site_url('apis');
+    $url = site_url('api/apis.php');
     $curl = curl_init();
     switch ($method) {
         case "POST":
@@ -531,15 +531,15 @@ function callSdrAPI($data, $method = 'GET') {
     if (curl_errno($curl)) {
         $error_msg = curl_error($curl);
     }
-
+ 
     if (!$result) {
         $return_array = array('error' => 0, 'message' => $error_msg);
         $result = json_encode($return_array);
         //die("Connection Failure");
     }
-    
-    var_dump($result);
-    
+
+
+
     curl_close($curl);
 
 
