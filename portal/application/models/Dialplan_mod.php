@@ -1,4 +1,5 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
@@ -59,11 +60,24 @@ class Dialplan_mod extends CI_Model {
         if (isset($data['frm_status']))
             $data_array['route_status'] = $data['frm_status'];
         $data_array['update_dt'] = $data_array['create_dt'] = date('Y-m-d H:i:s');
-        $str = $this->db->insert_string('dialplan_prefix_list', $data_array);
-        $result = $this->db->query($str);
+
+        $table = 'dialplan_prefix_list';
+        $data = $data_array;
+        if (empty($table) || empty($data))
+            return false;
+        $duplicate_data = array();
+        foreach ($data AS $key => $value) {
+            $duplicate_data[] = sprintf("%s='%s'", $key, $value);
+        }
+
+        $sql = sprintf("%s ON DUPLICATE KEY UPDATE %s", $this->db->insert_string($table, $data), implode(',', $duplicate_data));
+        $result = $this->db->query($sql);
+        //return $this->db->insert_id();
+        //  $str = $this->db->insert_string('dialplan_prefix_list', $data_array);
+        //  $result = $this->db->query($str);
         if ($result) {
             $insert_id = $this->db->insert_id();
-            $log_data_array[] = array('activity_type' => 'insert', 'sql_table' => 'dialplan_prefix_list', 'sql_key' => '', 'sql_query' => $str);
+            $log_data_array[] = array('activity_type' => 'insert', 'sql_table' => 'dialplan_prefix_list', 'sql_key' => '', 'sql_query' => $sql);
             set_activity_log($log_data_array);
             return array('status' => true, 'id' => $insert_id, 'msg' => 'Successfully added');
         } else {
