@@ -162,6 +162,8 @@ class OVS extends PDO {
     }
 
     function api($request) {
+
+
         $this->rdata = $request;
         $carrier = $this->rdata['carrier'];
         $account = $this->rdata['account'];
@@ -177,7 +179,7 @@ class OVS extends PDO {
         $atime = str_replace("T", ' ', $atime);
         $destination_number = str_replace("T", '#', $destination_number);
         $this->dbconnect();
-        $query = sprintf("SELECT id, ipaddress from carrier_ip WHERE id = '%s' limit 1;", $gatewayname);
+        $query = sprintf("SELECT id, ipaddress as   gateway_ipaddress from carrier_ips WHERE carrier_ip_id = '%s' limit 1;", $gatewayname);
         $this->writelog($query);
         $this->query('SWITCH', $query);
         $rs = $this->resultset();
@@ -529,7 +531,7 @@ class OVS extends PDO {
 
         $str = rtrim($str, ' or ');
 
-        $query = sprintf("SELECT tariff.tariff_status, tariff_ratecard_map.id, tariff_ratecard_map.ratecard_id, tariff_ratecard_map.tariff_id, tariff_ratecard_map.start_day, tariff_ratecard_map.end_day, tariff_ratecard_map.start_time, tariff_ratecard_map.end_time, carrier_rates.prefix, carrier_rates.destination, carrier_rates.rate, carrier_rates.connection_charge, carrier_rates.minimal_time, carrier_rates.resolution_time, carrier_rates.grace_period, carrier_rates.rate_multiplier, carrier_rates.rate_addition, carrier_rates.rates_status, tariff.tariff_currency_id, tariff.tariff_currency_id, tariff.monthly_charges, tariff.bundle_option,  tariff.bundle1_type, tariff.bundle1_value, tariff.bundle2_type, tariff.bundle2_value, tariff.bundle3_type, tariff.bundle3_value FROM tariff_ratecard_map  INNER JOIN carrier_rates on carrier_rates.ratecard_id = tariff_ratecard_map.ratecard_id    INNER JOIN ratecard on carrier_rates.ratecard_id = ratecard.ratecard_id and ratecard.ratecard_for = 'INBOUND' INNER JOIN tariff on  tariff.tariff_id = tariff_ratecard_map.tariff_id where WEEKDAY(CURDATE()) BETWEEN start_day and end_day AND CURTIME() BETWEEN start_time and end_time and tariff_ratecard_map.tariff_id = '%s'  and (%s) ORDER BY priority asc, prefix desc, rate ASC, end_time ASC limit 1;", $this->carrierdata['tariff_id'], $str);
+        $query = sprintf("SELECT tariff.tariff_status, tariff_ratecard_map.id, tariff_ratecard_map.ratecard_id, tariff_ratecard_map.tariff_id, tariff_ratecard_map.start_day, tariff_ratecard_map.end_day, tariff_ratecard_map.start_time, tariff_ratecard_map.end_time, carrier_rates.prefix, carrier_rates.destination, carrier_rates.rate, carrier_rates.connection_charge, carrier_rates.minimal_time, carrier_rates.resolution_time, carrier_rates.grace_period, carrier_rates.rate_multiplier, carrier_rates.rate_addition, carrier_rates.rates_status, tariff.tariff_currency_id, tariff.tariff_currency_id, tariff.monthly_charges, tariff.bundle_option,  tariff.bundle1_type, tariff.bundle1_value, tariff.bundle2_type, tariff.bundle2_value, tariff.bundle3_type, tariff.bundle3_value FROM tariff_ratecard_map  INNER JOIN carrier_rates on carrier_rates.ratecard_id = tariff_ratecard_map.ratecard_id    INNER JOIN ratecard on carrier_rates.ratecard_id = ratecard.ratecard_id and ratecard.ratecard_for = 'INCOMING' INNER JOIN tariff on  tariff.tariff_id = tariff_ratecard_map.tariff_id where WEEKDAY(CURDATE()) BETWEEN start_day and end_day AND CURTIME() BETWEEN start_time and end_time and tariff_ratecard_map.tariff_id = '%s'  and (%s) ORDER BY priority asc, prefix desc, rate ASC, end_time ASC limit 1;", $this->carrierdata['tariff_id'], $str);
 
         $this->writelog($query);
         $this->query('SWITCH', $query);
@@ -700,20 +702,32 @@ class OVS extends PDO {
         $this->writelog($query);
         $this->query('SWITCH', $query);
         $rs = $this->resultset();
-        foreach ($rs[0] as $key => $value) {
-            $this->customers[$key] = $value;
+        if (count($rs) > 0) {
+            foreach ($rs[0] as $key => $value) {
+                $this->customers[$key] = $value;
+                $this->writelog("1st query $key $value");
+            }
+            // $this->customers['account_id'] = $user;
+        } else {
+            $otherinfo = $user;
+            $this->customers['account_id'] = $user;
+            $this->fail_route_xml_inbound('USERINACTIVE', $otherinfo);
+            $this->status = 'FAIL';
+            $this->customersdata['user'] = $this->customers;
+            $this->rates_incoming = str_replace('"', "'", json_encode($this->customersdata));
+            return;
         }
 
         if ($this->carrierdata['dst_type'] == 'IP') {
             $this->customers['device_type'] = 'ip';
 
-            $query = sprintf("SELECT account_sip.id, account_sip.username, account_sip.`status`, account_sip.account_id, account_sip.sip_cc, account_sip.sip_cps from account_sip INNER JOIN account on account_sip.account_id = account.account_id where username = '%s' and account.account_id = '%s' limit 1;", $user);
+            $query = sprintf("SELECT account_sip.id, account_sip.username, account_sip.`status`, account_sip.sip_cc, account_sip.sip_cps from account_sip INNER JOIN account on account_sip.account_id = account.account_id where username = '%s' and account.account_id = '%s' limit 1;", $user);
 
             $this->customers['device_id'] = str_replace('.', "", json_encode($this->customers['dst_destination']));
         } elseif ($this->carrierdata['dst_type'] == 'CUSTOMER') {
             $this->customers['device_type'] = 'u';
 
-            $query = sprintf("SELECT account_ips.id, account_ips.ipaddress, account_ips.account_id, account_ips.ip_status, account_ips.ip_cc, account_ips.ip_cps from account_ips  INNER JOIN account on account_ips.account_id = account.account_id where ipaddress = '%s'  and account.account_id = '%s' limit 1;", $user);
+            $query = sprintf("SELECT account_ips.id, account_ips.ipaddress,  account_ips.ip_status, account_ips.ip_cc, account_ips.ip_cps from account_ips  INNER JOIN account on account_ips.account_id = account.account_id where ipaddress = '%s'  and account.account_id = '%s' limit 1;", $user);
 
             $this->customers['device_id'] = str_replace('.', "", json_encode($this->customers['dst_destination']));
         }
@@ -737,6 +751,8 @@ class OVS extends PDO {
         /*
          * User status check
          */
+
+        // $this->customers['account_id'] = $user;
 
         $otherinfo = $this->account_id;
         if ($this->customers['account_status'] == 0) {
@@ -772,7 +788,7 @@ class OVS extends PDO {
         /*
          * Checking the user balance
          */
-        $query = sprintf("SELECT balance_id, credit_limit - outstanding_balance balance from balance where account_id = '%s';", $user);
+        $query = sprintf("SELECT id, credit_limit - balance as balance from customer_balance where account_id = '%s';", $user);
 
         $this->writelog($query);
         $this->query('SWITCH', $query);
@@ -815,7 +831,7 @@ class OVS extends PDO {
         }
 
         $str = rtrim($str, ' or ');
-        $query = sprintf("SELECT tariff.tariff_status, tariff_ratecard_map.tariff_ratecard_map_id, tariff_ratecard_map.ratecard_id, tariff_ratecard_map.tariff_id, tariff_ratecard_map.start_day, tariff_ratecard_map.end_day, tariff_ratecard_map.start_time, tariff_ratecard_map.end_time, customer_rates.prefix, customer_rates.destination, customer_rates.rate, customer_rates.connection_charge, customer_rates.minimal_time, customer_rates.resolution_time, customer_rates.grace_period, customer_rates.rate_multiplier, customer_rates.rate_addition, customer_rates.rates_status, tariff.tariff_currency_id, tariff.tariff_currency_id, tariff.monthly_charges, tariff.bundle_option,  tariff.bundle1_type, tariff.bundle1_value, tariff.bundle2_type, tariff.bundle2_value, tariff.bundle3_type, tariff.bundle3_value,  tariff.charge_on_customer_config, tariff.config_monthly_charge_status, tariff.config_monthly_charge, tariff.config_bundle_charge_status, tariff.config_bundle_charge, tariff.config_call_cost_status, tariff.config_call_cost  FROM tariff_ratecard_map  INNER JOIN customer_rates on customer_rates.ratecard_id = tariff_ratecard_map.ratecard_id    INNER JOIN ratecard on customer_rates.ratecard_id = ratecard.ratecard_id and ratecard.ratecard_for = 'INBOUND' INNER JOIN tariff on  tariff.tariff_id = tariff_ratecard_map.tariff_id where WEEKDAY(CURDATE()) BETWEEN start_day and end_day AND CURTIME() BETWEEN start_time and end_time and tariff_ratecard_map.tariff_id = '%s' and (%s)  ORDER BY priority asc, prefix desc, rate ASC, end_time ASC limit 1;", $this->customers['tariff_id'], $str);
+        $query = sprintf("SELECT tariff.tariff_status,  tariff_ratecard_map.ratecard_id, tariff_ratecard_map.tariff_id, tariff_ratecard_map.start_day, tariff_ratecard_map.end_day, tariff_ratecard_map.start_time, tariff_ratecard_map.end_time, customer_rates.prefix, customer_rates.destination, customer_rates.rate, customer_rates.connection_charge, customer_rates.minimal_time, customer_rates.resolution_time, customer_rates.grace_period, customer_rates.rate_multiplier, customer_rates.rate_addition, customer_rates.rates_status, tariff.tariff_currency_id, tariff.tariff_currency_id, tariff.monthly_charges, tariff.bundle_option,  tariff.bundle1_type, tariff.bundle1_value, tariff.bundle2_type, tariff.bundle2_value, tariff.bundle3_type, tariff.bundle3_value  FROM tariff_ratecard_map  INNER JOIN customer_rates on customer_rates.ratecard_id = tariff_ratecard_map.ratecard_id    INNER JOIN ratecard on customer_rates.ratecard_id = ratecard.ratecard_id and ratecard.ratecard_for = 'INCOMING' INNER JOIN tariff on  tariff.tariff_id = tariff_ratecard_map.tariff_id where WEEKDAY(CURDATE()) BETWEEN start_day and end_day AND CURTIME() BETWEEN start_time and end_time and tariff_ratecard_map.tariff_id = '%s' and (%s)  ORDER BY priority asc, prefix desc, rate ASC, end_time ASC limit 1;", $this->customers['tariff_id'], $str);
 
 
         $this->writelog($query);
@@ -847,15 +863,16 @@ class OVS extends PDO {
         /*
          * User and Tariff currency not same
          */
-        $otherinfo = $this->account_id;
-        if ($this->customers['account_currency_id'] != $this->customers['tariff_currency_id']) {
-            $this->fail_route_xml_inbound('USERTARIFFCURRENCY', $otherinfo);
-            $this->status = 'FAIL';
-            $this->customersdata['user'] = $this->customers;
-            $this->rates_incoming = str_replace('"', "'", json_encode($this->customersdata));
-            return;
-        }
-
+        /*
+          $otherinfo = $this->account_id;
+          if ($this->customers['account_currency_id'] != $this->customers['tariff_currency_id']) {
+          $this->fail_route_xml_inbound('USERTARIFFCURRENCY', $otherinfo);
+          $this->status = 'FAIL';
+          $this->customersdata['user'] = $this->customers;
+          $this->rates_incoming = str_replace('"', "'", json_encode($this->customersdata));
+          return;
+          }
+         */
         /*
          * User tariff is inactive
          */
@@ -897,7 +914,7 @@ class OVS extends PDO {
         unset($this->customers['end_day']);
         unset($this->customers['start_day']);
         unset($this->customers['rates_status']);
-        unset($this->customers['account_id']);
+  
         unset($this->customers['account_ip_id']);
         unset($this->customers['dial_prefix']);
         unset($this->customers['ip_status']);
@@ -907,6 +924,7 @@ class OVS extends PDO {
         $this->customersdata['user'] = $this->customers;
 
         /*
+         *  $this->writelog("$key $value");
          * building User and reseller billing data Array for CDR event
          */
         $this->rates_incoming = str_replace('"', "'", json_encode($this->customersdata));
@@ -933,6 +951,7 @@ class OVS extends PDO {
         $this->CCSTRING = $this->CCSTRING . ":" . $device_cc;
         $this->writelog("Device Running CPS $device_cps ------ " . $result);
         $this->rates_incoming = str_replace('"', "'", json_encode($this->customersdata));
+
         return;
     }
 
@@ -1128,7 +1147,7 @@ class OVS extends PDO {
 
         $str = rtrim($str, ' or ');
 
-        $query = sprintf("SELECT tariff.tariff_status, tariff_ratecard_map.id, tariff_ratecard_map.ratecard_id, tariff_ratecard_map.tariff_id, tariff_ratecard_map.start_day, tariff_ratecard_map.end_day, tariff_ratecard_map.start_time, tariff_ratecard_map.end_time, customer_rates.prefix, customer_rates.destination, customer_rates.rate, customer_rates.connection_charge, customer_rates.minimal_time, customer_rates.resolution_time, customer_rates.grace_period, customer_rates.rate_multiplier, customer_rates.rate_addition, customer_rates.rates_status, tariff.tariff_currency_id, tariff.tariff_currency_id, tariff.monthly_charges, tariff.bundle_option,  tariff.bundle1_type, tariff.bundle1_value, tariff.bundle2_type, tariff.bundle2_value, tariff.bundle3_type, tariff.bundle3_value  FROM tariff_ratecard_map  INNER JOIN customer_rates on customer_rates.ratecard_id = tariff_ratecard_map.ratecard_id    INNER JOIN ratecard on customer_rates.ratecard_id = ratecard.ratecard_id and ratecard.ratecard_for = 'INBOUND' INNER JOIN tariff on  tariff.tariff_id = tariff_ratecard_map.tariff_id where WEEKDAY(CURDATE()) BETWEEN start_day and end_day AND CURTIME() BETWEEN start_time and end_time and tariff_ratecard_map.tariff_id = '%s' and (%s) ORDER BY priority asc, prefix desc, rate ASC, end_time ASC limit 1;", $resellerusers['tariff_id'], $str);
+        $query = sprintf("SELECT tariff.tariff_status, tariff_ratecard_map.id, tariff_ratecard_map.ratecard_id, tariff_ratecard_map.tariff_id, tariff_ratecard_map.start_day, tariff_ratecard_map.end_day, tariff_ratecard_map.start_time, tariff_ratecard_map.end_time, customer_rates.prefix, customer_rates.destination, customer_rates.rate, customer_rates.connection_charge, customer_rates.minimal_time, customer_rates.resolution_time, customer_rates.grace_period, customer_rates.rate_multiplier, customer_rates.rate_addition, customer_rates.rates_status, tariff.tariff_currency_id, tariff.tariff_currency_id, tariff.monthly_charges, tariff.bundle_option,  tariff.bundle1_type, tariff.bundle1_value, tariff.bundle2_type, tariff.bundle2_value, tariff.bundle3_type, tariff.bundle3_value  FROM tariff_ratecard_map  INNER JOIN customer_rates on customer_rates.ratecard_id = tariff_ratecard_map.ratecard_id    INNER JOIN ratecard on customer_rates.ratecard_id = ratecard.ratecard_id and ratecard.ratecard_for = 'INCOMING' INNER JOIN tariff on  tariff.tariff_id = tariff_ratecard_map.tariff_id where WEEKDAY(CURDATE()) BETWEEN start_day and end_day AND CURTIME() BETWEEN start_time and end_time and tariff_ratecard_map.tariff_id = '%s' and (%s) ORDER BY priority asc, prefix desc, rate ASC, end_time ASC limit 1;", $resellerusers['tariff_id'], $str);
 
 
         $this->writelog($query);
@@ -2332,7 +2351,7 @@ class OVS extends PDO {
             array_push($routlist, $data['carrier_id']);
             array_push($pg_data, $data);
         }
-        $this->orderBy($pg_data, ' rpriority ASC, running_percentage ASC');
+        $this->orderBy($pg_data, ' rpriority ASC, rate ASC, running_percentage ASC');
 
         $this->writelog('I am in route LB end');
         return $pg_data;
@@ -2794,15 +2813,15 @@ class OVS extends PDO {
 
                     $destination_number1 = preg_replace("/#/", "T", $destination_number);
 
-                    $this->Gateway_XML .= "\n <action application=\"export\" data=\"nolocal:execute_on_ring=curl https://localhost/api/api.php?r=ring&common_uuid=" . $this->uuid . "&gatewayname=" . $gateway_ipaddress_name . "&atime=\${strftime(%Y-%m-%dT%H:%M:%S)}&gateway_ipaddress=" . $route2['ipaddress'] . "&carrier_gateway_ipaddress_name=" . $route2['carrier_ip_id'] . "&routcallerid=" . $route_callid . "&account=" . $this->account_id . "&carrier=" . $route2['carrier_id'] . "&destination_number=" . $destination_number1 . "\"/>";
+                    $this->Gateway_XML .= "\n <action application=\"export\" data=\"nolocal:execute_on_ring=curl https://localhost/api/api.php?r=ring&common_uuid=" . $this->uuid . "&gatewayname=" . $gateway_ipaddress_name . "&atime=\${strftime(%Y-%m-%dT%H:%M:%S)}&gateway_ipaddress=" . $route2['ipaddress'] . "&carrier_gateway_ipaddress_name=" . $route2['carrier_ip_id'] . "&routcallerid=" . $route_callid . "&account=" . $this->account_id . "&carrier=" . $route2['carrier_id'] . "&destination_number=" . $destination_number1 . " | -k \"/>";
 
 
-                    $this->Gateway_XML .= "\n <action application=\"export\" data=\"nolocal:execute_on_pre_answer=curl https://localhost/api/api.php?r=ring&common_uuid=" . $this->uuid . "&gatewayname=" . $gateway_ipaddress_name . "&atime=\${strftime(%Y-%m-%dT%H:%M:%S)}&gateway_ipaddress=" . $route2['ipaddress'] . "&carrier_gateway_ipaddress_name=" . $route2['carrier_ip_id'] . "&routcallerid=" . $route_callid . "&account=" . $this->account_id . "&carrier=" . $route2['carrier_id'] . "&destination_number=" . $destination_number1 . "\"/>";
+                    $this->Gateway_XML .= "\n <action application=\"export\" data=\"nolocal:execute_on_pre_answer=curl  https://localhost/api/api.php?r=ring&common_uuid=" . $this->uuid . "&gatewayname=" . $gateway_ipaddress_name . "&atime=\${strftime(%Y-%m-%dT%H:%M:%S)}&gateway_ipaddress=" . $route2['ipaddress'] . "&carrier_gateway_ipaddress_name=" . $route2['carrier_ip_id'] . "&routcallerid=" . $route_callid . "&account=" . $this->account_id . "&carrier=" . $route2['carrier_id'] . "&destination_number=" . $destination_number1 . " | -k \"/>";
 
-                    $this->Gateway_XML .= "\n <action application=\"export\" data=\"nolocal:execute_on_pre_answer=curl https://localhost/api/api.php?r=ring&common_uuid=" . $this->uuid . "&gatewayname=" . $gateway_ipaddress_name . "&atime=\${strftime(%Y-%m-%dT%H:%M:%S)}&gateway_ipaddress=" . $route2['ipaddress'] . "&carrier_gateway_ipaddress_name=" . $route2['carrier_ip_id'] . "&routcallerid=" . $route_callid . "&account=" . $this->account_id . "&carrier=" . $route2['carrier_id'] . "&destination_number=" . $destination_number1 . "\"/>";
+                    $this->Gateway_XML .= "\n <action application=\"export\" data=\"nolocal:execute_on_pre_answer=curl https://localhost/api/api.php?r=ring&common_uuid=" . $this->uuid . "&gatewayname=" . $gateway_ipaddress_name . "&atime=\${strftime(%Y-%m-%dT%H:%M:%S)}&gateway_ipaddress=" . $route2['ipaddress'] . "&carrier_gateway_ipaddress_name=" . $route2['carrier_ip_id'] . "&routcallerid=" . $route_callid . "&account=" . $this->account_id . "&carrier=" . $route2['carrier_id'] . "&destination_number=" . $destination_number1 . " | -k \"/>";
 
 
-                    $this->Gateway_XML .= "\n <action application=\"export\" data=\"nolocal:execute_on_answer=curl https://localhost/api/api.php?r=answer&common_uuid=" . $this->uuid . "&gatewayname=" . $gateway_ipaddress_name . "&atime=\${strftime(%Y-%m-%dT%H:%M:%S)}&gateway_ipaddress=" . $route2['ipaddress'] . "&carrier_gateway_ipaddress_name=" . $route2['carrier_ip_id'] . "&routcallerid=" . $route_callid . "&account=" . $this->account_id . "&carrier=" . $route2['carrier_id'] . "&destination_number=" . $destination_number1 . "\"/>";
+                    $this->Gateway_XML .= "\n <action application=\"export\" data=\"nolocal:execute_on_answer=curl https://localhost/api/api.php?r=answer&common_uuid=" . $this->uuid . "&gatewayname=" . $gateway_ipaddress_name . "&atime=\${strftime(%Y-%m-%dT%H:%M:%S)}&gateway_ipaddress=" . $route2['ipaddress'] . "&carrier_gateway_ipaddress_name=" . $route2['carrier_ip_id'] . "&routcallerid=" . $route_callid . "&account=" . $this->account_id . "&carrier=" . $route2['carrier_id'] . "&destination_number=" . $destination_number1 . " | -k \"/>";
 
                     $gateway_ipaddress_name = '';
                     if ($route2['carrier_ring_timeout'] > 0) {

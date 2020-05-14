@@ -120,13 +120,15 @@ class Customers extends CI_Controller {
 
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
 
-
+        if ($id != -1) {
+            $account_id = param_decrypt($id);
+        }
         //==========export pdf start==========================			
         if ($arg1 == 'export' && $format != '') {
 
-            if ($id != -1) {
-                $account_id = param_decrypt($id);
-            }
+
+
+
 
             $format = param_decrypt($format);
 
@@ -171,17 +173,15 @@ class Customers extends CI_Controller {
         //================================export pdf end===========================
 
 
-        if (check_logged_account_type(array('RESELLER', 'CUSTOMER'))) {
+        if ($id != -1) {
+            $account_id = param_decrypt($id);
+        } elseif (check_logged_account_type(array('RESELLER', 'CUSTOMER'))) {
             $account_id = get_logged_account_id();
         } elseif (isset($_POST['search_action']) && isset($_POST['account_id']) && $_POST['account_id'] != '') {
             $account_id = trim($_POST['account_id']);
         } elseif (isset($_POST['invoice_search_action']) && isset($_POST['account_id']) && $_POST['account_id'] != '') {
             $account_id = trim($_POST['account_id']);
-        } elseif ($id != -1) {
-            $account_id = param_decrypt($id);
         }
-
-
 
         if (isset($account_id) && $account_id != '') {
             $customer_result = $this->member_mod->get_account_by_key('account_id', $account_id);

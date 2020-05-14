@@ -1,4 +1,5 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
@@ -42,6 +43,15 @@ class Utils_model extends CI_Model {
         $sql = "SELECT currency_id, name, symbol FROM sys_currencies ORDER BY name";
         $query = $this->db->query($sql);
         $rows = $query->result_array();
+
+        $rows = Array(
+            '0' => Array('currency_id' => 1, 'name' => 'USD', 'symbol' => '$', 'detail_name' => 'United States Dollar'),
+            '1' => Array('currency_id' => 2, 'name' => 'GBP', 'symbol' => '£', 'detail_name' => 'British Pound'),
+            '2' => Array('currency_id' => 3, 'name' => 'INR', 'symbol' => '&#x20b9;', 'detail_name' => 'Indian Rupee'),
+            '3' => Array('currency_id' => 4, 'name' => 'SGD', 'symbol' => 'S$', 'detail_name' => 'Singapore Dollar'),
+            '4' => Array('currency_id' => 5, 'name' => 'EURO', 'symbol' => '&euro;', 'detail_name' => 'Euro'),
+        );
+
         return $rows;
     }
 
@@ -70,7 +80,7 @@ class Utils_model extends CI_Model {
     }
 
     function get_tariffs($user_type, $tariff_type = '', $created_by = '') {
-        $sql = "SELECT id, tariff_id, tariff_name, tariff_currency_id, tariff_type FROM tariff t INNER JOIN customers ua ON t.created_by=ua.account_id WHERE t.tariff_status='1' ";              
+        $sql = "SELECT id, tariff_id, tariff_name, tariff_currency_id, tariff_type FROM tariff t INNER JOIN customers ua ON t.created_by=ua.account_id WHERE t.tariff_status='1' ";
         if (in_array($user_type, array('ADMIN', 'SUBADMIN', 'ACCOUNTS'))) {
             $sql .= " AND ua.account_type IN('ADMIN','SUBADMIN','ACCOUNTS')";
         } elseif (in_array($user_type, array('RESELLER'))) {

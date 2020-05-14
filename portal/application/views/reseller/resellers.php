@@ -179,9 +179,8 @@ $status_name_array = array(
                                 <?php endif; ?>
                                 <?php
                                 if (check_account_permission('reseller', 'delete') && $this->session->userdata('session_current_account_id') != $account_data['id']):
-                                    ?>
-
-                                    <!--<a href="<?php echo base_url(); ?>resellers/statement/<?php echo param_encrypt($account_data['account_id']); ?>" title="Account Statement"><i class="fa fa-hand-o-right"></i></a>-->
+                                    ?>                                  
+                                   <a href="<?php echo base_url(); ?>resellers/statement/<?php echo param_encrypt($account_data['account_id']); ?>" title="Account Statement"><i class="fa fa-hand-o-right"></i></a>
                                     <a href="<?php echo base_url(); ?>resellers/rState/<?php echo param_encrypt($account_data['account_id']); ?>" title="Call Analysis"><i class="fa fa-bar-chart-o"></i></a>
 
                                     <?php

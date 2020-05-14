@@ -187,9 +187,9 @@ $tab_index = 1;
                                 <tr>
                                     <td colspan="2" align="center"><strong>No Record Found</strong></td>
                                 </tr>
-    <?php
-}
-?>
+                                <?php
+                            }
+                            ?>
 
 
                         </tbody>
@@ -226,30 +226,30 @@ $tab_index = 1;
                         </thead>
 
                         <tbody>
-<?php
-if (count($data['translation_rules']) > 0) {
-    foreach ($data['translation_rules'] as $translation_rule_data) {
-        if ($translation_rule_data['action_type'] == '1')
-            $status = '<span class="label label-success">Allowed</span>';
-        else
-            $status = '<span class="label label-danger">Blocked</span>';
-        ?>
+                            <?php
+                            if (count($data['translation_rules']) > 0) {
+                                foreach ($data['translation_rules'] as $translation_rule_data) {
+                                    if ($translation_rule_data['action_type'] == '1')
+                                        $status = '<span class="label label-success">Allowed</span>';
+                                    else
+                                        $status = '<span class="label label-danger">Blocked</span>';
+                                    ?>
                                     <tr >
                                         <td><?php echo $translation_rule_data['display_string']; ?></td>                                  
                                         <td><?php echo $status; ?></td>                                   
 
                                     </tr>
 
-        <?php
-    }
-} else {
-    ?>
+                                    <?php
+                                }
+                            } else {
+                                ?>
                                 <tr>
                                     <td colspan="2" align="center"><strong>No Record Found</strong></td>
                                 </tr>
-    <?php
-}
-?>
+                                <?php
+                            }
+                            ?>
 
 
                         </tbody>
@@ -288,24 +288,24 @@ if (count($data['translation_rules']) > 0) {
                         </thead>
 
                         <tbody>
-<?php
-if (count($data['callerid_incoming']) > 0) {
-    foreach ($data['callerid_incoming'] as $callerid_data) {
-        if ($callerid_data['action_type'] == '1')
-            $status = '<span class="label label-success">Allowed</span>';
-        else
-            $status = '<span class="label label-danger">Blocked</span>';
-        ?>
+                            <?php
+                            if (count($data['callerid_incoming']) > 0) {
+                                foreach ($data['callerid_incoming'] as $callerid_data) {
+                                    if ($callerid_data['action_type'] == '1')
+                                        $status = '<span class="label label-success">Allowed</span>';
+                                    else
+                                        $status = '<span class="label label-danger">Blocked</span>';
+                                    ?>
                                     <tr >
                                         <td><?php echo $callerid_data['display_string']; ?></td>                                  
                                         <td><?php echo $status; ?></td>                                   
 
                                     </tr>
 
-        <?php
-    }
-} else {
-    ?>
+                                    <?php
+                                }
+                            } else {
+                                ?>
                                 <tr>
                                     <td colspan="2" align="center"><strong>No Record Found</strong></td>
                                 </tr>
@@ -350,24 +350,24 @@ if (count($data['callerid_incoming']) > 0) {
                         </thead>
 
                         <tbody>
-<?php
-if (count($data['translation_rules_incoming']) > 0) {
-    foreach ($data['translation_rules_incoming'] as $translation_rule_data) {
-        if ($translation_rule_data['action_type'] == '1')
-            $status = '<span class="label label-success">Allowed</span>';
-        else
-            $status = '<span class="label label-danger">Blocked</span>';
-        ?>
+                            <?php
+                            if (count($data['translation_rules_incoming']) > 0) {
+                                foreach ($data['translation_rules_incoming'] as $translation_rule_data) {
+                                    if ($translation_rule_data['action_type'] == '1')
+                                        $status = '<span class="label label-success">Allowed</span>';
+                                    else
+                                        $status = '<span class="label label-danger">Blocked</span>';
+                                    ?>
                                     <tr >
                                         <td><?php echo $translation_rule_data['display_string']; ?></td>                                  
                                         <td><?php echo $status; ?></td>                                   
 
                                     </tr>
 
-        <?php
-    }
-} else {
-    ?>
+                                    <?php
+                                }
+                            } else {
+                                ?>
                                 <tr>
                                     <td colspan="2" align="center"><strong>No Record Found</strong></td>
                                 </tr>
@@ -428,64 +428,67 @@ if (count($data['translation_rules_incoming']) > 0) {
                     </div>                                 
 
 
-<?php
-if (check_logged_account_type(array('ADMIN', 'SUBADMIN', 'NOC'))) {
-    ?> 
+                    <?php
+                    if (check_logged_account_type(array('ADMIN', 'SUBADMIN', 'NOC'))) {
+                        ?> 
                         <div class="form-group">
                             <label class="control-label col-md-4 col-sm-3 col-xs-12" >Currency <span class="required">*</span></label>
                             <div class="col-md-7 col-sm-6 col-xs-12">                               
 
-                        <?php
-                        $account_currency_display = '';
-                        foreach ($currency_options as $key => $currency_array) {
-                            if ($data['currency_id'] == $currency_array['currency_id']) {
-                                $account_currency_display = $currency_array['symbol'] . " - " . $currency_array['name'];
-                                break;
-                            }
-                        }
+                                <?php
+                                $account_currency_display = '';
+                                foreach ($currency_options as $key => $currency_array) {
+                                    if ($data['currency_id'] == $currency_array['currency_id']) {
+                                        $account_currency_display = $currency_array['symbol'] . " - " . $currency_array['name'];
+                                        break;
+                                    }
+                                }
 
-                        echo '<input type="hidden" name="account_currency_id" id="account_currency_id" value="' . $data['currency_id'] . '" data-parsley-required="" class="form-control"  readonly="readonly" tabindex="' . $tab_index++ . '">';
-                        echo '<input type="text" name="currency_display" id="currency_display" value="' . $account_currency_display . '" class="form-control"  readonly="readonly"  tabindex="' . $tab_index++ . '">';
-                        ?>
+                                echo '<input type="hidden" name="account_currency_id" id="account_currency_id" value="' . $data['currency_id'] . '" data-parsley-required="" class="form-control"  readonly="readonly" tabindex="' . $tab_index++ . '">';
+                                echo '<input type="text" name="currency_display" id="currency_display" value="' . $account_currency_display . '" class="form-control"  readonly="readonly"  tabindex="' . $tab_index++ . '">';
+                                ?>
                             </div>
                         </div>
-                                <?php
-                            } else {
-                                echo '<input type="hidden" name="account_currency_id" id="account_currency_id" value="' . $data['currency_id'] . '" class="form-control">';
-                            }
-                            ?>
+                        <?php
+                    } else {
+                        echo '<input type="hidden" name="account_currency_id" id="account_currency_id" value="' . $data['currency_id'] . '" class="form-control">';
+                    }
+                    ?>
 
                     <div class="form-group">
                         <label class="control-label col-md-4 col-sm-3 col-xs-12" >Tariff Name <span class="required">*</span>
                         </label>
-                    <?php
+                        <?php
 //                         print_r($tariff_options);
 //                                echo $data['currency_id'];
 //                                echo "<br>".$data['tariff_id'];
 //                                
 //                                die;
-                    ?>
+                        ?>
                         <div class="col-md-7 col-sm-6 col-xs-12">
                             <select name="tariff_id" id="tariff_id" class="combobox form-control" data-parsley-required="" tabindex="<?php echo $tab_index++; ?>">
                                 <option value="">Select</option>                    
-                        <?php
-                        $str = '';
+                                <?php
+                                $str = '';
 
-                        $is_assigned_tariff_found = false;
-                        foreach ($tariff_options as $key => $tariff_name_array) {
-                            if ($data['currency_id'] != $tariff_name_array['tariff_currency_id'])
-                                continue;
-                            $selected = ' ';
-                            if ($data['currency_id'] == $tariff_name_array['tariff_currency_id']) {
-                                $selected = '  selected="selected" ';
-                                $is_assigned_tariff_found = true;
-                            }
-                            $str .= '<option value="' . $tariff_name_array['tariff_id'] . '" ' . $selected . '>' . $tariff_name_array['tariff_name'] . '</option>';
-                        }
+                                $is_assigned_tariff_found = false;
+                                foreach ($tariff_options as $key => $tariff_name_array) {
+                                    if ($data['currency_id'] != $tariff_name_array['tariff_currency_id'])
+                                        continue;
+                                    $selected = ' ';
+                                    if ($data['currency_id'] == $tariff_name_array['tariff_currency_id']) {
+                                        if ($data['tariff_id'] == $tariff_name_array['tariff_id'])
+                                            $selected = '  selected="selected" ';
+                                        else
+                                            $selected = ' ';
+                                        $is_assigned_tariff_found = true;
+                                    }
+                                    $str .= '<option value="' . $tariff_name_array['tariff_id'] . '" ' . $selected . '>' . $tariff_name_array['tariff_name'] . '</option>';
+                                }
 
 
-                        echo $str;
-                        ?>
+                                echo $str;
+                                ?>
 
                             </select>
                         </div>
@@ -493,16 +496,16 @@ if (check_logged_account_type(array('ADMIN', 'SUBADMIN', 'NOC'))) {
                     <div class="form-group">
                         <label class="control-label col-md-4 col-sm-3 col-xs-12" >Billing Type <span class="required">*</span></label>
                         <div class="col-md-7 col-sm-6 col-xs-12">                            
-<?php
-$billing_type_array = array('prepaid' => 'Prepaid', 'postpaid' => 'Postpaid', 'netoff' => 'Net-Off');
-foreach ($billing_type_array as $key => $billing_type) {
-    if ($data['billing_type'] == $key) {
-        echo '<input type="hidden" name="billing_type" id="billing_type" value="' . $key . '">';
-        echo ucfirst($billing_type);
-        break;
-    }
-}
-?>
+                            <?php
+                            $billing_type_array = array('prepaid' => 'Prepaid', 'postpaid' => 'Postpaid', 'netoff' => 'Net-Off');
+                            foreach ($billing_type_array as $key => $billing_type) {
+                                if ($data['billing_type'] == $key) {
+                                    echo '<input type="hidden" name="billing_type" id="billing_type" value="' . $key . '">';
+                                    echo ucfirst($billing_type);
+                                    break;
+                                }
+                            }
+                            ?>
                         </div>
                     </div>                              
 
@@ -513,17 +516,17 @@ foreach ($billing_type_array as $key => $billing_type) {
                         <div class="col-md-7 col-sm-6 col-xs-12">
                             <select name="payment_terms" id="payment_terms" data-parsley-required="" class="form-control" tabindex="<?php echo $tab_index++; ?>">
                                 <option value="">Select</option>                    
-<?php
-$payment_terms_array = range(1, 30);
-$str = '';
-foreach ($payment_terms_array as $key => $payment_terms) {
-    $selected = ' ';
-    if ($data['payment_terms'] == $payment_terms)
-        $selected = '  selected="selected" ';
-    $str .= '<option value="' . $payment_terms . '" ' . $selected . '>' . ucfirst($payment_terms) . '</option>';
-}
-echo $str;
-?>
+                                <?php
+                                $payment_terms_array = range(1, 30);
+                                $str = '';
+                                foreach ($payment_terms_array as $key => $payment_terms) {
+                                    $selected = ' ';
+                                    if ($data['payment_terms'] == $payment_terms)
+                                        $selected = '  selected="selected" ';
+                                    $str .= '<option value="' . $payment_terms . '" ' . $selected . '>' . ucfirst($payment_terms) . '</option>';
+                                }
+                                echo $str;
+                                ?>
                             </select>
                         </div>
                     </div>
@@ -532,16 +535,16 @@ echo $str;
                         <label  class="control-label col-md-4 col-sm-3 col-xs-12">VAT / Tax Flag <span class="required">*</span></label>
                         <div class="col-md-7 col-sm-6 col-xs-12">
                             <select name="vat_flag" id="vat_flag" data-parsley-required="" class="form-control" tabindex="<?php echo $tab_index++; ?>">                                  
-<?php
-$str = '';
-foreach ($vatflag_array as $key => $vat) {
-    $selected = ' ';
-    if ($data['vat_flag'] == $vat)
-        $selected = '  selected="selected" ';
-    $str .= '<option value="' . $vat . '" ' . $selected . '>' . $vat . '</option>';
-}
-echo $str;
-?>  
+                                <?php
+                                $str = '';
+                                foreach ($vatflag_array as $key => $vat) {
+                                    $selected = ' ';
+                                    if ($data['vat_flag'] == $vat)
+                                        $selected = '  selected="selected" ';
+                                    $str .= '<option value="' . $vat . '" ' . $selected . '>' . $vat . '</option>';
+                                }
+                                echo $str;
+                                ?>  
                             </select>
                         </div>
                     </div>
@@ -551,17 +554,17 @@ echo $str;
                             <div class="col-md-7 col-sm-6 col-xs-12">
                                 <select name="tax_type" id="tax_type" data-parsley-required="" class="form-control" tabindex="<?php echo $tab_index++; ?>">
                                     <option value="">Select</option>                    
-<?php
-$tax_type_array = array('exclusive' => 'Tax On Bill Amount (exclusive)', 'inclusive' => 'Bill Amount with Tax (inclusive)');
-$str = '';
-foreach ($tax_type_array as $key => $tax_type) {
-    $selected = ' ';
-    if ($data['tax_type'] == $key)
-        $selected = '  selected="selected" ';
-    $str .= '<option value="' . $key . '" ' . $selected . '>' . ucfirst($tax_type) . '</option>';
-}
-echo $str;
-?>
+                                    <?php
+                                    $tax_type_array = array('exclusive' => 'Tax On Bill Amount (exclusive)', 'inclusive' => 'Bill Amount with Tax (inclusive)');
+                                    $str = '';
+                                    foreach ($tax_type_array as $key => $tax_type) {
+                                        $selected = ' ';
+                                        if ($data['tax_type'] == $key)
+                                            $selected = '  selected="selected" ';
+                                        $str .= '<option value="' . $key . '" ' . $selected . '>' . ucfirst($tax_type) . '</option>';
+                                    }
+                                    echo $str;
+                                    ?>
                                 </select>
                             </div>
                         </div>
@@ -673,100 +676,100 @@ echo $str;
                         </div>
                     </div>
 
-<?php
-$logged_account_type = get_logged_account_type();
-$account_status = $data['account_status'];
-$status_update_options_array = array();
-$status_update_options_array['ADMIN'] = array(
-    '-1' => array(),
-    '1' => array(0, -2, -3),
-    '0' => array(),
-    '-2' => array(0, 1, -3),
-    '-3' => array(0, -2, 1),
-);
-$status_update_options_array['CREDITCONTROL'] = array(
-    '-1' => array(1),
-    '1' => array(0, -2, -3),
-    '0' => array(),
-    '-2' => array(0, 1, -3),
-    '-3' => array(0, -2, 1),
-);
-$status_update_options_array['NOC'] = array(
-    '1' => array(0, -2, -3),
-    '-3' => array(0, -2, 1),
-);
+                    <?php
+                    $logged_account_type = get_logged_account_type();
+                    $account_status = $data['account_status'];
+                    $status_update_options_array = array();
+                    $status_update_options_array['ADMIN'] = array(
+                        '-1' => array(),
+                        '1' => array(0, -2, -3),
+                        '0' => array(),
+                        '-2' => array(0, 1, -3),
+                        '-3' => array(0, -2, 1),
+                    );
+                    $status_update_options_array['CREDITCONTROL'] = array(
+                        '-1' => array(1),
+                        '1' => array(0, -2, -3),
+                        '0' => array(),
+                        '-2' => array(0, 1, -3),
+                        '-3' => array(0, -2, 1),
+                    );
+                    $status_update_options_array['NOC'] = array(
+                        '1' => array(0, -2, -3),
+                        '-3' => array(0, -2, 1),
+                    );
 
-$status_name_array = array(
-    '-1' => array('name' => 'Not Approved', 'tooltip' => 'Waiting for approval'),
-    '1' => array('name' => 'Active', 'tooltip' => 'Account is active'),
-    '0' => array('name' => 'Closed', 'tooltip' => 'Account Closed'),
-    '-2' => array('name' => 'Temporarily Suspended', 'tooltip' => 'If balance is zero'),
-    '-3' => array('name' => 'Suspected Blocked', 'tooltip' => 'For suspicious activity, make user blocked'),
-    '-4' => array('name' => 'Account Closed', 'tooltip' => 'Account is closed'),
-);
-?>
+                    $status_name_array = array(
+                        '-1' => array('name' => 'Not Approved', 'tooltip' => 'Waiting for approval'),
+                        '1' => array('name' => 'Active', 'tooltip' => 'Account is active'),
+                        '0' => array('name' => 'Closed', 'tooltip' => 'Account Closed'),
+                        '-2' => array('name' => 'Temporarily Suspended', 'tooltip' => 'If balance is zero'),
+                        '-3' => array('name' => 'Suspected Blocked', 'tooltip' => 'For suspicious activity, make user blocked'),
+                        '-4' => array('name' => 'Account Closed', 'tooltip' => 'Account is closed'),
+                    );
+                    ?>
 
 
                     <div class="form-group">
                         <label class="control-label col-md-4 col-sm-3 col-xs-12">Status</label>
                         <div class="col-md-8 col-sm-6 col-xs-12">
-<?php
-if (isset($status_update_options_array[$logged_account_type][$account_status])) {
-    foreach ($status_update_options_array[$logged_account_type][$account_status] as $status_value) {
-        if ($account_status == $status_value)
-            $checked = ' checked="checked"';
-        else
-            $checked = '';
+                            <?php
+                            if (isset($status_update_options_array[$logged_account_type][$account_status])) {
+                                foreach ($status_update_options_array[$logged_account_type][$account_status] as $status_value) {
+                                    if ($account_status == $status_value)
+                                        $checked = ' checked="checked"';
+                                    else
+                                        $checked = '';
 
-        if (isset($status_name_array[$status_value])) {
-            $status_name = $status_name_array[$status_value]['name'];
-            $tooltip = $status_name_array[$status_value]['tooltip'];
-        } else {
-            $status_name = $status_value;
-            $tooltip = '';
-        }
-        ?>
+                                    if (isset($status_name_array[$status_value])) {
+                                        $status_name = $status_name_array[$status_value]['name'];
+                                        $tooltip = $status_name_array[$status_value]['tooltip'];
+                                    } else {
+                                        $status_name = $status_value;
+                                        $tooltip = '';
+                                    }
+                                    ?>
                                     <div class="col-md-12 col-sm-6 col-xs-12 radio1">
                                         <label><input type="radio" name="account_status" id="status<?php echo $status_value; ?>" value="<?php echo $status_value; ?>" <?php echo $checked; ?>  tabindex="<?php echo $tab_index++; ?>" /> <?php echo $status_name; ?></label>
+                                        <?php
+                                        if ($tooltip != '')
+                                            echo '<a href="#" data-toggle="tooltip" data-placement="top" title="' . $tooltip . '"><i class="fa fa-question-circle"></i></a>';
+                                        ?>
+                                    </div>
+                                <?php }
+                                ?>
+
+                                <?php
+                                if (isset($status_name_array[$account_status])) {
+                                    $status_name = $status_name_array[$account_status]['name'];
+                                    $tooltip = $status_name_array[$account_status]['tooltip'];
+                                } else {
+                                    $status_name = $account_status;
+                                    $tooltip = '';
+                                }
+                                ?>
+                                <div class="col-md-12 col-sm-6 col-xs-12 radio1">
+                                    <label><input type="radio" name="account_status" id="status<?php echo $account_status; ?>" value="<?php echo $account_status; ?>"  checked="checked"  tabindex="<?php echo $tab_index++; ?>" /> <?php echo $status_name; ?></label>
                                     <?php
                                     if ($tooltip != '')
                                         echo '<a href="#" data-toggle="tooltip" data-placement="top" title="' . $tooltip . '"><i class="fa fa-question-circle"></i></a>';
                                     ?>
-                                    </div>
-                                    <?php }
-                                    ?>
-
-                                    <?php
-                                    if (isset($status_name_array[$account_status])) {
-                                        $status_name = $status_name_array[$account_status]['name'];
-                                        $tooltip = $status_name_array[$account_status]['tooltip'];
-                                    } else {
-                                        $status_name = $account_status;
-                                        $tooltip = '';
-                                    }
-                                    ?>
-                                <div class="col-md-12 col-sm-6 col-xs-12 radio1">
-                                    <label><input type="radio" name="account_status" id="status<?php echo $account_status; ?>" value="<?php echo $account_status; ?>"  checked="checked"  tabindex="<?php echo $tab_index++; ?>" /> <?php echo $status_name; ?></label>
-                                <?php
-                                if ($tooltip != '')
-                                    echo '<a href="#" data-toggle="tooltip" data-placement="top" title="' . $tooltip . '"><i class="fa fa-question-circle"></i></a>';
-                                ?>
                                 </div>
-                                    <?php
+                                <?php
+                            } else {
+                                if (isset($status_name_array[$account_status])) {
+                                    $status_name = $status_name_array[$account_status]['name'];
+                                    $tooltip = $status_name_array[$account_status]['tooltip'];
                                 } else {
-                                    if (isset($status_name_array[$account_status])) {
-                                        $status_name = $status_name_array[$account_status]['name'];
-                                        $tooltip = $status_name_array[$account_status]['tooltip'];
-                                    } else {
-                                        $status_name = $account_status;
-                                        $tooltip = '';
-                                    }
-                                    echo '<div class="col-md-12 col-sm-6 col-xs-12 radio""><label>' . $status_name . '</label> ';
-                                    if ($tooltip != '')
-                                        echo '<a href="#" data-toggle="tooltip" data-placement="top" title="' . $tooltip . '" ><i class="fa fa-question-circle"></i></a>';
-                                    echo '<input type="hidden" name="account_status" id="status1" value="' . $account_status . '" /></div>';
+                                    $status_name = $account_status;
+                                    $tooltip = '';
                                 }
-                                ?>
+                                echo '<div class="col-md-12 col-sm-6 col-xs-12 radio""><label>' . $status_name . '</label> ';
+                                if ($tooltip != '')
+                                    echo '<a href="#" data-toggle="tooltip" data-placement="top" title="' . $tooltip . '" ><i class="fa fa-question-circle"></i></a>';
+                                echo '<input type="hidden" name="account_status" id="status1" value="' . $account_status . '" /></div>';
+                            }
+                            ?>
                         </div>
                     </div>
 
@@ -799,16 +802,16 @@ if (isset($status_update_options_array[$logged_account_type][$account_status])) 
                             <div class="col-md-7 col-sm-6 col-xs-12">
                                 <select name="country_id" id="country_id" class="combobox form-control" tabindex="<?php echo $tab_index++; ?>">
                                     <option value="">Select</option>                    
-<?php
-$str = '';
-foreach ($country_options as $key => $country_array) {
-    $selected = ' ';
-    if ($data['country_id'] == $country_array->country_id)
-        $selected = '  selected="selected" ';
-    $str .= '<option value="' . $country_array->country_id . '" ' . $selected . '>' . $country_array->country_name . '</option>';
-}
-echo $str;
-?>
+                                    <?php
+                                    $str = '';
+                                    foreach ($country_options as $key => $country_array) {
+                                        $selected = ' ';
+                                        if ($data['country_id'] == $country_array->country_id)
+                                            $selected = '  selected="selected" ';
+                                        $str .= '<option value="' . $country_array->country_id . '" ' . $selected . '>' . $country_array->country_name . '</option>';
+                                    }
+                                    echo $str;
+                                    ?>
                                 </select>
                             </div>
                         </div>       
@@ -831,16 +834,16 @@ echo $str;
                             <div class="col-md-7 col-sm-6 col-xs-12">
                                 <select name="state_code_id" id="state_code_id" class="form-control" tabindex="<?php echo $tab_index++; ?>">
                                     <option value="">Select</option>                    
-<?php
-$str = '';
-foreach ($state_options as $key => $state_array) {
-    $selected = ' ';
-    if ($data['state_code_id'] == $state_array['state_code_id'])
-        $selected = '  selected="selected" ';
-    $str .= '<option value="' . $state_array['state_code_id'] . '" ' . $selected . '>' . $state_array['state_name'] . '</option>';
-}
-echo $str;
-?>
+                                    <?php
+                                    $str = '';
+                                    foreach ($state_options as $key => $state_array) {
+                                        $selected = ' ';
+                                        if ($data['state_code_id'] == $state_array['state_code_id'])
+                                            $selected = '  selected="selected" ';
+                                        $str .= '<option value="' . $state_array['state_code_id'] . '" ' . $selected . '>' . $state_array['state_name'] . '</option>';
+                                    }
+                                    echo $str;
+                                    ?>
                                 </select>
                             </div>
                         </div>
@@ -857,10 +860,10 @@ echo $str;
                     <div class="form-group">
                         <div class="col-md-12 col-sm-6 col-xs-12 col-md-offset-3">
                             <!--<a href="<?php echo base_url($reseller_type . 's') ?>" ><button class="btn btn-primary" type="button"  tabindex="<?php echo $tab_index++; ?>">Cancel</button></a>-->				
-<?php if (check_account_permission('reseller', 'edit')): ?>	
+                            <?php if (check_account_permission('reseller', 'edit')): ?>	
                                 <button type="button" id="btnSave" class="btn btn-success"  tabindex="<?php echo $tab_index++; ?>">Save</button>
                                 <button type="button" id="btnSaveClose" class="btn btn-info"  tabindex="<?php echo $tab_index++; ?>">Save & Go Back to Listing Page</button>
-<?php endif; ?>
+                            <?php endif; ?>
                         </div>
                     </div>
 

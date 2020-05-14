@@ -1,4 +1,5 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
@@ -74,8 +75,8 @@ class Reseller_mod extends CI_Model {
             $limit_from = intval($limit_from);
             if ($limit_to != '')
                 $sql .= " LIMIT $limit_from, $limit_to";
-            
-           // echo $sql;
+
+            // echo $sql;
             $query = $this->db->query($sql);
             if (!$query) {
                 $error_array = $this->db->error();
@@ -398,7 +399,7 @@ class Reseller_mod extends CI_Model {
 
             if (isset($data['state_code_id']))
                 $account_access_array['state_code_id'] = $data['state_code_id'];
-           
+
             if (isset($data['pincode']))
                 $account_access_array['pincode'] = $data['pincode'];
 
@@ -551,27 +552,27 @@ class Reseller_mod extends CI_Model {
                 $this->db->trans_rollback();
                 return $error_array['message'];
             } else {
-                /*
-                  /////////SDR API////
-                  $api_request['account_id'] = $account_data_array['account_id'];
-                  $api_request['account_type'] = $account_data_array['account_type'];
-                  $api_request['account_level'] = $account_data_array['account_level'];
-                  $api_request['is_new_account'] = 'Y';
-                  $api_request['service_number'] = $account_data_array['tariff_id_name']; //tariff
-                  $api_request['request'] = 'TARIFFCHARGES';
-
-                  $api_response = callSdrAPI($api_request);
-                  $api_result = json_decode($api_response, true);
-                  $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['request'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
-                  set_activity_log($api_log_data_array); //api log
-                  if (!isset($api_result['error']) || $api_result['error'] == '1') {
-                  //echo '<pre>';print_r($api_result);die;
-                  $this->db->trans_rollback();
-                  throw new Exception('SDR Problem:' . $api_result['message']);
-                  }
-                  ///////////////
-                 */
                 $this->db->trans_commit();
+                /////////SDR API////
+                $api_request['account_id'] = $account_data_array['account_id'];
+                $api_request['account_type'] = $account_data_array['account_type'];
+                $api_request['account_level'] = $account_data_array['account_level'];
+                $api_request['is_new_account'] = 'Y';
+                $api_request['service_number'] = $account_data_array['tariff_id_name']; //tariff
+                $api_request['request'] = 'TARIFFCHARGES';
+
+                $api_response = callSdrAPI($api_request);
+                $api_result = json_decode($api_response, true);
+                $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['request'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
+                set_activity_log($api_log_data_array); //api log
+                if (!isset($api_result['error']) || $api_result['error'] == '1') {
+                    //echo '<pre>';print_r($api_result);die;
+                    // $this->db->trans_rollback();
+                    throw new Exception('SDR Problem:' . $api_result['message']);
+                }
+                ///////////////
+
+
                 set_activity_log($log_data_array);
             }
 
@@ -645,7 +646,7 @@ class Reseller_mod extends CI_Model {
                 $account_access_data_array['username'] = $data['username'];
             if (isset($data['secret']) && $data['secret'] != '')
                 $account_access_data_array['secret'] = $data['secret'];
-            
+
             if (isset($data['company_name']))
                 $customer_data_array['company_name'] = $data['company_name'];
             if (isset($data['billing_type']))
@@ -716,24 +717,25 @@ class Reseller_mod extends CI_Model {
             } else {
 
                 if (isset($data['tariff_id']) && $existing_account_row['account_status'] == '1' && $data['tariff_id'] != $existing_account_row['tariff_id']) {
-//                    $api_request['account_id'] = $key;
-//                    $api_request['account_type'] = $existing_account_row['account_type'];
-//                    $api_request['account_level'] = $existing_account_row['account_level'];
-//                    $api_request['service_number'] = $data['tariff_id']; //tariff
-//                    $api_request['request'] = 'TARIFFCHARGES';
-//
-//                    $api_response = callSdrAPI($api_request);
-//                    $api_result = json_decode($api_response, true);
-//                    $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['request'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
-//
-//                    if (!isset($api_result['error']) || $api_result['error'] == '1') {
-//                        $this->db->trans_rollback();
-//                        throw new Exception('SDR Problem:(' . $api_request['account_id'] . ')' . $api_result['message']);
-//                    }
+                    $this->db->trans_commit();
+                    $api_request['account_id'] = $key;
+                    $api_request['account_type'] = $existing_account_row['account_type'];
+                    $api_request['account_level'] = $existing_account_row['account_level'];
+                    $api_request['service_number'] = $data['tariff_id']; //tariff
+                    $api_request['request'] = 'TARIFFCHARGES';
+
+                    $api_response = callSdrAPI($api_request);
+                    $api_result = json_decode($api_response, true);
+                    $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['request'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
+
+                    if (!isset($api_result['error']) || $api_result['error'] == '1') {
+                        $this->db->trans_rollback();
+                        throw new Exception('SDR Problem:(' . $api_request['account_id'] . ')' . $api_result['message']);
+                    }
                 }
 
 
-                $this->db->trans_commit();
+
                 set_activity_log($log_data_array);
                 set_activity_log($api_log_data_array);
             }

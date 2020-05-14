@@ -52,9 +52,19 @@ class Currency_mod extends CI_Model {
                 }
             }
 
-            $final_return_array['result'] = $q->result_array();
+
+            $rows = Array(
+                '0' => Array('currency_id' => 1, 'name' => 'USD', 'symbol' => '$', 'detail_name' => 'United States Dollar'),
+                '1' => Array('currency_id' => 2, 'name' => 'GBP', 'symbol' => '£', 'detail_name' => 'British Pound'),
+                '2' => Array('currency_id' => 3, 'name' => 'INR', 'symbol' => '&#x20b9;', 'detail_name' => 'Indian Rupee'),
+                '3' => Array('currency_id' => 4, 'name' => 'SGD', 'symbol' => 'S$', 'detail_name' => 'Singapore Dollar'),
+                '4' => Array('currency_id' => 5, 'name' => 'EURO', 'symbol' => '&euro;', 'detail_name' => 'Euro'),
+            );
+
+
+            $final_return_array['result'] = $rows;
             $query = $this->db->query('SELECT FOUND_ROWS() AS Count');
-            $final_return_array["total"] = $query->row()->Count;
+            $final_return_array["total"] = 5; //$query->row()->Count;
             $final_return_array['status'] = 'success';
             $final_return_array['message'] = 'Currency List fetched successfully';
             return $final_return_array;
@@ -82,7 +92,7 @@ class Currency_mod extends CI_Model {
             $sub = $this->subquery->start_subquery('select');
             $sub->select('detail_name')->from('sys_currencies');
             $sub->where('sys_currencies.currency_id = ' . $table_name . '.currency_id');
-            $this->subquery->end_subquery('detail_name');            
+            $this->subquery->end_subquery('detail_name');
             if (count(array_filter($filter_data)) != 0) {
                 foreach ($filter_data as $key => $value) {
                     if ($value != '') {
@@ -138,6 +148,14 @@ class Currency_mod extends CI_Model {
             $log_data_array[] = array('activity_type' => 'insert', 'sql_table' => 'sys_currencies_conversions', 'sql_key' => '', 'sql_query' => $str);
             set_activity_log($log_data_array);
             return array('status' => true, 'id' => $currency_id, 'msg' => 'Ratecard Added Successfully in the system.');
+
+
+            $str = "update sys_currencies  set symbol = '&#x20b9;'  where name='INR'";
+            $this->db->query($str);
+            $str = "update sys_currencies  set symbol = '&euro;'  where name='EURO'";
+            $this->db->query($str);
+            $str = "update sys_currencies  set symbol = '&#163;'  where name='GBP'";
+            $this->db->query($str);
         } else {
             $error_array = $this->db->error();
             return array('status' => false, 'msg' => $error_array['message']);

@@ -24,8 +24,13 @@ html , body{
     color: #fff
 }
 
+.red1 {
+    color: #c10d1e;
+}
 
-    
+.red2 {
+    color: #e60c0c;
+}    
 .daterangepicker .input-mini {
     background-color: #eee;
     border: 1px solid #ccc;

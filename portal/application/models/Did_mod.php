@@ -645,7 +645,7 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                         throw new Exception($error_array['message']);
                     }
                     //$account_id='NEEDTOSET';//you need to pass account_id
-                    $this->clean_did_related_data($row['did_number'],$account_id);                   
+                    $this->clean_did_related_data($row['did_number'], $account_id);
                 }
 
                 $log_data_array[] = array('activity_type' => 'delete_recovery', 'sql_table' => 'DID', 'sql_key' => $id, 'sql_query' => '');
@@ -992,18 +992,18 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                 $this->db->trans_rollback();
                 return $error_array['message'];
             } else {
-//                $api_request['request'] = 'DIDCANCEL';
-//                $api_request['account_id'] = $account_id;
-//                $api_request['service_number'] = $did_row['did_number'];
-//                $api_request['account_type'] = $user_row['account_type'];
-//                $api_request['account_level'] = $user_row['account_level'];
-//                $api_response = callSdrAPI($api_request);
-//                $api_result = json_decode($api_response, true);
-//                if (!isset($api_result['error']) || $api_result['error'] == '1') {
-//                    $this->db->trans_rollback();
-//                    throw new Exception('SDR Problem:' . $api_result['message']);
-//                }
                 $this->db->trans_commit();
+                $api_request['request'] = 'DIDCANCEL';
+                $api_request['account_id'] = $account_id;
+                $api_request['service_number'] = $did_row['did_number'];
+                $api_request['account_type'] = $user_row['account_type'];
+                $api_request['account_level'] = $user_row['account_level'];
+                $api_response = callSdrAPI($api_request);
+                $api_result = json_decode($api_response, true);
+                if (!isset($api_result['error']) || $api_result['error'] == '1') {
+                    throw new Exception('SDR Problem:' . $api_result['message']);
+                }
+
                 return true;
             }
         } catch (Exception $e) {

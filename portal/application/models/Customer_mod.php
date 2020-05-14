@@ -633,10 +633,12 @@ class Customer_mod extends CI_Model {
                 $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['request'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
 
                 if (!isset($api_result['error']) || $api_result['error'] == '1') {
-                    echo '<pre>';print_r($api_result);die;
+                //    echo '<pre>';
+                //    print_r($api_result);
+                 //   die;
                     $this->db->trans_rollback();
-                    throw new Exception('SDR Problem:('.$api_request['account_id'].')'.$api_result['message']);
-                }               
+                    throw new Exception('SDR Problem:(' . $api_request['account_id'] . ')' . $api_result['message']);
+                }
                 return true;
             }
         } catch (Exception $e) {
@@ -654,7 +656,6 @@ class Customer_mod extends CI_Model {
         $account_type = 'CUSTOMER';
         $key = $data['key'];
         try {
-            $this->db->trans_begin();
             $account_access_data_array = $account_data_array = $account_access_array = $billing_cust_data_array = array();
             if (isset($data['username']))
                 $account_access_data_array['username'] = $data['username'];
@@ -754,6 +755,7 @@ class Customer_mod extends CI_Model {
                     $account_data_array['account_status'] = '-1';
                 }
             }
+            $this->db->trans_begin();
             if (count($account_data_array) > 0) {
                 $where = "account_id='" . $key . "'";
                 $str = $this->db->update_string('account', $account_data_array, $where);
@@ -779,7 +781,7 @@ class Customer_mod extends CI_Model {
 
             if (count($account_access_data_array) > 0) {
                 $sql = "SELECT customer_id FROM customers WHERE account_id ='" . $key . "'";
-                echo $sql;
+                //  echo $sql;
                 $query = $this->db->query($sql);
                 foreach ($query->result_array() as $row) {
                     $customer_id = $row['customer_id'];
@@ -816,6 +818,7 @@ class Customer_mod extends CI_Model {
                 return $error_array['message'];
             } else {
                 if (isset($data['tariff_id']) && $existing_account_row['account_status'] == '1' && $data['tariff_id'] != $existing_account_row['tariff_id']) {
+                    $this->db->trans_commit();
                     $api_request['account_id'] = $key;
                     $api_request['account_type'] = 'CUSTOMER';
                     $api_request['account_level'] = '';
@@ -825,14 +828,17 @@ class Customer_mod extends CI_Model {
 
                     $api_response = callSdrAPI($api_request);
                     $api_result = json_decode($api_response, true);
+                         print_r($api_result);
                     $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['request'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
+
+                   //    print_r($api_log_data_array);
 
                     if (!isset($api_result['error']) || $api_result['error'] == '1') {
                         throw new Exception('SDR Problem:(' . $api_request['account_id'] . ')' . $api_result['message']);
                     }
                 }
 
-                $this->db->trans_commit();
+
                 set_activity_log($log_data_array);
                 set_activity_log($api_log_data_array);
             }

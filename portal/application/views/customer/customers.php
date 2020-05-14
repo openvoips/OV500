@@ -226,7 +226,7 @@ $status_name_array = array(
                                     <a href="<?php echo base_url(); ?>reports/cdr/<?php echo param_encrypt($account_data['account_id']); ?>" title="CDR" target="_blank">CDR</a>
                                 <?php endif; ?>
 
-                                <a href="<?php echo base_url(); ?>customers/statement/<?php echo param_encrypt($account_data['account_id']); ?>" title="Account Statement"><i class="fa fa-hand-o-right"></i></a>
+                                    <a href="<?php echo base_url(); ?>customers/statement/<?php echo param_encrypt($account_data['account_id']); ?>" title="Account Statement"><i class="fa fa-hand-o-right"></i></a>                                         
                                 <a href="<?php echo base_url(); ?>customers/cState/<?php echo param_encrypt($account_data['account_id']); ?>" title="Call Analysis"><i class="fa fa-bar-chart-o"></i></a>
                                 <?php
                                 if (check_account_permission('customer', 'delete') && $this->session->userdata('session_current_account_id') != $account_data['id'] && strtolower($status_name) == 'closed'):

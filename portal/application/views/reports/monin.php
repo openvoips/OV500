@@ -32,10 +32,10 @@
 <!-- jQuery Sparklines -->
 <script src="<?php echo base_url() ?>theme/vendors/jquery-sparkline/dist/jquery.sparkline.min.js"></script>
 <style type="text/css">
-    .red1{background-color:#AA0000;color: white;}/*FF3535*/
-    .red2{background-color:#FE6363;color: white;}
+    .red1{background-color:#AA0000;color: #c10d1e;}/*FF3535*/
+    .red2{background-color:#FE6363;color: #e60c0c;}
     .red3{background-color:#FEA7A7;color:#F0F3F4;}
-    .red4{background-color:#FFDFDF;}   
+    .red4{background-color:#FFDFDF;}  
 </style>         
 
 <div id="analytics" class="col-md-12 col-sm-12 col-xs-12">
