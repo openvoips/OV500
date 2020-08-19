@@ -8,21 +8,21 @@ Refer teh OV500 deployment architecture diagram
 
 Features list are as below...
 
-- Prepaid / Postpaid Billing
-- GUI design in CodeIgniter Web Framework
-- Used opensource  Mariadb Database
-- Kamailio, RTPProxy and Freeswitch based Solution
-- High scalable solution (Solution fit for single server architecture and multi server architecture based on business needs.)
-- High CPS and CC supports.
-- Easy to Manage
-- Fit for Wholesale, call center traffic, retail traffic as Class-4 Switch and billing. Residential solution as Class-5 switch and billing
-- IP and SIP User, Dialprefix and Caller ID based authentication
-- Multi level Reseller account Management
-- DID billing
-- Smart and dynamic routing
-- Tariff / Bundle Traiff (Package) Management 
-- Integrated online payment process option
-- Monitoring & Repoting 
+-  Prepaid / Postpaid Billing
+-  GUI design in CodeIgniter Web Framework
+-  Used opensource Mariadb Database
+-  Kamailio, RTPProxy and Freeswitch based Solution
+-  High scalable solution (Solution fit for single-server architecture and multi-server architecture based on business needs.)
+-  High CPS and CC support.
+-  Easy to Manage
+-  Fit for Wholesale, call center traffic, retail traffic as Class-4 Switch and billing. The residential solution as Class-5 switch and billing
+-  IP and SIP User, Dialprefix and Caller ID-based authentication
+-  Multi-level Reseller account Management
+-  DID billing
+-  Smart and dynamic routing
+-  Tariff / Bundle Tariff (Package) Management
+-  The integrated online payment process option
+-  Monitoring & Reporting
 
 and many more
 
