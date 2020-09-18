@@ -276,12 +276,12 @@ class Ratecard extends CI_Controller {
                                     $error_type .= 'Destination (' . $dest . ')';
                                 }
                                 $ppm = trim($d[2]);
-                                if (!preg_match('/^[0-9]+(\.[0-9]{1,6})?$/', $ppm)) {
+                                if (!preg_match('/^[0-9]+(\.[0-9]{1,10})?$/', $ppm)) {
                                     $error++;
                                     $error_type .= 'PPM';
                                 }
                                 $ppc = trim($d[3]);
-                                if (!preg_match('/^[0-9]+(\.[0-9]{1,6})?$/', $ppc)) {
+                                if (!preg_match('/^[0-9]+(\.[0-9]{1,10})?$/', $ppc)) {
                                     $error++;
                                     $error_type .= 'PPC';
                                 }
@@ -301,7 +301,7 @@ class Ratecard extends CI_Controller {
                                     $error_type .= 'Grace';
                                 }
                                 $mul = trim($d[7]);
-                                if (!preg_match('/^[0-9]+(\.[0-9]{1,6})?$/', $mul)) /* if(!ctype_digit($mul)) */ {
+                                if (!preg_match('/^[0-9]+(\.[0-9]{1,10})?$/', $mul)) /* if(!ctype_digit($mul)) */ {
                                     $error++;
                                     $error_type .= 'Multiply';
                                 }
@@ -324,19 +324,19 @@ class Ratecard extends CI_Controller {
                                         $error_type .= 'Inclusive Channel';
                                     }
                                     $exclusive_per_channel_rental = trim($d[11]);
-                                    if (!preg_match('/^[0-9]+(\.[0-9]{1,6})?$/', $exclusive_per_channel_rental)) {
+                                    if (!preg_match('/^[0-9]+(\.[0-9]{1,10})?$/', $exclusive_per_channel_rental)) {
                                         $error++;
                                         $error_type .= 'Exclusive Per Channel Rental';
                                     } //decimal		
 
 
                                     $rental = trim($d[12]);
-                                    if (!preg_match('/^[0-9]+(\.[0-9]{1,6})?$/', $rental)) {
+                                    if (!preg_match('/^[0-9]+(\.[0-9]{1,10})?$/', $rental)) {
                                         $error++;
                                         $error_type .= 'Rental';
                                     } //decimal		
                                     $setup_charge = trim($d[13]);
-                                    if (!preg_match('/^[0-9]+(\.[0-9]{1,6})?$/', $setup_charge)) {
+                                    if (!preg_match('/^[0-9]+(\.[0-9]{1,10})?$/', $setup_charge)) {
                                         $error++;
                                         $error_type .= 'Setup Charge';
                                     } //decimal		

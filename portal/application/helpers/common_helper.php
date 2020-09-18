@@ -61,7 +61,7 @@ function get_export_formats() {
 
 function get_account_types($key = '') {
     $account_type_array = array();
-    $account_type_array[1] = array('ADMIN' => 'Supper Admin', 'SUBADMIN' => 'Admin User', 'ACCOUNTS' => 'Accounts & Billing');
+    $account_type_array[1] = array('ADMIN' => 'Super Admin', 'SUBADMIN' => 'Admin User');
     $account_type_array[2] = array('CUSTOMER' => 'Customer');
     $account_type_array[3] = array('RESELLER' => 'Reseller');
 
