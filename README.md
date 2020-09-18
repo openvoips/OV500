@@ -3,7 +3,7 @@
 
 <a href="https://ov500.openvoips.org/">OV500</a> is an Open Source VoIP Billing Switching and rating Solution for Kamailio & Freeswitch. 
 
-Refer teh OV500 deployment architecture diagram 
+Refer the OV500 deployment architecture diagram 
 ![](https://github.com/openvoips/OV500/blob/master/config/images/OV500%20Billing%20%26%20Routing%20VoIP%20Solution.jpg)
 
 Features list are as below...
