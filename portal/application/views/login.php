@@ -2,14 +2,20 @@
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
-// Copyright (C) 2019 Chinna Technologies  
+// Copyright (C) 2019-2020 Chinna Technologies   
 // Seema Anand <openvoips@gmail.com>
 // Anand <kanand81@gmail.com>
 // http://www.openvoips.com  http://www.openvoips.org
 //
 //
-// OV500 Version 1.0
+// OV500 Version 1.0.3
 // License https://www.gnu.org/licenses/agpl-3.0.html
+//
+//
+// The Initial Developer of the Original Code is
+// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
+// Portions created by the Initial Developer are Copyright (C)
+// the Initial Developer. All Rights Reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -75,7 +81,7 @@
                     <section class="login_content">
 
                         <form class="form with-margin" name="login-form" id="login-form" method="post" action="<?php echo base_url(); ?>login">
-                                <label class="control-label col-md-12 col-sm-12 col-xs-12">OV500 Billing & Switching Portal</label>
+                                <label class="control-label col-md-12 col-sm-12 col-xs-12">Billing & Switching Portal</label>
                             <input type="hidden" name="action" value="login">
                             <?php
                             if (isset($_REQUEST['redirect'])) {
@@ -104,7 +110,7 @@
                                 <br />
 
                                 <div>
-              <p>Copyright © <?php echo date('Y'); ?> <a href="https://ov500.openvoips.org" target="_blank">OV500 Billing & Switching Software</a> (Chinna Technologies). All Rights Reserved  </p>
+              <p>Copyright © <?php echo date('Y'); ?> <a href="https://ov500.openvoips.org" target="_blank">Billing & Switching Software</a> All Rights Reserved  </p>
                                 </div>
                             </div>
                         </form>
@@ -134,7 +140,7 @@
                                 <br />
 
                                 <div>
-                                    <p>Copyright©<?php echo date('Y'); ?> <a href="https://ov500.openvoips.org" target="_blank">OV500 Billing & Switching Software</a> (Chinna Technologies). All Rights Reserved  </p>
+                                    <p>Copyright©<?php echo date('Y'); ?> <a href="https://ov500.openvoips.org" target="_blank">Billing & Switching Software</a>. All Rights Reserved  </p>
        
     
                                    

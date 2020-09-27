@@ -9,7 +9,7 @@
 // http://www.openvoips.com  http://www.openvoips.org
 //
 //
-// OV500 Version 1.0
+//OV500 Version 1.0.3
 // License https://www.gnu.org/licenses/agpl-3.0.html
 //
 // This program is free software: you can redistribute it and/or modify
@@ -71,7 +71,7 @@ class Reports extends CI_Controller {
                 's_dest' => $_POST['frmdest'],
                 's_prefix' => $_POST['frmprefix'],
                 's_ctype' => $_POST['frmctype'],
-                's_code' => $_POST['frmcode'],            
+                's_code' => $_POST['frmcode'],
                 's_customer_company_name' => $_POST['customer_company_name'],
                 's_g_user' => (isset($_POST['g_user']) ? 'Y' : 'N'),
                 's_g_carrier' => (isset($_POST['g_carrier']) ? 'Y' : 'N'),
@@ -79,7 +79,7 @@ class Reports extends CI_Controller {
                 's_g_hour' => (isset($_POST['g_hour']) ? 'Y' : 'N'),
                 's_g_minute' => (isset($_POST['g_minute']) ? 'Y' : 'N'),
                 's_g_prefix' => (isset($_POST['g_prefix']) ? 'Y' : 'N'),
-                's_g_dest' => (isset($_POST['g_dest']) ? 'Y' : 'N'),                
+                's_g_dest' => (isset($_POST['g_dest']) ? 'Y' : 'N'),
             );
             $is_make_search = true;
         } elseif ($arg1 != 'export') {
@@ -95,9 +95,9 @@ class Reports extends CI_Controller {
                 's_g_hour' => '',
                 's_g_minute' => '',
                 's_g_prefix' => '',
-                's_g_dest' => '',              
+                's_g_dest' => '',
                 's_customer_company_name' => '',
-                's_ctype' => '',               
+                's_ctype' => '',
             );
         } else {
             $is_make_search = true;
@@ -110,14 +110,14 @@ class Reports extends CI_Controller {
             'company_name' => $_SESSION['search_data']['s_customer_company_name'],
             'account_type' => $_SESSION['search_data']['s_ctype'],
             'prefix' => $_SESSION['search_data']['s_prefix'],
-            'destination' => $_SESSION['search_data']['s_dest'],         
+            'destination' => $_SESSION['search_data']['s_dest'],
             'group_by_carrier' => $_SESSION['search_data']['s_g_carrier'],
             'group_by_user' => $_SESSION['search_data']['s_g_user'],
             'group_by_hour' => $_SESSION['search_data']['s_g_hour'],
             'group_by_minute' => $_SESSION['search_data']['s_g_minute'],
             'group_by_date' => $_SESSION['search_data']['s_g_date'],
             'group_by_prefix' => $_SESSION['search_data']['s_g_prefix'],
-            'group_by_destination' => $_SESSION['search_data']['s_g_dest'],          
+            'group_by_destination' => $_SESSION['search_data']['s_g_dest'],
             'logged_customer_type' => get_logged_account_type(),
             'logged_customer_account_id' => get_logged_account_id(),
             'logged_customer_level' => get_logged_account_level(),
@@ -156,7 +156,7 @@ class Reports extends CI_Controller {
 
             $export_header[] = 'Total Duration';
             $export_header[] = 'Total Calls';
-            $export_header[] = 'Ans Calls';          
+            $export_header[] = 'Ans Calls';
             $export_header[] = 'Cost';
             $export_data = array();
             $currency_abbr = function($id) use ($currency_data) {
@@ -214,7 +214,7 @@ class Reports extends CI_Controller {
                 $search_array['Prefix'] = $_SESSION['search_data']['s_prefix'];
             if ($_SESSION['search_data']['s_dest'] != '')
                 $search_array['Destination'] = $_SESSION['search_data']['s_dest'];
-          
+
             $this->load->library('Export');
             $downloaded_message = $this->export->download($file_name, $format, $search_array, $export_header, $export_data);
             if (gettype($downloaded_message) == 'string')
@@ -2819,8 +2819,8 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
         } else {
             die;
         }
-        
-        if (isset($_POST['search_action'])) {								
+
+        if (isset($_POST['search_action'])) {
             $_SESSION['search_topup_cust_data']['s_cdr_record_date'] = $_POST['time_range'];
             $_SESSION['search_topup_cust_data']['s_account_id'] = $_POST['account_id'];
         } elseif (!isset($_SESSION['search_topup_cust_data']['s_cdr_record_date'])) {
@@ -2993,7 +2993,7 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
             'record_date' => $_SESSION['search_sales_day_data']['s_cdr_record_date'],
             'g_rec_date' => 'Y');
 
-      if (check_logged_account_type(array('RESELLER')))
+        if (check_logged_account_type(array('RESELLER')))
             $search_data['s_parent_account_id'] = $logged_account_id;
         elseif (check_logged_account_type(array('CUSTOMER')))
             $search_data['account_id'] = $logged_account_id;
@@ -3005,7 +3005,7 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
             show_404('403');
         }
 
-     
+
 
         $data['currency_options'] = $this->utils_model->get_currencies();
         $report_data = $this->report_mod->get_businesHistory($search_data, '', '');
@@ -3041,7 +3041,7 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
         $logged_account_id = get_logged_account_id();
 
         ////////////get customer data///////////////////
-      if (check_logged_account_type(array('RESELLER', 'CUSTOMER')))
+        if (check_logged_account_type(array('RESELLER', 'CUSTOMER')))
             $customer_search_data['parent_account_id'] = get_logged_account_id();
         elseif (check_logged_account_type(array('ADMIN', 'SUBADMIN')))
             $customer_search_data['parent_account_id'] = '';
@@ -3094,7 +3094,7 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
         $report_search_data = array('account_id' => $_SESSION['search_sales_cust_data']['s_account_id'],
             'record_date' => $_SESSION['search_sales_cust_data']['s_cdr_record_date'],
             'g_account_id' => 'Y');
-if (check_logged_account_type(array('RESELLER')))
+        if (check_logged_account_type(array('RESELLER')))
             $report_search_data['s_parent_account_id'] = $logged_account_id;
         elseif (check_logged_account_type(array('CUSTOMER')))
             $report_search_data['account_id'] = $logged_account_id;
@@ -3186,7 +3186,7 @@ if (check_logged_account_type(array('RESELLER')))
                 'Supplier Reference',
                 'Service Type',
                 'Status',
-                'Microtalk Reference',
+                'Our Reference',
                 'Start Date',
                 'End Date',
                 'Quantity',

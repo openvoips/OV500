@@ -121,7 +121,7 @@ $help_text_array['cli_riles'] = array(
     array('%=>919949800228', 'allowing all CLI and replacing incoming CLI with 919949800228.')
 );
 $help_text_array['trans_riles'] = array(
-    array('%=>%', 'allow all dialed number without allying and  translation.'),
+    array('%=>%', 'allow all dialed number without any translation.'),
     array('44|%=>%', 'allow only 44 prefix Dialed number and removing 44 prefix from dialed number.'),
     array('44|%=>0044%', 'allow only 44 prefix dialed number and removing 44 and adding 0044 prefix in dialed number.'),
     array('44{4}|%=>%', 'allowing only 44 prefix dialed number with 4 length and removing 44 from the dialed number.'),
@@ -130,7 +130,7 @@ $help_text_array['trans_riles'] = array(
 );
 
 $help_text_array['term_prefix_riles'] = array(
-    array('%=>%', 'allow all dialed number without allying and  translation.'),
+    array('%=>%', 'allow all dialed number without any translation.'),
     array('44|%=>%', 'allow only 44 prefix Dialed number and removing 44 prefix from dialed number.'),
     array('44|%=>0044%', 'allow only 44 prefix dialed number and removing 44 and adding 0044 prefix in dialed number.'),
     array('44{4}|%=>%', 'allowing only 44 prefix dialed number with 4 length and removing 44 from the dialed number.'),
@@ -144,7 +144,7 @@ define('SITE_FULL_NAME', 'OV500 Billing and Switching Software');
 define('SDR_API_URL', 'https://openvoips.org/portal/api/sdrapi.php');
 define('LOGO_IMAGE', 'logo.png');
 
-define('MOMENT_TIMEZONE', 'Asia/Calcutta');
+define('MOMENT_TIMEZONE', 'GMT0');
 
 
 define('SITE_MAIL_FROM', 'kanand81@gmail.com');

@@ -8,7 +8,7 @@
 // http://www.openvoips.com  http://www.openvoips.org
 //
 //
-// OV500 Version 1.0
+//OV500 Version 1.0.3
 // License https://www.gnu.org/licenses/agpl-3.0.html
 //
 // This program is free software: you can redistribute it and/or modify

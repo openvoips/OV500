@@ -1,4 +1,5 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
@@ -8,7 +9,7 @@
 // http://www.openvoips.com  http://www.openvoips.org
 //
 //
-// OV500 Version 1.0
+//OV500 Version 1.0.3
 // License https://www.gnu.org/licenses/agpl-3.0.html
 //
 // This program is free software: you can redistribute it and/or modify
@@ -146,7 +147,7 @@ class Payment extends CI_Controller {
                             if ($account_result['account_type'] == 'CUSTOMER')
                                 $redirect_page = 'customers';
                             elseif ($account_result['account_type'] == 'RESELLER')
-                                $redirect_page = 'resellers';                            
+                                $redirect_page = 'resellers';
                             else
                                 $redirect_page = 'dashboard';
                             redirect(base_url() . $redirect_page, 'location', '301');
@@ -272,7 +273,7 @@ class Payment extends CI_Controller {
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
         $view_page = "make_payment";
 
-        $account_id = get_logged_account_id();       
+        $account_id = get_logged_account_id();
         $option_param = array('currency' => true);
         $account_result = $this->member_mod->get_account_by_key('account_id', $account_id, $option_param);
 
@@ -345,7 +346,7 @@ class Payment extends CI_Controller {
     /* keep record before payment initiate */
 
     function initiate_payment($account_id, $amount, $method, $account_result, $payment_gateway_data) {
-        $item_name = 'Microtalk payment';
+        $item_name = 'Payment';
         $credentials = json_decode($payment_gateway_data['credentials'], true);
 
         $order_id = str_replace(' ', '', $account_id);
@@ -862,7 +863,6 @@ class Payment extends CI_Controller {
 
         $mail_footer = 'Thanks & Regards,<br>'
                 . '<strong>' . SITE_FULL_NAME . '</strong><br>'
-                . '<strong>Email</strong>: creditcontrol@microtalkgroup.com<br>'
                 . '<strong>Website</strong>: ' . base_url();
 
 
@@ -1184,10 +1184,8 @@ class Payment extends CI_Controller {
             $subject = $heading;
 
 
-            $mail_to = 'nocteam@microtalkgroup.com';
-            $mail_to_cc = SITE_MAIL_TO;
-            $mail_to_bcc = 'anand.kumar@microtalkgroup.com';
-            //
+
+            $mail_to = SITE_MAIL_TO;
             $mail_from = SITE_MAIL_FROM;
             $mail_from_name = SITE_FULL_NAME;
             if ($mail_to != '') {

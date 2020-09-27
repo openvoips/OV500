@@ -2,13 +2,13 @@
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
-// Copyright (C) 2019 Chinna Technologies  
+// Copyright (C) 2019-2020 Chinna Technologies   
 // Seema Anand <openvoips@gmail.com>
 // Anand <kanand81@gmail.com>
 // http://www.openvoips.com  http://www.openvoips.org
 //
 //
-// OV500 Version 1.0
+// OV500 Version 1.0.3
 // License https://www.gnu.org/licenses/agpl-3.0.html
 //
 // This program is free software: you can redistribute it and/or modify
@@ -37,17 +37,13 @@ $current_timestamp = time() * 1000;
     function showTime()
     {
         current_timestamp = current_timestamp + interval_time;
-
-//		var time=moment(current_timestamp).tz("GMT").utcOffset("+05:30").format('hh:mm A');
-        var time = moment().tz("Europe/London").format('hh:mm A');
-        //var time=moment(current_timestamp).tz("BST").format('hh:mm A');			
-        $('#id_clock').html('Server Time: ' + time);
-        //console.log(time);
+        var time = moment().tz("GMT0").format('Y-MM-D hh:mm A');
+        $('#id_clock').html('Server Date & Time : ' + time);
     }
 
     $(document).ready(function () {
-        //showTime();	
-        //setInterval(showTime, interval_time);
+        showTime();	
+        setInterval(showTime, interval_time);
     });
 </script> 
 

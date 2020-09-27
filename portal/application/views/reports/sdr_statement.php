@@ -2,14 +2,20 @@
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
-// Copyright (C) 2019 Chinna Technologies  
+// Copyright (C) 2019-2020 Chinna Technologies   
 // Seema Anand <openvoips@gmail.com>
 // Anand <kanand81@gmail.com>
 // http://www.openvoips.com  http://www.openvoips.org
 //
 //
-// OV500 Version 1.0
+// OV500 Version 1.0.3
 // License https://www.gnu.org/licenses/agpl-3.0.html
+//
+//
+// The Initial Developer of the Original Code is
+// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
+// Portions created by the Initial Developer are Copyright (C)
+// the Initial Developer. All Rights Reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -29,14 +35,15 @@
 //print_r($_SESSION['search_sdr_summary_data']);
 //echo '<br><br>';
 //print_r(current($sdr_terms));
-if (!$user_dp || $user_dp == '')
-    $user_dp = 2;
+$tab_index=0;
+if (!$customer_dp || $customer_dp == '')
+    $customer_dp = 2;
 
 if ($active_tab == 'tab_statement')
     $tab_statement_class = 'active in';
 else
     $tab_invoice_class = 'active in';
-$amount_format = "%." . $user_dp . "f";
+$amount_format = "%." . $customer_dp . "f";
 
 $credit_history = array();
 ?>
@@ -165,7 +172,7 @@ $credit_history = array();
                                         $top_html_str = $last_html_str = '';
                                         if (count($data['result']) > 0) {
                                             foreach ($data['result'] as $sdr_data) {
-                                                $debit = $credit = '';
+                                                $debit = $credit = 0;
                                                 $display_text = '';
                                                 $rule_type = $sdr_data['rule_type'];
 
@@ -178,8 +185,7 @@ $credit_history = array();
                                                     $display_text = $term_array['display_text'];
                                                     $cost_calculation_formula = trim($term_array['cost_calculation_formula']);
 
-                                                    //$total_cost = number_format($sdr_data['total_cost'],$user_dp,'.','');
-                                                    $total_cost = round($sdr_data['total_cost'], $user_dp);
+                                                    $total_cost = round($sdr_data['total_cost'], $customer_dp);
 
 
 
@@ -464,7 +470,7 @@ if (check_logged_account_type(array('CUSTOMER', 'RESELLER'))) {
                                             $create_dt_display = date(DATE_FORMAT_1, $create_dt_timestamp);
                                         }
 
-                                        $amount = number_format($payment_data['amount'], $user_dp, '.', '');
+                                        $amount = number_format($payment_data['amount'], $customer_dp, '.', '');
                                         ?>
                                             <tr >                          
                                                 <td class="column-title" ><?php echo $create_dt_display; ?></td>                                 <td ><?php echo $payment_data['file_name']; ?></td>

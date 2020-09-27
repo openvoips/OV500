@@ -3,13 +3,19 @@
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
-// Copyright (C) 2019 Chinna Technologies  
+// Copyright (C) 2019-2020 Chinna Technologies   
 // Seema Anand <openvoips@gmail.com>
 // Anand <kanand81@gmail.com>
 // http://www.openvoips.com  http://www.openvoips.org
 //
-// OV500 Version 1.0
+//OV500 Version 1.0.3.3
 // License https://www.gnu.org/licenses/agpl-3.0.html
+//
+//
+// The Initial Developer of the Original Code is
+// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
+// Portions created by the Initial Developer are Copyright (C)
+// the Initial Developer. All Rights Reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -162,8 +168,6 @@ class OVS extends PDO {
     }
 
     function api($request) {
-
-
         $this->rdata = $request;
         $carrier = $this->rdata['carrier'];
         $account = $this->rdata['account'];
@@ -495,7 +499,6 @@ class OVS extends PDO {
             $this->carrierdata[$key] = $value;
         }
 
-
         $query = sprintf("SELECT did.did_number, did.did_status, did.carrier_id, did.account_id, did.reseller1_account_id, did.reseller2_account_id, did.reseller3_account_id,  did_dst.account_id, did_dst.dst_type, did_dst.dst_destination, did_dst.dst_destination2, did_dst.dst_type2  from did INNER JOIN did_dst on did.account_id = did_dst.account_id where did_dst.did_number = '%s' ORDER BY did.did_number limit 1;", $this->incomingcarrierdst, $this->incomingcarrier);
 
         $this->writelog($query);
@@ -504,8 +507,6 @@ class OVS extends PDO {
         foreach ($rs[0] as $key => $value) {
             $this->carrierdata[$key] = $value;
         }
-
-
 
         $query = sprintf("SELECT LENGTH(maching_string) lndata, remove_string, add_string, action_type FROM carrier_callerid where carrier_id = '%s' and '%s' and route = 'INBOUND' like maching_string ORDER BY lndata desc limit 1;", $this->incomingcarrier, $this->caller_number);
 
@@ -531,7 +532,7 @@ class OVS extends PDO {
 
         $str = rtrim($str, ' or ');
 
-        $query = sprintf("SELECT tariff.tariff_status, tariff_ratecard_map.id, tariff_ratecard_map.ratecard_id, tariff_ratecard_map.tariff_id, tariff_ratecard_map.start_day, tariff_ratecard_map.end_day, tariff_ratecard_map.start_time, tariff_ratecard_map.end_time, carrier_rates.prefix, carrier_rates.destination, carrier_rates.rate, carrier_rates.connection_charge, carrier_rates.minimal_time, carrier_rates.resolution_time, carrier_rates.grace_period, carrier_rates.rate_multiplier, carrier_rates.rate_addition, carrier_rates.rates_status, tariff.tariff_currency_id, tariff.tariff_currency_id, tariff.monthly_charges, tariff.bundle_option,  tariff.bundle1_type, tariff.bundle1_value, tariff.bundle2_type, tariff.bundle2_value, tariff.bundle3_type, tariff.bundle3_value FROM tariff_ratecard_map  INNER JOIN carrier_rates on carrier_rates.ratecard_id = tariff_ratecard_map.ratecard_id    INNER JOIN ratecard on carrier_rates.ratecard_id = ratecard.ratecard_id and ratecard.ratecard_for = 'INCOMING' INNER JOIN tariff on  tariff.tariff_id = tariff_ratecard_map.tariff_id where WEEKDAY(CURDATE()) BETWEEN start_day and end_day AND CURTIME() BETWEEN start_time and end_time and tariff_ratecard_map.tariff_id = '%s'  and (%s) ORDER BY priority asc, prefix desc, rate ASC, end_time ASC limit 1;", $this->carrierdata['tariff_id'], $str);
+        $query = sprintf("SELECT tariff.tariff_status, tariff_ratecard_map.id, tariff_ratecard_map.ratecard_id, tariff_ratecard_map.tariff_id, tariff_ratecard_map.start_day, tariff_ratecard_map.end_day, tariff_ratecard_map.start_time, tariff_ratecard_map.end_time, carrier_rates.prefix, carrier_rates.destination, carrier_rates.rate, carrier_rates.connection_charge, carrier_rates.minimal_time, carrier_rates.resolution_time, carrier_rates.grace_period, carrier_rates.rate_multiplier, carrier_rates.rate_addition, carrier_rates.rates_status, tariff.tariff_currency_id, tariff.tariff_currency_id FROM tariff_ratecard_map  INNER JOIN carrier_rates on carrier_rates.ratecard_id = tariff_ratecard_map.ratecard_id    INNER JOIN ratecard on carrier_rates.ratecard_id = ratecard.ratecard_id and ratecard.ratecard_for = 'INCOMING' INNER JOIN tariff on  tariff.tariff_id = tariff_ratecard_map.tariff_id where WEEKDAY(CURDATE()) BETWEEN start_day and end_day AND CURTIME() BETWEEN start_time and end_time and tariff_ratecard_map.tariff_id = '%s'  and (%s) ORDER BY priority asc, prefix desc, rate ASC, end_time ASC limit 1;", $this->carrierdata['tariff_id'], $str);
 
         $this->writelog($query);
         $this->query('SWITCH', $query);
@@ -689,6 +690,11 @@ class OVS extends PDO {
             }
         }
 
+
+	if ($this->carrierdata['dst_type1'] != 'PSTN' or $this->carrierdata['dst_type2'] != 'PSTN') {
+            $this->livecalls_in();
+        }
+
         $this->Gateway_XML = $this->Gateway_XML_incoming;
         return;
     }
@@ -707,7 +713,7 @@ class OVS extends PDO {
                 $this->customers[$key] = $value;
                 $this->writelog("1st query $key $value");
             }
-            // $this->customers['account_id'] = $user;
+            $this->customers['account_id'] = $user;
         } else {
             $otherinfo = $user;
             $this->customers['account_id'] = $user;
@@ -721,13 +727,13 @@ class OVS extends PDO {
         if ($this->carrierdata['dst_type'] == 'IP') {
             $this->customers['device_type'] = 'ip';
 
-            $query = sprintf("SELECT account_sip.id, account_sip.username, account_sip.`status`, account_sip.sip_cc, account_sip.sip_cps from account_sip INNER JOIN account on account_sip.account_id = account.account_id where username = '%s' and account.account_id = '%s' limit 1;", $user);
+            $query = sprintf("SELECT account_sip.id, account_sip.username, account_sip.`status`, account_sip.account_id, account_sip.sip_cc, account_sip.sip_cps from account_sip INNER JOIN account on account_sip.account_id = account.account_id where username = '%s' and account.account_id = '%s' limit 1;", $user);
 
             $this->customers['device_id'] = str_replace('.', "", json_encode($this->customers['dst_destination']));
         } elseif ($this->carrierdata['dst_type'] == 'CUSTOMER') {
             $this->customers['device_type'] = 'u';
 
-            $query = sprintf("SELECT account_ips.id, account_ips.ipaddress,  account_ips.ip_status, account_ips.ip_cc, account_ips.ip_cps from account_ips  INNER JOIN account on account_ips.account_id = account.account_id where ipaddress = '%s'  and account.account_id = '%s' limit 1;", $user);
+            $query = sprintf("SELECT account_ips.id, account_ips.ipaddress, account_ips.account_id, account_ips.ip_status, account_ips.ip_cc, account_ips.ip_cps from account_ips  INNER JOIN account on account_ips.account_id = account.account_id where ipaddress = '%s'  and account.account_id = '%s' limit 1;", $user);
 
             $this->customers['device_id'] = str_replace('.', "", json_encode($this->customers['dst_destination']));
         }
@@ -751,8 +757,7 @@ class OVS extends PDO {
         /*
          * User status check
          */
-
-        // $this->customers['account_id'] = $user;
+        $this->customers['account_id'] = $user;
 
         $otherinfo = $this->account_id;
         if ($this->customers['account_status'] == 0) {
@@ -831,8 +836,7 @@ class OVS extends PDO {
         }
 
         $str = rtrim($str, ' or ');
-        $query = sprintf("SELECT tariff.tariff_status,  tariff_ratecard_map.ratecard_id, tariff_ratecard_map.tariff_id, tariff_ratecard_map.start_day, tariff_ratecard_map.end_day, tariff_ratecard_map.start_time, tariff_ratecard_map.end_time, customer_rates.prefix, customer_rates.destination, customer_rates.rate, customer_rates.connection_charge, customer_rates.minimal_time, customer_rates.resolution_time, customer_rates.grace_period, customer_rates.rate_multiplier, customer_rates.rate_addition, customer_rates.rates_status, tariff.tariff_currency_id, tariff.tariff_currency_id, tariff.monthly_charges, tariff.bundle_option,  tariff.bundle1_type, tariff.bundle1_value, tariff.bundle2_type, tariff.bundle2_value, tariff.bundle3_type, tariff.bundle3_value  FROM tariff_ratecard_map  INNER JOIN customer_rates on customer_rates.ratecard_id = tariff_ratecard_map.ratecard_id    INNER JOIN ratecard on customer_rates.ratecard_id = ratecard.ratecard_id and ratecard.ratecard_for = 'INCOMING' INNER JOIN tariff on  tariff.tariff_id = tariff_ratecard_map.tariff_id where WEEKDAY(CURDATE()) BETWEEN start_day and end_day AND CURTIME() BETWEEN start_time and end_time and tariff_ratecard_map.tariff_id = '%s' and (%s)  ORDER BY priority asc, prefix desc, rate ASC, end_time ASC limit 1;", $this->customers['tariff_id'], $str);
-
+        $query = sprintf("SELECT tariff.tariff_status,  tariff_ratecard_map.ratecard_id, tariff_ratecard_map.tariff_id, tariff_ratecard_map.start_day, tariff_ratecard_map.end_day, tariff_ratecard_map.start_time, tariff_ratecard_map.end_time, customer_rates.prefix, customer_rates.destination, customer_rates.rate, customer_rates.connection_charge, customer_rates.minimal_time, customer_rates.resolution_time, customer_rates.grace_period, customer_rates.rate_multiplier, customer_rates.rate_addition, customer_rates.rates_status, tariff.tariff_currency_id, tariff.tariff_currency_id  FROM tariff_ratecard_map  INNER JOIN customer_rates on customer_rates.ratecard_id = tariff_ratecard_map.ratecard_id    INNER JOIN ratecard on customer_rates.ratecard_id = ratecard.ratecard_id and ratecard.ratecard_for = 'INCOMING' INNER JOIN tariff on  tariff.tariff_id = tariff_ratecard_map.tariff_id where WEEKDAY(CURDATE()) BETWEEN start_day and end_day AND CURTIME() BETWEEN start_time and end_time and tariff_ratecard_map.tariff_id = '%s' and (%s)  ORDER BY priority asc, prefix desc, rate ASC, end_time ASC limit 1;", $this->customers['tariff_id'], $str);
 
         $this->writelog($query);
         $this->query('SWITCH', $query);
@@ -901,6 +905,96 @@ class OVS extends PDO {
         $this->DID_DNIS($incomingcarrierdst, $this->account_id);
 
         /*
+         * Bundle & Plan  bundle_option
+         */
+        $this->bundle_package_management($user);
+        $query = sprintf("SELECT bundle_option,  bundle_id, prefix , bundle_package_prefixes.bundle_package_id, monthly_charges,   bundle1_type, bundle1_value, bundle2_type, bundle2_value, bundle3_type, bundle3_value from bundle_package INNER JOIN bundle_package_prefixes on bundle_package_prefixes.bundle_package_id = bundle_package.bundle_package_id  where bundle_package_prefixes.bundle_package_id in (select bundle_package_id from bundle_account where account_id  = '%s') and  (%s) and LENGTH(prefix) > 0  order by prefix desc limit 1;", $user, $str);
+        $this->writelog($query);
+        $this->query('SWITCH', $query);
+        $rs = $this->resultset();
+        if (count($rs) > 0) {
+            foreach ($rs[0] as $key => $value) {
+                $this->customers[$key] = $value;
+            }
+        }
+        if (strlen($this->customers['bundle_package_id']) > 0 and $this->customers['bundle_option'] == '1') {
+            $query = sprintf("SELECT account_id, rule_type, yearmonth,  sum(total_allowed) as  total_allowed , sum(sdr_consumption) as sdr_consumption  FROM customer_bundle_sdr where account_id = '%s' and bundle_package_id  = '%s' and rule_type in ('bundle1', 'bundle2', 'bundle2') and yearmonth = '%s';", $user, $this->customers['bundle_package_id'], date("Ym"));
+            $this->writelog($query);
+            $this->query('SWITCH', $query);
+            $rs3 = $this->resultset();
+            $available_bundle1 = '';
+            $available_bundle2 = '';
+            $available_bundle3 = '';
+            if (count($rs3) > 0) {
+                foreach ($rs3 as $data_b) {
+                    if ($data_b['rule_type'] == 'bundle1') {
+                        $available_bundle1 = $data_b['total_allowed'] - $data_b['sdr_consumption'];
+                        $this->writelog("available_bundle1 $available_bundle1");
+                        $insert_allow = 0;
+                    }
+                    if ($data_b['rule_type'] == 'bundle2') {
+                        $available_bundle2 = $data_b['total_allowed'] - $data_b['sdr_consumption'];
+                        $this->writelog("available_bundle2 $available_bundle2");
+                        $insert_allow = 0;
+                    }
+                    if ($data_b['rule_type'] == 'bundle3') {
+                        $available_bundle3 = $data_b['total_allowed'] - $data_b['sdr_consumption'];
+                        $this->writelog("available_bundle3 $available_bundle3");
+                        $insert_allow = 0;
+                    }
+                }
+            }
+
+            foreach ($rs as $data) {
+                if ($data['bundle_id'] == '1') {
+                    $bundle1 = $this->customers['bundle1_value'];
+                    if ($this->customers['bundle1_type'] == 'MINUTE') {
+                        $duration_b = $available_bundle1;
+                        $this->customers['bundle_type'] = 'MINUTE';
+                        $this->customers['bundle_value'] = $duration_b;
+                        $this->customers['bundle_number'] = 'bundle1';
+                    }
+                    if ($this->customers['bundle1_type'] == 'COST') {
+                        $balance_b = $available_bundle1;
+                        $this->customers['bundle_type'] = 'COST';
+                        $this->customers['bundle_value'] = $balance_b;
+                        $this->customers['bundle_number'] = 'bundle1';
+                    }
+                    $this->writelog("available_bundle1 " . $this->customers['bundle_value']);
+                } elseif ($data['bundle_id'] == '2') {
+                    $bundle2 = $this->customers['bundle2_value'];
+                    if ($this->customers['bundle2_type'] == 'MINUTE') {
+                        $duration_b = $available_bundle2;
+                        $this->customers['bundle_type'] = 'MINUTE';
+                        $this->customers['bundle_value'] = $duration_b;
+                        $this->customers['bundle_number'] = 'bundle2';
+                    }
+                    if ($this->customers['bundle2_type'] == 'COST') {
+                        $balance_b = $available_bundle2;
+                        $this->customers['bundle_type'] = 'COST';
+                        $this->customers['bundle_value'] = $balance_b;
+                        $this->customers['bundle_number'] = 'bundle2';
+                    }
+                } elseif ($data['bundle_id'] == '3') {
+                    $bundle1 = $this->customers['bundle3_value'];
+                    if ($this->customers['bundle3_type'] == 'MINUTE') {
+                        $duration_b = $available_bundle3;
+                        $this->customers['bundle_type'] = 'MINUTE';
+                        $this->customers['bundle_value'] = $duration_b;
+                        $this->customers['bundle_number'] = 'bundle3';
+                    }
+                    if ($this->customers['bundle3_type'] == 'COST') {
+                        $balance_b = $available_bundle3;
+                        $this->customers['bundle_type'] = 'COST';
+                        $this->customers['bundle_value'] = $balance_b;
+                        $this->customers['bundle_number'] = 'bundle3';
+                    }
+                }
+            }
+        }
+
+
+        /*
          * Building the users billing infomation Array which will pass in CDR event
          */
 
@@ -914,13 +1008,11 @@ class OVS extends PDO {
         unset($this->customers['end_day']);
         unset($this->customers['start_day']);
         unset($this->customers['rates_status']);
-  
         unset($this->customers['account_ip_id']);
         unset($this->customers['dial_prefix']);
         unset($this->customers['ip_status']);
         unset($this->customers['ip_cc']);
         unset($this->customers['ip_cps']);
-
         $this->customersdata['user'] = $this->customers;
 
         /*
@@ -932,7 +1024,21 @@ class OVS extends PDO {
          * Users call duration calculations
          */
         $this->customers['duration'] = 0;
+
+        if ($balance_b > 0 AND $this->customers['bundle_type'] == 'COST') {
+            $this->customers['balance'] = $this->customers['balance'] + $balance_b;
+        }
+
         $this->customers['duration'] = $this->duration($this->customers);
+        $this->writelog("Normal duration " . $this->customers['duration']);
+        $this->writelog("Bundle duration " . $duration_b);
+
+
+        if ($duration_b > 0) {
+            $this->customers['duration'] = $this->customers['duration'] + $duration_b;
+        }
+        $this->writelog("Normal duration " . $this->customers['duration']);
+
 
         /*
          * Call Duration is zero. maybe rates are higher compared to balance
@@ -951,12 +1057,94 @@ class OVS extends PDO {
         $this->CCSTRING = $this->CCSTRING . ":" . $device_cc;
         $this->writelog("Device Running CPS $device_cps ------ " . $result);
         $this->rates_incoming = str_replace('"', "'", json_encode($this->customersdata));
-
         return;
     }
 
     function sign($number) {
         return ( $number > 0 ) ? 1 : ( ( $number < 0 ) ? -1 : 0 );
+    }
+
+    function bundle_package_management($account_id) {
+        $yearmonth = date('Ym');
+        $query = sprintf("SELECT bundle_account.bundle_package_id, bundle_account.account_id, bundle_account.assign_dt, bundle_account.account_bundle_key, bundle_account.bundle_package_desc, if(MONTH(assign_dt) = MONTH(CURDATE()),1,0) AS isthismonthbuy, bundle_package.monthly_charges, bundle_package.bundle_option, bundle_package.bundle1_type, bundle_package.bundle1_value, bundle_package.bundle2_type, bundle_package.bundle2_value, bundle_package.bundle3_type, bundle_package.bundle3_value, bundle_package.bundle_package_id, bundle_package.bundle_package_name FROM bundle_account INNER JOIN bundle_package on bundle_package.bundle_package_id = bundle_account.bundle_package_id where account_id = '%s' and account_bundle_key not in ( select account_bundle_key from customer_bundle_sdr where account_id = '%s' and yearmonth = '%s')", $account_id, $account_id, $yearmonth);
+        $this->writelog($query);
+        $this->query('SWITCH', $query);
+        $unassign_bundledata = $this->resultset();
+        foreach ($unassign_bundledata as $unassign_bundle) {
+            if (strlen($unassign_bundle['bundle_package_id']) > 0 and strlen($unassign_bundle['account_id']) > 0) {
+                /*
+                 * Bundle 1 Package free minute / cost setup. If there is no free minute of cost then sdr will not generate
+                 */
+                $this->writelog("1");
+                if ($unassign_bundle['bundle1_value'] == '' or $unassign_bundle['bundle1_value'] == null) {
+                    $unassign_bundle['bundle1_value'] = 0;
+                }
+                if ($unassign_bundle['bundle1_value'] > 0) {
+                    $this->writelog("B1");
+                    if ($unassign_bundle['isthismonthbuy'] == 0) {
+                        $bundle1_value = $unassign_bundle['bundle1_value'];
+                    } else {
+                        $bundle1_value = $this->charges_cal_bundle($unassign_bundle['bundle1_value'], $unassign_bundle['assign_dt']);
+                    }
+                    if ($unassign_bundle['bundle1_type'] == 'MINUTE')
+                        $bundle1_value = floor($bundle1_value);
+                    $query = sprintf("INSERT INTO customer_bundle_sdr (account_id, rule_type, yearmonth,bundle_type,total_allowed,sdr_consumption,action_date,account_bundle_key,bundle_package_id,service_startdate, service_stopdate,bundle_package_name) VALUES('%s','%s','%s','%s','%s','%s',now(),'%s','%s','%s','%s','%s')", $unassign_bundle['account_id'], 'bundle1', date("Ym"), $unassign_bundle['bundle1_type'], $bundle1_value, '0', $unassign_bundle['account_bundle_key'], $unassign_bundle['bundle_package_id'], $service_startdate, $service_stopdate, $unassign_bundle['bundle_package_name']);
+                    $this->writelog($query);
+                    $this->query('SWITCH', $query);
+                    $this->execute();
+                }
+                /*
+                 * Bundle 2 Package free minute / cost setup
+                 */
+                if ($unassign_bundle['bundle2_value'] == '' or $unassign_bundle['bundle2_value'] == null) {
+                    $unassign_bundle['bundle2_value'] = 0;
+                }
+                if ($unassign_bundle['bundle2_value'] > 0) {
+                    $this->writelog("B2");
+                    if ($unassign_bundle['isthismonthbuy'] == 0) {
+                        $bundle2_value = $unassign_bundle['bundle2_value'];
+                    } else {
+                        $bundle2_value = $this->charges_cal_bundle($unassign_bundle['bundle2_value'], $unassign_bundle['assign_dt']);
+                    }
+                    if ($unassign_bundle['bundle2_type'] == 'MINUTE')
+                        $bundle2_value = floor($bundle2_value);
+                    $query = sprintf("INSERT INTO customer_bundle_sdr (account_id, rule_type, yearmonth,otherdata,service_charges,sdr_consumption,action_date,account_bundle_key,bundle_package_id) VALUES('%s','%s','%s','%s','%s','%s',now(),'%s','%s')", $unassign_bundle['account_id'], 'bundle2', date("Ym"), $unassign_bundle['bundle2_type'], $bundle2_value, '0', $unassign_bundle['account_bundle_key'], $unassign_bundle['bundle_package_id']);
+                    $this->writelog($query);
+                    $this->query('SWITCH', $query);
+                    $this->execute();
+                }
+
+                /*
+                 * Bundle 3 Package free minute / cost setup
+                 */
+                if ($unassign_bundle['bundle3_value'] == '' or $unassign_bundle['bundle3_value'] == null) {
+                    $unassign_bundle['bundle3_value'] = 0;
+                }
+                if ($unassign_bundle['bundle3_value'] > 0) {
+                    $this->writelog("B3");
+                    if ($unassign_bundle['isthismonthbuy'] == 0) {
+                        $bundle3_value = $unassign_bundle['bundle3_value'];
+                    } else {
+                        $bundle3_value = $this->charges_cal_bundle($unassign_bundle['bundle3_value'], $unassign_bundle['assign_dt']);
+                    }
+                    if ($unassign_bundle['bundle3_type'] == 'MINUTE')
+                        $bundle3_value = floor($bundle3_value);
+                    $query = sprintf("INSERT INTO customer_bundle_sdr (account_id, rule_type, yearmonth,bundle_type,total_allowed,sdr_consumption,action_date,account_bundle_key,bundle_package_id,service_startdate, service_stopdate,bundle_package_name) VALUES('%s','%s','%s','%s','%s','%s',now(),'%s','%s','%s','%s','%s')", $unassign_bundle['account_id'], 'bundle3', date("Ym"), $unassign_bundle['bundle3_type'], $bundle3_value, '0', $unassign_bundle['account_bundle_key'], $unassign_bundle['bundle_package_id'], $service_startdate, $service_stopdate, $unassign_bundle['bundle_package_name']);
+
+                    $this->writelog($query);
+                    $this->query('SWITCH', $query);
+                    $this->execute();
+                }
+            }
+        }
+    }
+
+    function charges_cal_bundle($charges, $date) {
+        $no_of_days = date('t', strtotime($date));
+        $current_day = date('d', strtotime($date));
+        $billingdays = ($no_of_days - $current_day) + 1;
+        $current_month_charges = ($charges / $no_of_days) * $billingdays;
+        return $current_month_charges;
     }
 
     function DID_DNIS($incomingcarrierdst, $account_id) {
@@ -1147,7 +1335,7 @@ class OVS extends PDO {
 
         $str = rtrim($str, ' or ');
 
-        $query = sprintf("SELECT tariff.tariff_status, tariff_ratecard_map.id, tariff_ratecard_map.ratecard_id, tariff_ratecard_map.tariff_id, tariff_ratecard_map.start_day, tariff_ratecard_map.end_day, tariff_ratecard_map.start_time, tariff_ratecard_map.end_time, customer_rates.prefix, customer_rates.destination, customer_rates.rate, customer_rates.connection_charge, customer_rates.minimal_time, customer_rates.resolution_time, customer_rates.grace_period, customer_rates.rate_multiplier, customer_rates.rate_addition, customer_rates.rates_status, tariff.tariff_currency_id, tariff.tariff_currency_id, tariff.monthly_charges, tariff.bundle_option,  tariff.bundle1_type, tariff.bundle1_value, tariff.bundle2_type, tariff.bundle2_value, tariff.bundle3_type, tariff.bundle3_value  FROM tariff_ratecard_map  INNER JOIN customer_rates on customer_rates.ratecard_id = tariff_ratecard_map.ratecard_id    INNER JOIN ratecard on customer_rates.ratecard_id = ratecard.ratecard_id and ratecard.ratecard_for = 'INCOMING' INNER JOIN tariff on  tariff.tariff_id = tariff_ratecard_map.tariff_id where WEEKDAY(CURDATE()) BETWEEN start_day and end_day AND CURTIME() BETWEEN start_time and end_time and tariff_ratecard_map.tariff_id = '%s' and (%s) ORDER BY priority asc, prefix desc, rate ASC, end_time ASC limit 1;", $resellerusers['tariff_id'], $str);
+        $query = sprintf("SELECT tariff.tariff_status, tariff_ratecard_map.id, tariff_ratecard_map.ratecard_id, tariff_ratecard_map.tariff_id, tariff_ratecard_map.start_day, tariff_ratecard_map.end_day, tariff_ratecard_map.start_time, tariff_ratecard_map.end_time, customer_rates.prefix, customer_rates.destination, customer_rates.rate, customer_rates.connection_charge, customer_rates.minimal_time, customer_rates.resolution_time, customer_rates.grace_period, customer_rates.rate_multiplier, customer_rates.rate_addition, customer_rates.rates_status, tariff.tariff_currency_id, tariff.tariff_currency_id  FROM tariff_ratecard_map  INNER JOIN customer_rates on customer_rates.ratecard_id = tariff_ratecard_map.ratecard_id    INNER JOIN ratecard on customer_rates.ratecard_id = ratecard.ratecard_id and ratecard.ratecard_for = 'INCOMING' INNER JOIN tariff on  tariff.tariff_id = tariff_ratecard_map.tariff_id where WEEKDAY(CURDATE()) BETWEEN start_day and end_day AND CURTIME() BETWEEN start_time and end_time and tariff_ratecard_map.tariff_id = '%s' and (%s) ORDER BY priority asc, prefix desc, rate ASC, end_time ASC limit 1;", $resellerusers['tariff_id'], $str);
 
 
         $this->writelog($query);
@@ -1156,6 +1344,97 @@ class OVS extends PDO {
         foreach ($rs[0] as $key => $value) {
             $resellerusers[$key] = $value;
         }
+
+
+        /*
+         * Bundle & Plan
+         */
+        $this->bundle_package_management($user);
+        $query = sprintf("SELECT bundle_option, bundle_id, prefix , bundle_package_prefixes.bundle_package_id, monthly_charges,   bundle1_type, bundle1_value, bundle2_type, bundle2_value, bundle3_type, bundle3_value from bundle_package INNER JOIN bundle_package_prefixes on bundle_package_prefixes.bundle_package_id = bundle_package.bundle_package_id  where bundle_package_prefixes.bundle_package_id in (select bundle_package_id from bundle_account where account_id  = '%s') and  (%s) and LENGTH(prefix) > 0  order by prefix desc limit 1;", $reseller_id, $str);
+
+        $this->writelog($query);
+        $this->query('SWITCH', $query);
+        $rs = $this->resultset();
+        if (count($rs) > 0) {
+            foreach ($rs[0] as $key => $value) {
+                $resellerusers[$key] = $value;
+            }
+        }
+
+        if (strlen($resellerusers['bundle_package_id']) > 0 and $resellerusers['bundle_option'] == '1') {
+            $query = sprintf("SELECT account_id, rule_type, yearmonth,  sum(total_allowed) as  total_allowed , sum(sdr_consumption) as sdr_consumption  FROM customer_bundle_sdr where account_id = '%s' and bundle_package_id  = '%s' and rule_type in ('bundle1', 'bundle2', 'bundle2') and yearmonth = '%s';", $reseller_id, $resellerusers['bundle_package_id'], date("Ym"));
+            $this->writelog($query);
+            $this->query('SWITCH', $query);
+            $rs3 = $this->resultset();
+            $available_bundle1 = '';
+            $available_bundle2 = '';
+            $available_bundle3 = '';
+            $insert_allow = 1;
+            if (count($rs3) > 0) {
+                foreach ($rs3 as $data_b) {
+                    if ($data_b['rule_type'] == 'bundle1') {
+                        $available_bundle1 = $data_b['total_allowed'] - $data_b['sdr_consumption'];
+                        $insert_allow = 0;
+                    }
+                    if ($data_b['rule_type'] == 'bundle2') {
+                        $available_bundle2 = $data_b['total_allowed'] - $data_b['sdr_consumption'];
+                        $insert_allow = 0;
+                    }
+                    if ($data_b['rule_type'] == 'bundle3') {
+                        $available_bundle3 = $data_b['total_allowed'] - $data_b['sdr_consumption'];
+                        $insert_allow = 0;
+                    }
+                }
+            }
+
+            foreach ($rs as $data) {
+                if ($data['bundle_id'] == '1') {
+                    $bundle1 = $resellerusers['bundle1_value'];
+                    if ($resellerusers['bundle1_type'] == 'MINUTE') {
+                        $duration_b = $available_bundle1;
+                        $resellerusers['bundle_type'] = 'MINUTE';
+                        $resellerusers['bundle_value'] = $duration_b;
+                        $resellerusers['bundle_number'] = 'bundle1';
+                    }
+                    if ($resellerusers['bundle1_type'] == 'COST') {
+                        $balance = $available_bundle1;
+                        $resellerusers['bundle_type'] = 'COST';
+                        $resellerusers['bundle_value'] = $balance_b;
+                        $resellerusers['bundle_number'] = 'bundle1';
+                    }
+                } elseif ($data['bundle_id'] == '2') {
+                    $bundle2 = $resellerusers['bundle2_value'];
+                    if ($resellerusers['bundle2_type'] == 'MINUTE') {
+                        $duration_b = $available_bundle2;
+                        $resellerusers['bundle_type'] = 'MINUTE';
+                        $resellerusers['bundle_value'] = $duration_b;
+                        $resellerusers['bundle_number'] = 'bundle2';
+                    }
+                    if ($resellerusers['bundle2_type'] == 'COST') {
+                        $balance = $available_bundle2;
+                        $resellerusers['bundle_type'] = 'COST';
+                        $resellerusers['bundle_value'] = $balance_b;
+                        $resellerusers['bundle_number'] = 'bundle2';
+                    }
+                } elseif ($data['bundle_id'] == '3') {
+                    $bundle1 = $resellerusers['bundle3_value'];
+                    if ($resellerusers['bundle3_type'] == 'MINUTE') {
+                        $duration_b = $available_bundle3;
+                        $resellerusers['bundle_type'] = 'MINUTE';
+                        $resellerusers['bundle_value'] = $duration_b;
+                        $resellerusers['bundle_number'] = 'bundle3';
+                    }
+                    if ($resellerusers['bundle3_type'] == 'COST') {
+                        $balance_b = $available_bundle3;
+                        $resellerusers['bundle_type'] = 'COST';
+                        $resellerusers['bundle_value'] = $balance_b;
+                        $resellerusers['bundle_number'] = 'bundle3';
+                    }
+                }
+            }
+        }
+
+
         $this->customersdata[$reseelerinfo] = $resellerusers;
         $this->rates_incoming = str_replace('"', "'", json_encode($this->customersdata));
         $this->writelog($this->rates_incoming);
@@ -1353,15 +1632,15 @@ class OVS extends PDO {
         /*
          * User balance issue
          */
-        if ($this->customers['bundle_option'] == '0') {
-            $otherinfo = $this->account_id;
-            if ($this->customers['balance'] < 0.1) {
-                $this->fail_route_xml('USERBALANCE', $otherinfo);
-                $this->status = 'FAIL';
-                $this->customersdata['user'] = $this->customers;
-                return;
-            }
+
+        $otherinfo = $this->account_id;
+        if ($this->customers['balance'] < 0.1) {
+            $this->fail_route_xml('USERBALANCE', $otherinfo);
+            $this->status = 'FAIL';
+            $this->customersdata['user'] = $this->customers;
+            return;
         }
+
         $this->vmaccess_internalcall();
         if ($this->is_vmaccess_internalcall == '0') {
             $this->internalcall();
@@ -1380,9 +1659,7 @@ class OVS extends PDO {
                 }
 
                 $str = rtrim($str, ' or ');
-                $query = sprintf("SELECT tariff.tariff_status,  tariff_ratecard_map.ratecard_id, tariff_ratecard_map.tariff_id, tariff_ratecard_map.start_day, tariff_ratecard_map.end_day, tariff_ratecard_map.start_time, tariff_ratecard_map.end_time, customer_rates.prefix, customer_rates.destination, customer_rates.rate, customer_rates.connection_charge, customer_rates.minimal_time, customer_rates.resolution_time, customer_rates.grace_period, customer_rates.rate_multiplier, customer_rates.rate_addition, customer_rates.rates_status, tariff.tariff_currency_id, tariff.tariff_currency_id, tariff.monthly_charges, tariff.bundle_option,  tariff.bundle1_type, tariff.bundle1_value, tariff.bundle2_type, tariff.bundle2_value, tariff.bundle3_type, tariff.bundle3_value   FROM tariff_ratecard_map  INNER JOIN customer_rates on customer_rates.ratecard_id = tariff_ratecard_map.ratecard_id    INNER JOIN ratecard on customer_rates.ratecard_id = ratecard.ratecard_id and ratecard.ratecard_for = 'OUTGOING' INNER JOIN tariff on  tariff.tariff_id = tariff_ratecard_map.tariff_id where WEEKDAY(CURDATE()) BETWEEN start_day and end_day AND CURTIME() BETWEEN start_time and end_time and tariff_ratecard_map.tariff_id = '%s' and (%s)  ORDER BY priority asc, prefix desc, rate ASC, end_time ASC limit 1;", $this->customers['tariff_id'], $str);
-
-
+                $query = sprintf("SELECT tariff.tariff_status,  tariff_ratecard_map.ratecard_id, tariff_ratecard_map.tariff_id, tariff_ratecard_map.start_day, tariff_ratecard_map.end_day, tariff_ratecard_map.start_time, tariff_ratecard_map.end_time, customer_rates.prefix, customer_rates.destination, customer_rates.rate, customer_rates.connection_charge, customer_rates.minimal_time, customer_rates.resolution_time, customer_rates.grace_period, customer_rates.rate_multiplier, customer_rates.rate_addition, customer_rates.rates_status, tariff.tariff_currency_id, tariff.tariff_currency_id  FROM tariff_ratecard_map  INNER JOIN customer_rates on customer_rates.ratecard_id = tariff_ratecard_map.ratecard_id    INNER JOIN ratecard on customer_rates.ratecard_id = ratecard.ratecard_id and ratecard.ratecard_for = 'OUTGOING' INNER JOIN tariff on  tariff.tariff_id = tariff_ratecard_map.tariff_id where WEEKDAY(CURDATE()) BETWEEN start_day and end_day AND CURTIME() BETWEEN start_time and end_time and tariff_ratecard_map.tariff_id = '%s' and (%s)  ORDER BY priority asc, prefix desc, rate ASC, end_time ASC limit 1;", $this->customers['tariff_id'], $str);
                 $this->writelog($query);
                 $this->query('SWITCH', $query);
                 $rs = $this->resultset();
@@ -1403,120 +1680,98 @@ class OVS extends PDO {
                     $this->customers[$key] = $value;
                 }
 
-                if ($this->customers['bundle_option'] == '1') {
-                    $query = sprintf("SELECT bundle_id, prefix from tariff_bundle_prefixes where tariff_id = '%s' and  (%s)  order by prefix desc;", $this->customers['tariff_id'], $str);
 
+
+                /*
+                 * Bundle & Plan
+                 */
+                $this->bundle_package_management($user);
+                $query = sprintf("SELECT  bundle_option, bundle_id, prefix , bundle_package_prefixes.bundle_package_id, monthly_charges,   bundle1_type, bundle1_value, bundle2_type, bundle2_value, bundle3_type, bundle3_value from bundle_package INNER JOIN bundle_package_prefixes on bundle_package_prefixes.bundle_package_id = bundle_package.bundle_package_id  where bundle_package_prefixes.bundle_package_id in (select bundle_package_id from bundle_account where account_id  = '%s') and  (%s) and LENGTH(prefix) > 0  order by prefix desc limit 1;", $this->account_id, $str);
+
+                $this->writelog($query);
+                $this->query('SWITCH', $query);
+                $rs = $this->resultset();
+                if (count($rs) > 0) {
+                    foreach ($rs[0] as $key => $value) {
+                        $this->customers[$key] = $value;
+                    }
+                }
+                if (strlen($this->customers['bundle_package_id']) > 0 and $this->customers['bundle_option'] == '1') {
+                    $query = sprintf("SELECT account_id, rule_type, yearmonth,  sum(total_allowed) as  total_allowed , sum(sdr_consumption) as sdr_consumption  FROM customer_bundle_sdr where account_id = '%s' and bundle_package_id  = '%s' and rule_type in ('bundle1', 'bundle2', 'bundle2') and yearmonth = '%s';", $this->account_id, $this->customers['bundle_package_id'], date("Ym"));
                     $this->writelog($query);
                     $this->query('SWITCH', $query);
-                    $rs = $this->resultset();
-                    if (count($rs) > 0) {
-                        $query = sprintf("SELECT account_id, rule_type, yearmonth,  service_charges , sdr_consumption  FROM customer_bundle_sdr where account_id = '%s' and rule_type in ('bundle1', 'bundle2', 'bundle2') and yearmonth = '%s';", $user, date("Ym"));
-
-                        $this->writelog($query);
-                        $this->query('SWITCH', $query);
-                        $rs3 = $this->resultset();
-                        $available_bundle1 = '';
-                        $available_bundle2 = '';
-                        $available_bundle3 = '';
-                        $insert_allow = 1;
-                        if (count($rs3) > 0) {
-                            foreach ($rs3 as $data_b) {
-                                if ($data_b['rule_type'] == 'bundle1') {
-                                    $available_bundle1 = $data_b['service_charges'] - $data_b['sdr_consumption'];
-                                    $this->writelog("available_bundle1 $available_bundle1");
-                                    $insert_allow = 0;
-                                }
-                                if ($data_b['rule_type'] == 'bundle2') {
-                                    $available_bundle2 = $data_b['service_charges'] - $data_b['sdr_consumption'];
-                                    $this->writelog("available_bundle2 $available_bundle2");
-                                    $insert_allow = 0;
-                                }
-                                if ($data_b['rule_type'] == 'bundle3') {
-                                    $available_bundle3 = $data_b['service_charges'] - $data_b['sdr_consumption'];
-                                    $this->writelog("available_bundle3 $available_bundle3");
-                                    $insert_allow = 0;
-                                }
+                    $rs3 = $this->resultset();
+                    $available_bundle1 = '';
+                    $available_bundle2 = '';
+                    $available_bundle3 = '';
+                    if (count($rs3) > 0) {
+                        foreach ($rs3 as $data_b) {
+                            if ($data_b['rule_type'] == 'bundle1') {
+                                $available_bundle1 = $data_b['total_allowed'] - $data_b['sdr_consumption'];
+                                $this->writelog("available_bundle1 $available_bundle1");
+                                $insert_allow = 0;
+                            }
+                            if ($data_b['rule_type'] == 'bundle2') {
+                                $available_bundle2 = $data_b['total_allowed'] - $data_b['sdr_consumption'];
+                                $this->writelog("available_bundle2 $available_bundle2");
+                                $insert_allow = 0;
+                            }
+                            if ($data_b['rule_type'] == 'bundle3') {
+                                $available_bundle3 = $data_b['total_allowed'] - $data_b['sdr_consumption'];
+                                $this->writelog("available_bundle3 $available_bundle3");
+                                $insert_allow = 0;
                             }
                         }
-                        if ($available_bundle1 == '' and $this->customers['bundle1_value'] > 0 and $insert_allow == 1) {
-                            $bundle1_value = $this->charges_cal($this->customers['bundle1_value']);
-                            if ($this->customers['bundle1_type'] == 'MINUTE')
-                                $bundle1_value = floor($bundle1_value);
-                            $query = sprintf("INSERT INTO customer_bundle_sdr (account_id, rule_type, yearmonth,otherdata,service_charges,sdr_consumption,action_date) VALUES('%s','%s','%s','%s','%s','%s',now())", $user, 'bundle1', date("Ym"), $this->customers['bundle1_type'], $bundle1_value, '0');
+                    }
 
-                            $this->writelog($query);
-                            $this->query('SWITCH', $query);
-                            $this->execute();
-                        }
-                        if ($available_bundle2 == '' and $this->customers['bundle2_value'] > 0 and $insert_allow == 1) {
-                            $bundle1_value = $this->charges_cal($this->customers['bundle2_value']);
-                            if ($this->customers['bundle2_type'] == 'MINUTE')
-                                $bundle1_value = floor($bundle1_value);
-                            $query = sprintf("INSERT INTO customer_bundle_sdr (account_id, rule_type, yearmonth,otherdata,service_charges,sdr_consumption,action_date) VALUES('%s','%s','%s','%s','%s','%s',now())", $user, 'bundle2', date("Ym"), $this->customers['bundle2_type'], $bundle1_value, '0');
-
-                            $this->writelog($query);
-                            $this->query('SWITCH', $query);
-                            $this->execute();
-                        }
-                        if ($available_bundle3 == '' and $this->customers['bundle3_value'] > 0 and $insert_allow == 1) {
-                            $bundle1_value = $this->charges_cal($this->customers['bundle3_value']);
-                            if ($this->customers['bundle3_type'] == 'MINUTE')
-                                $bundle1_value = floor($bundle1_value);
-                            $query = sprintf("INSERT INTO customer_bundle_sdr (account_id, rule_type, yearmonth,otherdata,service_charges,sdr_consumption,action_date) VALUES('%s','%s','%s','%s','%s','%s',now())", $user, 'bundle3', date("Ym"), $this->customers['bundle3_type'], $bundle1_value, '0');
-
-                            $this->writelog($query);
-                            $this->query('SWITCH', $query);
-                            $this->execute();
-                        }
-
-                        foreach ($rs as $data) {
-                            if ($data['bundle_id'] == '1') {
-                                $bundle1 = $this->customers['bundle1_value'];
-                                if ($this->customers['bundle1_type'] == 'MINUTE') {
-                                    $duration_b = $available_bundle1;
-                                    $this->customers['bundle_type'] = 'MINUTE';
-                                    $this->customers['bundle_value'] = $duration_b;
-                                    $this->customers['bundle_number'] = 'bundle1';
-                                }
-                                if ($this->customers['bundle1_type'] == 'COST') {
-                                    $balance_b = $available_bundle1;
-                                    $this->customers['bundle_type'] = 'COST';
-                                    $this->customers['bundle_value'] = $balance_b;
-                                    $this->customers['bundle_number'] = 'bundle1';
-                                }
-                                $this->writelog("available_bundle1 " . $this->customers['bundle_value']);
-                            } elseif ($data['bundle_id'] == '2') {
-                                $bundle2 = $this->customers['bundle2_value'];
-                                if ($this->customers['bundle2_type'] == 'MINUTE') {
-                                    $duration_b = $available_bundle2;
-                                    $this->customers['bundle_type'] = 'MINUTE';
-                                    $this->customers['bundle_value'] = $duration_b;
-                                    $this->customers['bundle_number'] = 'bundle2';
-                                }
-                                if ($this->customers['bundle2_type'] == 'COST') {
-                                    $balance_b = $available_bundle2;
-                                    $this->customers['bundle_type'] = 'COST';
-                                    $this->customers['bundle_value'] = $balance_b;
-                                    $this->customers['bundle_number'] = 'bundle2';
-                                }
-                            } elseif ($data['bundle_id'] == '3') {
-                                $bundle1 = $this->customers['bundle3_value'];
-                                if ($this->customers['bundle3_type'] == 'MINUTE') {
-                                    $duration_b = $available_bundle3;
-                                    $this->customers['bundle_type'] = 'MINUTE';
-                                    $this->customers['bundle_value'] = $duration_b;
-                                    $this->customers['bundle_number'] = 'bundle3';
-                                }
-                                if ($this->customers['bundle3_type'] == 'COST') {
-                                    $balance_b = $available_bundle3;
-                                    $this->customers['bundle_type'] = 'COST';
-                                    $this->customers['bundle_value'] = $balance_b;
-                                    $this->customers['bundle_number'] = 'bundle3';
-                                }
+                    foreach ($rs as $data) {
+                        if ($data['bundle_id'] == '1') {
+                            $bundle1 = $this->customers['bundle1_value'];
+                            if ($this->customers['bundle1_type'] == 'MINUTE') {
+                                $duration_b = $available_bundle1;
+                                $this->customers['bundle_type'] = 'MINUTE';
+                                $this->customers['bundle_value'] = $duration_b;
+                                $this->customers['bundle_number'] = 'bundle1';
+                            }
+                            if ($this->customers['bundle1_type'] == 'COST') {
+                                $balance_b = $available_bundle1;
+                                $this->customers['bundle_type'] = 'COST';
+                                $this->customers['bundle_value'] = $balance_b;
+                                $this->customers['bundle_number'] = 'bundle1';
+                            }
+                            $this->writelog("available_bundle1 " . $this->customers['bundle_value']);
+                        } elseif ($data['bundle_id'] == '2') {
+                            $bundle2 = $this->customers['bundle2_value'];
+                            if ($this->customers['bundle2_type'] == 'MINUTE') {
+                                $duration_b = $available_bundle2;
+                                $this->customers['bundle_type'] = 'MINUTE';
+                                $this->customers['bundle_value'] = $duration_b;
+                                $this->customers['bundle_number'] = 'bundle2';
+                            }
+                            if ($this->customers['bundle2_type'] == 'COST') {
+                                $balance_b = $available_bundle2;
+                                $this->customers['bundle_type'] = 'COST';
+                                $this->customers['bundle_value'] = $balance_b;
+                                $this->customers['bundle_number'] = 'bundle2';
+                            }
+                        } elseif ($data['bundle_id'] == '3') {
+                            $bundle1 = $this->customers['bundle3_value'];
+                            if ($this->customers['bundle3_type'] == 'MINUTE') {
+                                $duration_b = $available_bundle3;
+                                $this->customers['bundle_type'] = 'MINUTE';
+                                $this->customers['bundle_value'] = $duration_b;
+                                $this->customers['bundle_number'] = 'bundle3';
+                            }
+                            if ($this->customers['bundle3_type'] == 'COST') {
+                                $balance_b = $available_bundle3;
+                                $this->customers['bundle_type'] = 'COST';
+                                $this->customers['bundle_value'] = $balance_b;
+                                $this->customers['bundle_number'] = 'bundle3';
                             }
                         }
                     }
                 }
+
                 /*
                  * Assign the rates value to LLRRate variable to check the LLR in reseler and carrier
                  */
@@ -1627,6 +1882,12 @@ class OVS extends PDO {
          * Users call duration calculations
          */
         $this->customers['duration'] = 0;
+
+
+        if ($balance_b > 0 AND $this->customers['bundle_type'] == 'COST') {
+            $this->customers['balance'] = $this->customers['balance'] + $balance_b;
+        }
+
         $this->customers['duration'] = $this->duration($this->customers);
         $this->writelog("Normal duration " . $this->customers['duration']);
         $this->writelog("Bundle duration " . $duration_b);
@@ -1751,7 +2012,7 @@ class OVS extends PDO {
             $this->is_internalcall = '1';
         }
 
-        $query2 = sprintf("select extension_no as dst_extension_no as dst_extension_no from customer_sip_account where id = '%s';", $this->account_device_id);
+        $query2 = sprintf("select extension_no as dst_extension_no from customer_sip_account where extension_no = '%s';", $this->destination_number);
         $this->writelog($query2);
         $this->query('SWITCH', $query2);
         $rs = $this->resultset();
@@ -2813,15 +3074,15 @@ class OVS extends PDO {
 
                     $destination_number1 = preg_replace("/#/", "T", $destination_number);
 
-                    $this->Gateway_XML .= "\n <action application=\"export\" data=\"nolocal:execute_on_ring=curl https://localhost/api/api.php?r=ring&common_uuid=" . $this->uuid . "&gatewayname=" . $gateway_ipaddress_name . "&atime=\${strftime(%Y-%m-%dT%H:%M:%S)}&gateway_ipaddress=" . $route2['ipaddress'] . "&carrier_gateway_ipaddress_name=" . $route2['carrier_ip_id'] . "&routcallerid=" . $route_callid . "&account=" . $this->account_id . "&carrier=" . $route2['carrier_id'] . "&destination_number=" . $destination_number1 . " | -k \"/>";
+                    $this->Gateway_XML .= "\n <action application=\"export\" data=\"nolocal:execute_on_ring=curl http://localhost/api/api.php?r=ring&common_uuid=" . $this->uuid . "&gatewayname=" . $gateway_ipaddress_name . "&atime=\${strftime(%Y-%m-%dT%H:%M:%S)}&gateway_ipaddress=" . $route2['ipaddress'] . "&carrier_gateway_ipaddress_name=" . $route2['carrier_ip_id'] . "&routcallerid=" . $route_callid . "&account=" . $this->account_id . "&carrier=" . $route2['carrier_id'] . "&destination_number=" . $destination_number1 . "\"/>";
 
 
-                    $this->Gateway_XML .= "\n <action application=\"export\" data=\"nolocal:execute_on_pre_answer=curl  https://localhost/api/api.php?r=ring&common_uuid=" . $this->uuid . "&gatewayname=" . $gateway_ipaddress_name . "&atime=\${strftime(%Y-%m-%dT%H:%M:%S)}&gateway_ipaddress=" . $route2['ipaddress'] . "&carrier_gateway_ipaddress_name=" . $route2['carrier_ip_id'] . "&routcallerid=" . $route_callid . "&account=" . $this->account_id . "&carrier=" . $route2['carrier_id'] . "&destination_number=" . $destination_number1 . " | -k \"/>";
+                    $this->Gateway_XML .= "\n <action application=\"export\" data=\"nolocal:execute_on_pre_answer=curl  http://localhost/api/api.php?r=ring&common_uuid=" . $this->uuid . "&gatewayname=" . $gateway_ipaddress_name . "&atime=\${strftime(%Y-%m-%dT%H:%M:%S)}&gateway_ipaddress=" . $route2['ipaddress'] . "&carrier_gateway_ipaddress_name=" . $route2['carrier_ip_id'] . "&routcallerid=" . $route_callid . "&account=" . $this->account_id . "&carrier=" . $route2['carrier_id'] . "&destination_number=" . $destination_number1 . "\"/>";
 
-                    $this->Gateway_XML .= "\n <action application=\"export\" data=\"nolocal:execute_on_pre_answer=curl https://localhost/api/api.php?r=ring&common_uuid=" . $this->uuid . "&gatewayname=" . $gateway_ipaddress_name . "&atime=\${strftime(%Y-%m-%dT%H:%M:%S)}&gateway_ipaddress=" . $route2['ipaddress'] . "&carrier_gateway_ipaddress_name=" . $route2['carrier_ip_id'] . "&routcallerid=" . $route_callid . "&account=" . $this->account_id . "&carrier=" . $route2['carrier_id'] . "&destination_number=" . $destination_number1 . " | -k \"/>";
+                    $this->Gateway_XML .= "\n <action application=\"export\" data=\"nolocal:execute_on_pre_answer=curl http://localhost/api/api.php?r=ring&common_uuid=" . $this->uuid . "&gatewayname=" . $gateway_ipaddress_name . "&atime=\${strftime(%Y-%m-%dT%H:%M:%S)}&gateway_ipaddress=" . $route2['ipaddress'] . "&carrier_gateway_ipaddress_name=" . $route2['carrier_ip_id'] . "&routcallerid=" . $route_callid . "&account=" . $this->account_id . "&carrier=" . $route2['carrier_id'] . "&destination_number=" . $destination_number1 . "\"/>";
 
 
-                    $this->Gateway_XML .= "\n <action application=\"export\" data=\"nolocal:execute_on_answer=curl https://localhost/api/api.php?r=answer&common_uuid=" . $this->uuid . "&gatewayname=" . $gateway_ipaddress_name . "&atime=\${strftime(%Y-%m-%dT%H:%M:%S)}&gateway_ipaddress=" . $route2['ipaddress'] . "&carrier_gateway_ipaddress_name=" . $route2['carrier_ip_id'] . "&routcallerid=" . $route_callid . "&account=" . $this->account_id . "&carrier=" . $route2['carrier_id'] . "&destination_number=" . $destination_number1 . " | -k \"/>";
+                    $this->Gateway_XML .= "\n <action application=\"export\" data=\"nolocal:execute_on_answer=curl http://localhost/api/api.php?r=answer&common_uuid=" . $this->uuid . "&gatewayname=" . $gateway_ipaddress_name . "&atime=\${strftime(%Y-%m-%dT%H:%M:%S)}&gateway_ipaddress=" . $route2['ipaddress'] . "&carrier_gateway_ipaddress_name=" . $route2['carrier_ip_id'] . "&routcallerid=" . $route_callid . "&account=" . $this->account_id . "&carrier=" . $route2['carrier_id'] . "&destination_number=" . $destination_number1 . "\"/>";
 
                     $gateway_ipaddress_name = '';
                     if ($route2['carrier_ring_timeout'] > 0) {
@@ -3035,37 +3296,7 @@ class OVS extends PDO {
         else
             $reseller['orgbalance'] = "-" . $reseller['balance'];
 
-        /*
-          if ($reseller['nigativebalance_cc_check'] == '1') {
-          if (($reseller['balance'] / $this->account_currency_ratio ) < 5) {
-          $reseller['balance'] = ($reseller['balance'] - (100 - $reseller['balance']) * $reseller['balance'] / 100);
-          }
-          if (($reseller['balance'] / $this->account_currency_ratio) < 5) {
-          $newcc = round(($reseller['account_cc'] * $reseller['balance'] / 100), 0, PHP_ROUND_HALF_UP);
-          if ($newcc < 2)
-          $newcc = 1;
-          if ($callcounts > $newcc) {
-          $otherinfo = $reseller['account_id'];
-          $this->fail_route_xml('USERCPS', $otherinfo);
-          $this->status = 'FAIL';
-          $this->customersdata[$reseelerinfo] = $reseller;
-          return;
-          }
-          }
-          if (($reseller['balance'] / $this->account_currency_ratio) < 5) {
-          $newcps = round(($reseller['account_cps'] * $reseller['balance'] / 100), 0, PHP_ROUND_HALF_UP);
-          if ($newcps < 2)
-          $newcps = 1;
-          if ($result_cps > $newcps) {
-          $otherinfo = $reseller['account_id'];
-          $this->fail_route_xml('USERCPS', $otherinfo);
-          $this->status = 'FAIL';
-          $this->customersdata[$reseelerinfo] = $reseller;
-          return;
-          }
-          }
-          }
-         */
+
         /*
          * Reseller don't have sufucuient balance to process the call.
          */
@@ -3098,7 +3329,7 @@ class OVS extends PDO {
         }
         $str = rtrim($str, ' or ');
 
-        $query = sprintf("SELECT tariff.tariff_status,  tariff_ratecard_map.ratecard_id, tariff_ratecard_map.tariff_id, tariff_ratecard_map.start_day, tariff_ratecard_map.end_day, tariff_ratecard_map.start_time, tariff_ratecard_map.end_time, customer_rates.prefix, customer_rates.destination, customer_rates.rate, customer_rates.connection_charge, customer_rates.minimal_time, customer_rates.resolution_time, customer_rates.grace_period, customer_rates.rate_multiplier, customer_rates.rate_addition, customer_rates.rates_status, tariff.tariff_currency_id , tariff.monthly_charges, tariff.bundle_option,  tariff.bundle1_type, tariff.bundle1_value, tariff.bundle2_type, tariff.bundle2_value, tariff.bundle3_type, tariff.bundle3_value   FROM tariff_ratecard_map  INNER JOIN customer_rates on customer_rates.ratecard_id = tariff_ratecard_map.ratecard_id  INNER JOIN ratecard on customer_rates.ratecard_id = ratecard.ratecard_id and ratecard.ratecard_for = 'OUTGOING' INNER JOIN tariff on  tariff.tariff_id = tariff_ratecard_map.tariff_id where WEEKDAY(CURDATE()) BETWEEN start_day and end_day AND CURTIME() BETWEEN start_time and end_time and tariff_ratecard_map.tariff_id = '%s' and (%s)  ORDER BY priority asc, prefix desc, rate ASC, end_time ASC limit 1;", $reseller['tariff_id'], $str);
+        $query = sprintf("SELECT tariff.tariff_status,  tariff_ratecard_map.ratecard_id, tariff_ratecard_map.tariff_id, tariff_ratecard_map.start_day, tariff_ratecard_map.end_day, tariff_ratecard_map.start_time, tariff_ratecard_map.end_time, customer_rates.prefix, customer_rates.destination, customer_rates.rate, customer_rates.connection_charge, customer_rates.minimal_time, customer_rates.resolution_time, customer_rates.grace_period, customer_rates.rate_multiplier, customer_rates.rate_addition, customer_rates.rates_status, tariff.tariff_currency_id     FROM tariff_ratecard_map  INNER JOIN customer_rates on customer_rates.ratecard_id = tariff_ratecard_map.ratecard_id  INNER JOIN ratecard on customer_rates.ratecard_id = ratecard.ratecard_id and ratecard.ratecard_for = 'OUTGOING' INNER JOIN tariff on  tariff.tariff_id = tariff_ratecard_map.tariff_id where WEEKDAY(CURDATE()) BETWEEN start_day and end_day AND CURTIME() BETWEEN start_time and end_time and tariff_ratecard_map.tariff_id = '%s' and (%s)  ORDER BY priority asc, prefix desc, rate ASC, end_time ASC limit 1;", $reseller['tariff_id'], $str);
 
 
         $this->writelog($query);
@@ -3120,118 +3351,96 @@ class OVS extends PDO {
             $reseller[$key] = $value;
         }
 
-        if ($this->customers['bundle_option'] == '1') {
-            $query = sprintf("SELECT bundle_id, prefix from tariff_bundle_prefixes where tariff_id = '%s' and  (%s)  order by prefix desc;", $reseller['tariff_id'], $str);
 
+        /*
+         * Bundle & Plan
+         */
+        $this->bundle_package_management($user);
+        $query = sprintf("SELECT bundle_option, bundle_id, prefix , bundle_package_prefixes.bundle_package_id, monthly_charges,   bundle1_type, bundle1_value, bundle2_type, bundle2_value, bundle3_type, bundle3_value from bundle_package INNER JOIN bundle_package_prefixes on bundle_package_prefixes.bundle_package_id = bundle_package.bundle_package_id  where bundle_package_prefixes.bundle_package_id in (select bundle_package_id from bundle_account where account_id  = '%s') and  (%s) and LENGTH(prefix) > 0  order by prefix desc limit 1;", $user, $str);
 
+        $this->writelog($query);
+        $this->query('SWITCH', $query);
+        $rs = $this->resultset();
+        if (count($rs) > 0) {
+            foreach ($rs[0] as $key => $value) {
+                $reseller[$key] = $value;
+            }
+        }
+        if (strlen($reseller['bundle_package_id']) > 0 and $reseller['bundle_option'] == '1') {
+            $query = sprintf("SELECT account_id, rule_type, yearmonth,  sum(total_allowed) as  total_allowed , sum(sdr_consumption) as sdr_consumption  FROM customer_bundle_sdr where account_id = '%s' and bundle_package_id  = '%s' and rule_type in ('bundle1', 'bundle2', 'bundle2') and yearmonth = '%s';", $user, $reseller['bundle_package_id'], date("Ym"));
             $this->writelog($query);
             $this->query('SWITCH', $query);
-            $rs = $this->resultset();
-            if (count($rs) > 0) {
-                $query = sprintf("SELECT account_id, rule_type, yearmonth,  service_charges , sdr_consumption  FROM customer_bundle_sdr where account_id = '%s' and rule_type in ('bundle1', 'bundle2', 'bundle2') and yearmonth = '%s';", $user, date("Ym"));
+            $rs3 = $this->resultset();
 
-                $this->writelog($query);
-                $this->query('SWITCH', $query);
-                $rs3 = $this->resultset();
-                $available_bundle1 = '';
-                $available_bundle2 = '';
-                $available_bundle3 = '';
-                $insert_allow = 1;
-                if (count($rs3) > 0) {
-                    foreach ($rs3 as $data_b) {
-                        if ($data_b['rule_type'] == 'bundle1') {
-                            $available_bundle1 = $data_b['service_charges'] - $data_b['sdr_consumption'];
-                            $insert_allow = 0;
-                        }
-                        if ($data_b['rule_type'] == 'bundle2') {
-                            $available_bundle2 = $data_b['service_charges'] - $data_b['sdr_consumption'];
-                            $insert_allow = 0;
-                        }
-                        if ($data_b['rule_type'] == 'bundle3') {
-                            $available_bundle3 = $data_b['service_charges'] - $data_b['sdr_consumption'];
-                            $insert_allow = 0;
-                        }
+            $available_bundle1 = '';
+            $available_bundle2 = '';
+            $available_bundle3 = '';
+            $insert_allow = 1;
+            if (count($rs3) > 0) {
+                foreach ($rs3 as $data_b) {
+                    if ($data_b['rule_type'] == 'bundle1') {
+                        $available_bundle1 = $data_b['total_allowed'] - $data_b['sdr_consumption'];
+                        $insert_allow = 0;
+                    }
+                    if ($data_b['rule_type'] == 'bundle2') {
+                        $available_bundle2 = $data_b['total_allowed'] - $data_b['sdr_consumption'];
+                        $insert_allow = 0;
+                    }
+                    if ($data_b['rule_type'] == 'bundle3') {
+                        $available_bundle3 = $data_b['total_allowed'] - $data_b['sdr_consumption'];
+                        $insert_allow = 0;
                     }
                 }
+            }
 
-                if ($available_bundle1 == '' and $reseller['bundle1_value'] > 0 and $insert_allow == 1) {
-                    $bundle1_value = $this->charges_cal($reseller['bundle1_value']);
-                    if ($this->customers['bundle1_type'] == 'MINUTE')
-                        $bundle1_value = floor($bundle1_value);
-                    $query = sprintf("INSERT INTO customer_bundle_sdr (account_id, rule_type, yearmonth,otherdata,service_charges,sdr_consumption,action_date) VALUES('%s','%s','%s','%s','%s','%s',now())", $user, 'bundle1', date("Ym"), $reseller['bundle1_type'], $bundle1_value, '0');
 
-                    $this->writelog($query);
-                    $this->query('SWITCH', $query);
-                    $this->execute();
-                }
-                if ($available_bundle2 == '' and $reseller['bundle2_value'] > 0 and $insert_allow == 1) {
-                    $bundle1_value = $this->charges_cal($reseller['bundle2_value']);
-                    if ($reseller['bundle2_type'] == 'MINUTE')
-                        $bundle1_value = floor($bundle1_value);
-                    $query = sprintf("INSERT INTO customer_bundle_sdr (account_id, rule_type, yearmonth,otherdata,service_charges,sdr_consumption,action_date) VALUES('%s','%s','%s','%s','%s','%s',now())", $user, 'bundle2', date("Ym"), $reseller['bundle2_type'], $bundle1_value, '0');
-
-                    $this->writelog($query);
-                    $this->query('SWITCH', $query);
-                    $this->execute();
-                }
-                if ($available_bundle3 == '' and $reseller['bundle3_value'] > 0 and $insert_allow == 1) {
-                    $bundle1_value = $this->charges_cal($reseller['bundle3_value']);
-                    if ($reseller['bundle3_type'] == 'MINUTE')
-                        $bundle1_value = floor($bundle1_value);
-                    $query = sprintf("INSERT INTO customer_bundle_sdr (account_id, rule_type, yearmonth,otherdata,service_charges,sdr_consumption,action_date) VALUES('%s','%s','%s','%s','%s','%s',now())", $user, 'bundle3', date("Ym"), $reseller['bundle3_type'], $bundle1_value, '0');
-
-                    $this->writelog($query);
-                    $this->query('SWITCH', $query);
-                    $this->execute();
-                }
-
-                foreach ($rs as $data) {
-                    if ($data['bundle_id'] == '1') {
-                        $bundle1 = $reseller['bundle1_value'];
-                        if ($reseller['bundle1_type'] == 'MINUTE') {
-                            $duration_b = $available_bundle1;
-                            $reseller['bundle_type'] = 'MINUTE';
-                            $reseller['bundle_value'] = $duration_b;
-                            $reseller['bundle_number'] = 'bundle1';
-                        }
-                        if ($reseller['bundle1_type'] == 'COST') {
-                            $balance = $available_bundle1;
-                            $reseller['bundle_type'] = 'COST';
-                            $reseller['bundle_value'] = $balance_b;
-                            $reseller['bundle_number'] = 'bundle1';
-                        }
-                    } elseif ($data['bundle_id'] == '2') {
-                        $bundle2 = $reseller['bundle2_value'];
-                        if ($reseller['bundle2_type'] == 'MINUTE') {
-                            $duration_b = $available_bundle2;
-                            $reseller['bundle_type'] = 'MINUTE';
-                            $reseller['bundle_value'] = $duration_b;
-                            $reseller['bundle_number'] = 'bundle2';
-                        }
-                        if ($reseller['bundle2_type'] == 'COST') {
-                            $balance = $available_bundle2;
-                            $reseller['bundle_type'] = 'COST';
-                            $reseller['bundle_value'] = $balance_b;
-                            $reseller['bundle_number'] = 'bundle2';
-                        }
-                    } elseif ($data['bundle_id'] == '3') {
-                        $bundle1 = $reseller['bundle3_value'];
-                        if ($reseller['bundle3_type'] == 'MINUTE') {
-                            $duration_b = $available_bundle3;
-                            $reseller['bundle_type'] = 'MINUTE';
-                            $reseller['bundle_value'] = $duration_b;
-                            $reseller['bundle_number'] = 'bundle3';
-                        }
-                        if ($reseller['bundle3_type'] == 'COST') {
-                            $balance_b = $available_bundle3;
-                            $reseller['bundle_type'] = 'COST';
-                            $reseller['bundle_value'] = $balance_b;
-                            $reseller['bundle_number'] = 'bundle3';
-                        }
+            foreach ($rs as $data) {
+                if ($data['bundle_id'] == '1') {
+                    $bundle1 = $reseller['bundle1_value'];
+                    if ($reseller['bundle1_type'] == 'MINUTE') {
+                        $duration_b = $available_bundle1;
+                        $reseller['bundle_type'] = 'MINUTE';
+                        $reseller['bundle_value'] = $duration_b;
+                        $reseller['bundle_number'] = 'bundle1';
+                    }
+                    if ($reseller['bundle1_type'] == 'COST') {
+                        $balance = $available_bundle1;
+                        $reseller['bundle_type'] = 'COST';
+                        $reseller['bundle_value'] = $balance_b;
+                        $reseller['bundle_number'] = 'bundle1';
+                    }
+                } elseif ($data['bundle_id'] == '2') {
+                    $bundle2 = $reseller['bundle2_value'];
+                    if ($reseller['bundle2_type'] == 'MINUTE') {
+                        $duration_b = $available_bundle2;
+                        $reseller['bundle_type'] = 'MINUTE';
+                        $reseller['bundle_value'] = $duration_b;
+                        $reseller['bundle_number'] = 'bundle2';
+                    }
+                    if ($reseller['bundle2_type'] == 'COST') {
+                        $balance = $available_bundle2;
+                        $reseller['bundle_type'] = 'COST';
+                        $reseller['bundle_value'] = $balance_b;
+                        $reseller['bundle_number'] = 'bundle2';
+                    }
+                } elseif ($data['bundle_id'] == '3') {
+                    $bundle1 = $reseller['bundle3_value'];
+                    if ($reseller['bundle3_type'] == 'MINUTE') {
+                        $duration_b = $available_bundle3;
+                        $reseller['bundle_type'] = 'MINUTE';
+                        $reseller['bundle_value'] = $duration_b;
+                        $reseller['bundle_number'] = 'bundle3';
+                    }
+                    if ($reseller['bundle3_type'] == 'COST') {
+                        $balance_b = $available_bundle3;
+                        $reseller['bundle_type'] = 'COST';
+                        $reseller['bundle_value'] = $balance_b;
+                        $reseller['bundle_number'] = 'bundle3';
                     }
                 }
             }
         }
+
         /*
          * check the LLR(lossless Routing) for reseller
          */
@@ -3289,6 +3498,16 @@ class OVS extends PDO {
 
         $reseller['duration'] = 0;
         $reseller['duration'] = $this->duration($reseller);
+
+
+        if ($reseller['bundle_type'] == 'MINUTE')
+            $reseller['duration'] = $reseller['duration'] + $reseller['bundle_value'];
+
+        /*
+         * Bunlde duration
+         * 
+         */
+
         array_push($this->str, $reseller['duration']);
         if ($reseller['account_level'] == '1')
             $level = 1;
@@ -3316,7 +3535,6 @@ class OVS extends PDO {
         unset($reseller['bundle3_type']);
         unset($reseller['bundle3_value']);
         $this->customersdata[$reseelerinfo] = $reseller;
-
         $parent_account_id = '';
         $parent_account_id = $reseller['parent_account_id'];
         $this->writelog("RESELLER" . $level . ":" . $reseller['parent_account_id'] . " " . strlen($reseller['parent_account_id']));
@@ -3456,7 +3674,7 @@ class OVS extends PDO {
 
         $responce = "<?xml version = \"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>
                             <document type=\"OvSwitch/xml\">
-                            <section name=\"dialplan\" description=\"RE Dial Plan For OvSwitch\">";
+                            <section name=\"dialplan\" description=\"RE Dial Plan For OvSwitch-1.0.1\">";
         $responce .= "\n<context name=\"default\">";
         $responce .= "\n<extension name=\"outbound_international\">
                 <condition field=\"destination_number\" expression=\"^(.+)$\">";
@@ -3525,7 +3743,7 @@ class OVS extends PDO {
                             <document type=\"OvSwitch/xml\">";
 
         $responce .= $this->directory;
-        $responce .= "<section name=\"dialplan\" description=\"RE Dial Plan For OvSwitch\">";
+        $responce .= "<section name=\"dialplan\" description=\"RE Dial Plan For OvSwitch-1.0.1\">";
         $responce .= "\n<context name=\"default\">";
         $responce .= "\n<extension name=\"outbound_international\">
                 <condition field=\"destination_number\" expression=\"^(.+)$\">";
@@ -3560,6 +3778,73 @@ class OVS extends PDO {
 
 
         RETURN $responce;
+    }
+
+function livecalls_in() {
+        if ($this->status != 'FAIL') {
+            if (count($this->customersdata) > 0) {
+                foreach ($this->customersdata as $userkey => $uservalue) {
+                    if ($userkey == 'user') {
+                        foreach ($uservalue as $key => $value) {
+                            if ($key == 'account_id' or $key == 'tariff_id' or $key == 'customer_currency_id' or $key == 'ipaddress' or $key == 'ratecard_id' or $key == 'prefix' or $key == 'destination' or $key == 'rate' or $key == 'src_caller' or $key == 'src_callee' or $key == 'src_ip') {
+                                $data = $data . "customer_$key = '" . addslashes($value) . "',";
+                            } elseif ($key == 'company_name') {
+                                $data = $data . "customer_company = '" . addslashes($value) . "',";
+                            }
+                        }
+                    }
+                    if ($userkey == 'Reseller1') {
+                        foreach ($uservalue as $key => $value) {
+                            if ($key == 'account_id' or $key == 'tariff_id' or $key == 'ratecard_id' or $key == 'prefix' or $key == 'destination' or $key == 'rate') {
+                                $data = $data . "reseller1_$key = '" . addslashes($value) . "',";
+                            }
+                        }
+                    }
+                    if ($userkey == 'Reseller2') {
+                        foreach ($uservalue as $key => $value) {
+                            if ($key == 'account_id' or $key == 'tariff_id' or $key == 'ratecard_id' or $key == 'prefix' or $key == 'destination' or $key == 'rate') {
+                                $data = $data . "reseller2_$key = '" . addslashes($value) . "',";
+                            }
+                        }
+                    }
+                    if ($userkey == 'Reseller3') {
+                        foreach ($uservalue as $key => $value) {
+                            if ($key == 'account_id' or $key == 'tariff_id' or $key == 'ratecard_id' or $key == 'prefix' or $key == 'destination' or $key == 'rate') {
+                                $data = $data . "reseller3_$key = '" . addslashes($value) . "',";
+                            }
+                        }
+                    }
+                }
+
+                foreach ($this->route22 as $key => $value) {
+
+                    if ($key == 'carrier_id' or $key == 'carrier_name' or $key == 'carrier_currency_id')
+                        $data = $data . "$key='" . addslashes($value) . "',";
+
+                    if ($key == 'ratecard_id' or $key == 'tariff_id' or $key == 'prefix' or $key == 'destination' or $key == 'rate' or $key == 'src_caller' or $key == 'src_callee' or $key == 'dst_caller' or $key == 'dst_callee') {
+                        $data = $data . "carrier_$key = '" . addslashes($value) . "',";
+                    }
+                    if ($key == 'ipaddress')
+                        $data = $data . "carrier_ipaddress='" . addslashes($value) . "',";
+                    if ($key == 'ipaddress_name')
+                        $data = $data . "carrier_ipaddress_name='" . addslashes($value) . "',";
+                }
+
+                $data = $data . "dialplan_id = '" . addslashes($this->dialplan_id) . "',";
+                $data = $data . "common_uuid = '" . addslashes($this->uuid) . "',";
+                $data = $data . "start_time= '" . addslashes($this->request['Event-Date-Local']) . "',";
+                $data = $data . "fs_host= '" . addslashes($this->request['FreeSWITCH-IPv4']) . "',";
+                $data = $data . "loadbalancer= '" . trim($this->Hunt_Network_Addr) . "',";
+                $data = $data . "callstatus='progress'";
+
+                $livecalldata = rtrim($data, ',');
+                $query = "insert into livecalls  set " . $livecalldata;
+                $this->writelog($query);
+                $this->query('SWITCH', $query);
+                $this->execute();
+                $this->route22 = Array();
+            }
+        }
     }
 
     function livecalls() {
@@ -4436,10 +4721,12 @@ class OVS extends PDO {
         if ($this->leg == 'A' and $this->switch_issue == '0' and addslashes($this->cdr_variable['billsec']) > 0) {
             $yearmonth = date('Ym');
             $b_value = 0;
+            $sub_used = 0;
             if ($this->userdata['bundle_option'] == '1') {
+                $customer_callcost_total_org = $customer_callcost_total;
                 if ($this->userdata['bundle_type'] == 'MINUTE') {
                     if ($customer_duration <= $this->userdata['bundle_value'] * 60) {
-                        $b_value = ceil($customer_duration / 60);
+                        $b_value = ceil($customer_duration);
                         $customer_callcost_total = 0;
                     } else {
                         $b_value = $this->userdata['bundle_value'];
@@ -4456,16 +4743,48 @@ class OVS extends PDO {
                         $customer_callcost_total = $customer_callcost_total - $this->userdata['bundle_value'];
                     }
                 }
-                $query = sprintf("update customer_bundle_sdr  set sdr_consumption =  sdr_consumption + %s where account_id = '%s' and rule_type = '%s' and yearmonth = '%s'", $b_value, $this->userdata['account_id'], $this->userdata['bundle_number'], $yearmonth);
+                $cdr_date = date("Ym");
+                $query = sprintf("SELECT id, account_id, rule_type, yearmonth,  total_allowed as  total_allowed , sdr_consumption as sdr_consumption  FROM customer_bundle_sdr where account_id = '%s' and bundle_package_id  = '%s' and total_allowed > 0 and rule_type = '%s' and yearmonth = '%s';", $this->userdata['account_id'], $this->userdata['bundle_package_id'], $this->userdata['bundle_number'], $cdr_date);
                 $this->writelog($query);
                 $this->query('SWITCH', $query);
-                $this->execute();
+                $rs3 = $this->resultset();
+                if (count($rs3) > 0) {
+                    $sub_used = $b_value;
+                    foreach ($rs3 as $data_b) {
+                        if ($sub_used > 0) {
+                            if ($b_value <= ($data_b['total_allowed'] - $data_b['sdr_consumption'])) {
+                                $sub_used = $b_value;
+                                $b_value = 0;
+                            } else {
+                                $sub_used = $data_b['total_allowed'] - $data_b['sdr_consumption'];
+                                $b_value = $b_value - $sub_used;
+                            }
+                            $query = sprintf("update customer_bundle_sdr  set sdr_consumption =  sdr_consumption + %s where id = '%s'", $sub_used/60, $data_b['id']);
+                            $this->writelog($query);
+                            $this->query('SWITCH', $query);
+                            $this->execute();
+                        }
+                    }
+
+                    if ($b_value > 0) {
+                        if ($this->userdata['bundle_type'] == 'COST') {
+                            $customer_callcost_total = $customer_callcost_total + $b_value;
+                        } elseif ($this->userdata['bundle_type'] == 'MINUTE') {
+                            $remaining_duration = $customer_duration - ($this->userdata['bundle_value'] * 60);
+                            $customer_callcost_total = $customer_callcost_total + ($customer_callcost_total_org / $customer_duration) * $b_value;
+                        }
+                    }
+                } else {
+                    $customer_callcost_total = $customer_callcost_total_org;
+                }
             }
+            $sub_used = 0;
             $b_value = 0;
             if ($this->reseller1_data['bundle_option'] == '1') {
+                $reseller1_callcost_total_org = $reseller1_callcost_total;
                 if ($this->reseller1_data['bundle_type'] == 'MINUTE') {
                     if ($reseller1_duartion <= $this->reseller1_data['bundle_value'] * 60) {
-                        $b_value = ceil($reseller1_duartion / 60);
+                        $b_value = ceil($reseller1_duartion );
                         $reseller1_callcost_total = 0;
                     } else {
                         $b_value = $this->reseller1_data['bundle_value'];
@@ -4483,17 +4802,52 @@ class OVS extends PDO {
                         $reseller1_callcost_total = $reseller1_callcost_total - $this->reseller1_data['bundle_value'];
                     }
                 }
-                $query = sprintf("update customer_bundle_sdr  set sdr_consumption =  sdr_consumption + %s where account_id = '%s' and rule_type = '%s' and yearmonth = '%s'", $b_value, $this->reseller1_data['account_id'], $this->reseller1_data['bundle_number'], $yearmonth);
+                $cdr_date = date("Ym");
+                $query = sprintf("SELECT id, account_id, rule_type, yearmonth,  total_allowed as  total_allowed , sdr_consumption as sdr_consumption  FROM customer_bundle_sdr where account_id = '%s' and bundle_package_id  = '%s' and total_allowed > 0 and rule_type = '%s' and yearmonth = '%s';", $this->reseller1_data['account_id'], $this->reseller1_data['bundle_package_id'], $this->reseller1_data['bundle_number'], $cdr_date);
                 $this->writelog($query);
                 $this->query('SWITCH', $query);
-                $this->execute();
+                $rs3 = $this->resultset();
+                if (count($rs3) > 0) {
+                    $sub_used = $b_value;
+                    foreach ($rs3 as $data_b) {
+                        if ($sub_used > 0) {
+                            if ($b_value <= ($data_b['total_allowed'] - $data_b['sdr_consumption'])) {
+                                $sub_used = $b_value;
+                                $b_value = 0;
+                            } else {
+                                $sub_used = $data_b['total_allowed'] - $data_b['sdr_consumption'];
+                                $b_value = $b_value - $sub_used;
+                            }
+                            $query = sprintf("update customer_bundle_sdr  set sdr_consumption =  sdr_consumption + %s where id = '%s'", $sub_used/60, $data_b['id']);
+                            $this->writelog($query);
+                            $this->query('SWITCH', $query);
+                            $this->execute();
+                        }
+                    }
+
+                    if ($b_value > 0) {
+                        if ($this->userdata['bundle_type'] == 'COST') {
+                            $reseller1_callcost_total = $reseller1_callcost_total + $b_value;
+                        } elseif ($this->userdata['bundle_type'] == 'MINUTE') {
+                            $reseller1_callcost_total = $reseller1_callcost_total + ($reseller1_callcost_total_org / $reseller1_duartion) * $b_value;
+                        }
+                    }
+                } else {
+                    $reseller1_callcost_total = $reseller1_callcost_total_org;
+                }
             }
 
+
+            $sub_used = 0;
             $b_value = 0;
             if ($this->reseller2_data['bundle_option'] == '1') {
+                $reseller2_callcost_total_org = $reseller2_callcost_total;
                 if ($this->reseller2_data['bundle_type'] == 'MINUTE') {
                     if ($reseller2_duartion <= $this->reseller2_data['bundle_value'] * 60) {
-                        $b_value = ceil($reseller2_duartion / 60);
+                        $b_value = ceil($reseller2_duartion);
+
+
+
                         $reseller2_callcost_total = 0;
                     } else {
                         $b_value = $this->reseller2_data['bundle_value'];
@@ -4511,15 +4865,48 @@ class OVS extends PDO {
                         $reseller2_callcost_total = $reseller2_callcost_total - $this->reseller2_data['bundle_value'];
                     }
                 }
-                $query = sprintf("update customer_bundle_sdr  set sdr_consumption =  sdr_consumption + %s where account_id = '%s' and rule_type = '%s' and yearmonth = '%s'", $b_value, $this->reseller2_data['account_id'], $this->reseller2_data['bundle_number'], $yearmonth);
+
+
+                $cdr_date = date("Ym");
+                $query = sprintf("SELECT id, account_id, rule_type, yearmonth,  total_allowed as  total_allowed , sdr_consumption as sdr_consumption  FROM customer_bundle_sdr where account_id = '%s' and bundle_package_id  = '%s' and total_allowed > 0 and rule_type = '%s' and yearmonth = '%s';", $this->reseller2_data['account_id'], $this->reseller2_data['bundle_package_id'], $this->reseller2_data['bundle_number'], $cdr_date);
                 $this->writelog($query);
                 $this->query('SWITCH', $query);
-                $this->execute();
+                $rs3 = $this->resultset();
+                if (count($rs3) > 0) {
+                    foreach ($rs3 as $data_b) {
+                        $sub_used = $b_value;
+                        if ($sub_used > 0) {
+                            if ($b_value <= ($data_b['total_allowed'] - $data_b['sdr_consumption'])) {
+                                $sub_used = $b_value;
+                                $b_value = 0;
+                            } else {
+                                $sub_used = $data_b['total_allowed'] - $data_b['sdr_consumption'];
+                                $b_value = $b_value - $sub_used;
+                            }
+                            $query = sprintf("update customer_bundle_sdr  set sdr_consumption =  sdr_consumption + %s where id = '%s'", $sub_used/60, $data_b['id']);
+                            $this->writelog($query);
+                            $this->query('SWITCH', $query);
+                            $this->execute();
+                        }
+                    }
+
+                    if ($b_value > 0) {
+                        if ($this->userdata['bundle_type'] == 'COST') {
+                            $reseller2_callcost_total = $reseller2_callcost_total + $b_value;
+                        } elseif ($this->userdata['bundle_type'] == 'MINUTE') {
+                            $reseller2_callcost_total = $reseller2_callcost_total + ($reseller2_callcost_total_org / $reseller2_duartion) * $b_value;
+                        }
+                    }
+                } else {
+                    $reseller2_callcost_total = $reseller2_callcost_total_org;
+                }
             }
 
-            $b_value = 0;
 
+            $sub_used = 0;
+            $b_value = 0;
             if ($this->reseller3_data['bundle_option'] == '1') {
+                $reseller3_callcost_total_org = $reseller3_callcost_total;
                 if ($this->reseller3_data['bundle_type'] == 'MINUTE') {
                     if ($reseller3_duartion <= $this->reseller3_data['bundle_value'] * 60) {
                         $b_value = ceil($reseller3_duartion / 60);
@@ -4540,18 +4927,45 @@ class OVS extends PDO {
                         $reseller3_callcost_total = $reseller3_callcost_total - $this->reseller3_data['bundle_value'];
                     }
                 }
-                $query = sprintf("update customer_bundle_sdr  set sdr_consumption =  sdr_consumption + %s where account_id = '%s' and rule_type = '%s' and yearmonth = '%s'", $b_value, $this->reseller3_data['account_id'], $this->reseller3_data['bundle_number'], $yearmonth);
+
+                $cdr_date = date("Ym");
+                $query = sprintf("SELECT id, account_id, rule_type, yearmonth,  total_allowed as  total_allowed , sdr_consumption as sdr_consumption  FROM customer_bundle_sdr where account_id = '%s' and bundle_package_id  = '%s' and total_allowed > 0 and rule_type = '%s' and yearmonth = '%s';", $this->reseller3_data['account_id'], $this->reseller3_data['bundle_package_id'], $this->reseller3_data['bundle_number'], $cdr_date);
                 $this->writelog($query);
                 $this->query('SWITCH', $query);
-                $this->execute();
+                $rs3 = $this->resultset();
+                if (count($rs3) > 0) {
+                    $sub_used = $b_value;
+                    foreach ($rs3 as $data_b) {
+                        if ($sub_used > 0)
+                            if ($b_value <= ($data_b['total_allowed'] - $data_b['sdr_consumption'])) {
+                                $sub_used = $b_value;
+                                $b_value = 0;
+                            } else {
+                                $sub_used = $data_b['total_allowed'] - $data_b['sdr_consumption'];
+                                $b_value = $b_value - $sub_used;
+                            }
+                        $query = sprintf("update customer_bundle_sdr  set sdr_consumption =  sdr_consumption + %s where id = '%s'", $sub_used, $data_b['id']);
+                        $this->writelog($query);
+                        $this->query('SWITCH', $query);
+                        $this->execute();
+                    }
+
+                    if ($b_value > 0) {
+                        if ($this->userdata['bundle_type'] == 'COST') {
+                            $reseller3_callcost_total = $reseller3_callcost_total + $b_value;
+                        } elseif ($this->userdata['bundle_type'] == 'MINUTE') {
+                            $reseller3_callcost_total = $reseller3_callcost_total + ($reseller3_callcost_total_org / $reseller3_duration) * $b_value;
+                        }
+                    }
+                } else {
+                    $reseller3_callcost_total = $reseller3_callcost_total_org;
+                }
             }
         }
-
 
         if ($this->cdr_variable['hangup_cause'] == 'PROGRESS_TIMEOUT') {
             $fscause = "PROGRESS_TIMEOUT";
         }
-
 
         $data = $data . "pdd = '" . addslashes($pdd) . "',";
         $data = $data . "fscause = '" . addslashes($fscause) . "',";
@@ -4691,7 +5105,7 @@ class OVS extends PDO {
         if ($this->switch_carrier_statistics == '1') {
             $table_carrier_statistics = $dbdate . '_carrierstate';
 
-            $query = sprintf("INSERT INTO %s ( carrier_id, bill_duration, carrier_duration, carrier_cost, totalcalls, answeredcalls, carrier_prefix, carrier_prefix_name, call_date, calltime_h, calltime_m, pdd, Q850CODE, SIPCODE,fscause, carrier_ipaddress, carrier_currency_id, carrier_name, cdr_type ) values ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s','%s' ,'%s','%s','%s','%s') ON DUPLICATE KEY UPDATE bill_duration = bill_duration+ values(bill_duration), carrier_duration = carrier_duration + values(carrier_duration), carrier_cost = carrier_cost + values(carrier_cost), totalcalls = totalcalls + values(totalcalls), answeredcalls = answeredcalls + values(answeredcalls), pdd = pdd+ values(pdd);", $table_carrier_statistics, $carrier_id, $bill_duration, $carrier_duration, $carrier_cost, $totalcalls, $answeredcalls, $carrier_prefix, $carrier_prefix_name, $call_date, $calltime_h, $calltime_m, $pdd, $causeQ850, $causeSIP, $fscause, $this->carrierdata['gateway_ipaddress'], $this->carrierdata['carrier_currency_id'], $this->carrierdata['carrier_name'], 'IN');
+            $query = sprintf("INSERT INTO %s ( carrier_id, bill_duration, carrier_duration, carrier_cost, totalcalls, answeredcalls, carrier_prefix, carrier_prefix_name, call_date, calltime_h, calltime_m, pdd, Q850CODE, SIPCODE,fscause, carrier_ipaddress, carrier_currency_id, carrier_name, cdr_type ) values ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s','%s' ,'%s','%s','%s','%s') ON DUPLICATE KEY UPDATE bill_duration = bill_duration+ values(bill_duration), carrier_duration = carrier_duration + values(carrier_duration), carrier_cost = carrier_cost + values(carrier_cost), totalcalls = totalcalls + values(totalcalls), answeredcalls = answeredcalls + values(answeredcalls), pdd = pdd+ values(pdd);", $table_carrier_statistics, $carrier_id, $bill_duration, $carrier_duration, $carrier_cost, $totalcalls, $answeredcalls, $carrier_prefix, $carrier_prefix_name, $call_date, $calltime_h, $calltime_m, $pdd, $causeQ850, $causeSIP, $fscause, $this->carrierdata['gateway_ipaddress'], $this->carrierdata['carrier_currency_id'], $this->carrierdata['carrier_name'], 'OUT');
             $this->writelog($query);
             $this->query('CDR', $query);
             if ($this->execute()) {
@@ -4705,13 +5119,17 @@ class OVS extends PDO {
         if ($this->switch_issue == '0' and addslashes($this->cdr_variable['billsec']) == 0) {
             $query = sprintf("UPDATE livecalls SET Q850CODE ='%s', SIPCODE = '%s', fscause = '%s',notes = CONCAT(ifnull(notes,''),' ','%s') , end_time='%s' where  common_uuid = '%s' ", $causeQ850, $causeSIP, $fscause, $notes, addslashes($this->cdr_variable['end_stamp']), addslashes($this->cdr_variable['common_uuid']));
             $this->query('SWITCH', $query);
-            $this->execute();
+	   $this->execute();
+   $this->writelog($query);
+
         }
 
         if ($this->leg == 'A') {
-            $query = sprintf("delete from livecalls where common_uuid = '%s' or carrier_ipaddress_name = '' or carrier_ipaddress_name is null ", addslashes($this->cdr_variable['common_uuid']));
+            $query = sprintf("delete from livecalls where common_uuid = '%s'", addslashes($this->cdr_variable['common_uuid']));
             $this->query('SWITCH', $query);
             $this->execute();
+   $this->writelog($query);
+
         }
 
         $data = $data . "carrier_ratio= '" . addslashes($this->carrierdata['ratio']) . "',";
@@ -4952,13 +5370,13 @@ r3_rate ) VALUES ('%s', '%s', '%s', '%s', '%s', '%s','%s', '%s', '%s','%s', '%s'
   carrier_tariff_id varchar(30) DEFAULT NULL,
   carrier_prefix varchar(15) DEFAULT NULL,
   carrier_destination varchar(50) DEFAULT NULL,
-  carrier_rate double(20,10) DEFAULT NULL,
-  carrier_connection_charge double(20,10) DEFAULT NULL,
+  carrier_rate double(10,6) DEFAULT NULL,
+  carrier_connection_charge double(10,6) DEFAULT NULL,
   carrier_minimal_time int(11) DEFAULT NULL,
   carrier_resolution_time int(11) DEFAULT NULL,
   carrier_grace_period int(11) DEFAULT NULL,
-  carrier_rate_multiplier double(20,10) DEFAULT NULL,
-  carrier_rate_addition double(20,10) DEFAULT NULL,
+  carrier_rate_multiplier double(10,6) DEFAULT NULL,
+  carrier_rate_addition double(10,6) DEFAULT NULL,
   carrier_id varchar(30) DEFAULT NULL,
   carrier_name varchar(30) DEFAULT NULL,
   carrier_ipaddress varchar(30) DEFAULT NULL,
@@ -4970,15 +5388,15 @@ r3_rate ) VALUES ('%s', '%s', '%s', '%s', '%s', '%s','%s', '%s', '%s','%s', '%s'
   carrier_dst_callee varchar(30) DEFAULT NULL,
   carrier_duration int(11) DEFAULT NULL,
   carrier_dp int(11) DEFAULT NULL,
-  carrier_tax1 double(20,10) DEFAULT '0.000000',
-  carrier_tax2 double(20,10) DEFAULT '0.000000',
-  carrier_tax3 double(20,10) DEFAULT '0.000000',
+  carrier_tax1 double(12,6) DEFAULT '0.000000',
+  carrier_tax2 double(12,6) DEFAULT '0.000000',
+  carrier_tax3 double(12,6) DEFAULT '0.000000',
   carrier_tax_type varchar(15) DEFAULT NULL,
-  carrier_callcost double(20,10) DEFAULT NULL,
-  carrier_tax1_cost double(20,10) DEFAULT '0.000000',
-  carrier_tax2_cost double(20,10) DEFAULT '0.000000',
-  carrier_tax3_cost double(20,10) DEFAULT '0.000000',
-  carrier_callcost_total double(20,10) DEFAULT '0.000000',
+  carrier_callcost double(10,6) DEFAULT NULL,
+  carrier_tax1_cost double(12,6) DEFAULT '0.000000',
+  carrier_tax2_cost double(12,6) DEFAULT '0.000000',
+  carrier_tax3_cost double(12,6) DEFAULT '0.000000',
+  carrier_callcost_total double(12,6) DEFAULT '0.000000',
   carrier_dialplan_id varchar(30) DEFAULT NULL,
   customer_account_id varchar(30) DEFAULT NULL,
   customer_dp int(11) DEFAULT NULL,
@@ -4988,25 +5406,25 @@ r3_rate ) VALUES ('%s', '%s', '%s', '%s', '%s', '%s','%s', '%s', '%s','%s', '%s'
   customer_ratecard_id varchar(30) DEFAULT NULL,
   customer_prefix varchar(15) DEFAULT NULL,
   customer_destination varchar(50) DEFAULT NULL,
-  customer_rate double(20,10) DEFAULT NULL,
-  customer_connection_charge double(20,10) DEFAULT NULL,
+  customer_rate double(10,6) DEFAULT NULL,
+  customer_connection_charge double(10,6) DEFAULT NULL,
   customer_minimal_time int(11) DEFAULT NULL,
   customer_resolution_time int(11) DEFAULT NULL,
   customer_grace_period int(11) DEFAULT NULL,
-  customer_rate_multiplier double(20,10) DEFAULT NULL,
-  customer_rate_addition double(20,10) DEFAULT NULL,
+  customer_rate_multiplier double(10,6) DEFAULT NULL,
+  customer_rate_addition double(10,6) DEFAULT NULL,
   customer_duration int(11) DEFAULT NULL,
   customer_src_caller varchar(30) DEFAULT NULL,
   customer_src_callee varchar(30) DEFAULT NULL,
-  customer_tax1 double(20,10) DEFAULT NULL,
-  customer_tax2 double(20,10) DEFAULT NULL,
-  customer_tax3 double(20,10) DEFAULT NULL,
-  customer_tax1_cost double(20,10) DEFAULT '0.000000',
+  customer_tax1 double(10,6) DEFAULT NULL,
+  customer_tax2 double(10,6) DEFAULT NULL,
+  customer_tax3 double(10,6) DEFAULT NULL,
+  customer_tax1_cost double(12,6) DEFAULT '0.000000',
   customer_tax_type varchar(20) DEFAULT NULL,
-  customer_callcost double(20,10) DEFAULT NULL,
-  customer_tax2_cost double(20,10) DEFAULT '0.000000',
-  customer_tax3_cost double(20,10) DEFAULT '0.000000',
-  customer_callcost_total double(20,10) DEFAULT '0.000000',
+  customer_callcost double(10,6) DEFAULT NULL,
+  customer_tax2_cost double(12,6) DEFAULT '0.000000',
+  customer_tax3_cost double(12,6) DEFAULT '0.000000',
+  customer_callcost_total double(12,6) DEFAULT '0.000000',
   customer_src_ip varchar(30) DEFAULT NULL,
   reseller1_account_id varchar(30) DEFAULT NULL,
   reseller1_tariff_id varchar(30) DEFAULT NULL,
@@ -5014,72 +5432,72 @@ r3_rate ) VALUES ('%s', '%s', '%s', '%s', '%s', '%s','%s', '%s', '%s','%s', '%s'
   reseller1_ratecard_id varchar(30) DEFAULT NULL,
   reseller1_prefix varchar(15) DEFAULT NULL,
   reseller1_destination varchar(50) DEFAULT NULL,
-  reseller1_rate double(20,10) DEFAULT NULL,
-  reseller1_connection_charge double(20,10) DEFAULT NULL,
+  reseller1_rate double(10,6) DEFAULT NULL,
+  reseller1_connection_charge double(10,6) DEFAULT NULL,
   reseller1_minimal_time int(11) DEFAULT NULL,
   reseller1_resolution_time int(11) DEFAULT NULL,
   reseller1_grace_period int(11) DEFAULT NULL,
-  reseller1_rate_multiplier double(20,10) DEFAULT NULL,
-  reseller1_rate_addition double(20,10) DEFAULT NULL,
+  reseller1_rate_multiplier double(10,6) DEFAULT NULL,
+  reseller1_rate_addition double(10,6) DEFAULT NULL,
   reseller1_duration int(11) DEFAULT NULL,
-  reseller1_tax1 double(20,10) DEFAULT NULL,
-  reseller1_tax2 double(20,10) DEFAULT NULL,
-  reseller1_tax3 double(20,10) DEFAULT NULL,
+  reseller1_tax1 double(10,6) DEFAULT NULL,
+  reseller1_tax2 double(10,6) DEFAULT NULL,
+  reseller1_tax3 double(10,6) DEFAULT NULL,
   reseller1_tax_type varchar(20) DEFAULT NULL,
-  reseller1_callcost double(20,10) DEFAULT NULL,
-  reseller1_tax1_cost double(20,10) DEFAULT '0.000000',
-  reseller1_tax2_cost double(20,10) DEFAULT '0.000000',
-  reseller1_tax3_cost double(20,10) DEFAULT '0.000000',
-  reseller1_callcost_total double(20,10) DEFAULT '0.000000',
+  reseller1_callcost double(10,6) DEFAULT NULL,
+  reseller1_tax1_cost double(12,6) DEFAULT '0.000000',
+  reseller1_tax2_cost double(12,6) DEFAULT '0.000000',
+  reseller1_tax3_cost double(12,6) DEFAULT '0.000000',
+  reseller1_callcost_total double(12,6) DEFAULT '0.000000',
   reseller2_account_id varchar(30) DEFAULT NULL,
   reseller2_tariff_id varchar(30) DEFAULT NULL,
   reseller2_dp int(11) DEFAULT NULL,
   reseller2_ratecard_id  varchar(30) DEFAULT NULL,
   reseller2_prefix varchar(15) DEFAULT NULL,
   reseller2_destination varchar(50) DEFAULT NULL,
-  reseller2_rate double(20,10) DEFAULT NULL,
-  reseller2_connection_charge double(20,10) DEFAULT NULL,
+  reseller2_rate double(10,6) DEFAULT NULL,
+  reseller2_connection_charge double(10,6) DEFAULT NULL,
   reseller2_minimal_time int(11) DEFAULT NULL,
   reseller2_resolution_time int(11) DEFAULT NULL,
   reseller2_grace_period int(11) DEFAULT NULL,
-  reseller2_rate_multiplier double(20,10) DEFAULT NULL,
-  reseller2_rate_addition double(20,10) DEFAULT NULL,
+  reseller2_rate_multiplier double(10,6) DEFAULT NULL,
+  reseller2_rate_addition double(10,6) DEFAULT NULL,
   reseller2_duration int(11) DEFAULT NULL,
-  reseller2_callcost double(20,10) DEFAULT NULL,
-  reseller2_tax1 double(20,10) DEFAULT NULL,
-  reseller2_tax2 double(20,10) DEFAULT NULL,
-  reseller2_tax3 double(20,10) DEFAULT NULL,
+  reseller2_callcost double(10,6) DEFAULT NULL,
+  reseller2_tax1 double(10,6) DEFAULT NULL,
+  reseller2_tax2 double(10,6) DEFAULT NULL,
+  reseller2_tax3 double(10,6) DEFAULT NULL,
   reseller2_tax_type varchar(20) DEFAULT NULL,
-  reseller2_tax1_cost double(20,10) DEFAULT '0.000000',
-  reseller2_tax2_cost double(20,10) DEFAULT '0.000000',
-  reseller2_tax3_cost double(20,10) DEFAULT '0.000000',
-  reseller2_callcost_total double(20,10) DEFAULT '0.000000',
+  reseller2_tax1_cost double(12,6) DEFAULT '0.000000',
+  reseller2_tax2_cost double(12,6) DEFAULT '0.000000',
+  reseller2_tax3_cost double(12,6) DEFAULT '0.000000',
+  reseller2_callcost_total double(12,6) DEFAULT '0.000000',
   reseller3_account_id varchar(30) DEFAULT NULL,
   reseller3_tariff_id  varchar(30) DEFAULT NULL,
   reseller3_dp int(11) DEFAULT NULL,
   reseller3_ratecard_id  varchar(50) DEFAULT NULL,
   reseller3_prefix varchar(50) DEFAULT NULL,
   reseller3_destination varchar(50) DEFAULT NULL,
-  reseller3_rate double(20,10) DEFAULT NULL,
-  reseller3_connection_charge double(20,10) DEFAULT NULL,
+  reseller3_rate double(10,6) DEFAULT NULL,
+  reseller3_connection_charge double(10,6) DEFAULT NULL,
   reseller3_minimal_time int(11) DEFAULT NULL,
   reseller3_resolution_time int(11) DEFAULT NULL,
   reseller3_grace_period int(11) DEFAULT NULL,
-  reseller3_rate_multiplier double(20,10) DEFAULT NULL,
-  reseller3_rate_addition double(20,10) DEFAULT NULL,
+  reseller3_rate_multiplier double(10,6) DEFAULT NULL,
+  reseller3_rate_addition double(10,6) DEFAULT NULL,
   reseller3_duration int(11) DEFAULT NULL,
-  reseller3_tax1 double(20,10) DEFAULT NULL,
-  reseller3_tax2 double(20,10) DEFAULT NULL,
-  reseller3_tax3 double(20,10) DEFAULT NULL,
+  reseller3_tax1 double(10,6) DEFAULT NULL,
+  reseller3_tax2 double(10,6) DEFAULT NULL,
+  reseller3_tax3 double(10,6) DEFAULT NULL,
   reseller3_tax_type varchar(30) DEFAULT NULL,
-  reseller3_callcost double(20,10) DEFAULT NULL,
-  reseller3_tax1_cost double(20,10) DEFAULT '0.000000',
-  reseller3_tax2_cost double(20,10) DEFAULT '0.000000',
-  reseller3_tax3_cost double(20,10) DEFAULT '0.000000',
-  reseller3_callcost_total double(20,10) DEFAULT '0.000000',
-  customer_actual_callcost double(20,10) DEFAULT NULL,
-  reseller1_actual_callcost double(20,10) DEFAULT NULL,
-  reseller2_actual_callcost double(20,10) DEFAULT NULL,
+  reseller3_callcost double(10,6) DEFAULT NULL,
+  reseller3_tax1_cost double(12,6) DEFAULT '0.000000',
+  reseller3_tax2_cost double(12,6) DEFAULT '0.000000',
+  reseller3_tax3_cost double(12,6) DEFAULT '0.000000',
+  reseller3_callcost_total double(12,6) DEFAULT '0.000000',
+  customer_actual_callcost double(12,6) DEFAULT NULL,
+  reseller1_actual_callcost double(12,6) DEFAULT NULL,
+  reseller2_actual_callcost double(12,6) DEFAULT NULL,
   reseller3_actual_callcost double(12,0) DEFAULT NULL,
   billsec int(11) DEFAULT NULL,
   start_time datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
@@ -5097,9 +5515,9 @@ r3_rate ) VALUES ('%s', '%s', '%s', '%s', '%s', '%s','%s', '%s', '%s','%s', '%s'
   reseller1_balance varchar(30) DEFAULT NULL,
   reseller2_balance varchar(30) DEFAULT NULL,
   reseller3_balance varchar(30) DEFAULT NULL,
-  carrier_callcost_total_usercurrency double(20,10) DEFAULT '0.000000',
-  carrier_ratio double(20,10) DEFAULT '1.000000',
-  profit_usercurrency double(20,10) DEFAULT '0.000000',
+  carrier_callcost_total_usercurrency double(12,6) DEFAULT '0.000000',
+  carrier_ratio double(12,6) DEFAULT '1.000000',
+  profit_usercurrency double(12,6) DEFAULT '0.000000',
   customer_company_name varchar(150) DEFAULT NULL,
   customer_incodecs varchar(300) DEFAULT NULL,
   carrier_outcodecs varchar(30) DEFAULT NULL,
@@ -5251,7 +5669,7 @@ KEY billsec (billsec) USING BTREE
   bill_duration int(11) DEFAULT '0',
   carrier_duration int(11) DEFAULT '0',
   carrier_currency_id int(11) DEFAULT '0',
-  carrier_cost double(20,10) DEFAULT '0.000000',
+  carrier_cost double(12,6) DEFAULT '0.000000',
   totalcalls int(11) DEFAULT '0',
   answeredcalls int(11) DEFAULT '0',
   carrier_prefix varchar(20) DEFAULT NULL,
@@ -5280,44 +5698,44 @@ KEY billsec (billsec) USING BTREE
   `call_date` date DEFAULT NULL,
   `calltime_h` varchar(5) DEFAULT '0',
   `calltime_m` varchar(5) DEFAULT '0',
-  `rate` double(20,10) DEFAULT NULL,
+  `rate` double(12,6) DEFAULT NULL,
   `prefix` varchar(20) DEFAULT NULL,
   `prefix_name` varchar(50) DEFAULT NULL,
   `bill_duration` int(11) DEFAULT '0',
   `customer_duration` int(11) DEFAULT '0',
   `customer_currency_id` int(11) DEFAULT '0',
-  `customer_cost` double(20,10) DEFAULT '0.000000',
+  `customer_cost` double(12,6) DEFAULT '0.000000',
   `r1_prefix` varchar(15) DEFAULT NULL,
   `r1_account_id` varchar(30) DEFAULT NULL,
-  `r1_rate` double(20,10) DEFAULT NULL,
+  `r1_rate` double(12,6) DEFAULT NULL,
   `r1_duration` int(11) DEFAULT '0',
-  `r1_cost` double(20,10) DEFAULT '0.000000',
+  `r1_cost` double(12,6) DEFAULT '0.000000',
   `r2_prefix` varchar(15) DEFAULT NULL,
   `r2_account_id` varchar(30) DEFAULT NULL,
-  `r2_rate` double(20,10) DEFAULT NULL,
+  `r2_rate` double(12,6) DEFAULT NULL,
   `r2_duration` int(11) DEFAULT '0',
-  `r2_cost` double(20,10) DEFAULT '0.000000',
+  `r2_cost` double(12,6) DEFAULT '0.000000',
   `r3_prefix` varchar(15) DEFAULT NULL,
   `r3_account_id` varchar(30) DEFAULT NULL,
-  `r3_rate` double(20,10) DEFAULT NULL,
+  `r3_rate` double(12,6) DEFAULT NULL,
   `r3_duration` int(11) DEFAULT '0',
-  `r3_cost` double(20,10) DEFAULT '0.000000',
+  `r3_cost` double(12,6) DEFAULT '0.000000',
   `carrier_prefix` varchar(20) DEFAULT NULL,
-  `carrier_ratio` double(20,10) DEFAULT '1.000000',
+  `carrier_ratio` double(12,6) DEFAULT '1.000000',
   `carrier_id` varchar(30) DEFAULT NULL,
   `carrier_duration` int(11) DEFAULT '0',
   `carrier_rate` double(16,6) DEFAULT NULL,
   `carrier_currency_id` int(11) DEFAULT '0',
-  `carrier_cost` double(20,10) DEFAULT '0.000000',
+  `carrier_cost` double(12,6) DEFAULT '0.000000',
   `carrier_prefix_name` varchar(50) DEFAULT NULL,
   `carrier_name` varchar(150) DEFAULT NULL,
-  `carrier_callcost_total_usercurrency` double(20,10) DEFAULT '0.000000',
+  `carrier_callcost_total_usercurrency` double(12,6) DEFAULT '0.000000',
   `customer_company_name` varchar(150) DEFAULT NULL,
   `pdd` int(11) DEFAULT '0',
   `fscause` varchar(150) DEFAULT NULL,
   `Q850CODE` int(11) DEFAULT NULL,
   `SIPCODE` int(11) DEFAULT NULL,
-  `profit_usercurrency` double(20,10) DEFAULT '0.000000',
+  `profit_usercurrency` double(12,6) DEFAULT '0.000000',
   `src_ipaddress` varchar(30) DEFAULT NULL,
   `cdr_type` varchar(5) DEFAULT 'OUT',
   PRIMARY KEY (`id`),
@@ -5328,9 +5746,8 @@ KEY billsec (billsec) USING BTREE
   KEY `account_id_2` (`account_id`),
   KEY `carrier_id` (`carrier_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1";
-
-
         return $tables;
     }
 
 }
+

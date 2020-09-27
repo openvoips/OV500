@@ -2,14 +2,20 @@
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
-// Copyright (C) 2019 Chinna Technologies  
+// Copyright (C) 2019-2020 Chinna Technologies   
 // Seema Anand <openvoips@gmail.com>
 // Anand <kanand81@gmail.com>
 // http://www.openvoips.com  http://www.openvoips.org
 //
 //
-// OV500 Version 1.0
+// OV500 Version 1.0.3
 // License https://www.gnu.org/licenses/agpl-3.0.html
+//
+//
+// The Initial Developer of the Original Code is
+// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
+// Portions created by the Initial Developer are Copyright (C)
+// the Initial Developer. All Rights Reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -133,6 +139,14 @@
                 </div>
             </div>
 
+            
+
+
+            
+        </div>
+
+        <div class="col-md-6 col-sm-12 col-xs-12">
+			
             <div class="row">
                 <div class="col-md-12 col-sm-12 col-xs-12">
                     <div class="x_panel">
@@ -182,8 +196,6 @@
                     </div>
                 </div>
             </div>
-
-
             <div class="row">
                 <div class="col-md-12 col-sm-12 col-xs-12">
                     <div class="x_panel">
@@ -233,146 +245,7 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="col-md-6 col-sm-12 col-xs-12">
-
-            <div class="row">
-                <div class="col-md-12 col-sm-12 col-xs-12">
-                    <div class="x_panel">
-                        <div class="x_title">
-                            <h2>Package Services</h2>                           
-                            <div class="clearfix"></div>
-                        </div>
-                        <div class="x_content">
-                            <form action="<?php echo base_url(); ?>tariffs/editTP/<?php echo param_encrypt($data['tariff_id']); ?>" method="post" name="edit_form_ratecard_p_s" id="edit_form_ratecard_p_s" data-parsley-validate class="form-horizontal form-label-left">
-                                <input type="hidden" name="button_action_p_s" id="button_action_p_s" value="">
-                                <input type="hidden" name="action" value="OkUpdateData">    
-                                <input type="hidden" name="frm_key" value="<?php echo $data['tariff_id']; ?>"/>
-                                <input type="hidden" name="frm_id" value="<?php echo $data['id']; ?>"/>    
-
-
-                                <div class="form-group">
-                                    <label for="middle-name" class="control-label col-md-6 col-sm-3 col-xs-12">Plan Services</label>
-                                    <div class="col-md-6 col-sm-6 col-xs-12">
-                                        <div class="radio">
-                                            <label><input type="radio" name="frm_plan" id="frm_plan1" value="1" <?php if ($data['package_option'] == '1') { ?> checked="checked" <?php } ?> /> Yes</label>
-                                            <label><input type="radio" name="frm_plan" id="frm_plan2" value="0" <?php if ($data['package_option'] == '0') { ?> checked="checked" <?php } ?> /> No</label>
-                                        </div>                    
-                                    </div>
-                                </div> 
-
-                                <div class="form-group plan">
-                                    <label class="control-label col-md-6 col-sm-3 col-xs-12" for="first-name">Monthly Tariff Charge <span class="required">*</span></label>
-                                    <div class="col-md-6 col-sm-6 col-xs-12">
-                                        <input type="text" name="frm_monthly_charge" id="frm_monthly_charge" value="<?php echo $data['monthly_charges']; ?>"  data-parsley-required="" data-parsley-price="" class="form-control col-md-7 col-xs-12" placeholder="0">
-                                    </div>
-                                </div>
-
-                                <div class="form-group plan">
-                                    <label for="middle-name" class="control-label col-md-6 col-sm-3 col-xs-12">Has Bundle?</label>
-                                    <div class="col-md-6 col-sm-6 col-xs-12">
-                                        <div class="radio">
-                                            <label><input type="radio" name="frm_bundle" id="frm_bundle1" value="1" <?php if ($data['bundle_option'] == '1') { ?> checked="checked" <?php } ?> /> Yes</label>
-                                            <label><input type="radio" name="frm_bundle" id="frm_bundle2" value="0" <?php if ($data['bundle_option'] == '0' || $data['bundle_option'] == '') { ?> checked="checked" <?php } ?> /> No</label>
-                                        </div>                    
-                                    </div>
-                                </div> 
-                                <div class="form-group well plan bundle" style="padding: 5px;">	
-                                    <h4 style="padding-left: 7px;">Bundle 1</h4>
-                                    <div class="col-md-6 col-sm-6 col-xs-12" style="padding-bottom: 12px;">
-                                        <label for="heard">Type</label>
-                                    </div>
-                                    <div class="col-md-6 col-sm-6 col-xs-12" style="padding-bottom: 12px;">
-                                        <div class="radio">
-                                            <label><input type="radio" name="bundle1_type" value="MINUTE"  <?php if ($data['bundle1_type'] == 'MINUTE') { ?> checked="checked" <?php } ?> /> Fixed Minute</label>
-                                            <label> <input type="radio" name="bundle1_type" value="COST" <?php if ($data['bundle1_type'] == 'COST') { ?> checked="checked" <?php } ?> /> Fixed Cost</label>
-                                        </div> 
-                                    </div>
-                                    <div class="col-md-6 col-sm-6 col-xs-12" style="padding-bottom: 12px;">
-                                        <label for="heard">Value</label>
-                                    </div>
-                                    <div class="col-md-6 col-sm-6 col-xs-12" style="padding-bottom: 12px;">
-                                        <input type="text" name="bundle1_value" id="bundle1_value" value="<?php echo $data['bundle1_value']; ?>" class="form-control col-md-7 col-xs-12"  data-parsley-type="number">
-                                    </div>
-                                    <div class="col-md-6 col-sm-6 col-xs-12" style="padding-bottom: 12px;">
-                                        <label for="heard">Prefix</label><br />
-                                        <small>comma separated value, % can be used</small>
-                                    </div>
-                                    <div class="col-md-6 col-sm-6 col-xs-12" style="padding-bottom: 12px;">
-                                        <textarea name="bundle1_prefix" id="bundle1_prefix" class="form-control col-md-7 col-xs-12"><?php echo $bundle[0]['prefixes']; ?></textarea>
-                                    </div>
-
-                                </div>
-                                <div class="form-group well plan bundle" style="padding: 5px;">	
-                                    <h4 style="padding-left: 7px;">Bundle 2</h4>
-                                    <div class="col-md-6 col-sm-6 col-xs-12" style="padding-bottom: 12px;">
-                                        <label for="heard">Type</label>
-                                    </div>
-                                    <div class="col-md-6 col-sm-6 col-xs-12" style="padding-bottom: 12px;">
-                                        <div class="radio">
-                                            <label><input type="radio" name="bundle2_type" value="MINUTE" <?php if ($data['bundle2_type'] == 'MINUTE') { ?> checked="checked" <?php } ?> /> Fixed Minute</label>
-                                            <label> <input type="radio" name="bundle2_type" value="COST" <?php if ($data['bundle2_type'] == 'COST') { ?> checked="checked" <?php } ?> /> Fixed Cost</label>
-                                        </div> 
-                                    </div>
-                                    <div class="col-md-6 col-sm-6 col-xs-12" style="padding-bottom: 12px;">
-                                        <label for="heard">Value</label>
-                                    </div>
-                                    <div class="col-md-6 col-sm-6 col-xs-12" style="padding-bottom: 12px;">
-                                        <input type="text" name="bundle2_value" id="bundle2_value" value="<?php echo $data['bundle2_value']; ?>" class="form-control col-md-7 col-xs-12" data-parsley-type="number">
-                                    </div>
-                                    <div class="col-md-6 col-sm-6 col-xs-12" style="padding-bottom: 12px;">
-                                        <label for="heard">Prefix</label><br />
-                                        <small>comma separted value, % can be used</small>
-                                    </div>
-                                    <div class="col-md-6 col-sm-6 col-xs-12" style="padding-bottom: 12px;">
-                                        <textarea name="bundle2_prefix" id="bundle2_prefix" class="form-control col-md-7 col-xs-12"><?php if (isset($bundle[1]['prefixes'])) echo $bundle[1]['prefixes']; ?></textarea>
-                                    </div>
-
-                                </div>
-                                <div class="form-group well plan bundle" style="padding: 5px;">	
-                                    <h4 style="padding-left: 7px;">Bundle 3</h4>
-                                    <div class="col-md-6 col-sm-6 col-xs-12" style="padding-bottom: 12px;">
-                                        <label for="heard">Type</label>
-                                    </div>
-                                    <div class="col-md-6 col-sm-6 col-xs-12" style="padding-bottom: 12px;">
-                                        <div class="radio">
-                                            <label><input type="radio" name="bundle3_type" value="MINUTE"  <?php if ($data['bundle3_type'] == 'MINUTE') { ?> checked="checked" <?php } ?> /> Fixed Minute</label>
-                                            <label> <input type="radio" name="bundle3_type" value="COST" <?php if ($data['bundle3_type'] == 'COST') { ?> checked="checked" <?php } ?> /> Fixed Cost</label>
-                                        </div> 
-                                    </div>
-                                    <div class="col-md-6 col-sm-6 col-xs-12" style="padding-bottom: 12px;">
-                                        <label for="heard">Value</label>
-                                    </div>
-                                    <div class="col-md-6 col-sm-6 col-xs-12" style="padding-bottom: 12px;">
-                                        <input type="text" name="bundle3_value" id="bundle3_value" value="<?php echo $data['bundle3_value']; ?>" class="form-control col-md-7 col-xs-12"  data-parsley-type="number">
-                                    </div>
-                                    <div class="col-md-6 col-sm-6 col-xs-12" style="padding-bottom: 12px;">
-                                        <label for="heard">Prefix</label><br />
-                                        <small>comma separted value, % can be used</small>
-                                    </div>
-                                    <div class="col-md-6 col-sm-6 col-xs-12" style="padding-bottom: 12px;">
-                                        <textarea name="bundle3_prefix" id="bundle3_prefix" class="form-control col-md-7 col-xs-12"><?php if (isset($bundle[2]['prefixes'])) echo $bundle[2]['prefixes']; ?></textarea>
-                                    </div>
-
-                                </div>   
-
-
-                        </div>
-                        <div class="ln_solid"></div>
-                        <div class="form-group">
-                            <div class="col-md-8 col-sm-6 col-xs-12 col-md-offset-4">
-                                <!--<a href="<?php echo base_url('tariffs') ?>"><button class="btn btn-primary" type="button">Cancel</button></a>-->				
-                                <?php //if(count($data_carrier) == 0 && count($data_user) == 0 && count($data_reseller) == 0){?>
-                                <button type="button" id="btnSaveCard" class="btn btn-success">Save</button>
-                                <button type="button" id="btnCloseCard" class="btn btn-info">Save & Go Back to Listing Page </button>
-                                <?php //}?>
-                            </div>
-                        </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
+            
         </div>
     </div>
 
