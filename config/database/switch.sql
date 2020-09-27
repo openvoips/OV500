@@ -903,8 +903,7 @@ CREATE TABLE `did` (
   `did_name` varchar(150) DEFAULT NULL,
   `number_type` enum('TFN','DID') DEFAULT 'DID',
   PRIMARY KEY (`did_id`),
-  UNIQUE KEY `did_number` (`did_number`) USING BTREE,
-  UNIQUE KEY `did_number_2` (`did_number`) USING BTREE
+  UNIQUE KEY `did_number` (`did_number`) USING BTREE  
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 -- ----------------------------

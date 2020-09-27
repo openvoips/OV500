@@ -2,14 +2,20 @@
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
-// Copyright (C) 2019 Chinna Technologies  
+// Copyright (C) 2019-2020 Chinna Technologies   
 // Seema Anand <openvoips@gmail.com>
 // Anand <kanand81@gmail.com>
 // http://www.openvoips.com  http://www.openvoips.org
 //
 //
-// OV500 Version 1.0
+// OV500 Version 1.0.3
 // License https://www.gnu.org/licenses/agpl-3.0.html
+//
+//
+// The Initial Developer of the Original Code is
+// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
+// Portions created by the Initial Developer are Copyright (C)
+// the Initial Developer. All Rights Reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -69,13 +75,10 @@
                             <div><button type="submit" id="login_button" class="btn btn-primary">Login</button></div>
 
                             <div class="separator">
-                <!--<p class="change_link"><a href="#signup" class="to_register"> Forgotten Password </a>    </p>-->
-
                                 <div class="clearfix"></div>
                                 <br />
 
                                 <div>
-                <!--                  <h1><i class="fa fa-paw"></i> MCPL</h1>-->
                                     <p>©2019 All Rights Reserved.</p>
                                 </div>
                             </div>
@@ -83,41 +86,7 @@
                     </section>
                 </div>
 
-                <!--        <div id="register" class="animate form registration_form">
-                          <section class="login_content">
-                            <form>
-                              <h1>Create Account</h1>
-                              <div>
-                                <input type="text" class="form-control" placeholder="Username" required="" />
-                              </div>
-                              <div>
-                                <input type="email" class="form-control" placeholder="Email" required="" />
-                              </div>
-                              <div>
-                                <input type="password" class="form-control" placeholder="Password" required="" />
-                              </div>
-                              <div>
-                                <a class="btn btn-default submit" href="index.html">Submit</a>
-                              </div>
-                
-                              <div class="clearfix"></div>
-                
-                              <div class="separator">
-                                <p class="change_link">Already a member ?
-                                  <a href="#signin" class="to_register"> Log in </a>
-                                </p>
-                
-                                <div class="clearfix"></div>
-                                <br />
-                
-                                <div>
-                                  <h1><i class="fa fa-paw"></i> Gentelella Alela!</h1>
-                                  <p>©2016 All Rights Reserved. Gentelella Alela! is a Bootstrap 3 template. Privacy and Terms</p>
-                                </div>
-                              </div>
-                            </form>
-                          </section>
-                        </div>-->
+           
             </div>
         </div>
     </body>

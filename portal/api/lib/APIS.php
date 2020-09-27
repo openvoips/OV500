@@ -3,13 +3,19 @@
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
-// Copyright (C) 2019 Chinna Technologies
+// Copyright (C) 2019-2020 Chinna Technologies 
 // Seema Anand <openvoips@gmail.com>
 // Anand <kanand81@gmail.com>
 // http://www.openvoips.com  http://www.openvoips.org
 //
-// OV500 Version 1.0
+//OV500 Version 1.0.3.3
 // License https://www.gnu.org/licenses/agpl-3.0.html
+//
+//
+// The Initial Developer of the Original Code is
+// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
+// Portions created by the Initial Developer are Copyright (C)
+// the Initial Developer. All Rights Reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -116,7 +122,7 @@ class APIS extends PDO {
 
     function currencies_data() {
         $query = sprintf("select id, currency_id,ratio,date  from sys_currencies_conversions where id in (select max(id) from sys_currencies_conversions group by currency_id) order by id desc;");
-
+        $this->writelog($query);
         $this->query('SWITCH', $query);
         $this->currencies = $this->resultset();
     }
@@ -275,6 +281,14 @@ class APIS extends PDO {
         return $current_month_charges;
     }
 
+    function charges_cal_bundle($charges, $date) {
+        $no_of_days = date('t', strtotime($date));
+        $current_day = date('d', strtotime($date));
+        $billingdays = ($no_of_days - $current_day) + 1;
+        $current_month_charges = ($charges / $no_of_days) * $billingdays;
+        return $current_month_charges;
+    }
+
     function format_period($seconds_input) {
         $hours = (int) ($minutes = (int) ($seconds = (int) ($milliseconds = (int) ($seconds_input * 1000)) / 1000) / 60) / 60;
         return $hours . ':' . ($minutes % 60) . ':' . ($seconds % 60) . (($milliseconds === 0) ? '' : '.' . rtrim($milliseconds % 1000, '0'));
@@ -287,7 +301,25 @@ class APIS extends PDO {
                 $this->request[$key] = $value;
             }
             $this->CustomerInfo();
-            if ($data['request'] == 'REMOVEBALANCE' or $data['request'] == 'ADDBALANCE' or $data['request'] == 'ADDCREDIT' or $data['request'] == 'REMOVECREDIT' or $data['request'] == 'ADDTESTBALANCE' or $data['request'] == 'REMOVETESTBALANCE' or $data['request'] == 'BALANCETRANSFERADD' or $data['request'] == 'BALANCETRANSFERREMOVE') {
+
+            if ($data['request'] == 'BUNDLECHARGES') {
+                $date = date('Y-m-d');
+                $result = $this->assign_bundle($data, $date);
+                if ($this->data['error'] == '0') {
+                    header('Content-Type: application/json');
+
+                    $msg = $this->data['message'];
+                    $op = array('status' => 'SUCCESS', 'message' => $msg, 'error' => 0);
+                    echo json_encode($op);
+                    return;
+                } else {
+                    header('Content-Type: application/json');
+                    $msg = $this->data['message'];
+                    $op = array('status' => 'FAILED', 'message' => $msg, 'error' => 1);
+                    echo json_encode($op);
+                    return;
+                }
+            } else if ($data['request'] == 'REMOVEBALANCE' or $data['request'] == 'ADDBALANCE' or $data['request'] == 'ADDCREDIT' or $data['request'] == 'REMOVECREDIT' or $data['request'] == 'ADDTESTBALANCE' or $data['request'] == 'REMOVETESTBALANCE' or $data['request'] == 'BALANCETRANSFERADD' or $data['request'] == 'BALANCETRANSFERREMOVE') {
                 $result = $this->save_payment($data);
                 if ($result) {
                     header('Content-Type: application/json');
@@ -382,6 +414,111 @@ class APIS extends PDO {
         }
     }
 
+    function assign_bundle($data, $date) {
+        try {
+            if ($data['request'] == 'BUNDLECHARGES') {
+                /*
+                  $query = "ALTER TABLE `sys_sdr_terms`  ADD UNIQUE INDEX (`term`) ;";
+                  $this->query('SWITCH', $query);
+                  $this->execute();
+
+                  $query = "INSERT INTO `sys_sdr_terms` (`term_group`, `term`, `display_text`, `cost_calculation_formula`) VALUES ('usage', 'BUNDLECHARGES', 'Bundle & Package Charges', '-');";
+                  $this->query('SWITCH', $query);
+                  $this->execute();
+                 */
+                $query = sprintf("SELECT bundle_package.bundle_package_name, bundle_package.monthly_charges, bundle_package.bundle_package_status, bundle_package.bundle_package_id FROM bundle_package WHERE bundle_package_id = '%s' and bundle_package_status = '1' limit 1", $this->request['service_number']);
+                $this->writelog($query);
+                $this->query('SWITCH', $query);
+                $bundal_data = $this->resultset();
+                if (count($bundal_data) > 0) {
+                    foreach ($bundal_data as $fdata) {
+                        if ($fdata['monthly_charges'] > 0) {
+                            $data['amount'] = $fdata['monthly_charges'];
+                            $this->request['amount'] = $fdata['monthly_charges'];
+                        } else {
+                            $data['amount'] = 0;
+                        }
+                    }
+
+                    $this->request['service_number'] = $bundal_data[0]['bundle_package_id'];
+                    $service_startdate = $date;
+                    $service_stopdate = date('Y-m-t', strtotime($date));
+                    $this->request['yearmonth'] = date('Ym', strtotime($date));
+                    $this->request['service_charges'] = $this->request['amount'];
+                    $this->request['rule_type'] = 'BUNDLECHARGES';
+
+                    $total_cost = $data['amount'];
+                    $total_cost = $this->charges_cal($total_cost);
+                    $charges_data = $this->tax_calculation($this->accountinfo, $total_cost);
+
+                    $query = sprintf(" INSERT INTO customer_sdr (account_id, rule_type, yearmonth, service_number, service_charges, tax1, tax1_cost, tax2, tax2_cost, tax3, tax3_cost, total_tax, cost, total_cost, service_startdate, service_stopdate, seller_tax1, seller_tax2, seller_tax3, seller_tax1_cost, seller_tax2_cost, seller_tax3_cost, seller_cost, total_seller_cost, action_date,actiondate,carrier_cost, total_carrier_cost) VALUES ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', now(), '%s', '%s', '%s');", $this->request['account_id'], $this->request['rule_type'], $this->request['yearmonth'], $this->request['service_number'], $this->request['service_charges'], $this->accountinfo['tax1'], $charges_data['tax1_cost'], $this->accountinfo['tax2'], $charges_data['tax2_cost'], $this->accountinfo['tax3'], $charges_data['tax3_cost'], $charges_data['total_tax'], $charges_data['cost'], $charges_data['total_cost'], $service_startdate, $service_stopdate, 0, 0, 0, 0, 0, 0, 0, 0, $date, 0, 0);
+                    $this->writelog($query);
+                    $this->query('SWITCH', $query);
+                    $this->execute();
+                    $query = sprintf("update customer_balance set balance = balance + '%s' where account_id = '%s';", $charges_data['total_cost'], $this->request['account_id']);
+                    $this->writelog($query);
+                    $this->query('SWITCH', $query);
+                    $this->execute();
+                    $this->data['message'] = $query;
+                    $this->data['error'] = '0';
+                    $this->data['message'] = 'Bundle Added';
+                    return;
+                }
+                $this->data['error'] = '1';
+                $this->data['message'] = 'Wrong Bundle';
+                return;
+            }
+            $this->data['error'] = '1';
+            $this->data['message'] = 'Wrong Request';
+            return;
+        } catch (Exception $ex) {
+            $this->data['error'] = '1';
+            $this->data['message'] = 'Wrong Bundle';
+            return $e->getMessage();
+        }
+    }
+
+    function ServiceMonthlyBundle($date) {
+        $query = sprintf("SELECT bundle_account.bundle_package_id, bundle_account.account_id, bundle_account.assign_dt, bundle_account.account_bundle_key, bundle_package.bundle_package_name, bundle_package.monthly_charges, bundle_package.bundle_package_status FROM `bundle_account`  INNER JOIN bundle_package on bundle_package.bundle_package_id = bundle_account.bundle_package_id GROUP BY account_bundle_key");
+        $this->query('SWITCH', $query);
+        $bundal_data = $this->resultset();
+        $this->writelog($query);
+        if (count($bundal_data) > 0) {
+            foreach ($bundal_data as $fdata) {
+                if ($fdata['monthly_charges'] > 0) {
+                    $data['amount'] = $fdata['monthly_charges'];
+                    $this->request['amount'] = $fdata['monthly_charges'];
+                } else {
+                    $data['amount'] = 0;
+                }
+
+                $this->request['account_id'] = $fdata['account_id'];
+                $this->request['service_number'] = $fdata['bundle_package_id'];
+                $this->CustomerInfo();
+                if (strlen($this->request['account_id']) > 0 and strlen($this->request['service_number']) > 0) {
+                    $service_startdate = date('Y-m-01', strtotime($date));
+                    $service_stopdate = date('Y-m-t', strtotime($date));
+                    $this->request['yearmonth'] = date('Ym', strtotime($date));
+                    $this->request['service_charges'] = $this->request['amount'];
+                    $this->request['rule_type'] = 'BUNDLECHARGES';
+                    $total_cost = $data['amount'];
+                    $charges_data = $this->tax_calculation($this->accountinfo, $total_cost);
+                    $query = sprintf(" INSERT INTO customer_sdr (account_id, rule_type, yearmonth, service_number, service_charges, tax1, tax1_cost, tax2, tax2_cost, tax3, tax3_cost, total_tax, cost, total_cost, service_startdate, service_stopdate, seller_tax1, seller_tax2, seller_tax3, seller_tax1_cost, seller_tax2_cost, seller_tax3_cost, seller_cost, total_seller_cost, action_date,actiondate,carrier_cost, total_carrier_cost) VALUES ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', now(), '%s', '%s', '%s');", $this->request['account_id'], $this->request['rule_type'], $this->request['yearmonth'], $this->request['service_number'], $this->request['service_charges'], $this->accountinfo['tax1'], $charges_data['tax1_cost'], $this->accountinfo['tax2'], $charges_data['tax2_cost'], $this->accountinfo['tax3'], $charges_data['tax3_cost'], $charges_data['total_tax'], $charges_data['cost'], $charges_data['total_cost'], $service_startdate, $service_stopdate, 0, 0, 0, 0, 0, 0, 0, 0, $date, 0, 0);
+                    $this->writelog($query);
+                    $this->query('SWITCH', $query);
+                    $this->execute();
+                    $query = sprintf("update customer_balance set balance = balance + '%s' where account_id = '%s';", $charges_data['total_cost'], $this->request['account_id']);
+                    $this->query('SWITCH', $query);
+                    $this->writelog($query);
+                    $this->execute();
+                    $charges_data = Array();
+                    $this->request = Array();
+                    $this->accountinfo = Array();
+                }
+            }
+        }
+    }
+
     function updatetariff($data, $date) {
         try {
             $didcharge_data_array = array();
@@ -393,8 +530,9 @@ class APIS extends PDO {
             $didcharge_data_array['create_dt'] = date('Y-m-d H:s:i');
             $didcharge_data_array['notes'] = $data['service_number'];
             $yearmonth = date('Ym');
-            $query = sprintf("select monthly_charges  from tariff where tariff_id ='%s' limit 1;", $this->request['service_number']);
+            $query = sprintf("select '0' as monthly_charges  from tariff where tariff_id ='%s' limit 1;", $this->request['service_number']);
             $this->query('SWITCH', $query);
+            $this->writelog($query);
             $tdata = $this->resultset();
             if (count($tdata) > 0) {
                 foreach ($tdata as $fdata) {
@@ -443,8 +581,9 @@ class APIS extends PDO {
             $didcharge_data_array['create_dt'] = date('Y-m-d H:s:i');
             $didcharge_data_array['notes'] = $data['service_number'];
             $yearmonth = date('Ym');
-            $query = sprintf("select monthly_charges  from tariff where tariff_id ='%s' limit 1;", $data['service_number']);
+            $query = sprintf("select '0' as monthly_charges  from tariff where tariff_id ='%s' limit 1;", $data['service_number']);
             $this->query('SWITCH', $query);
+            $this->writelog($query);
             $tdata = $this->resultset();
             if (count($tdata) > 0) {
                 foreach ($tdata as $fdata) {
@@ -462,7 +601,7 @@ class APIS extends PDO {
 
                 $request = 'OPENINGBALANCE';
                 $query = sprintf("INSERT INTO customer_sdr( account_id, rule_type, yearmonth, service_number, service_charges, detail, otherdata, action_date, tax1_cost, tax2_cost, tax3_cost, cost, total_cost, total_tax, service_startdate, service_stopdate,tax1,tax2,tax3,actiondate) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', Now(), '%s','%s', '%s', '%s', '%s', '%s', '%s', '%s','%s', '%s', '%s', '%s');", $didcharge_data_array['account_id'], $request, $yearmonth, '', 0, 0, 0, 0, 0, 0, 0, 0, 0, $service_startdate, $service_stopdate, 0, 0, 0, $date);
-
+                $this->writelog($query);
                 $this->query('SWITCH', $query);
                 $this->execute();
                 $service_stopdate = date('Y-m-t h:s:i');
@@ -473,7 +612,7 @@ class APIS extends PDO {
                 $total_cost = $this->charges_cal($total_cost);
                 $charges_data = $this->tax_calculation($this->accountinfo, $total_cost);
                 $query = sprintf(" INSERT INTO customer_sdr (account_id, rule_type, yearmonth, service_number, service_charges, tax1, tax1_cost, tax2, tax2_cost, tax3, tax3_cost, total_tax, cost, total_cost, service_startdate, service_stopdate, seller_tax1, seller_tax2, seller_tax3, seller_tax1_cost, seller_tax2_cost, seller_tax3_cost, seller_cost, total_seller_cost, action_date,actiondate,carrier_cost, total_carrier_cost) VALUES ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', now(), '%s', '%s', '%s');", $this->request['account_id'], $this->request['rule_type'], $this->request['yearmonth'], $this->request['service_number'], $this->request['service_charges'], $this->accountinfo['tax1'], $charges_data['tax1_cost'], $this->accountinfo['tax2'], $charges_data['tax2_cost'], $this->accountinfo['tax3'], $charges_data['tax3_cost'], $charges_data['total_tax'], $charges_data['cost'], $charges_data['total_cost'], $service_startdate, $service_startdate, 0, 0, 0, 0, 0, 0, 0, 0, $date, 0, 0);
-
+                $this->writelog($query);
                 $this->query('SWITCH', $query);
                 $this->execute();
                 $query = sprintf("INSERT INTO customer_balance( account_id, credit_limit, balance, maxcredit_limit) VALUES ('%s', '%s', '%s', '%s' );", $didcharge_data_array['account_id'], 0, 0, 0);
@@ -481,11 +620,11 @@ class APIS extends PDO {
                 $this->query('SWITCH', $query);
                 $this->execute();
 
-
+                $this->writelog($query);
                 $query = sprintf("update customer_balance set balance = balance + '%s' where account_id = '%s';", $charges_data['total_cost'], $didcharge_data_array['account_id']);
                 $this->query('SWITCH', $query);
                 $this->execute();
-
+                $this->writelog($query);
                 return true;
             }
         } catch (Exception $ex) {
@@ -505,7 +644,7 @@ class APIS extends PDO {
             $account_id = $this->request['account_id'];
 
         $query = sprintf("SELECT  customers.emailaddress, customers.company_name, account.currency_id, customers.billing_type, account.dp, account.tariff_id, account.tax3, account.tax2, account.tax1, account.tax_type, parent_account_id, account_level  from account INNER JOIN customers on customers.account_id= account.account_id  WHERE account.account_id = '%s' and account.account_status not in ('-3','-4') limit 1;", $account_id);
-
+        $this->writelog($query);
         $this->query('SWITCH', $query);
         $userdetail = $this->resultset();
         if (count($userdetail) > 0) {
@@ -526,6 +665,7 @@ class APIS extends PDO {
         $query = sprintf("SELECT  maxcredit_limit, credit_limit, balance  as existing_balance , account_id, credit_limit - balance as  balance from customer_balance where account_id = '%s' limit 1;", $account_id);
         $this->query('SWITCH', $query);
         $balance = $this->resultset();
+        $this->writelog($query);
         $initial_setup = 0;
         if (count($balance) > 0) {
             foreach ($balance[0] as $key => $value) {
@@ -552,6 +692,7 @@ class APIS extends PDO {
             $query = sprintf("INSERT INTO  customer_balance (account_id, credit_limit, outstanding_balance) VALUES ('%s',0,0 )", $account_id);
             $this->query('SWITCH', $query);
             $balance = $this->resultset();
+            $this->writelog($query);
             $initial_setup = 1;
         }
     }
@@ -570,6 +711,7 @@ class APIS extends PDO {
              * Finding DID carrier detail
              */
             $query = sprintf("SELECT did.did_number, did.did_status, did.carrier_id , did.channels from did where did_number = '%s';", $this->request['service_number']);
+            $this->writelog($query);
             $this->query('SWITCH', $query);
             $diddetail = $this->resultset();
             if (count($diddetail) > 0) {
@@ -581,7 +723,7 @@ class APIS extends PDO {
              * Fibnding the DID rates
              */
             $query = sprintf("SELECT customer_rates.prefix, customer_rates.destination, customer_rates.setup_charge, customer_rates.rental, customer_rates.inclusive_channel, customer_rates.exclusive_per_channel_rental from customer_rates INNER JOIN tariff_ratecard_map on tariff_ratecard_map.ratecard_id = customer_rates.ratecard_id INNER JOIN ratecard on ratecard.ratecard_id = customer_rates.ratecard_id and ratecard.ratecard_for= 'INCOMING' and ratecard.ratecard_type ='CUSTOMER' where tariff_ratecard_map.tariff_id = '%s' and '%s' like CONCAT(prefix,'%%')  ORDER BY prefix desc limit 1;", $this->accountinfo['tariff_id'], $this->request['service_number']);
-
+            $this->writelog($query);
             $this->query('SWITCH', $query);
             $didrates = $this->resultset();
 
@@ -595,6 +737,7 @@ class APIS extends PDO {
                  */
                 $query = sprintf("select carrier_currency_id, tariff_id, 'prepaid',dp, tax1,tax2, tax3, tax_type from carrier WHERE carrier_id = '%s' limit 1;", $this->request['carrier_id']);
                 $this->query('SWITCH', $query);
+                $this->writelog($query);
                 $tariff = $this->resultset();
                 foreach ($tariff[0] as $key => $value) {
                     $carrierdidrates[$key] = $value;
@@ -605,7 +748,7 @@ class APIS extends PDO {
                  */
                 $query = sprintf("SELECT carrier_rates.prefix, carrier_rates.destination, carrier_rates.setup_charge, carrier_rates.rental, carrier_rates.inclusive_channel, carrier_rates.exclusive_per_channel_rental from carrier_rates INNER JOIN tariff_ratecard_map on tariff_ratecard_map.ratecard_id = carrier_rates.ratecard_id INNER JOIN ratecard on ratecard.ratecard_id = carrier_rates.ratecard_id and ratecard.ratecard_for= 'INCOMING' and ratecard.ratecard_type ='CARRIER' where tariff_ratecard_map.tariff_id = '%s' and '%s' like CONCAT(prefix,'%%')  ORDER BY prefix desc limit 1;", $carrierdidrates['tariff_id'], $this->request['service_number']);
 
-
+                $this->writelog($query);
                 $this->query('SWITCH', $query);
                 $saller = $this->resultset();
 
@@ -621,6 +764,7 @@ class APIS extends PDO {
                      */
                     $query = sprintf("SELECT  currency_id carrier_currency_id, tariff_id, billing_type, dp, tariff_id, tax3, tax2, tax1, tax_type, parent_account_id, account_level  from account INNER JOIN customers on customers.account_id = account.account_id WHERE account.account_id = '%s' limit 1;", $this->accountinfo['parent_account_id']);
                     $this->query('SWITCH', $query);
+                    $this->writelog($query);
                     $tariff = $this->resultset();
                     foreach ($tariff[0] as $key => $value) {
                         $sallerdidrates[$key] = $value;
@@ -630,7 +774,7 @@ class APIS extends PDO {
                      * Account is under reseller so seller is reseller and that rates
                      */
                     $query = sprintf("SELECT customer_rates.prefix, customer_rates.destination, customer_rates.setup_charge, customer_rates.rental, customer_rates.inclusive_channel, customer_rates.exclusive_per_channel_rental from customer_rates INNER JOIN tariff_ratecard_map on tariff_ratecard_map.ratecard_id = customer_rates.ratecard_id INNER JOIN ratecard on ratecard.ratecard_id = customer_rates.ratecard_id and ratecard.ratecard_for= 'INCOMING' and ratecard.ratecard_type ='CUSTOMER' where tariff_ratecard_map.tariff_id = '%s' and '%s' like CONCAT(prefix,'%%')  ORDER BY prefix desc limit 1;", $sallerdidrates['tariff_id'], $this->request['service_number']);
-
+                    $this->writelog($query);
                     $this->query('SWITCH', $query);
                     $saller = $this->resultset();
 
@@ -651,7 +795,7 @@ class APIS extends PDO {
                  */
                 $this->data['error'] = '1';
                 $this->data['message'] = 'DID Rates not available';
-                return;
+                return FALSE;
             }
 
             /*
@@ -667,26 +811,15 @@ class APIS extends PDO {
                 } else if ($this->accountinfo['balance'] < $charges_data['total_cost'] and $initial_setup == 0) {
                     $this->data['error'] = '1';
                     $this->data['message'] = 'Low Balance';
-                    return;
+                    return FALSE;
                 }
                 $query = sprintf(" INSERT INTO customer_sdr (account_id, rule_type, yearmonth, service_number, service_charges, tax1, tax1_cost, tax2, tax2_cost, tax3, tax3_cost, total_tax, cost, total_cost, service_startdate, service_stopdate, seller_tax1, seller_tax2, seller_tax3, seller_tax1_cost, seller_tax2_cost, seller_tax3_cost, seller_cost, total_seller_cost, action_date,actiondate,carrier_cost, total_carrier_cost) VALUES ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', now(), '%s', '%s', '%s');", $this->request['account_id'], $this->request['rule_type'], $this->request['yearmonth'], $this->request['service_number'], $this->request['service_charges'], $this->accountinfo['tax1'], $charges_data['tax1_cost'], $this->accountinfo['tax2'], $charges_data['tax2_cost'], $this->accountinfo['tax3'], $charges_data['tax3_cost'], $charges_data['total_tax'], $charges_data['cost'], $charges_data['total_cost'], $service_startdate, $service_startdate, $saller_charges_data['tax1'], $saller_charges_data['tax2'], $saller_charges_data['tax3'], $saller_charges_data['tax1_cost'], $saller_charges_data['tax2_cost'], $saller_charges_data['tax3_cost'], $saller_charges_data['cost'], $saller_charges_data['total_cost'], $date, $saller_charges_data['cost'], $saller_charges_data['total_cost']);
                 $this->query('SWITCH', $query);
-                $this->data['message'] = $query;
                 $this->execute();
-
-
-                /*
-                 * Remove the DID configuration from the system and release the DID. Move DID status as free
-                 */
-
-                /*
-                  $query = sprintf("update did set account_id = '' where did_number = '%s' and account_id = '%s';", $this->request['service_number'], $this->request['account_id']);
-
-                  $this->query('SWITCH', $query);
-                  $this->execute();
-                 */
-
-                return;
+                $this->writelog($query);
+                $this->data['error'] = '0';
+                $this->data['message'] = 'DID removed';
+                return true;
             }
             $didsetup_foremail = '';
             /*
@@ -722,12 +855,13 @@ class APIS extends PDO {
                 }
 
                 $query = sprintf(" INSERT INTO customer_sdr (account_id, rule_type, yearmonth, service_number, service_charges, tax1, tax1_cost, tax2, tax2_cost, tax3, tax3_cost, total_tax, cost, total_cost, service_startdate, service_stopdate, seller_tax1, seller_tax2, seller_tax3, seller_tax1_cost, seller_tax2_cost, seller_tax3_cost, seller_cost, total_seller_cost, action_date,actiondate, carrier_cost, total_carrier_cost) VALUES ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', now(), '%s', '%s', '%s');", $this->request['account_id'], $this->request['rule_type'], $this->request['yearmonth'], $this->request['service_number'], $this->request['service_charges'], $this->accountinfo['tax1'], $charges_data['tax1_cost'], $this->accountinfo['tax2'], $charges_data['tax2_cost'], $this->accountinfo['tax3'], $charges_data['tax3_cost'], $charges_data['total_tax'], $charges_data['cost'], $charges_data['total_cost'], $service_startdate, $service_startdate, $saller_charges_data['tax1'], $saller_charges_data['tax2'], $saller_charges_data['tax3'], $saller_charges_data['tax1_cost'], $saller_charges_data['tax2_cost'], $saller_charges_data['tax3_cost'], $saller_charges_data['cost'], $saller_charges_data['total_cost'], $date, $carrier_charges_data['cost'], $carrier_charges_data['total_cost']);
-
+                $this->writelog($query);
                 $this->query('SWITCH', $query);
                 $this->execute();
                 $query = sprintf("update customer_balance set balance = balance + '%s' where account_id = '%s';", $charges_data['total_cost'], $this->request['account_id']);
                 $this->query('SWITCH', $query);
                 $this->execute();
+                $this->writelog($query);
                 $didnumber_foremail = $this->request['service_number'];
             }
             if ($rental == 1) {
@@ -778,14 +912,14 @@ class APIS extends PDO {
                 $query = sprintf(" INSERT INTO customer_sdr (account_id, rule_type, yearmonth, service_number, service_charges, tax1, tax1_cost, tax2, tax2_cost, tax3, tax3_cost, total_tax, cost, total_cost, service_startdate, service_stopdate, seller_tax1, seller_tax2, seller_tax3, seller_tax1_cost, seller_tax2_cost, seller_tax3_cost, seller_cost, total_seller_cost, action_date,actiondate ,carrier_cost, total_carrier_cost) VALUES ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', now(), '%s', '%s', '%s');", $this->request['account_id'], $this->request['rule_type'], $this->request['yearmonth'], $this->request['service_number'], $this->request['service_charges'], $this->accountinfo['tax1'], $charges_data['tax1_cost'], $this->accountinfo['tax2'], $charges_data['tax2_cost'], $this->accountinfo['tax3'], $charges_data['tax3_cost'], $charges_data['total_tax'], $charges_data['cost'], $charges_data['total_cost'], $service_startdate, $service_stopdate, $saller_charges_data['tax1'], $saller_charges_data['tax2'], $saller_charges_data['tax3'], $saller_charges_data['tax1_cost'], $saller_charges_data['tax2_cost'], $saller_charges_data['tax3_cost'], $saller_charges_data['cost'], $saller_charges_data['total_cost'], $date, $carrier_charges_data['cost'], $carrier_charges_data['total_cost']);
                 $this->query('SWITCH', $query);
                 $this->execute();
-
+                $this->writelog($query);
                 /*
                  * Deducting Balance
                  */
                 $query = sprintf("update customer_balance set balance = balance + '%s' where account_id = '%s';", $charges_data['total_cost'], $this->request['account_id']);
                 $this->query('SWITCH', $query);
                 $this->execute();
-
+                $this->writelog($query);
 
                 /*
                  * Additional channels
@@ -841,10 +975,11 @@ class APIS extends PDO {
                     $query = sprintf(" INSERT INTO customer_sdr (account_id, rule_type, yearmonth, service_number, service_charges, tax1, tax1_cost, tax2, tax2_cost, tax3, tax3_cost, total_tax, cost, total_cost, service_startdate, service_stopdate, seller_tax1, seller_tax2, seller_tax3, seller_tax1_cost, seller_tax2_cost, seller_tax3_cost, seller_cost, total_seller_cost, action_date, actiondate , carrier_cost, total_carrier_cost ) VALUES ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', now(),'%s' , '%s', '%s' );", $this->request['account_id'], $this->request['rule_type'], $this->request['yearmonth'], $this->request['service_number'], $this->request['service_charges'], $this->accountinfo['tax1'], $charges_data['tax1_cost'], $this->accountinfo['tax2'], $charges_data['tax2_cost'], $this->accountinfo['tax3'], $charges_data['tax3_cost'], $charges_data['total_tax'], $charges_data['cost'], $charges_data['total_cost'], $service_startdate, $service_stopdate, $saller_charges_data['tax1'], $saller_charges_data['tax2'], $saller_charges_data['tax3'], $saller_charges_data['tax1_cost'], $saller_charges_data['tax2_cost'], $saller_charges_data['tax3_cost'], $saller_charges_data['cost'], $saller_charges_data['total_cost'], $date, $carrier_charges_data['cost'], $carrier_charges_data['total_cost']);
                     $this->query('SWITCH', $query);
                     $this->execute();
-
+                    $this->writelog($query);
                     $query = sprintf("update customer_balance set balance = balance + '%s' where account_id = '%s';", $charges_data['total_cost'], $this->request['account_id']);
                     $this->query('SWITCH', $query);
                     $this->execute();
+                    $this->writelog($query);
                 }
             }
             /*
@@ -901,10 +1036,11 @@ class APIS extends PDO {
                     $query = sprintf(" INSERT INTO customer_sdr (account_id, rule_type, yearmonth, service_number, service_charges, tax1, tax1_cost, tax2, tax2_cost, tax3, tax3_cost, total_tax, cost, total_cost, service_startdate, service_stopdate, seller_tax1, seller_tax2, seller_tax3, seller_tax1_cost, seller_tax2_cost, seller_tax3_cost, seller_cost, total_seller_cost, action_date, actiondate , carrier_cost, total_carrier_cost ) VALUES ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', now(),'%s' , '%s', '%s' );", $this->request['account_id'], $this->request['rule_type'], $this->request['yearmonth'], $this->request['service_number'], $this->request['service_charges'], $this->accountinfo['tax1'], $charges_data['tax1_cost'], $this->accountinfo['tax2'], $charges_data['tax2_cost'], $this->accountinfo['tax3'], $charges_data['tax3_cost'], $charges_data['total_tax'], $charges_data['cost'], $charges_data['total_cost'], $service_startdate, $service_stopdate, $saller_charges_data['tax1'], $saller_charges_data['tax2'], $saller_charges_data['tax3'], $saller_charges_data['tax1_cost'], $saller_charges_data['tax2_cost'], $saller_charges_data['tax3_cost'], $saller_charges_data['cost'], $saller_charges_data['total_cost'], $date, $carrier_charges_data['cost'], $carrier_charges_data['total_cost']);
                     $this->query('SWITCH', $query);
                     $this->execute();
-
+                    $this->writelog($query);
                     $query = sprintf("update customer_balance set balance = balance + '%s' where account_id = '%s';", $charges_data['total_cost'], $this->request['account_id']);
                     $this->query('SWITCH', $query);
                     $this->execute();
+                    $this->writelog($query);
                 }
             }
             $this->data['error'] = '0';
@@ -970,9 +1106,16 @@ class APIS extends PDO {
             $service_stopdate = date('Y-m-d h:s:i');
             $date = date('Y-m-d h:s:i');
             $query = sprintf("INSERT INTO customer_sdr( account_id, rule_type, yearmonth, service_number, service_charges, detail, otherdata, action_date, tax1_cost, tax2_cost, tax3_cost, cost, total_cost, total_tax, service_startdate, service_stopdate,tax1,tax2,tax3,actiondate) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', Now(), '%s','%s', '%s', '%s', '%s', '%s', '%s', '%s','%s', '%s', '%s', '%s');", $account_id, $data['request'], $yearmonth, $payment_data_array['notes'], 0, 0, 0, 0, 0, 0, 0, $total_cost, 0, $service_startdate, $service_stopdate, 0, 0, 0, $date);
-
+            $this->writelog($query);
             $this->query('SWITCH', $query);
             $this->execute();
+
+            if ($data['request'] == 'ADDTESTBALANCE' || $data['request'] == 'BALANCETRANSFERADD' || $data['request'] == 'ADDTESTBALANCE' || $data['request'] == 'ADDCREDIT' || $data['request'] == 'ADDBALANCE') {
+                $query = sprintf("update account set account_status = '1' where account_id = '%s';", $account_id);
+                $this->query('SWITCH', $query);
+                $this->execute();
+            }
+
             return true;
         } catch (Exception $e) {
             return $e->getMessage();
@@ -991,6 +1134,7 @@ class APIS extends PDO {
         }
         $query = sprintf("SELECT HIGH_PRIORITY customer_account_id account_id, 'user' account_type FROM %s where  '%s' = date(end_time) %s GROUP BY customer_account_id;", $tablename, $date, $subquery);
         $this->query('CDR', $query);
+        $this->writelog($query);
         $diddetail = $this->resultset();
         if (count($diddetail) > 0) {
             foreach ($diddetail as $data) {
@@ -1010,7 +1154,7 @@ class APIS extends PDO {
         }
         $query = sprintf("SELECT  HIGH_PRIORITY reseller1_account_id account_id, 'reseller1' as account_type FROM %s where  '%s' = date(end_time)  %s  GROUP BY reseller1_account_id;", $tablename, $date, $subquery);
 
-
+        $this->writelog($query);
 
         $this->query('CDR', $query);
         $diddetail = $this->resultset();
@@ -1032,7 +1176,7 @@ class APIS extends PDO {
             $subquery = "";
         }
         $query = sprintf("SELECT  HIGH_PRIORITY reseller2_account_id account_id, 'reseller2' account_type FROM %s where  '%s' = date(end_time) %s GROUP BY reseller2_account_id;", $tablename, $date, $subquery);
-
+        $this->writelog($query);
         $this->query('CDR', $query);
         $diddetail = $this->resultset();
         if (count($diddetail) > 0) {
@@ -1053,7 +1197,7 @@ class APIS extends PDO {
         }
 
         $query = sprintf("SELECT  HIGH_PRIORITY reseller3_account_id account_id, 'reseller3' account_type FROM %s where  '%s' = date(end_time) %s GROUP BY reseller3_account_id;", $tablename, $date, $subquery);
-
+        $this->writelog($query);
         $this->query('CDR', $query);
         $diddetail = $this->resultset();
         if (count($diddetail) > 0) {
@@ -1084,7 +1228,7 @@ class APIS extends PDO {
             $query = sprintf("SELECT  HIGH_PRIORITY reseller2_account_id account_id, sum(reseller2_callcost_total) callcost, sum(reseller1_callcost_total) sellercallcost, sum(carrier_callcost_total_usercurrency) carrier_cost, sum(carrier_duration) carrier_duration, sum(reseller2_duration) user_duration, sum(reseller1_duration) seller_duration from %s where '%s' = date(end_time) and  reseller2_account_id ='%s' %s;", $tablename, $date, $account_id, $subquery);
         if ($account_type == 'reseller1')
             $query = sprintf("SELECT  HIGH_PRIORITY reseller1_account_id account_id, sum(reseller1_callcost_total) callcost, sum(carrier_callcost_total_usercurrency) sellercallcost, sum(carrier_callcost_total_usercurrency) carrier_cost, sum(carrier_duration) carrier_duration, sum(reseller1_duration) user_duration, sum(carrier_callcost_total_usercurrency) seller_duration from %s where '%s' = date(end_time)   and reseller1_account_id ='%s' %s;", $tablename, $date, $account_id, $subquery);
-
+        $this->writelog($query);
 
         $this->query('CDR', $query);
         $cdrdetail = $this->resultset();
@@ -1107,7 +1251,7 @@ class APIS extends PDO {
 
             $carrier_cost = $this->userdetail['carrier_cost'];
             $query = sprintf("SELECT  HIGH_PRIORITY dp, tax3, tax2, tax1, tax_type,  parent_account_id from account WHERE account_id = '%s' limit 1;", $account_id);
-
+            $this->writelog($query);
             $this->query('SWITCH', $query);
             $userdetail = $this->resultset();
 
@@ -1133,6 +1277,7 @@ class APIS extends PDO {
             if (strlen($this->userdetail['parent_account_id']) > 0) {
                 $query = sprintf("SELECT  HIGH_PRIORITY dp, tax3, tax2, tax1, tax_type from account WHERE account_id = '%s' limit 1;", $this->userdetail['parent_account_id']);
                 $this->query('SWITCH', $query);
+                $this->writelog($query);
                 $sellerdetail = $this->resultset();
                 if (count($sellerdetail) > 0) {
                     foreach ($sellerdetail[0] as $key => $value) {
@@ -1172,42 +1317,57 @@ class APIS extends PDO {
             $this->execute();
 
             $query = sprintf(" INSERT INTO customer_sdr (account_id, rule_type, yearmonth, service_number, service_charges, tax1, tax1_cost, tax2, tax2_cost, tax3, tax3_cost, total_tax, cost, total_cost, service_startdate, service_stopdate, seller_tax1, seller_tax2, seller_tax3, seller_tax1_cost, seller_tax2_cost, seller_tax3_cost, seller_cost, total_seller_cost, carrier_tax1, carrier_tax2, carrier_tax3, carrier_tax1_cost, carrier_tax2_cost, carrier_tax3_cost, carrier_cost, total_carrier_cost, user_usage, seller_usage, carrier_usage, action_date,actiondate) VALUES ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s','%s');", $account_id, $rule_type, $yearmonth, '', '', $this->userdetail['tax1'], $callcost_data['tax1_cost'], $this->userdetail['tax2'], $callcost_data['tax2_cost'], $this->userdetail['tax3'], $callcost_data['tax3_cost'], $callcost_data['total_tax'], $callcost_data['cost'], $callcost_data['total_cost'], $service_startdate, $service_stopdate, $this->sellerdetail['tax1'], $this->sellerdetail['tax2'], $this->sellerdetail['tax3'], $sellercallcost_data['tax1_cost'], $sellercallcost_data['tax2_cost'], $sellercallcost_data['tax3_cost'], $sellercallcost_data['cost'], $sellercallcost_data['total_cost'], $this->carrierdetail['tax1'], $this->carrierdetail['tax2'], $this->carrierdetail['tax3'], $carrier_data['tax1_cost'], $carrier_data['tax2_cost'], $carrier_data['tax3_cost'], $carrier_data['cost'], $carrier_data['total_cost'], $this->userdetail['user_duration'], $this->userdetail['seller_duration'], $this->userdetail['carrier_duration'], $date, $date);
-
+            $this->writelog($query);
             $this->query('SWITCH', $query);
             $this->execute();
         }
     }
 
     function ServiceChargesMonthly($date) {
-        if (date('Y-m-d', strtotime($date)) == '01' or date('Y-m-d', strtotime($date)) == '1') {
-            $query = sprintf("select '0' buy_rate , '0' buy_rate_per_hit , tariff.tariff_id service_id, account.account_id, tariff.monthly_charges as charges, dp,tax1,tax2,tax3,tax_type,'TARIFFCHARGES' service_type, account.currency_id currency_id from tariff  INNER JOIN account on tariff.tariff_id = account.tariff_id where tariff.monthly_charges > 0 and account.account_status not in ('0');");
-            $this->query('SWITCH', $query);
-            $servicedetail = $this->resultset();
-            if (count($servicedetail) > 0) {
-                foreach ($servicedetail as $data) {
-                    if (count($data) > 0) {
-                        $service = 1;
-                        $this->ChargesMonthly($data, $date);
-                    }
+
+        $query = sprintf("select '0' buy_rate , '0' buy_rate_per_hit , tariff.tariff_id service_id, account.account_id, '0' as charges, dp,tax1,tax2,tax3,tax_type,'TARIFFCHARGES' service_type, account.currency_id currency_id from tariff  INNER JOIN account on tariff.tariff_id = account.tariff_id where tariff.monthly_charges > 0 and account.account_status not in ('0');");
+        $this->writelog($query);
+        $this->query('SWITCH', $query);
+        $servicedetail = $this->resultset();
+        if (count($servicedetail) > 0) {
+            foreach ($servicedetail as $data) {
+                if (count($data) > 0) {
+                    $service = 1;
+                    $this->ChargesMonthly($data, $date);
                 }
             }
         }
     }
 
     function ServiceDIDRental($date) {
-        if (date('Y-m-d', strtotime($date)) == '01' or date('Y-m-d', strtotime($date)) == '1') {
-            $query = sprintf("SELECT did.did_number, did.did_status, did.carrier_id, did.account_id, did.reseller1_account_id, did.reseller2_account_id,  did.reseller3_account_id,  did.channels from did where did_status = 'USED'");
 
-            $this->query('SWITCH', $query);
-            $diddetail = $this->resultset();
-            if (DBLOGWRITE == '1')
-                $this->writelog($query);
-            if (count($diddetail) > 0) {
-                foreach ($diddetail as $data) {
+
+        $query = sprintf("SELECT did.did_number, did.did_status, did.carrier_id, did.account_id, did.reseller1_account_id, did.reseller2_account_id,  did.reseller3_account_id,  did.channels from did where did_status = 'USED'");
+        $this->writelog($query);
+        $this->query('SWITCH', $query);
+        $diddetail = $this->resultset();
+        if (DBLOGWRITE == '1')
+            $this->writelog($query);
+        if (count($diddetail) > 0) {
+            foreach ($diddetail as $data) {
+                $didsetup = 0;
+                $rental = 1;
+                $extrachannels = 0;
+                $this->request['account_id'] = $data['account_id'];
+                $this->request['service_number'] = $data['did_number'];
+                $this->request['channels'] = $data['channels'];
+                $this->request['request_from'] = 'service';
+                $this->request['carrier_id'] = $data['carrier_id'];
+                $this->data['error'] = '0';
+                $this->CustomerInfo();
+                $this->didsetupcharge($date, $didsetup, $rental, $extrachannels);
+                $this->request = Array();
+                $this->accountinfo = Array();
+                if (strlen($data['reseller1_account_id']) > 0) {
                     $didsetup = 0;
                     $rental = 1;
                     $extrachannels = 0;
-                    $this->request['account_id'] = $data['account_id'];
+                    $this->request['account_id'] = $data['reseller1_account_id'];
                     $this->request['service_number'] = $data['did_number'];
                     $this->request['channels'] = $data['channels'];
                     $this->request['request_from'] = 'service';
@@ -1217,86 +1377,74 @@ class APIS extends PDO {
                     $this->didsetupcharge($date, $didsetup, $rental, $extrachannels);
                     $this->request = Array();
                     $this->accountinfo = Array();
-                    if (strlen($data['reseller1_account_id']) > 0) {
-                        $didsetup = 0;
-                        $rental = 1;
-                        $extrachannels = 0;
-                        $this->request['account_id'] = $data['reseller1_account_id'];
-                        $this->request['service_number'] = $data['did_number'];
-                        $this->request['channels'] = $data['channels'];
-                        $this->request['request_from'] = 'service';
-                        $this->request['carrier_id'] = $data['carrier_id'];
-                        $this->data['error'] = '0';
-                        $this->CustomerInfo();
-                        $this->didsetupcharge($date, $didsetup, $rental, $extrachannels);
-                        $this->request = Array();
-                        $this->accountinfo = Array();
-                    }
-                    if (strlen($data['reseller2_account_id']) > 0) {
-                        $didsetup = 0;
-                        $rental = 1;
-                        $extrachannels = 0;
-                        $this->request['account_id'] = $data['reseller2_account_id'];
-                        $this->request['service_number'] = $data['did_number'];
-                        $this->request['channels'] = $data['channels'];
-                        $this->request['request_from'] = 'service';
-                        $this->request['carrier_id'] = $data['carrier_id'];
-                        $this->data['error'] = '0';
-                        $this->CustomerInfo();
-                        $this->didsetupcharge($date, $didsetup, $rental, $extrachannels);
-                        $this->request = Array();
-                        $this->accountinfo = Array();
-                    }
-                    if (strlen($data['reseller3_account_id']) > 0) {
-                        $didsetup = 0;
-                        $rental = 1;
-                        $extrachannels = 0;
-                        $this->request['account_id'] = $data['reseller3_account_id'];
-                        $this->request['service_number'] = $data['did_number'];
-                        $this->request['channels'] = $data['channels'];
-                        $this->request['request_from'] = 'service';
-                        $this->request['carrier_id'] = $data['carrier_id'];
-                        $this->data['error'] = '0';
-                        $this->CustomerInfo();
-                        $this->didsetupcharge($date, $didsetup, $rental, $extrachannels);
-                        $this->request = Array();
-                        $this->accountinfo = Array();
-                    }
+                }
+                if (strlen($data['reseller2_account_id']) > 0) {
+                    $didsetup = 0;
+                    $rental = 1;
+                    $extrachannels = 0;
+                    $this->request['account_id'] = $data['reseller2_account_id'];
+                    $this->request['service_number'] = $data['did_number'];
+                    $this->request['channels'] = $data['channels'];
+                    $this->request['request_from'] = 'service';
+                    $this->request['carrier_id'] = $data['carrier_id'];
+                    $this->data['error'] = '0';
+                    $this->CustomerInfo();
+                    $this->didsetupcharge($date, $didsetup, $rental, $extrachannels);
+                    $this->request = Array();
+                    $this->accountinfo = Array();
+                }
+                if (strlen($data['reseller3_account_id']) > 0) {
+                    $didsetup = 0;
+                    $rental = 1;
+                    $extrachannels = 0;
+                    $this->request['account_id'] = $data['reseller3_account_id'];
+                    $this->request['service_number'] = $data['did_number'];
+                    $this->request['channels'] = $data['channels'];
+                    $this->request['request_from'] = 'service';
+                    $this->request['carrier_id'] = $data['carrier_id'];
+                    $this->data['error'] = '0';
+                    $this->CustomerInfo();
+                    $this->didsetupcharge($date, $didsetup, $rental, $extrachannels);
+                    $this->request = Array();
+                    $this->accountinfo = Array();
                 }
             }
         }
     }
 
     function ServiceOpeningBalance($date) {
-        if (date('Y-m-d', strtotime($date)) == '01' or date('Y-m-d', strtotime($date)) == '1') {
-            $query = sprintf("SELECT account_id from switch_user WHERE user_status not in ('0')");
-            $this->query('SWITCH', $query);
-            $accountdata = $this->resultset();
-            if (count($accountdata) > 0) {
-                foreach ($accountdata as $data) {
-                    $account_id = $data['account_id'];
-                    if (strlen($account_id) > 0) {
-                        $usage = 0;
-                        $balance = 0;
-                        $openingbalance = 0;
-                        $closingdate = date('Ym', strtotime($date));
-                        $openingbalance = 0;
-                        $usertype = '';
-                        $yearmonth = $closingdate;
-                        $new_openingbalance = $this->closing_balance($account_id, $yearmonth);
-                        $yearmonth = date('Ym', strtotime($date . ' +1 day'));
-                        $datenew = date('Y-m-d', strtotime($date . ' +1 day'));
-                        $this->request['service_startdate'] = $datenew;
-                        $this->request['service_stopdate'] = $datenew;
-                        $query = sprintf("delete from customer_sdr where actiondate = '%s' and rule_type='OPENINGBALANCE' and yearmonth='%s' and account_id='%s'", $datenew, $yearmonth, $account_id);
-                        $this->query('SWITCH', $query);
-                        $this->execute();
-                        $query = sprintf("INSERT INTO customer_sdr ( account_id, rule_type, yearmonth, service_number, service_charges, action_date, tax1_cost, tax2_cost, tax3_cost, cost, total_cost, total_tax, service_startdate, service_stopdate,tax1,tax2,tax3,actiondate) VALUES ('%s', '%s', '%s', '%s', '%s', Now(), '%s','%s', '%s', '%s', '%s', '%s', '%s', '%s','%s', '%s', '%s','%s');", $account_id, 'OPENINGBALANCE', $yearmonth, '', '', '0', '0', '0', '0', $new_openingbalance, '0', $this->request['service_startdate'], $this->request['service_stopdate'], '0', '0', '0', $datenew);
-                        $this->query('SWITCH', $query);
-                        $this->execute();
-                        $this->request = Array();
-                        $new_openingbalance = 0;
-                    }
+        $query = sprintf("SELECT account_id from account  WHERE account_status not in ('0');");
+        $this->writelog($query);
+        $this->query('SWITCH', $query);
+        $accountdata = $this->resultset();
+        if (count($accountdata) > 0) {
+            foreach ($accountdata as $data) {
+                $account_id = $data['account_id'];
+                if (strlen($account_id) > 0) {
+                    $usage = 0;
+                    $balance = 0;
+                    $openingbalance = 0;
+                    $closingdate = date('Ym', strtotime($date));
+                    $openingbalance = 0;
+                    $usertype = '';
+                    $yearmonth = $closingdate;
+
+                    $this->writelog("------ $yearmonth  date $date");
+                    $new_openingbalance = $this->closing_balance($account_id, $yearmonth);
+                    $yearmonth = date('Ym', strtotime($date . ' +1 day'));
+                    $datenew = date('Y-m-d', strtotime($date . ' +1 day'));
+                    $this->request['service_startdate'] = $datenew;
+                    $this->request['service_stopdate'] = $datenew;
+                    $query = sprintf("delete from customer_sdr where actiondate = '%s' and rule_type='OPENINGBALANCE' and yearmonth='%s' and account_id='%s'", $datenew, $yearmonth, $account_id);
+                    $this->query('SWITCH', $query);
+                    $this->writelog($query);
+                    $this->execute();
+                    $query = sprintf("INSERT INTO customer_sdr ( account_id, rule_type, yearmonth, service_number, service_charges, action_date, tax1_cost, tax2_cost, tax3_cost, cost, total_cost, total_tax, service_startdate, service_stopdate,tax1,tax2,tax3,actiondate) VALUES ('%s', '%s', '%s', '%s', '%s', Now(), '%s','%s', '%s', '%s', '%s', '%s', '%s', '%s','%s', '%s', '%s','%s');", $account_id, 'OPENINGBALANCE', $yearmonth, '', '', '0', '0', '0', '0', $new_openingbalance, '0', $this->request['service_startdate'], $this->request['service_stopdate'], '0', '0', '0', $datenew);
+                    $this->writelog($query);
+                    $this->query('SWITCH', $query);
+                    $this->execute();
+                    $this->request = Array();
+                    $new_openingbalance = 0;
                 }
             }
         }
@@ -1310,22 +1458,30 @@ class APIS extends PDO {
             $sdr_terms = array();
             $query = "SELECT term_group, term, display_text, cost_calculation_formula FROM sys_sdr_terms ORDER BY term_group, term";
             $this->query('SWITCH', $query);
+            $this->writelog($query);
             $result_data = $this->resultset();
             foreach ($result_data as $row) {
                 $term = $row['term'];
                 $sdr_terms[$term] = $row;
             }
-            $sql = sprintf("SELECT rule_type, action_date, service_number, total_cost, service_startdate, service_stopdate FROM customer_sdr WHERE account_id='%s' AND yearmonth='%s' ORDER BY action_date ASC ", $account_id, $yearmonth);
+            $query = sprintf("SELECT rule_type, action_date, service_number, total_cost, service_startdate, service_stopdate FROM customer_sdr WHERE account_id='%s' AND yearmonth='%s' ORDER BY action_date ASC ", $account_id, $yearmonth);
             $this->query('SWITCH', $query);
             $result_data = $this->resultset();
+            $this->writelog($sql);
             if (count($result_data) > 0) {
                 foreach ($result_data as $sdr_data) {
                     $rule_type = $sdr_data['rule_type'];
+
+                    $this->writelog("rule_type $rule_type ");
+                    $this->writelog("rule_type2 $sdr_terms[$rule_type] ");
                     if (isset($sdr_terms[$rule_type])) {
                         $term_array = $sdr_terms[$rule_type];
                         $term_group = $term_array['term_group'];
                         $cost_calculation_formula = trim($term_array['cost_calculation_formula']);
                         $total_cost = $sdr_data['total_cost'];
+
+                        $this->writelog("term_group $term_group total_cost $total_cost addbalance cost_calculation_formula $cost_calculation_formula");
+
                         if ($term_group == 'opening') {
                             if ($cost_calculation_formula == '+') {
                                 $openingbalance = $openingbalance + $total_cost;
@@ -1348,7 +1504,10 @@ class APIS extends PDO {
                     }
                 }
             }
+
+
             $current_balance = $openingbalance + $addbalance - $removebalance - $usage;
+            $this->writelog("current_balance $current_balance openingbalance $openingbalance addbalance $addbalance removebalance $removebalance usage $usage ");
             return $current_balance;
         } catch (Exception $e) {
             return 0;
@@ -1365,6 +1524,7 @@ class APIS extends PDO {
             $query = "SELECT term_group, term, display_text, cost_calculation_formula FROM sys_sdr_terms ORDER BY term_group, term";
             $this->query('SWITCH', $query);
             $result_data = $this->resultset();
+            $this->writelog($query);
             foreach ($result_data as $row) {
                 $term = $row['term'];
                 $sdr_terms[$term] = $row;
@@ -1372,6 +1532,7 @@ class APIS extends PDO {
             $query = sprintf("SELECT rule_type, action_date, service_number, total_cost, service_startdate, service_stopdate FROM customer_sdr WHERE account_id='%s' AND yearmonth='%s' ORDER BY action_date ASC ", $account_id, $yearmonth);
             $this->query('SWITCH', $query);
             $result_data = $this->resultset();
+            $this->writelog($query);
             if (count($result_data) > 0) {
                 foreach ($result_data as $sdr_data) {
                     $rule_type = $sdr_data['rule_type'];
@@ -1406,17 +1567,17 @@ class APIS extends PDO {
             $cost = 0;
             $customer_statistics = date('Ym', strtotime($date)) . "_customerstate";
             if ($usertype == 'CUSTOMER') {
-                $query = sprintf("SELECT sum(customer_cost) cost FROM 201909_customerstate where account_id = '%s' and CURDATE() = call_date;", $customer_statistics, $account_id);
+                $query = sprintf("SELECT sum(customer_cost) cost FROM %s where account_id = '%s' and CURDATE() = call_date;", $customer_statistics, $account_id);
             } elseif ($usertype == 'RESELLER1') {
-                $query = sprintf("SELECT sum(r1_cost) cost FROM 201909_customerstate where r1_account_id = '%s' and CURDATE() = call_date;", $customer_statistics, $account_id);
+                $query = sprintf("SELECT sum(r1_cost) cost FROM %s where r1_account_id = '%s' and CURDATE() = call_date;", $customer_statistics, $account_id);
             } elseif ($usertype == 'RESELLER2') {
-                $query = sprintf("SELECT sum(r2_cost) cost FROM 201909_customerstate where r2_account_id = '%s' and CURDATE() = call_date;", $customer_statistics, $account_id);
+                $query = sprintf("SELECT sum(r2_cost) cost FROM %s where r2_account_id = '%s' and CURDATE() = call_date;", $customer_statistics, $account_id);
             } elseif ($usertype == 'RESELLER3') {
-                $query = sprintf("SELECT sum(r3_cost) cost FROM 201909_customerstate where r2_account_id = '%s' and CURDATE() = call_date;", $customer_statistics, $account_id);
+                $query = sprintf("SELECT sum(r3_cost) cost FROM %s where r2_account_id = '%s' and CURDATE() = call_date;", $customer_statistics, $account_id);
             } else {
-                $query = sprintf("SELECT sum(customer_cost) cost FROM 201909_customerstate where account_id = '%s' and CURDATE() = call_date;", $customer_statistics, $account_id);
+                $query = sprintf("SELECT sum(customer_cost) cost FROM %s where account_id = '%s' and CURDATE() = call_date;", $customer_statistics, $account_id);
             }
-
+            $this->writelog($query);
             $this->query('CDR', $query);
             $result_data2 = $this->resultset();
             foreach ($result_data2 as $row2) {
@@ -1429,6 +1590,7 @@ class APIS extends PDO {
             $balance2 = 0 - $balance;
             $query = sprintf("update customer_balance set balance =  '%s' where account_id = '%s';", $balance2, $account_id);
             $this->query('SWITCH', $query);
+            $this->writelog($query);
             $this->execute();
             $balance2 = 0;
             $outstanding_balance = 0;
@@ -1444,7 +1606,7 @@ class APIS extends PDO {
         $accountlist = Array();
         $yearmonth = date('Ym');
         $query = sprintf("select HIGH_PRIORITY customer_sdr.account_id  from customer_sdr INNER JOIN account on customer_sdr.account_id = account.account_id  where yearmonth = '%s' and account_type = 'CUSTOMER' GROUP BY customer_sdr.account_id;", $yearmonth);
-
+        $this->writelog($query);
         $this->query('SWITCH', $query);
         $sdraccounts = $this->resultset();
         foreach ($sdraccounts as $account) {
@@ -1455,6 +1617,7 @@ class APIS extends PDO {
 
         $query = sprintf("select HIGH_PRIORITY customer_sdr.account_id  from customer_sdr INNER JOIN account on customer_sdr.account_id = account.account_id  where yearmonth = '%s' and account_type = 'RESELLER' and account_level = '1'  GROUP BY customer_sdr.account_id;
 ", $yearmonth);
+        $this->writelog($query);
         $this->query('SWITCH', $query);
         $this->writelog($query);
         $sdraccounts = $this->resultset();
@@ -1466,7 +1629,7 @@ class APIS extends PDO {
 
         $query = sprintf("select HIGH_PRIORITY customer_sdr.account_id  from customer_sdr INNER JOIN account on customer_sdr.account_id = account.account_id  where yearmonth = '%s' and account_type = 'RESELLER' and account_level = '2'  GROUP BY customer_sdr.account_id;
 ", $yearmonth);
-
+        $this->writelog($query);
         $this->query('SWITCH', $query);
         $this->writelog($query);
         $sdraccounts = $this->resultset();
@@ -1479,7 +1642,7 @@ class APIS extends PDO {
 
         $query = sprintf("select HIGH_PRIORITY customer_sdr.account_id  from customer_sdr INNER JOIN account on customer_sdr.account_id = account.account_id  where yearmonth = '%s' and account_type = 'RESELLER' and account_level = '3'  GROUP BY customer_sdr.account_id;
 ", $yearmonth);
-
+        $this->writelog($query);
         $this->query('SWITCH', $query);
         $this->writelog($query);
         $sdraccounts = $this->resultset();
@@ -1494,19 +1657,27 @@ class APIS extends PDO {
         /*
          * Generate Daily Call Charges SDR 
          */
+        $start_date = date('d', strtotime($date . ' +1 day'));
         $this->ServiceDailyCallChargesSDR($date, $account_id = '');
-        /*
-         * THis is rining every month day one and charging for full month tariff charges
-         */
-        $this->ServiceChargesMonthly($date);
+
         /*
          * Montholy DID rental Charges
          */
-        $this->ServiceDIDRental($date);
+        if ($start_date == '1') {
+            $this->ServiceDIDRental($date);
+        }
+        /*
+         * Monthly Bundal charges
+         */
+        if ($start_date == '1') {
+            $this->ServiceMonthlyBundle($date);
+        }
         /*
          * Opening Balance of Month in SDR for Billing 
          */
-        $this->ServiceOpeningBalance($date);
+        if ($start_date == '1') {
+            $this->ServiceOpeningBalance($date);
+        }
         /*
          * Reconsiled Balance for each accounts
          */
@@ -1535,23 +1706,36 @@ class APIS extends PDO {
         $saller_charges_data['cost'] = 0;
         $saller_charges_data['total_cost'] = 0;
         $query = sprintf(" INSERT INTO customer_sdr (account_id, rule_type, yearmonth, service_number, service_charges, tax1, tax1_cost, tax2, tax2_cost, tax3, tax3_cost, total_tax, cost, total_cost, service_startdate, service_stopdate, seller_tax1, seller_tax2, seller_tax3, seller_tax1_cost, seller_tax2_cost, seller_tax3_cost, seller_cost, total_seller_cost, action_date,actiondate, carrier_cost, total_carrier_cost) VALUES ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', now(), '%s', '%s', '%s');", $this->request['account_id'], $this->request['rule_type'], $yearmonth, $this->request['service_number'], $this->request['service_charges'], $data['tax1'], $charges_data['tax1_cost'], $data['tax2'], $charges_data['tax2_cost'], $data['tax3'], $charges_data['tax3_cost'], $charges_data['total_tax'], $charges_data['cost'], $charges_data['total_cost'], $service_startdate, $service_stopdate, $saller_charges_data['tax1'], $saller_charges_data['tax2'], $saller_charges_data['tax3'], $saller_charges_data['tax1_cost'], $saller_charges_data['tax2_cost'], $saller_charges_data['tax3_cost'], $saller_charges_data['cost'], $saller_charges_data['total_cost'], $date, $saller_charges_data['cost'], $saller_charges_data['total_cost']);
-
+        $this->writelog($query);
         $this->query('SWITCH', $query);
         $this->execute();
         $query = sprintf("update customer_balance set balance = balance + '%s' where account_id = '%s';", $charges_data['total_cost'], $this->request['account_id']);
+        $this->writelog($query);
         $this->query('SWITCH', $query);
         $this->execute();
     }
 
     function ServiceCreditDeduction() {
+        $query = "DELETE  FROM livecalls where start_time <  DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 10 MINUTE), '%Y-%m-%d %H:%i:00');";
+        $this->writelog($query);
+        $this->query('SWITCH', $query);
+        $this->execute();
+
+
+     $query = "DELETE  FROM livecalls where start_time <  DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 1 MINUTE), '%Y-%m-%d %H:%i:00') and (callstatus = 'ring' or callstatus = 'progress');";
+        $this->writelog($query);
+        $this->query('SWITCH', $query);
+        $this->execute();
 
         $query = sprintf("SELECT id, account_id, credit_amount, execution_date, status_id FROM credit_scheduler where execution_date < NOW() and status_id = '0'");
+        $this->writelog($query);
         $this->query('SWITCH', $query);
         $detail = $this->resultset();
         if (count($detail) > 0) {
             foreach ($detail as $data) {
                 if ($data['status_id'] == '0') {
                     $query = sprintf("SELECT id, maxcredit_limit, credit_limit, account_id, balance  from customer_balance where account_id = '%s' limit 1;", $data['account_id']);
+                    $this->writelog($query);
                     $aftercredit_limit = 0;
                     $this->userdetail['credit_limit'] = 0;
                     if (DBLOGWRITE == '1')
@@ -1572,7 +1756,7 @@ class APIS extends PDO {
                     $data['amount'] = $data['credit_amount'];
                     $data['created_by'] = '';
                     $query = sprintf("insert into  payment_history (account_id, payment_option_id, amount, paid_on, notes, created_by, create_dt ) values('%s', '%s', '%s', '%s', '%s','%s',now());", $data['account_id'], $data['rule_type'], $data['amount'], $data['paid_on'], $data['notes'], $data['created_by']);
-
+                    $this->writelog($query);
                     $this->query('SWITCH', $query);
                     $this->execute();
                     $data['service_startdate'] = date("Y-m-d H:i:s");
@@ -1593,23 +1777,24 @@ class APIS extends PDO {
                     $data['otherdata'] = '';
                     $date = date("Y-m-d");
                     $query = sprintf("INSERT INTO customer_sdr ( account_id, rule_type, yearmonth, service_number, service_charges, detail, otherdata, action_date, tax1_cost, tax2_cost, tax3_cost, cost, total_cost, total_tax, service_startdate, service_stopdate,tax1,tax2,tax3,actiondate) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', Now(), '%s','%s', '%s', '%s', '%s', '%s', '%s', '%s','%s', '%s', '%s', '%s');", $data['account_id'], $data['rule_type'], $data['yearmonth'], $data['service_number'], $data['service_charges'], $data['detail'], $data['otherdata'], $charges_data['tax1_cost'], $charges_data['tax2_cost'], $charges_data['tax3_cost'], $charges_data['cost'], $charges_data['total_cost'], $charges_data['total_tax'], $data['service_startdate'], $data['service_stopdate'], $charges_data['tax1'], $charges_data['tax2'], $charges_data['tax3'], $date);
-
+                    $this->writelog($query);
                     $this->query('SWITCH', $query);
                     $this->execute();
 
                     $query = sprintf("update customer_balance set credit_limit = credit_limit - '%s' where account_id = '%s';", $charges_data['total_cost'], $data['account_id']);
                     $this->query('SWITCH', $query);
                     $this->execute();
-
+                    $this->writelog($query);
 
                     $query = sprintf("update credit_scheduler set status_id = '1' where account_id = '%s' and execution_date = '%s';", $data['account_id'], $data['execution_date']);
                     $this->query('SWITCH', $query);
                     $this->execute();
 
-
+                    $this->writelog($query);
                     $query = sprintf("update customer_notification set email_status = '0'  where account_id = '%s' and  notify_name='low-balance';", $data['account_id']);
                     $this->query('SWITCH', $query);
                     $this->execute();
+                    $this->writelog($query);
                 }
             }
         }
@@ -1625,3 +1810,4 @@ class APIS extends PDO {
     }
 
 }
+

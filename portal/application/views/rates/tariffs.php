@@ -2,14 +2,20 @@
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
-// Copyright (C) 2019 Chinna Technologies  
+// Copyright (C) 2019-2020 Chinna Technologies   
 // Seema Anand <openvoips@gmail.com>
 // Anand <kanand81@gmail.com>
 // http://www.openvoips.com  http://www.openvoips.org
 //
 //
-// OV500 Version 1.0
+// OV500 Version 1.0.3
 // License https://www.gnu.org/licenses/agpl-3.0.html
+//
+//
+// The Initial Developer of the Original Code is
+// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
+// Portions created by the Initial Developer are Copyright (C)
+// the Initial Developer. All Rights Reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -126,10 +132,9 @@ $delete_option = '';
                     <thead>
                         <tr class="headings thc">                          
                             <th class="column-title">Tariff Name</th>                            
-                            <th class="column-title">Currency</th>
-                            <th class="column-title">Tariff Charge</th>
+                            <th class="column-title">Currency</th>             
                             <th class="column-title">Who can Use</th>  
-                            <th class="column-title">Open Routes & Package</th>
+                            <th class="column-title">Open Routes</th>
 
 
 
@@ -150,19 +155,18 @@ $delete_option = '';
                                 else
                                     $status = '<span class="label label-danger">Inactive</span>';
 
-
-
-
-                                if ($listing_row['tariff_count'] == 0)
-                                    $delete_option = true;
-                                else
-                                    $delete_option = false;
+									
+								if($listing_row['ratecard_count'] == 0 && $listing_row['carrier_count'] == 0  && $listing_row['user_count'] == 0) 
+									$delete_option = true;
+								else 
+									$delete_option = false;	
+									
+									
                                 ?>
                                 <tr>                                    
                                     <td><?php echo $listing_row['tariff_name'] . " (" . $listing_row['tariff_id'] . ")"; ?></td>
                                     <td ><?php echo $listing_row['currency_symbol'] . " - " . $listing_row['currency_name']; ?></td>
-                                    <td ><?php echo $listing_row['monthly_charges']; ?></td>
-
+                                    
                                     <?php
                                     if ($listing_row['ratecard_count'] > 0)
                                         $outrates = '<span class="label label-success">PSTN</span>';
@@ -174,24 +178,14 @@ $delete_option = '';
                                     else
                                         $inrates = '<span class="label label-danger">DID</span>';
 
-                                    if ($listing_row['package_option'] == '1')
-                                        $package_option = '<span class="label label-success">PACKAGE</span>';
-                                    else
-                                        $package_option = '<span class="label label-danger">PACKAGE</span>';
-
-                                    if ($listing_row['bundle_option'] == '1')
-                                        $bundle_option = '<span class="label label-success">BUNDLE</span>';
-                                    else
-                                        $bundle_option = '<span class="label label-danger">BUNDLE</span>';
+                             
                                     ?>
 
                                     <td ><?php echo $listing_row['tariff_type']; ?></td>                               
                                     <td ><?php
-                                        echo $outrates . " " . $inrates . " " . $package_option . " " . $bundle_option;
+                                        echo $outrates . " " . $inrates ;
                                         $inrates = '';
                                         $outrates = '';
-                                        $package_option = '';
-                                        $bundle_option = '';
                                         ?> </td>       
 
                                     <td ><?php echo $status; ?></td>                                   

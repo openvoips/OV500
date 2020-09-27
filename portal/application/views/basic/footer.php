@@ -4,7 +4,7 @@
 <!-- footer content -->
 <footer>
     <div class="pull-right">
-       Copyright©<?php echo date('Y'); ?> <a href="https://ov500.openvoips.org" target="_blank">OV500 Billing & Switching Software</a> (Chinna Technologies). All Rights Reserved  
+       Copyright©<?php echo date('Y'); ?> <a href="https://ov500.openvoips.org" target="_blank">Billing & Switching Software</a>. All Rights Reserved  
     </div>
     <div class="clearfix"></div>
 </footer>

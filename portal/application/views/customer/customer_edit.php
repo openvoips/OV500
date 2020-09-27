@@ -2,14 +2,20 @@
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
-// Copyright (C) 2019 Chinna Technologies  
+// Copyright (C) 2019-2020 Chinna Technologies   
 // Seema Anand <openvoips@gmail.com>
 // Anand <kanand81@gmail.com>
 // http://www.openvoips.com  http://www.openvoips.org
 //
 //
-// OV500 Version 1.0
+// OV500 Version 1.0.3
 // License https://www.gnu.org/licenses/agpl-3.0.html
+//
+//
+// The Initial Developer of the Original Code is
+// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
+// Portions created by the Initial Developer are Copyright (C)
+// the Initial Developer. All Rights Reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -90,11 +96,6 @@ $tab_index = 1;
             <div class="x_panel">
                 <div class="x_title">
                     <h2>Customer IP's Devices</h2>
-                    <ul class="nav navbar-right panel_toolbox">
-
-
-                        </li>
-                    </ul>
                     <div class="clearfix"></div>
                 </div>
 
@@ -138,7 +139,7 @@ $tab_index = 1;
                             else {
                                 ?>
                                 <tr>
-                                    <td colspan="3" align="center"><strong>No Record Found</strong></td>
+                                    <td colspan="5" align="center"><strong>No Record Found</strong></td>
                                 </tr>
                                 <?php
                             }
@@ -168,11 +169,6 @@ $tab_index = 1;
             <div class="x_panel">
                 <div class="x_title">
                     <h2>Customer SIP Users Devices</h2>
-                    <ul class="nav navbar-right panel_toolbox">
-
-
-                        </li>
-                    </ul>
                     <div class="clearfix"></div>
                 </div>
 
@@ -207,7 +203,7 @@ $tab_index = 1;
                                         <td><?php echo $sip_data['secret']; ?></td>                                      
                                         <td><?php echo $sip_data['extension_no']; ?></td>
 
-                 <!--<td><?php echo $voicemail; ?></td>-->
+                                                         <!--<td><?php echo $voicemail; ?></td>-->
                                         <td><?php echo $status; ?></td>
                                         <td class="last">
                                             <a href="<?php echo base_url($customer_type . 's'); ?>/sipEdit/<?php echo param_encrypt($data['account_id']); ?>/<?php echo param_encrypt($sip_data['id']); ?>" title="Edit" class="edit"><i class="fa fa-pencil-square-o"></i></a>
@@ -226,7 +222,7 @@ $tab_index = 1;
                             else {
                                 ?>
                                 <tr>
-                                    <td colspan="3" align="center"><strong>No Record Found</strong></td>
+                                    <td colspan="5" align="center"><strong>No Record Found</strong></td>
                                 </tr>
                                 <?php
                             }
@@ -249,11 +245,6 @@ $tab_index = 1;
             <div class="x_panel">
                 <div class="x_title">
                     <h2>Dialing Routes</h2>
-                    <ul class="nav navbar-right panel_toolbox">
-
-
-                        </li>
-                    </ul>
                     <div class="clearfix"></div>
                 </div>
 
@@ -315,12 +306,7 @@ $tab_index = 1;
         <div class="col-md-12 col-sm-6 col-xs-12">
             <div class="x_panel">
                 <div class="x_title">
-                    <h2>Source Number Translation Rules</h2>
-                    <ul class="nav navbar-right panel_toolbox">
-
-
-                        </li>
-                    </ul>
+                    <h2>Source Number Translation Rules</h2>          
                     <div class="clearfix"></div>
                 </div>
 
@@ -403,11 +389,6 @@ $tab_index = 1;
             <div class="x_panel">
                 <div class="x_title">
                     <h2>Destination Number Translation Rules</h2>
-                    <ul class="nav navbar-right panel_toolbox">
-
-
-                        </li>
-                    </ul>
                     <div class="clearfix"></div>
                 </div>
 
@@ -478,11 +459,6 @@ $tab_index = 1;
             <div class="x_panel">
                 <div class="x_title">
                     <h2>DID Calls Source Number Translation Rules</h2>
-                    <ul class="nav navbar-right panel_toolbox">
-
-
-                        </li>
-                    </ul>
                     <div class="clearfix"></div>
                 </div>
 
@@ -555,11 +531,6 @@ $tab_index = 1;
             <div class="x_panel">
                 <div class="x_title">
                     <h2>DID Calls Destination Number Translation Rules</h2>
-                    <ul class="nav navbar-right panel_toolbox">
-
-
-                        </li>
-                    </ul>
                     <div class="clearfix"></div>
                 </div>
 
@@ -626,7 +597,66 @@ $tab_index = 1;
             </div>
 
         </div>
-     
+
+        <div class="col-md-12 col-sm-6 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Bundle & Package</h2>
+                    <div class="clearfix"></div>
+                </div>
+
+                <div class="x_content">
+                    <table class="table table-striped jambo_table table-bordered">
+                        <thead>
+                            <tr class="headings thc">
+                                <th class="column-title">Bundle</th>
+                                <th class="column-title">Assign</th>
+                                <th class="column-title">Allowed Prefixes</th>
+                                <th class="column-title">Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <?php
+                            if (isset($data['bundle_package']) && count($data['bundle_package']) > 0) {
+                                foreach ($data['bundle_package'] as $package_data) {
+                                    ?>
+                                    <tr >
+                                        <td><?php echo $package_data['bundle_package_name'] . ' (' . $package_data['bundle_package_id'] . ')'; ?></td>
+                                        <td ><?php echo $package_data['bundle_count']; ?></td>
+                                        <td ><?php echo wordwrap(implode(', ', array_unique(explode(',', $package_data['prefix']))), 20, "<br>\n", TRUE); ?></td>
+                                        <td class=" last">                                           
+                                            <?php if (check_account_permission('customer', 'delete')): ?>
+                                                <a href="javascript:void(0);"
+                                                   onclick=doConfirmDelete('<?php echo $package_data['bundle_account_id']; ?>','<?php echo $customer_type . 's'; ?>/edit/<?php echo param_encrypt($data['account_id']); ?>','account_bundle_delete') title="One Bundle will delete at a time." class="delete"><i class="fa fa-trash"></i></a>
+                                               <?php endif; ?>
+
+                                        </td>
+                                    </tr>
+                                    <?php
+                                }
+                            }
+                            else {
+                                ?>
+                                <tr>
+                                    <td colspan="5" align="center"><strong>No Record Found</strong></td>
+                                </tr>
+                                <?php
+                            }
+                            ?>
+
+
+                        </tbody>
+                    </table>
+                    <div class="col-md-12 col-sm-12 col-xs-12 text-right">
+                        <a href="<?php echo base_url($customer_type . 's') ?>/addBundle/<?php echo param_encrypt($data['account_id']); ?>" ><input type="button" value="Add Bundle & Package" name="add_link" class="btn btn-primary"></a>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
     <div class="col-md-6 col-sm-12 col-xs-12">
         <div class="x_panel">
@@ -905,7 +935,7 @@ $tab_index = 1;
                                 '</div>';
                             }
                             ?>
-							<label>Only possible if G729 codec is installed in system.</label>
+                            <label>Only possible if G729 codec is installed in system.</label>
                         </div>
                     </div>
 
@@ -1165,18 +1195,18 @@ $tab_index = 1;
     </div>
 </div>
 <script>
-                                    var tariff_array = [];
-                                    tariff_array[1] = new Array();
-                                    tariff_array[2] = new Array();
-                                    tariff_array[3] = new Array();
-                                    tariff_array[4] = new Array();
-                                    tariff_array[5] = new Array();</script>
+                                            var tariff_array = [];
+                                            tariff_array[1] = new Array();
+                                            tariff_array[2] = new Array();
+                                            tariff_array[3] = new Array();
+                                            tariff_array[4] = new Array();
+                                            tariff_array[5] = new Array();</script>
 <?php
 $k = 0;
 foreach ($tariff_options as $tariff_name_array) {
     ?>
     <script>
-        tariff_array[<?php echo $tariff_name_array['tariff_currency_id']; ?>]["<?php echo $k; ?>"] = ["<?php echo $tariff_name_array['tariff_id']; ?>", "<?php echo $tariff_name_array['tariff_name']; ?>"];</script>
+                                                    tariff_array[<?php echo $tariff_name_array['tariff_currency_id']; ?>]["<?php echo $k; ?>"] = ["<?php echo $tariff_name_array['tariff_id']; ?>", "<?php echo $tariff_name_array['tariff_name']; ?>"];</script>
     <?php
     $k++;
 }
@@ -1184,318 +1214,318 @@ foreach ($tariff_options as $tariff_name_array) {
 
 <script>
 
-                                    window.Parsley
-                                    .addValidator('password', {
-                                    validateString: function(value) {
-                                    r = true;
-                                            if (!vCheckPassword(value))
-                                    {
-                                    r = false;
-                                    }
-                                    return r;
-                                    },
-                                            messages: {
-                                            en: 'min 8 char, 1 special char, 1 uppercase, 1 lowercase, 1 number'
+                                            window.Parsley
+                                            .addValidator('password', {
+                                            validateString: function(value) {
+                                            r = true;
+                                                    if (!vCheckPassword(value))
+                                            {
+                                            r = false;
                                             }
-                                    });
-                                    $('#btnSave, #btnSaveClose').click(function() {
+                                            return r;
+                                            },
+                                                    messages: {
+                                                    en: 'min 8 char, 1 special char, 1 uppercase, 1 lowercase, 1 number'
+                                                    }
+                                            });
+                                            $('#btnSave, #btnSaveClose').click(function() {
 
-                            $('#user_form').parsley().reset();
-                                    var is_ok = $("#user_form").parsley().isValid();
-                                    if (is_ok === true)
-                            {
-                            var clicked_button_id = this.id;
-                                    if (clicked_button_id == 'btnSaveClose')
-                                    $('#button_action').val('save_close');
+                                    $('#user_form').parsley().reset();
+                                            var is_ok = $("#user_form").parsley().isValid();
+                                            if (is_ok === true)
+                                    {
+                                    var clicked_button_id = this.id;
+                                            if (clicked_button_id == 'btnSaveClose')
+                                            $('#button_action').val('save_close');
+                                            else
+                                            $('#button_action').val('save');
+                                            if (is_ok === true)
+                                    {
+                                    //alert("ok");
+                                    $("#user_form").submit();
+                                    }
+                                    }
                                     else
-                                    $('#button_action').val('save');
-                                    if (is_ok === true)
-                            {
-                            //alert("ok");
-                            $("#user_form").submit();
-                            }
-                            }
-                            else
-                            {
-                            $('#user_form').parsley().validate();
-                            }
+                                    {
+                                    $('#user_form').parsley().validate();
+                                    }
 
-                            })
+                                    })
 /////notification form
 
-                                    $('#btnSaveNotification, #btnSaveCloseNotification').click(function() {
+                                            $('#btnSaveNotification, #btnSaveCloseNotification').click(function() {
 
-                            $('#notification_form').parsley().reset();
-                                    var is_ok = $("#notification_form").parsley().isValid();
-                                    if (is_ok === true)
-                            {
-                            var clicked_button_id = this.id;
-                                    if (clicked_button_id == 'btnSaveCloseNotification')
-                                    $('#button_action_notification').val('save_close');
-                                    else
-                                    $('#button_action_notification').val('save');
-                                    if (is_ok === true)
-                            {
-                            $("#notification_form").submit();
-                            }
-                            }
-                            else
-                            {
-                            $('#notification_form').parsley().validate();
-                            }
-
-                            })
-
-                                    function media_changed()
+                                    $('#notification_form').parsley().reset();
+                                            var is_ok = $("#notification_form").parsley().isValid();
+                                            if (is_ok === true)
                                     {
-                                    media_value = $("input[name='media_rtpproxy']:checked").val();
-                                            if (media_value == '1')
-                                            $('#id_transcoding_div').show();
+                                    var clicked_button_id = this.id;
+                                            if (clicked_button_id == 'btnSaveCloseNotification')
+                                            $('#button_action_notification').val('save_close');
                                             else
-                                            $('#id_transcoding_div').hide();
+                                            $('#button_action_notification').val('save');
+                                            if (is_ok === true)
+                                    {
+                                    $("#notification_form").submit();
+                                    }
+                                    }
+                                    else
+                                    {
+                                    $('#notification_form').parsley().validate();
                                     }
 
-                            function currency_changed()
-                            {
-                            var tariff_str = '<option value="">Select</option>';
-                                    currency_id = $("#currency_id").val();
-                                    if (currency_id == '')
-                            {
+                                    })
 
-                            }
-                            else
-                            {
-                            var arrayLength = tariff_array[currency_id].length;
-                                    if (arrayLength > 0)
-                            {
-                            for (var i in tariff_array[currency_id])
-                            {
-                            tariff_id = tariff_array[currency_id][i][0];
-                                    tariff_name = tariff_array[currency_id][i][1];
-                                    tariff_str = tariff_str + '<option value="' + tariff_id + '">' + tariff_name + '</option>';
-                            }
-                            }
-                            }
-                            $('#tariff_id').html(tariff_str);
-                            }
+                                            function media_changed()
+                                            {
+                                            media_value = $("input[name='media_rtpproxy']:checked").val();
+                                                    if (media_value == '1')
+                                                    $('#id_transcoding_div').show();
+                                                    else
+                                                    $('#id_transcoding_div').hide();
+                                            }
 
+                                    function currency_changed()
+                                    {
+                                    var tariff_str = '<option value="">Select</option>';
+                                            currency_id = $("#currency_id").val();
+                                            if (currency_id == '')
+                                    {
 
-                            function country_changed()
-                            {
-                            country_id = $("#country_id").val();
-                                    if (country_id == '100')
-                            {
-                            $('#id_state_div').show();
-                                    $('#state_code_id').attr('data-parsley-required', 'true');
-                            }
-                            else
-                            {
-                            $('#id_state_div').hide();
-                                    $('#state_code_id').attr('data-parsley-required', 'false');
-                            }
+                                    }
+                                    else
+                                    {
+                                    var arrayLength = tariff_array[currency_id].length;
+                                            if (arrayLength > 0)
+                                    {
+                                    for (var i in tariff_array[currency_id])
+                                    {
+                                    tariff_id = tariff_array[currency_id][i][0];
+                                            tariff_name = tariff_array[currency_id][i][1];
+                                            tariff_str = tariff_str + '<option value="' + tariff_id + '">' + tariff_name + '</option>';
+                                    }
+                                    }
+                                    }
+                                    $('#tariff_id').html(tariff_str);
+                                    }
 
 
-                            }
-                            function billing_country_changed()
-                            {
-                            country_id = $("#billing_country_id").val();
-                                    if (country_id == '100')
-                            {
-                            $('#id_billing_state_div').show();
-                                    $('#billing_state_code_id').attr('data-parsley-required', 'true');
-                            }
-                            else
-                            {
-                            $('#id_billing_state_div').hide();
-                                    $('#billing_state_code_id').attr('data-parsley-required', 'false');
-                            }
-                            }
+                                    function country_changed()
+                                    {
+                                    country_id = $("#country_id").val();
+                                            if (country_id == '100')
+                                    {
+                                    $('#id_state_div').show();
+                                            $('#state_code_id').attr('data-parsley-required', 'true');
+                                    }
+                                    else
+                                    {
+                                    $('#id_state_div').hide();
+                                            $('#state_code_id').attr('data-parsley-required', 'false');
+                                    }
 
-                            function multicallonsameno_chnaged()
-                            {
-                            if ($('#multicallonsameno_allow').is(":checked"))
-                            {
-                            $('#multicallonsameno_limit').attr('data-parsley-required', 'true');
-                                    $('#multicallonsameno_limit').attr('data-parsley-type', 'digits');
-                                    $("#multicallonsameno_limit").attr('readonly', false);
-                                    if ($("#multicallonsameno_limit").val() == '')
-                                    $("#multicallonsameno_limit").val(5);
-                            }
-                            else{
-                            $('#multicallonsameno_limit').attr('data-parsley-required', 'false');
-                                    $('#multicallonsameno_limit').removeAttr('data-parsley-type');
-                                    $("#multicallonsameno_limit").attr('readonly', true);
-                                    $("#multicallonsameno_limit").val('');
-                            }
-                            }
-                            function notification_changed(checked_id)
-                            {
-                            if ($('#' + checked_id).is(':checked'))
-                            {
-                            $('#email-' + checked_id).attr('data-parsley-required', 'true');
-                                    if ($('#amount-' + checked_id).length !== 0)
-                            {
-                            $('#amount-' + checked_id).attr('data-parsley-required', 'true');
-                                    $('#amount-' + checked_id).attr('data-parsley-type', 'digits');
-                            }
 
-                            }
-                            else
-                            {
-                            $('#email-' + checked_id).attr('data-parsley-required', 'false');
-                                    if ($('#amount-' + checked_id).length !== 0)
-                            {
-                            $('#amount-' + checked_id).attr('data-parsley-required', 'false');
-                                    $('#amount-' + checked_id).removeAttr('data-parsley-type');
-                            }
-                            }
-                            };
-                                    function tax_chnaged(){
-                                    vat_flag = $("#vat_flag").val();
-                                            if (vat_flag == 'NONE') {
-                                    $('#taxchange').hide();
-                                            $('#tax1').attr('data-parsley-required', 'false');
-                                            $('#tax2').attr('data-parsley-required', 'false');
-                                            $('#tax3').attr('data-parsley-required', 'false');
-                                            $('#tax_type').attr('data-parsley-required', 'false');
-                                            $("#tax_type").val("exclusive");
-                                            $("#tax1").val("0.0");
-                                            $("#tax2").val("0.0");
-                                            $("#tax3").val("0.0");
-                                    } else {
-                                    $('#taxchange').show();
-                                            /*set to initial status*/
-                                            $('.tax_class').show();
-                                            $('#vat_flag').attr('data-parsley-required', 'true');
-                                            $('#tax_type').attr('data-parsley-required', 'true');
-                                            $('#tax1').attr('data-parsley-required', 'true');
-                                            $('#tax2').attr('data-parsley-required', 'true');
-                                            $('#tax3').attr('data-parsley-required', 'true');
+                                    }
+                                    function billing_country_changed()
+                                    {
+                                    country_id = $("#billing_country_id").val();
+                                            if (country_id == '100')
+                                    {
+                                    $('#id_billing_state_div').show();
+                                            $('#billing_state_code_id').attr('data-parsley-required', 'true');
+                                    }
+                                    else
+                                    {
+                                    $('#id_billing_state_div').hide();
+                                            $('#billing_state_code_id').attr('data-parsley-required', 'false');
                                     }
                                     }
 
-                            $('input[type=radio][name=media_rtpproxy]').change(function() {
-                            media_changed();
-                            });
-                                    $("#currency_id").change(function(){
-                            currency_changed();
-                            });
-                                    $("#country_id").change(function(){
-                            country_changed();
-                            });
-                                    $("#billing_country_id").change(function(){
-                            billing_country_changed();
-                            });
-                                    $(".notifications").change(function() {
-                            var checked_id = this.id;
-                                    notification_changed(checked_id);
-                            });
-                                    $('#multicallonsameno_allow').click(function() {
-                            multicallonsameno_chnaged();
-                            });
-                                    $('#vat_flag').change(function() {
-                            tax_chnaged();
-                            });
-                                    $(document).ready(function() {
-                            media_changed();
+                                    function multicallonsameno_chnaged()
+                                    {
+                                    if ($('#multicallonsameno_allow').is(":checked"))
+                                    {
+                                    $('#multicallonsameno_limit').attr('data-parsley-required', 'true');
+                                            $('#multicallonsameno_limit').attr('data-parsley-type', 'digits');
+                                            $("#multicallonsameno_limit").attr('readonly', false);
+                                            if ($("#multicallonsameno_limit").val() == '')
+                                            $("#multicallonsameno_limit").val(5);
+                                    }
+                                    else{
+                                    $('#multicallonsameno_limit').attr('data-parsley-required', 'false');
+                                            $('#multicallonsameno_limit').removeAttr('data-parsley-type');
+                                            $("#multicallonsameno_limit").attr('readonly', true);
+                                            $("#multicallonsameno_limit").val('');
+                                    }
+                                    }
+                                    function notification_changed(checked_id)
+                                    {
+                                    if ($('#' + checked_id).is(':checked'))
+                                    {
+                                    $('#email-' + checked_id).attr('data-parsley-required', 'true');
+                                            if ($('#amount-' + checked_id).length !== 0)
+                                    {
+                                    $('#amount-' + checked_id).attr('data-parsley-required', 'true');
+                                            $('#amount-' + checked_id).attr('data-parsley-type', 'digits');
+                                    }
+
+                                    }
+                                    else
+                                    {
+                                    $('#email-' + checked_id).attr('data-parsley-required', 'false');
+                                            if ($('#amount-' + checked_id).length !== 0)
+                                    {
+                                    $('#amount-' + checked_id).attr('data-parsley-required', 'false');
+                                            $('#amount-' + checked_id).removeAttr('data-parsley-type');
+                                    }
+                                    }
+                                    };
+                                            function tax_chnaged(){
+                                            vat_flag = $("#vat_flag").val();
+                                                    if (vat_flag == 'NONE') {
+                                            $('#taxchange').hide();
+                                                    $('#tax1').attr('data-parsley-required', 'false');
+                                                    $('#tax2').attr('data-parsley-required', 'false');
+                                                    $('#tax3').attr('data-parsley-required', 'false');
+                                                    $('#tax_type').attr('data-parsley-required', 'false');
+                                                    $("#tax_type").val("exclusive");
+                                                    $("#tax1").val("0.0");
+                                                    $("#tax2").val("0.0");
+                                                    $("#tax3").val("0.0");
+                                            } else {
+                                            $('#taxchange').show();
+                                                    /*set to initial status*/
+                                                    $('.tax_class').show();
+                                                    $('#vat_flag').attr('data-parsley-required', 'true');
+                                                    $('#tax_type').attr('data-parsley-required', 'true');
+                                                    $('#tax1').attr('data-parsley-required', 'true');
+                                                    $('#tax2').attr('data-parsley-required', 'true');
+                                                    $('#tax3').attr('data-parsley-required', 'true');
+                                            }
+                                            }
+
+                                    $('input[type=radio][name=media_rtpproxy]').change(function() {
+                                    media_changed();
+                                    });
+                                            $("#currency_id").change(function(){
+                                    currency_changed();
+                                    });
+                                            $("#country_id").change(function(){
                                     country_changed();
+                                    });
+                                            $("#billing_country_id").change(function(){
                                     billing_country_changed();
+                                    });
+                                            $(".notifications").change(function() {
+                                    var checked_id = this.id;
+                                            notification_changed(checked_id);
+                                    });
+                                            $('#multicallonsameno_allow').click(function() {
                                     multicallonsameno_chnaged();
+                                    });
+                                            $('#vat_flag').change(function() {
                                     tax_chnaged();
-                            });</script>
+                                    });
+                                            $(document).ready(function() {
+                                    media_changed();
+                                            country_changed();
+                                            billing_country_changed();
+                                            multicallonsameno_chnaged();
+                                            tax_chnaged();
+                                    });</script>
 
 <script>
-                                    /*notification form validation*/
+                                            /*notification form validation*/
 
 
 </script>
 <script>
-                                    $("#same_as_registered_address").change(function() {
+                                            $("#same_as_registered_address").change(function() {
 
-                            if ($('#same_as_registered_address').is(":checked"))
-                            {
-                            var name = $('#name').val();
-                                    var company_name = $('#company_name').val();
-                                    var emailaddress = $('#emailaddress').val();
-                                    var phone = $('#phone').val();
-                                    var address = $('#address').val();
-                                    var pincode = $('#pincode').val();
-                                    var country_id = $('#country_id').val();
-                                    var state_code_id = $('#state_code_id').val();
-                                    $('#billing_name').val(name);
-                                    $('#billing_company_name').val(company_name);
-                                    $('#billing_emailaddress').val(emailaddress);
-                                    $('#billing_phone').val(phone);
-                                    $('#billing_address').val(address);
-                                    $('#billing_pincode').val(pincode);
-                                    $('#billing_country_id').val(country_id);
-                                    $('#billing_state_code_id').val(state_code_id);
-                            }
-                            else
-                            {
-                            $('#billing_name').val('');
-                                    $('#billing_company_name').val('');
-                                    $('#billing_emailaddress').val('');
-                                    $('#billing_phone').val('');
-                                    $('#billing_address').val('');
-                                    $('#billing_pincode').val('');
-                                    $('#billing_country_id').val('');
-                                    $('#billing_state_code_id').val('');
-                            }
-
-                            billing_country_changed();
-                            });
-                                    function doConfirmCancel(delete_val, delete_action_url = '', delete_type = '')
+                                    if ($('#same_as_registered_address').is(":checked"))
                                     {
-                                    var delete_id_array = [];
-                                            delete_id_array.push(delete_val);
-                                            var modal_body = '<h1 class="text-center"><i class="fa fa-exclamation-circle"></i></h1>' +
-                                            '<h4 class="text-center">Are you sure!</h4>' +
-                                            '<p class="text-center">You won\'t be able to revert this!</p>';
-                                            var modal_footer = '<button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>' +
-                                            '<button type="button" class="btn btn-danger" id="modal-btn-yes-single">Yes. cancel it!</button>';
-                                            openModal('', '', modal_body, modal_footer);
-                                            $("#my-modal").modal('show');
-                                            $("#modal-btn-yes-single").on("click", function(){
-                                    //alert("single");
-
-                                    var form = document.createElement("form");
-                                            document.body.appendChild(form);
-                                            form.method = "POST";
-                                            if (delete_action_url == '')
-                                            form.action = window.location.href;
-                                            else
-                                    {
-                                    form.action = BASE_URL + delete_action_url;
+                                    var name = $('#name').val();
+                                            var company_name = $('#company_name').val();
+                                            var emailaddress = $('#emailaddress').val();
+                                            var phone = $('#phone').val();
+                                            var address = $('#address').val();
+                                            var pincode = $('#pincode').val();
+                                            var country_id = $('#country_id').val();
+                                            var state_code_id = $('#state_code_id').val();
+                                            $('#billing_name').val(name);
+                                            $('#billing_company_name').val(company_name);
+                                            $('#billing_emailaddress').val(emailaddress);
+                                            $('#billing_phone').val(phone);
+                                            $('#billing_address').val(address);
+                                            $('#billing_pincode').val(pincode);
+                                            $('#billing_country_id').val(country_id);
+                                            $('#billing_state_code_id').val(state_code_id);
                                     }
-
-                                    var element2 = document.createElement("INPUT");
-                                            element2.name = "action";
-                                            element2.value = 'OkDeleteData';
-                                            element2.type = 'hidden';
-                                            form.appendChild(element2);
-                                            var element3 = document.createElement("INPUT");
-                                            element3.name = "delete_id";
-                                            element3.value = JSON.stringify(delete_id_array);
-                                            element3.type = 'hidden';
-                                            form.appendChild(element3);
-                                            if (delete_type == '')
-                                    {}
                                     else
                                     {
-                                    var element4 = document.createElement("INPUT");
-                                            element4.name = "delete_parameter_two";
-                                            element4.value = delete_type;
-                                            element4.type = 'hidden';
-                                            form.appendChild(element4);
+                                    $('#billing_name').val('');
+                                            $('#billing_company_name').val('');
+                                            $('#billing_emailaddress').val('');
+                                            $('#billing_phone').val('');
+                                            $('#billing_address').val('');
+                                            $('#billing_pincode').val('');
+                                            $('#billing_country_id').val('');
+                                            $('#billing_state_code_id').val('');
                                     }
 
-
-                                    form.submit();
-                                            //alert("yes");
-                                            $("#my-modal").modal('hide');
+                                    billing_country_changed();
                                     });
-                                    }
+                                            function doConfirmCancel(delete_val, delete_action_url = '', delete_type = '')
+                                            {
+                                            var delete_id_array = [];
+                                                    delete_id_array.push(delete_val);
+                                                    var modal_body = '<h1 class="text-center"><i class="fa fa-exclamation-circle"></i></h1>' +
+                                                    '<h4 class="text-center">Are you sure!</h4>' +
+                                                    '<p class="text-center">You won\'t be able to revert this!</p>';
+                                                    var modal_footer = '<button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>' +
+                                                    '<button type="button" class="btn btn-danger" id="modal-btn-yes-single">Yes. cancel it!</button>';
+                                                    openModal('', '', modal_body, modal_footer);
+                                                    $("#my-modal").modal('show');
+                                                    $("#modal-btn-yes-single").on("click", function(){
+                                            //alert("single");
+
+                                            var form = document.createElement("form");
+                                                    document.body.appendChild(form);
+                                                    form.method = "POST";
+                                                    if (delete_action_url == '')
+                                                    form.action = window.location.href;
+                                                    else
+                                            {
+                                            form.action = BASE_URL + delete_action_url;
+                                            }
+
+                                            var element2 = document.createElement("INPUT");
+                                                    element2.name = "action";
+                                                    element2.value = 'OkDeleteData';
+                                                    element2.type = 'hidden';
+                                                    form.appendChild(element2);
+                                                    var element3 = document.createElement("INPUT");
+                                                    element3.name = "delete_id";
+                                                    element3.value = JSON.stringify(delete_id_array);
+                                                    element3.type = 'hidden';
+                                                    form.appendChild(element3);
+                                                    if (delete_type == '')
+                                            {}
+                                            else
+                                            {
+                                            var element4 = document.createElement("INPUT");
+                                                    element4.name = "delete_parameter_two";
+                                                    element4.value = delete_type;
+                                                    element4.type = 'hidden';
+                                                    form.appendChild(element4);
+                                            }
+
+
+                                            form.submit();
+                                                    //alert("yes");
+                                                    $("#my-modal").modal('hide');
+                                            });
+                                            }
 </script>
 
 <div class="clearfix"></div>
