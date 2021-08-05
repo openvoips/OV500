@@ -1,39 +1,3 @@
-<!--
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019-2020 Chinna Technologies   
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
-// http://www.openvoips.com  http://www.openvoips.org
-//
-//
-// OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
-//
-//
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
--->
-<!-- Parsley -->
-<script src="<?php echo base_url() ?>theme/vendors/parsleyjs/dist/parsley.min.js"></script>
-
 <div class="">
     <div class="clearfix"></div>   
 
@@ -65,15 +29,15 @@
                         <input type="hidden" name="frm_key" value=""/>
                         <input type="hidden" name="frm_id" value=""/>               
                         <div class="form-group">
-                            <label class="control-label col-md-2 col-sm-3 col-xs-12" for="first-name">Name <span class="required">*</span></label>
+                            <label class="control-label col-md-2 col-sm-3 col-xs-12" >Name <span class="required">*</span></label>
                             <div class="col-md-6 col-sm-6 col-xs-12">
                                 <input type="text" name="frm_name" id="frm_name" value="<?php echo set_value('frm_prefix'); ?>"  data-parsley-required="" data-parsley-length="[5, 30]" class="form-control col-md-7 col-xs-12">
                             </div>
                         </div>
 
-                        <?php if (!check_logged_account_type(array('RESELLER'))) : ?>
+                        <?php if (!check_logged_user_group(array('RESELLER'))) : ?>
                             <div class="form-group">
-                                <label class="control-label col-md-2 col-sm-3 col-xs-12" for="first-name">Type <span class="required">*</span></label>
+                                <label class="control-label col-md-2 col-sm-3 col-xs-12" >Type <span class="required">*</span></label>
                                 <div class="col-md-6 col-sm-6 col-xs-12">
                                     <select name="frm_type" id="frm_type" class="form-control data-search-field">
                                         <option value="CUSTOMER"  <?php if (set_value('frm_type') == 'customer') echo 'selected'; ?>>Customer</option>
@@ -84,7 +48,7 @@
                                 </div>
                             </div> 
                             <div class="form-group">
-                                <label class="control-label col-md-2 col-sm-3 col-xs-12" for="first-name">Currency <span class="required">*</span></label>
+                                <label class="control-label col-md-2 col-sm-3 col-xs-12" >Currency <span class="required">*</span></label>
                                 <div class="col-md-6 col-sm-6 col-xs-12">
                                     <select name="frm_currency" id="frm_currency" class="form-control data-search-field" <?php if (get_logged_account_level() != 0) echo 'readonly'; ?>>
                                         <?php for ($i = 0; $i < count($currency_data); $i++) { ?>	
@@ -99,7 +63,7 @@
                                 </div>
                             </div>    
                         <?php else: ?>
-                            <input type="hidden" name="frm_type" id="frm_type" value="user" data-parsley-required="" class="form-control" />
+                            <input type="hidden" name="frm_type" id="frm_type" value="CUSTOMER" data-parsley-required="" class="form-control" />
                             <input type="hidden" name="frm_currency" id="frm_currency" value="<?php echo get_logged_account_currency(); ?>" data-parsley-required="" class="form-control" />
                         <?php endif; ?>
 
@@ -121,7 +85,6 @@
                         <div class="ln_solid"></div>
                         <div class="form-group">
                             <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
-                                <!--<a href="<?php echo base_url('tariffs') ?>"><button class="btn btn-primary" type="button">Cancel</button></a>-->				
                                 <button type="button" id="btnSave" class="btn btn-success">Save</button>
                                 <button type="button" id="btnSaveClose" class="btn btn-info">Save & Go Back to Listing Page</button>
                             </div>
@@ -144,21 +107,5 @@
 
     </div>
 </div>    
-<script>
-    $('#btnSave, #btnSaveClose').click(function () {
-        var is_ok = $("#add_form").parsley().isValid();
-        if (is_ok === true)
-        {
-            var clicked_button_id = this.id;
-            if (clicked_button_id == 'btnSaveClose')
-                $('#button_action').val('save_close');
-            else
-                $('#button_action').val('save');
-
-            $("#add_form").submit();
-        } else
-        {
-            $('#add_form').parsley().validate();
-        }
-    })
-</script>
+<script src="<?php echo base_url() ?>theme/vendors/parsleyjs/dist/parsley.min.js"></script>
+<script src="<?php echo base_url() ?>theme/default/js/parsley-custom.js"></script>

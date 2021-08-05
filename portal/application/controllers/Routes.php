@@ -1,15 +1,15 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019 Chinna Technologies  
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
+// OV500 Version 2.0.0
+// Copyright (C) 2019-2021 Openvoips Technologies   
 // http://www.openvoips.com  http://www.openvoips.org
-//
-//
-//OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// The Initial Developer of the Original Code is
+// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
+// Portions created by the Initial Developer are Copyright (C)
+// the Initial Developer. All Rights Reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -28,7 +28,7 @@
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
-class Routes extends CI_Controller {
+class Routes extends MY_Controller {
 
     public $search_serialize = '';
 
@@ -141,7 +141,7 @@ class Routes extends CI_Controller {
                 $per_page = RECORDS_PER_PAGE;
 
             $option_param = array();
-            $response = $this->route_mod->get_data($order_by,  $segment, $per_page, $search_data, $option_param);
+            $response = $this->route_mod->get_data($order_by, $segment, $per_page, $search_data, $option_param);
             $config = array();
             $config = $this->utils_model->setup_pagination_option($response['total'], 'routes/index', $per_page, $pagination_uri_segment);
             $this->pagination->initialize($config);
@@ -150,7 +150,7 @@ class Routes extends CI_Controller {
             $data['listing_data'] = $response['result'];
             $data['total_records'] = $data['listing_count'] = $response['total'];
 
-            
+
             //print_r($data);
             $this->load->view('basic/header', $data);
             $this->load->view('carrier/routes', $data);

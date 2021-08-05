@@ -1,0 +1,76 @@
+@charset "utf-8";
+/* CSS Document */
+
+.td_1 p{}
+.td_3 p{}
+.td_4 p{}
+.td_5 button{margin-top:12px;}
+.td_6 p{}
+a.tag2{
+font-weight:bold;
+}
+a.tag2:hover{
+text-decoration:underline;
+}
+a.tag3{
+font-size:16px;
+}
+a.tag3:hover{
+text-decoration:underline;
+}
+
+
+.edit_text{
+font-size: 14px;
+font-weight: 400;
+text-decoration:underline;
+display: block;
+color:#003366;
+}
+.inline_update{
+border-bottom: 1px solid #e8e8e8;
+}
+
+
+ul.messages li .message_wrapper {
+    margin-left: 0px;
+    margin-right: 0px;
+}
+ul.messages li {
+    border-bottom:none;
+    padding: 8px 0;
+}
+
+blockquote.message{
+font-size: 14.5px;
+}
+
+blockquote.message p{
+	margin:0 0 2px;
+}
+
+ul.messages1 li .message_date1 {
+    float: left;
+    text-align: left;
+}
+
+/*.alternate li:nth-of-type(2n+1) {
+    background-color: #f9f9f9;
+}*/
+.bg1{
+	 background-color: #f9f9f9;
+}
+.border1{
+	 border-bottom: 1px dotted #e6e6e6;;
+}
+.highlight{
+color:#660099;
+}
+
+p.url {
+    margin: 0 0 5px;
+}
+
+
+
+

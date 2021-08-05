@@ -1,37 +1,4 @@
-<!--
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019-2020 Chinna Technologies   
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
-// http://www.openvoips.com  http://www.openvoips.org
-//
-//
-// OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
-//
-//
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
--->
-<!-- Parsley -->
+
 <script src="<?php echo base_url() ?>theme/vendors/parsleyjs/dist/parsley.min.js"></script>
 <?php
 $prefix_data = $data['prefix'];
@@ -69,7 +36,7 @@ foreach ($prefix_data as $prefix_data_temp) {
                     <input type="hidden" name="id" value="<?php echo $data['id']; ?>"/>
                     <input type="hidden" name="carrier_id" value="<?php echo $data['carrier_id']; ?>"/>    
                     <input type="hidden" name="carrier_key" value="<?php echo $data['carrier_id']; ?>"/>        
-
+                    <input type="hidden" name="tab" value="<?php echo $active_tab; ?>">
 
                     <div class="form-group">
                         <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Carrier </label>
@@ -87,16 +54,16 @@ foreach ($prefix_data as $prefix_data_temp) {
                             <small>(comma or new line separated)</small>    
                         </div>
 
-                             <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Rules Notes </label>
-                             <div class="col-md-8 col-sm-6 col-xs-12" style="color: blue">                  
+                        <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Rules Notes </label>
+                        <div class="col-md-8 col-sm-6 col-xs-12" style="color: blue">                  
                             %=>% : allow all dialed number without any translation.
-<br/>44|%=>% : allow only 44 prefix Dialed number and removing 44 prefix from dialed number.
-<br/>44|%=>0044% : allow only 44 prefix dialed number and removing 44 and adding 0044 prefix in dialed number.
-<br/>44{4}|%=>% : allowing only 44 prefix dialed number with 4 length and removing 44 from the dialed number.
-<br/>{10}%=>91% : allowing only 10 digit dialed number and adding 91 prefix in the number.
-<br/>%=>441149800228 : allowing all dialed number and replacing incoming dialed number with 441149800228.
+                            <br/>44|%=>% : allow only 44 prefix Dialed number and removing 44 prefix from dialed number.
+                            <br/>44|%=>0044% : allow only 44 prefix dialed number and removing 44 and adding 0044 prefix in dialed number.
+                            <br/>44{4}|%=>% : allowing only 44 prefix dialed number with 4 length and removing 44 from the dialed number.
+                            <br/>{10}%=>91% : allowing only 10 digit dialed number and adding 91 prefix in the number.
+                            <br/>%=>441149800228 : allowing all dialed number and replacing incoming dialed number with 441149800228.
                         </div>
-                        
+
                     </div>
 
 
@@ -116,13 +83,13 @@ foreach ($prefix_data as $prefix_data_temp) {
             </div>
         </div>
     </div>
- 
+
     <div class="col-md-12 col-sm-12 col-xs-12 right">
         <div class="ln_solid"></div>
         <div class="x_title">
             <h2>Carrier Termination Prefix Translation Rules</h2>
             <ul class="nav navbar-right panel_toolbox">     
-                <li><a href="<?php echo base_url() . 'carriers/edit/' . param_encrypt($data['carrier_id']); ?>"><button class="btn btn-danger" type="button" >Back to Carrier Edit Page</button></a> </li>
+                <li><a href="<?php echo base_url() . 'carriers/edit/' . param_encrypt($data['carrier_id']); ?>/<?php echo $active_tab; ?>"><button class="btn btn-danger" type="button" >Back to Carrier Edit Page</button></a> </li>
             </ul>
             <div class="clearfix"></div>
         </div>

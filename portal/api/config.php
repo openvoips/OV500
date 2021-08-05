@@ -36,10 +36,13 @@ date_default_timezone_set("GMT0");
 define('CDR_DSN', 'mysql:dbname=switchcdr;host=localhost');
 define('CDR_DSN_LOGIN', 'ovswitch');
 define('CDR_DSN_PASSWORD', 'ovswitch123');
-define('SWITCH_DSN', 'mysql:dbname=switch;host=localhost');
+define('SWITCH_DSN', 'mysql:dbname=sasswtch;host=localhost');
 define('SWITCH_DSN_LOGIN', 'ovswitch');
 define('SWITCH_DSN_PASSWORD', 'ovswitch123');
 define('LOGPATH', 'log/');
-define('LOGWRITE', '0');
-define('DBLOGWRITE', '0');
+define('LOGWRITE', '1');
+define('APIDOAMIN','http://portal.openvoips.org/portal/');
+define('LB', '209.126.76.246');
+
+
 ?>

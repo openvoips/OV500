@@ -1,36 +1,3 @@
-<!--
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019-2020 Chinna Technologies 
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
-// http://www.openvoips.com  http://www.openvoips.org
-//
-//
-// OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
-//
-//
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
--->
 <script src="<?php echo base_url() ?>theme/vendors/parsleyjs/dist/parsley.min.js"></script>
 <?php
 $tab_index = 1;
@@ -85,7 +52,7 @@ $tab_index = 1;
                                     foreach ($tariff_options as $key => $tariff_name_array) {
                                         //print_r($tariff_name_array);
                                         $selected = ' ';
-                                        if (set_value('tariff_id')  == $tariff_name_array['tariff_id']) {
+                                        if (set_value('tariff_id') == $tariff_name_array['tariff_id']) {
                                             $selected = '  selected="selected" ';
                                             $is_assigned_tariff_found = true;
                                         }
@@ -108,9 +75,9 @@ $tab_index = 1;
                                     $str = '';
                                     $is_assigned_dialplan_found = false;
                                     foreach ($dialplan_options as $key => $dialplan_name_array) {
-                                    //    print_r($dialplan_name_array);
+                                        //    print_r($dialplan_name_array);
                                         $selected = ' ';
-                                        if (set_value('dialplan_id')  == $dialplan_name_array['dialplan_id']) {
+                                        if (set_value('dialplan_id') == $dialplan_name_array['dialplan_id']) {
                                             $selected = '  selected="selected" ';
                                             $is_assigned_dialplan_found = true;
                                         }
@@ -158,21 +125,21 @@ $tab_index = 1;
 <?php //echo '<pre>'; print_r($tariff_options);echo '</pre>';?>
 <script>
 //////////////////////
-$('#form_btnSave, #form_btnSaveClose').click(function () {
-	var is_ok = $("#provider_form").parsley().isValid();
-	if (is_ok === true)
-	{
-		var clicked_button_id = this.id;
-		if (clicked_button_id == 'form_btnSaveClose')
-			$('#button_action').val('save_close');
-		else
-			$('#button_action').val('save');
+    $('#form_btnSave, #form_btnSaveClose').click(function () {
+        var is_ok = $("#provider_form").parsley().isValid();
+        if (is_ok === true)
+        {
+            var clicked_button_id = this.id;
+            if (clicked_button_id == 'form_btnSaveClose')
+                $('#button_action').val('save_close');
+            else
+                $('#button_action').val('save');
 
 
-		$("#provider_form").submit();
-	} else
-	{
-		$('#provider_form').parsley().validate();
-	}
-});
+            $("#provider_form").submit();
+        } else
+        {
+            $('#provider_form').parsley().validate();
+        }
+    });
 </script>

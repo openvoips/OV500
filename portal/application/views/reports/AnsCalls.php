@@ -1,36 +1,4 @@
-<!--
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019-2020 Chinna Technologies   
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
-// http://www.openvoips.com  http://www.openvoips.org
-//
-//
-// OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
-//
-//
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
--->
+
 <div class="col-md-12 col-sm-12 col-xs-12">
     <div class="x_panel">
         <div class="x_title">
@@ -134,37 +102,44 @@
 
                 <div class="row">
 
-                    <div class="col-md-6">				
+                    <div class="col-md-5">				
                         <label class="control-label col-md-2 col-sm-3 col-xs-12">Date</label>
-                        <div class="col-md-8 col-sm-9 col-xs-12">
+                        <div class="col-md-10 col-sm-9 col-xs-12">
                             <input type="text" name="time_range" id="time_range" class="form-control " value="<?php if (isset($_SESSION['search_cdr_data']['s_time_range'])) echo $_SESSION['search_cdr_data']['s_time_range']; ?>" readonly="readonly" data-parsley-required="" />
                         </div> 
 
                     </div>
+                    <div class="col-md-3">
+                        <label class="control-label col-md-6 col-sm-6 col-xs-12">Call Type</label>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <select name="cdr_type" id="cdr_type" class="form-control">
+                                <option value="">Select</option>
+                                <option value="in" <?php if ($_SESSION['search_cdr_data']['s_cdr_cdr_type'] == 'in') echo 'selected="selected"'; ?>>IN </option> 
+                                <option value="out" <?php if ($_SESSION['search_cdr_data']['s_cdr_cdr_type'] == 'out') echo 'selected="selected"'; ?>>OUT </option>
+                                <option value="exten" <?php if ($_SESSION['search_cdr_data']['s_cdr_cdr_type'] == 'exten') echo 'selected="selected"'; ?>>EXTEN </option> 
 
-                    <div class="col-md-6">	
 
+                            </select>
+                        </div>
+                    </div>
 
-                        <div class="col-md-10">
-                            <label class="control-label col-md-4 col-sm-3 col-xs-12">Duration (Sec)</label>
-                            <div class="col-md-3 col-sm-4 col-xs-12">
-                                <select name="duration_range" id="duration_range" class="form-control" data-parsley-required="">
-                                    <option value="gt" <?php echo ($_SESSION['search_cdr_data']['s_cdr_call_duration_range'] == 'gt') ? 'selected="selected"' : ''; ?>>> </option> 
-                                    <option value="ls" <?php echo ($_SESSION['search_cdr_data']['s_cdr_call_duration_range'] == 'ls') ? 'selected="selected"' : ''; ?>>< </option> 
-                                    <option value="gteq" <?php echo ($_SESSION['search_cdr_data']['s_cdr_call_duration_range'] == 'gteq') ? 'selected="selected"' : ''; ?>>>= </option>
-                                    <option value="lseq" <?php echo ($_SESSION['search_cdr_data']['s_cdr_call_duration_range'] == 'lseq') ? 'selected="selected"' : ''; ?>> <= </option>
+                    <div class="col-md-4">	                    
+                        <label class="control-label col-md-5 col-sm-3 col-xs-12">Duration (Sec)</label>
+                        <div class="col-md-3 col-sm-4 col-xs-12">
+                            <select name="duration_range" id="duration_range" class="form-control" data-parsley-required="">
+                                <option value="gt" <?php echo ($_SESSION['search_cdr_data']['s_cdr_call_duration_range'] == 'gt') ? 'selected="selected"' : ''; ?>>> </option> 
+                                <option value="ls" <?php echo ($_SESSION['search_cdr_data']['s_cdr_call_duration_range'] == 'ls') ? 'selected="selected"' : ''; ?>>< </option> 
+                                <option value="gteq" <?php echo ($_SESSION['search_cdr_data']['s_cdr_call_duration_range'] == 'gteq') ? 'selected="selected"' : ''; ?>>>= </option>
+                                <option value="lseq" <?php echo ($_SESSION['search_cdr_data']['s_cdr_call_duration_range'] == 'lseq') ? 'selected="selected"' : ''; ?>> <= </option>
 
-                                    <option value="eq" <?php echo ($_SESSION['search_cdr_data']['s_cdr_call_duration_range'] == 'eq') ? 'selected="selected"' : ''; ?>> = </option>
+                                <option value="eq" <?php echo ($_SESSION['search_cdr_data']['s_cdr_call_duration_range'] == 'eq') ? 'selected="selected"' : ''; ?>> = </option>
 
-                                </select>
-                            </div>
+                            </select>
+                        </div>
 
-                            <div class="col-md-5">
+                        <div class="col-md-4">
 
-                                <input type="text" name="call_duration" id="call_duration" value="<?php echo $_SESSION['search_cdr_data']['s_cdr_call_duration']; ?>" class="form-control data-search-field" placeholder="Duration"> 
-
-                            </div>
-
+                            <input type="text" name="call_duration" id="call_duration" value="<?php echo $_SESSION['search_cdr_data']['s_cdr_call_duration']; ?>" class="form-control data-search-field" placeholder="Duration"> 
 
                         </div>
 
@@ -289,15 +264,7 @@
 
 
 <script>
-//var cur_date = moment().tz("GMT").format('YYYY-MM-DD HH:mm');
     $(document).ready(function () {
-        //moment.tz.setDefault('GMT');
-        //moment.tz.setDefault('Asia/Calcutta');
-        //Asia/Calcutta
-//	moment().tz("America/Los_Angeles").format();
-//moment.tz("2012-03-11 01:59:59", "America/New_York").format();
-
-
         $("#time_range").daterangepicker({
             timePicker: !0,
             timePickerIncrement: 1,
@@ -318,22 +285,12 @@
             }
         });
 
-        //$('#recordset').removeAttr("style");
-        // $('#search_loader').css('display','none');
-        $('#analytics').DataTable({
-            searching: false,
-            paging: false,
-            bInfo: false,
-            scrollX: true,
-        });
-        // showDatatable('analytics',[], [1,"asc" ] );
+
+        showDatatable('analytics', [], [1, "asc"]);
 
         $('#OkFilter').click(function () {
             var no_of_records = $('#no_of_records').val();
             $('#no_of_rows').val(no_of_records);
         });
-
-
-
     });
 </script>

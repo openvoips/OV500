@@ -2,13 +2,14 @@
 
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019 Chinna Technologies
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
+// OV500 Version 2.0.0
+// Copyright (C) 2019-2021 Openvoips Technologies   
 // http://www.openvoips.com  http://www.openvoips.org
-//OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// The Initial Developer of the Original Code is
+// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
+// Portions created by the Initial Developer are Copyright (C)
+// the Initial Developer. All Rights Reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -23,6 +24,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 // ##############################################################################
+
 
 class Did_mod extends CI_Model {
 
@@ -46,6 +48,8 @@ class Did_mod extends CI_Model {
                     } elseif ($value != '') {
                         if ($key == 'did_id')
                             $sql .= " AND $key ='" . $value . "' ";
+                        elseif ($key == 'prefix')
+                            $sql .= " AND $key ='%" . $value . "' ";
                         else
                             $sql .= " AND $key LIKE '%" . $value . "%' ";
                     }
@@ -203,6 +207,7 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
             }
             $incoming_ratecard_id = $row['incoming_ratecard_id'];
             $error_message_array = array();
+			$rate_values='';
             for ($i = 1; $i < count($csv_data); $i++) {
                 $data = $csv_data[$i];
                 $lineno = $i + 1;
@@ -271,6 +276,12 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                 $did_array[] = "'" . $did . "'";
                 $did_data_array[] = $did_data_array_temp;
                 $rate_data_array[] = $rate_data_array_temp;
+
+
+                $rate_data_array_temp_str = "'" . implode("','", $rate_data_array_temp) . "'";
+                if ($rate_values != '')
+                    $rate_values .= ",";
+                $rate_values .= '(' . $rate_data_array_temp_str . ')';
             }
             if (count($error_message_array) > 0) {
                 $msg = implode('<br>', $error_message_array);
@@ -296,32 +307,29 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                     $error_array = $this->db->error();
                     throw new Exception($error_array['message']);
                 }
-                $result = $this->db->insert_batch('carrier_rates', $rate_data_array);
+
+
+                $rate_fields_array = array_keys($rate_data_array_temp);
+                $rate_fields = implode(", ", $rate_fields_array);
+                $sql = "INSERT INTO carrier_rates ($rate_fields) VALUES $rate_values
+  ON DUPLICATE KEY UPDATE 
+ 
+  destination=VALUES(destination), 
+  rate=VALUES(rate), connection_charge=VALUES(connection_charge), setup_charge=VALUES(setup_charge), rental=VALUES(rental), minimal_time=VALUES(minimal_time), resolution_time=VALUES(resolution_time)  ";
+
+                $result = $this->db->query($sql);
                 if (!$result) {
                     $error_array = $this->db->error();
                     throw new Exception($error_array['message']);
                 }
             }
 
-
             if ($this->db->trans_status() === FALSE) {
                 $error_array = $this->db->error();
                 $this->db->trans_rollback();
                 return $error_array['message'];
             } else {
-                $this->db->trans_commit();
-                $did_number_array = array_column($did_data_array, 'did_number');
-                $api_request = array();
-                $api_request['request'] = 'SUPPILERNEWDID';
-                $api_request['action'] = 'NEW';
-                $api_request['service_number'] = $did_number_array;
-                $api_request['carrier'] = $carrier_id;
-
-                $api_response = callSdrAPI($api_request);
-                $api_result = json_decode($api_response, true);
-                if (!isset($api_result['error']) || $api_result['error'] == '1') {
-                    //throw new Exception('SDR Problem:('.$api_result['message'].')');;
-                }
+                $this->db->trans_commit();    
             }
             return true;
         } catch (Exception $e) {
@@ -375,7 +383,7 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
             $rate_data_array['grace_period'] = 0;
             $rate_data_array['rate_multiplier'] = 1;
             $rate_data_array['rate_addition'] = 0;
-            $rate_data_array['rates_status'] = 1;
+            $rate_data_array['rates_status'] = '1';
             $rate_data_array['prefix'] = $did_data_array['did_number'];
             $rate_data_array['create_dt'] = date('Y-m-d H:i:s');
 
@@ -552,16 +560,16 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                     $existing_account_id = $existing_did_row['account_id'];
                     $extra_channel = $data['channels'] - $existing_did_row['channels'];
                     if ($extra_channel > 0) {
-                        $api_request['request'] = 'DIDEXTRACHRENTAL';
+                        $api_request['REQUEST'] = 'DIDEXTRACHRENTAL';
                         $api_request['service_number'] = $existing_did_row['did_number'];
                         $api_request['channels'] = $extra_channel;
                         if ($existing_account_id != '') {
                             $api_request['account_id'] = $existing_account_id;
                             $api_request['account_type'] = 'CUSTOMER';
                             $api_request['account_level'] = '';
-                            $api_response = callSdrAPI($api_request);
+                            $api_response = call_billing_api($api_request);                         
                             $api_result = json_decode($api_response, true);
-                            $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['request'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
+                            $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['REQUEST'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
                             if (!isset($api_result['error']) || $api_result['error'] == '1') {
                                 $this->db->trans_rollback();
                                 throw new Exception('SDR Problem:(' . $api_request['account_id'] . ')' . $api_result['message']);
@@ -571,9 +579,8 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                         if ($existing_reseller1_account_id != '') {
                             $api_request['account_id'] = $existing_reseller1_account_id;
                             $api_request['account_type'] = 'RESELLER';
-                            $api_request['account_level'] = '1';
-
-                            $api_response = callSdrAPI($api_request);
+                            $api_request['account_level'] = '1';                          
+                            $api_response = call_billing_api($api_request);
                             $api_result = json_decode($api_response, true);
                             $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['request'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
                             if (!isset($api_result['error']) || $api_result['error'] == '1') {
@@ -586,8 +593,7 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                             $api_request['account_id'] = $existing_reseller2_account_id;
                             $api_request['account_type'] = 'RESELLER';
                             $api_request['account_level'] = '2';
-
-                            $api_response = callSdrAPI($api_request);
+                            $api_response = call_billing_api($api_request);
                             $api_result = json_decode($api_response, true);
                             $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['request'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
                             if (!isset($api_result['error']) || $api_result['error'] == '1') {
@@ -599,8 +605,8 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                         if ($existing_reseller3_account_id != '') {
                             $api_request['account_id'] = $existing_reseller3_account_id;
                             $api_request['account_type'] = 'RESELLER';
-                            $api_request['account_level'] = '3';
-                            $api_response = callSdrAPI($api_request);
+                            $api_request['account_level'] = '3';                           
+                            $api_response = call_billing_api($api_request);
                             $api_result = json_decode($api_response, true);
                             $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['request'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
                             if (!isset($api_result['error']) || $api_result['error'] == '1') {
@@ -678,7 +684,7 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
         $account_id = get_logged_account_id();
         $reseller_level = get_logged_account_level();
 
-        $sql = "SELECT ratecard_id FROM tariff_ratecard_map inner join account on tariff_ratecard_map.tariff_id = account.tariff_id WHERE  ratecard_for = 'INCOMING' and  account.account_id = '" . $account_id . "'";
+        $sql = "SELECT ratecard_id FROM tariff_ratecard_map inner join customer_voipminuts on tariff_ratecard_map.tariff_id = customer_voipminuts.tariff_id WHERE  ratecard_for = 'INCOMING' and  customer_voipminuts.account_id = '" . $account_id . "'";
         $query = $this->db->query($sql);
         $row = $query->row_array();
         if (!isset($row)) {
@@ -733,10 +739,11 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
         return $return;
     }
 
-    function getAvailableDID($did) {
+    function getAvailableDID($did, $area_specific = false) {
         $account_type = get_logged_account_type();
         $account_id = get_logged_account_id();
-        $sql = "SELECT ratecard_id FROM tariff_ratecard_map inner join account on tariff_ratecard_map.tariff_id = account.tariff_id WHERE  ratecard_for = 'INCOMING' and  account.account_id = '" . $account_id . "'";
+         $sql = "SELECT ratecard_id FROM tariff_ratecard_map inner join customer_voipminuts on tariff_ratecard_map.tariff_id = customer_voipminuts.tariff_id WHERE  ratecard_for = 'INCOMING' and  customer_voipminuts.account_id = '" . $account_id . "'";
+
         $query = $this->db->query($sql);
         $rs = $query->row();
         $incoming_ratecard_id = '';
@@ -744,8 +751,14 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
             $incoming_ratecard_id = "'" . $value . "',";
         }
         $incoming_ratecard_id = rtrim($incoming_ratecard_id, ',');
+
+        if ($area_specific)
+            $did_table = 'new_did';
+        else
+            $did_table = 'did';
+
         if (isset($rs)) {
-            $sql = "SELECT * FROM customer_rates WHERE ratecard_id in  (" . $incoming_ratecard_id . ") and ('" . $did . "' like concat(prefix,'%') or prefix like '" . $did . "%')";
+            $sql = "SELECT * FROM customer_rates WHERE ratecard_id in  (" . $incoming_ratecard_id . ") and ('" . $did . "' like concat('%',prefix,'%') or prefix like '%" . $did . "%')";
             $query = $this->db->query($sql);
             $rs_rates = $query->row();
             if (isset($rs_rates)) {
@@ -754,11 +767,11 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                 $parent_account_id = $user_result['parent_account_id'];
                 if ($account_type == 'CUSTOMER') {
                     if ($parent_account_id == '') {
-                        $sql = "SELECT did_number FROM did where (account_id is NULL OR account_id='') and did_status = 'NEW' ";
+                        $sql = "SELECT did_number FROM $did_table where (account_id is NULL OR account_id='') and did_status = 'NEW' ";
                     } else {
                         $reseller_result = $this->member_mod->get_account_by_key('account_id', $parent_account_id, $option_param);
                         $parent_level = $reseller_result['account_level'];
-                        $sql = "SELECT did_number FROM did where account_id is null and did_status = 'USED' ";
+                        $sql = "SELECT did_number FROM $did_table where account_id is null and did_status = 'USED' ";
                         if ($parent_level == 1)
                             $sql .= " and reseller1_account_id = '" . $parent_account_id . "'";
                         elseif ($parent_level == 2)
@@ -768,7 +781,7 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                     }
                 } else {
                     $reseller_level = get_logged_account_level();
-                    $sql = "SELECT did_number FROM did where (account_id is NULL OR account_id='') ";
+                    $sql = "SELECT did_number FROM $did_table where (account_id is NULL OR account_id='') ";
                     if ($reseller_level == 1) {
                         $sql .= " AND did_status = 'NEW' ";
                     } elseif ($reseller_level == 2) {
@@ -777,12 +790,9 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                         $sql .= " and did_status = 'USED' and reseller2_account_id = '" . $parent_account_id . "'";
                     }
                 }
-                $sql .= " and did_number like '" . $did . "%' limit 15 ";
+                $sql .= " and did_number like '%" . $did . "%' limit 500 ";
                 $query = $this->db->query($sql);
                 $rows = $query->result_array();
-
-//                $return = array('status' => false, 'msg' => 'DID available', 'dids' => $sql);
-//                return $return;
 
 
                 if (count($rows) > 0) {
@@ -810,27 +820,280 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
         //echo '<pre>';print_r($return);echo '</pre>';
         return $return;
     }
+	
+	
+	 function destination_bulk($data) {
+        try {
+            $log_data_array = array();
+            $did_data_array = array();
 
-    function assignment($did, $setup, $rental) {
+            $this->db->trans_begin();
 
+            $account_id = get_logged_account_id();
+            $assign_did_number = $data['assign_did_number'];
+
+            if (!isset($data['assign_did_number']) || $data['assign_did_number'] == '') {
+                throw new Exception('DID Numbers Not Found');
+            }
+
+            $did_data_array['dst_type'] = $data['dst_type'];
+
+            if ($data['dst_type'] == 'IP')
+                $dst_destination = $data['dst_point_ip'];
+            elseif ($data['dst_type'] == 'CUSTOMER')
+                $dst_destination = $data['dst_point_sip'];
+            else
+                $dst_destination = $data['dst_point_pstn'];
+
+
+            $did_data_array['dst_type2'] = $data['dst_type2'];
+            if ($data['dst_type2'] == 'IP')
+                $dst_destination2 = $data['dst_point2_ip'];
+            elseif ($data['dst_type2'] == 'CUSTOMER')
+                $dst_destination2 = $data['dst_point2_sip'];
+            else
+                $dst_destination2 = $data['dst_point2_pstn'];
+
+
+            $assign_did_number_array = explode(',', $assign_did_number);
+            $assign_did_number_str = "'" . implode("','", $assign_did_number_array) . "'";
+
+            $db_array = $add_array = $update_array = array();
+
+            $sql = "SELECT did_number FROM " . $this->db->dbprefix('did_dst') . " WHERE account_id='$account_id' AND did_number IN($assign_did_number_str)";
+
+            $query = $this->db->query($sql);
+            foreach ($query->result_array() as $row) {
+                $db_array[] = $row['did_number'];
+            }
+
+
+
+            $add_array = array_diff($assign_did_number_array, $db_array);
+            $update_array = array_intersect($assign_did_number_array, $db_array);
+
+            $did_add_data_array = $did_update_data_array = array();
+            $did_update_data_array['dst_type'] = $data['dst_type'];
+            $did_update_data_array['dst_destination'] = $dst_destination;
+            $did_update_data_array['dst_type2'] = $data['dst_type2'];
+            $did_update_data_array['dst_destination2'] = $dst_destination2;
+
+            if (count($add_array) > 0) {
+                foreach ($add_array as $did) {
+                    if (trim($did) == '')
+                        continue;
+                    $did_add_data_array[] = array(
+                        'account_id' => $account_id,
+                        'did_number' => $did,
+                        'create_date' => date('Y-m-d'),
+                        'dst_type' => $data['dst_type'],
+                        'dst_destination' => $dst_destination,
+                        'dst_type2' => $data['dst_type2'],
+                        'dst_destination2' => $dst_destination2,
+                    );
+                }
+                $this->db->insert_batch('did_dst', $did_add_data_array);
+            }
+
+            if (count($update_array) > 0) {
+                $update_array_str = "'" . implode("','", $update_array) . "'";
+                $where = " account_id='" . $account_id . "' AND did_number IN($update_array_str)";
+                $str = $this->db->update_string($this->db->dbprefix('did_dst'), $did_update_data_array, $where);
+                $result = $this->db->query($str);
+                if (!$result) {
+                    $error_array = $this->db->error();
+                    throw new Exception($error_array['message']);
+                }
+            }
+
+
+
+            if ($this->db->trans_status() === FALSE) {
+                $error_array = $this->db->error();
+                $this->db->trans_rollback();
+                return $error_array['message'];
+            } else {
+                $this->db->trans_commit();
+                //set_activity_log($log_data_array);
+            }
+            return true;
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            return $e->getMessage();
+        }
+    }
+
+    function assignment_bulk($did_data) {
         try {
             $account_type = get_logged_account_type();
             $account_id = get_logged_account_id();
             $account_level = get_logged_account_level();
-            ///////////api/////////
-            $api_request['request'] = 'NEWDIDSETUP';
-            $api_request['account_id'] = $account_id;
-            $api_request['service_number'] = $did;
-            $api_request['account_type'] = $account_type;
-            $api_request['account_level'] = $account_level;
+            $this->completed_did_purchase = 0;
 
-            //$request['channels'] = '15';
-            $api_response = callSdrAPI($api_request);
-            $api_result = json_decode($api_response, true);
-            if (!isset($api_result['status']) || $api_result['status'] != 'SUCCESS') {
-                throw new Exception('SDR Problem:' . $api_result['message']);
+            $completed_did_array = array();
+			
+			////find parent
+			$sql = "SELECT parent_account_id, account_type FROM account WHERE account_id='$account_id'";
+			$query = $this->db->query($sql);
+            $parent_account_row = $query->row_array(); 
+			$parent_account_id = $parent_account_row['parent_account_id'];
+			$parent_account_type = $parent_account_row['account_type'];
+			//////
+			
+            foreach ($did_data['did'] as $did) {
+                $this->db->trans_begin();
+                if ($account_type == 'CUSTOMER') {
+                    $sql = "update did set did_status = 'USED', account_id = '" . $account_id . "', assign_date = now() WHERE did_number = '" . $did . "'";
+                } else {
+                    if ($account_level == 1)
+                        $sql = "update did set did_status = 'USED', reseller1_account_id = '" . $account_id . "',reseller1_assign_date = now() WHERE did_number = '" . $did . "'";
+                    elseif ($account_level == 2)
+                        $sql = "update did set did_status = 'USED', reseller2_account_id = '" . $account_id . "', reseller2_assign_date = now() WHERE did_number = '" . $did . "'";
+                    else
+                        $sql = "update did set did_status = 'USED', reseller3_account_id = '" . $account_id . "', reseller3_assign_date = now() WHERE did_number = '" . $did . "'";
+                }
+                $result = $this->db->query($sql);
+                if (!$result) {
+                    $error_array = $this->db->error();
+                    throw new Exception($error_array['message']);
+                }
+
+                if ($this->db->trans_status() === FALSE) {
+                    $error_array = $this->db->error();
+                    $this->db->trans_rollback();
+                    throw new Exception($error_array['message']);
+                } else {                   	
+                    
+				if($account_type == 'CUSTOMER' || $parent_account_id!='')
+				{
+					////customer
+					$api_request=array();
+					$api_request['REQUEST'] = 'NEWDIDSETUP';
+                    $api_request['account_id'] = $account_id;
+                    $api_request['service_number'] = $did;
+                    $api_request['account_type'] = $account_type;
+                    $api_request['account_level'] = $account_level;
+                    $api_response = call_billing_api($api_request);
+					$api_result = json_decode($api_response, true);
+					if (!isset($api_result['error']) || $api_result['error'] == '1') {
+                        $this->db->trans_rollback();
+                        throw new Exception('SDR Problem:' . $api_result['message']);
+                    }   
+					///////
+					//////parent if exists
+					if($parent_account_id!='')
+					{
+						$api_request=array();
+						$api_request['REQUEST'] = 'NEWDIDSETUP';
+						$api_request['account_id'] = $parent_account_id;
+						$api_request['service_number'] = $did;
+						$api_request['account_type'] = $parent_account_type;
+						$api_request['account_level'] = $account_level-1;
+						$api_response = call_billing_api($api_request);
+						$api_result = json_decode($api_response, true);
+					}
+					
+					   
+				}
+					
+					/*echo "---------------------------------1 <br>";
+					
+					echo ( $api_response);
+					
+                    
+						echo "---------------------------------2 <br>";
+					print_r( $api_result);
+					die;*/
+                                     
+                }
+                $this->db->trans_commit();
+                $this->completed_did_purchase = $this->completed_did_purchase + 1;
+                $completed_did_array[] = $did;
+                $did_key = array_search($did, $_SESSION['cart']['did']);
+                if ($did_key !== false)
+                    unset($_SESSION['cart']['did'][$did_key]);
             }
+
+            if (isset($did_data['id_checkbox_configure_dest']) && $did_data['id_checkbox_configure_dest'] == 'yes') {
+                if (count($completed_did_array) > 0) {
+                    if ($did_data['dst_type'] == 'IP')
+                        $dst_destination = $did_data['dst_point_ip'];
+                    elseif ($did_data['dst_type'] == 'CUSTOMER')
+                        $dst_destination = $did_data['dst_point_sip'];
+                    else
+                        $dst_destination = $did_data['dst_point_pstn'];
+                    if ($did_data['dst_type2'] == 'IP')
+                        $dst_destination2 = $did_data['dst_point2_ip'];
+                    elseif ($did_data['dst_type2'] == 'CUSTOMER')
+                        $dst_destination2 = $did_data['dst_point2_sip'];
+                    else
+                        $dst_destination2 = $did_data['dst_point2_pstn'];
+                    $did_add_data_array = array();
+                    foreach ($completed_did_array as $did) {
+                        if (trim($did) == '')
+                            continue;
+                        $did_add_data_array[] = array(
+                            'account_id' => $account_id,
+                            'did_number' => $did,
+                            'create_date' => date('Y-m-d'),
+                            'dst_type' => $did_data['dst_type'],
+                            'dst_destination' => $dst_destination,
+                            'dst_type2' => $did_data['dst_type2'],
+                            'dst_destination2' => $dst_destination2,
+                        );
+                    }
+                    $this->db->insert_batch('did_dst', $did_add_data_array);
+                }
+            }
+            return true;
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+
+            if (isset($did_data['id_checkbox_configure_dest']) && $did_data['id_checkbox_configure_dest'] == 'yes') {
+                if (count($completed_did_array) > 0) {
+                    if ($data['dst_type'] == 'IP')
+                        $dst_destination = $did_data['dst_point_ip'];
+                    elseif ($data['dst_type'] == 'CUSTOMER')
+                        $dst_destination = $did_data['dst_point_sip'];
+                    else
+                        $dst_destination = $did_data['dst_point_pstn'];
+
+                    if ($data['dst_type2'] == 'IP')
+                        $dst_destination2 = $did_data['dst_point2_ip'];
+                    elseif ($data['dst_type2'] == 'CUSTOMER')
+                        $dst_destination2 = $did_data['dst_point2_sip'];
+                    else
+                        $dst_destination2 = $did_data['dst_point2_pstn'];
+                    $did_add_data_array = array();
+                    foreach ($completed_did_array as $did) {
+                        if (trim($did) == '')
+                            continue;
+                        $did_add_data_array[] = array(
+                            'account_id' => $account_id,
+                            'did_number' => $did,
+                            'create_date' => date('Y-m-d'),
+                            'dst_type' => $did_data['dst_type'],
+                            'dst_destination' => $dst_destination,
+                            'dst_type2' => $did_data['dst_type2'],
+                            'dst_destination2' => $dst_destination2,
+                        );
+                    }
+                    $this->db->insert_batch('did_dst', $did_add_data_array);
+                }
+            }
+
+            return $e->getMessage();
+        }
+    }
+
+
+    function assignment($did, $setup, $rental) {
+
+        try {
             $this->db->trans_begin();
+            $account_type = get_logged_account_type();
+            $account_id = get_logged_account_id();
+            $account_level = get_logged_account_level();
             if ($account_type == 'CUSTOMER') {
                 $sql = "update did set did_status = 'USED', account_id = '" . $account_id . "', assign_date = now() WHERE did_number = '" . $did . "'";
             } else {
@@ -850,11 +1113,25 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                 $error_array = $this->db->error();
                 $this->db->trans_rollback();
                 throw new Exception($error_array['message']);
-            } else {
+            } else {	
+                $api_request['REQUEST'] = 'NEWDIDSETUP';
+                $api_request['account_id'] = $account_id;
+                $api_request['service_number'] = $did;
+                $api_request['account_type'] = $account_type;
+                $api_request['account_level'] = $account_level;
+                $api_response = call_billing_api($api_request);
+                $api_result = json_decode($api_response, true);
+                
+                
+                if (!isset($api_result['error']) || $api_result['error'] == '1') {
+                    $this->db->trans_rollback();
+                    throw new Exception('SDR Problem:' . $api_result['message']);
+                }
                 $this->db->trans_commit();
+                return true;
             }
-            return true;
         } catch (Exception $e) {
+            $this->db->trans_rollback();
             return $e->getMessage();
         }
     }
@@ -992,15 +1269,15 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                 $this->db->trans_rollback();
                 return $error_array['message'];
             } else {
-                $this->db->trans_commit();
-                $api_request['request'] = 'DIDCANCEL';
+                $api_request['REQUEST'] = 'DIDCANCEL';
                 $api_request['account_id'] = $account_id;
                 $api_request['service_number'] = $did_row['did_number'];
                 $api_request['account_type'] = $user_row['account_type'];
                 $api_request['account_level'] = $user_row['account_level'];
-                $api_response = callSdrAPI($api_request);
+                              $api_response = call_billing_api($api_request);
                 $api_result = json_decode($api_response, true);
                 if (!isset($api_result['error']) || $api_result['error'] == '1') {
+                    $this->db->trans_rollback();
                     throw new Exception('SDR Problem:' . $api_result['message']);
                 }
 

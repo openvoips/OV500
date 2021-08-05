@@ -1,15 +1,15 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019 Chinna Technologies  
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
+// OV500 Version 2.0.0
+// Copyright (C) 2019-2021 Openvoips Technologies   
 // http://www.openvoips.com  http://www.openvoips.org
-//
-//
-//OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// The Initial Developer of the Original Code is
+// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
+// Portions created by the Initial Developer are Copyright (C)
+// the Initial Developer. All Rights Reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -25,7 +25,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 // ##############################################################################
 
-class Download extends CI_Controller {
+class Download extends MY_Controller {
 
     function __construct() {
         parent::__construct();
@@ -39,6 +39,12 @@ class Download extends CI_Controller {
         switch ($file) {
             case 'rate_incoming':
                 $filename = 'rates_incoming.csv';
+
+                $fullPath = 'uploads/sample/' . $filename;
+
+                break;
+            case 'diversion_number_sample':
+                $filename = 'diversion_number_sample.csv';
 
                 $fullPath = 'uploads/sample/' . $filename;
 
@@ -67,7 +73,7 @@ class Download extends CI_Controller {
                 } else
                     show_404();
         }
-        echo $fullPath;
+
         $this->load->helper('download');
         force_download($fullPath, NULL, true);
         exit;
@@ -123,6 +129,28 @@ class Download extends CI_Controller {
           }
           }
           fclose ($fd); */
+        exit;
+    }
+
+    public function ticket($account_id, $filename) {
+        if (!check_is_loggedin())
+            redirect(base_url(), 'refresh');
+
+        $account_id = param_decrypt($account_id);
+        $filename = param_decrypt($filename);
+
+        $download_path = 'uploads/ticket/' . $account_id;
+        $fullPath = $download_path . '/' . $filename;
+
+
+
+        if (!file_exists($fullPath))
+            show_404();
+
+
+        $this->load->helper('download');
+        force_download($fullPath, NULL);
+
         exit;
     }
 

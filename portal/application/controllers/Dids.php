@@ -2,15 +2,14 @@
 
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019 Chinna Technologies  
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
+// OV500 Version 2.0.0
+// Copyright (C) 2019-2021 Openvoips Technologies   
 // http://www.openvoips.com  http://www.openvoips.org
-//
-//
-//OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// The Initial Developer of the Original Code is
+// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
+// Portions created by the Initial Developer are Copyright (C)
+// the Initial Developer. All Rights Reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -26,11 +25,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 // ##############################################################################
 
-
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
-class Dids extends CI_Controller {
+class Dids extends MY_Controller {
 
     function __construct() {
         parent::__construct();
@@ -45,16 +43,49 @@ class Dids extends CI_Controller {
     function index($arg1 = '', $format = '') {
         $page_name = "did_index";
         $data['page_name'] = $page_name;
-        if (check_logged_account_type(array('ENDUSER')))
-            show_404('403');
+
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
+
+        if (isset($_POST['action']) && $_POST['action'] == 'OkUpdateDestinationBulk') {
+
+            if ($_POST['dst_type'] == 'IP')
+                $this->form_validation->set_rules('dst_point_ip', 'Destination Endpoint', 'trim|required');
+            elseif ($_POST['dst_type'] == 'CUSTOMER')
+                $this->form_validation->set_rules('dst_point_sip', 'Destination Endpoint', 'trim|required');
+            else
+                $this->form_validation->set_rules('dst_point_pstn', 'Destination Endpoint', 'trim|required');
+
+            if ($_POST['dst_type2'] == 'IP')
+                $this->form_validation->set_rules('dst_point2_ip', 'Failover Destination Endpoint', 'trim');
+            elseif ($_POST['dst_type2'] == 'CUSTOMER')
+                $this->form_validation->set_rules('dst_point2_sip', 'Failover Destination Endpoint', 'trim');
+            else
+                $this->form_validation->set_rules('dst_point2_pstn', 'Failover Destination Endpoint', 'trim');
+
+            $this->form_validation->set_rules('assign_did_number', 'DID Numbers', 'trim|required');
+            if ($this->form_validation->run() == FALSE) {
+                $data['err_msgs'] = validation_errors();
+            } else {
+                $result = $this->did_mod->destination_bulk($_POST);
+                //var_dump($result);die;
+                if ($result === true) {
+                    $this->session->set_flashdata('suc_msgs', 'DID destination mapped successfully');
+                    redirect(base_url() . 'dids', 'location', '301'); // 301 redirected	
+                    exit();
+                } else {
+                    $err_msgs = $result;
+                    $data['err_msgs'] = $err_msgs;
+                }
+            }
+        }
+      
         if (isset($_POST['action']) && $_POST['action'] == 'OkDeleteData') {
             $logged_account_type = get_logged_account_type();
             $logged_account_id = get_logged_account_id();
             $logged_account_level = get_logged_account_level();
-            if (check_logged_account_type(array('ADMIN', 'SUBADMIN'))) {
+            if (check_logged_user_group(ADMIN_ACCOUNT_ID)) {
                 $action_type = 'delete';
-            } elseif (check_logged_account_type(array('CUSTOMER', 'RESELLER'))) {
+            } elseif (check_logged_user_group(array('RESELLER', 'CUSTOMER'))) {
                 $action_type = 'cancel';
             } else {
                 $this->session->set_flashdata('err_msgs', 'You do not have enough permission');
@@ -64,7 +95,7 @@ class Dids extends CI_Controller {
             if (isset($_POST['delete_id']) && count($delete_id_array) > 0) {
                 if ($action_type == 'delete') {
                     $delete_param_array = array('delete_id' => $delete_id_array);
-                    $result = $this->did_mod->delete($logged_account_id,$delete_param_array);                   
+                    $result = $this->did_mod->delete($logged_account_id, $delete_param_array);
                 } else {
                     $result = $this->did_mod->release($delete_id_array[0], $logged_account_id);
                 }
@@ -131,7 +162,7 @@ class Dids extends CI_Controller {
         );
 
         unset($all_field_array['create_date']);
-        if (check_logged_account_type('RESELLER')) {
+        if (check_logged_user_group('RESELLER')) {
             unset($all_field_array['carrier_id']);
             unset($all_field_array['dst_type']);
             unset($all_field_array['dst_destination']);
@@ -157,7 +188,7 @@ class Dids extends CI_Controller {
                 unset($all_field_array['reseller3_account_id']);
                 $all_field_array['reseller3_assign_date'] = 'My Assign Date';
             }
-        } elseif (check_logged_account_type('CUSTOMER')) {
+        } elseif (check_logged_user_group('CUSTOMER')) {
             unset($all_field_array['carrier_id']);
             unset($all_field_array['user_account_id']);
             unset($all_field_array['reseller1_account_id']);
@@ -212,7 +243,7 @@ class Dids extends CI_Controller {
             } else
                 $export_data[] = array();
 
-            $file_name = 'Incoming Numbers';
+            $file_name = 'IncomingNumbers'.rand(100,200);
 
             $this->load->library('Export');
             $downloaded_message = $this->export->download($file_name, $format, $search_array, $export_header, $export_data);
@@ -254,7 +285,21 @@ class Dids extends CI_Controller {
             $data['all_field_array'] = $all_field_array;
 
             $this->load->view('basic/header', $data);
-            $this->load->view('did/incoming_numbers', $data);
+            //echo get_logged_account_type();
+            if (check_logged_user_group('CUSTOMER')) {//if module installed
+                $this->load->model('endpoints_mod');
+                $option_param = array('ip' => true, 'sipuser' => true);
+                $search_data = array('account_id' => get_logged_account_id());
+                $endusers_data = $this->endpoints_mod->get_data('', 1, 0, $search_data, $option_param);
+                $data['did_enduser'] = current($endusers_data['result']);
+
+                $this->load->view('did/incoming_numbers_user', $data);
+            } else {
+                $this->load->view('did/incoming_numbers', $data);
+            }
+
+
+
             $this->load->view('basic/footer', $data);
         }
     }
@@ -262,7 +307,7 @@ class Dids extends CI_Controller {
     public function add() {
         $page_name = "did_add";
         $data['page_name'] = $page_name;
-        if (!check_logged_account_type(array('ADMIN', 'SUBADMIN', 'ACCOUNTS')))
+        if (!check_logged_user_group(array(ADMIN_ACCOUNT_ID)))
             show_404('403');
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
         $this->load->model('carrier_mod');
@@ -313,7 +358,9 @@ class Dids extends CI_Controller {
             }
         } elseif (isset($_POST['action']) && $_POST['action'] == 'OkSaveData') {
             $this->form_validation->set_rules('carrier_id', 'Carrier', 'trim|required');
-            $this->form_validation->set_rules('did_number', 'DID', 'trim|required|is_unique[did.did_number]', array('is_unique' => 'DID number is already available in the system. Please add the new DID which is not listed in the system'));
+          
+		  //  $this->form_validation->set_rules('did_number', 'DID', 'trim|required|is_unique[did.did_number]', array('is_unique' => 'DID number is already available in the system. Please add the new DID which is not listed in the system'));
+		    $this->form_validation->set_rules('did_number', 'DID', 'trim|required');
             $this->form_validation->set_rules('destination', 'DID Name', 'trim|required');
             $this->form_validation->set_rules('setup_charge', 'Setup Charge', 'trim|required');
             $this->form_validation->set_rules('rental', 'Rental', 'trim|required');
@@ -351,7 +398,8 @@ class Dids extends CI_Controller {
             }
         }
         $data['currency_options'] = $this->utils_model->get_currencies();
-        $search_data = array('carrier_type' => 'INBOUND');
+
+        $search_data = array();
         $data['carriers_data'] = $this->carrier_mod->get_data('carrier_name', '', '', $search_data);
         $this->load->view('basic/header', $data);
         $this->load->view('did/incoming_add', $data);
@@ -365,7 +413,7 @@ class Dids extends CI_Controller {
         $page_name = "did_edit";
         $data['page_name'] = $page_name;
 
-        if (check_logged_account_type(array('RESELLER', 'CUSTOMER'))) {
+        if (check_logged_user_group(array('RESELLER', 'CUSTOMER'))) {
             $this->reseller_did_edit($id);
         } else {
             $this->admin_did_edit($id);
@@ -515,7 +563,13 @@ class Dids extends CI_Controller {
     public function api_did() {
         $this->load->model('member_mod');
         $did = $this->input->post('did', TRUE);
-        $return = $this->did_mod->getAvailableDID($did);
+        $area_specific = $this->input->post('area_specific', 'N');
+        if ($area_specific == 'Y')
+            $is_area_specific = true;
+        else
+            $is_area_specific = false;
+
+        $return = $this->did_mod->getAvailableDID($did, $is_area_specific);
         $this->output
                 ->set_content_type('application/json')
                 ->set_output(json_encode($return));
@@ -523,7 +577,7 @@ class Dids extends CI_Controller {
 
     public function purchase_did() {
         $data['page_name'] = "did_purchase";
-        if (check_logged_account_type(array('ADMIN', 'SUBADMIN')))
+        if (check_logged_user_group(ADMIN_ACCOUNT_ID))
             show_404('403');
 
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
@@ -543,6 +597,14 @@ class Dids extends CI_Controller {
                 }
             }
         }
+
+        if (check_logged_user_group('CUSTOMER')) {//if module installed
+            $this->load->model('endpoints_mod');
+            $option_param = array('ip' => true, 'sipuser' => true);
+            $search_data = array('account_id' => get_logged_account_id());
+            $endusers_data = $this->endpoints_mod->get_data('', 1, 0, $search_data, $option_param);
+            $data['did_enduser'] = current($endusers_data['result']);
+        }
         $this->load->view('basic/header', $data);
         $this->load->view('did/purchase', $data);
         $this->load->view('basic/footer', $data);
@@ -553,7 +615,7 @@ class Dids extends CI_Controller {
         $data['page_name'] = "did_assign";
 
         //if(!check_account_permission('did','did_purchase')) show_404('403');
-        if (check_logged_account_type(array('CUSTOMER')))
+        if (check_logged_user_group(array('CUSTOMER')))
             show_404('403');
 
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
@@ -590,7 +652,7 @@ class Dids extends CI_Controller {
 
         /* if(!check_account_permission('enduser','edit'))
           show_404('403'); */
-        if (check_logged_account_type(array('ADMIN', 'SUBADMIN')))
+        if (check_logged_user_group(ADMIN_ACCOUNT_ID))
             show_404('403');
 
         $page_name = "did_edit";
@@ -657,10 +719,10 @@ class Dids extends CI_Controller {
             if (isset($did_data['result'])) {
                 $did_data = current($did_data['result']);
 
-                $this->load->model('Customer_mod');
+                $this->load->model('endpoints_mod');
                 $option_param = array('ip' => true, 'sipuser' => true);
                 $search_data = array('account_id' => get_logged_account_id());
-                $endusers_data = $this->Customer_mod->get_data('', 1, 0, $search_data, $option_param);
+                $endusers_data = $this->endpoints_mod->get_data('', 1, 0, $search_data, $option_param);
                 //var_dump($endusers_data);
             } else {
                 show_404();

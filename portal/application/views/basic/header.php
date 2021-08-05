@@ -1,36 +1,4 @@
-<!--
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019-2020 Chinna Technologies   
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
-// http://www.openvoips.com  http://www.openvoips.org
-//
-//
-// OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
-//
-//
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
--->
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
     <head>
@@ -38,40 +6,12 @@
         <meta charset="utf-8"/>
         <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
-        <!--<title><?php  echo $sitesetup_data['site_name']; ?></title>-->
-  <title>Billing & Switch Software</title>
-        <!-- Bootstrap -->
-        <link href="<?php echo base_url() ?>theme/vendors/bootstrap/dist/css/bootstrap.css" rel="stylesheet"/>
-        <!-- Font Awesome -->
-        <link href="<?php echo base_url() ?>theme/vendors/font-awesome/css/font-awesome.css" rel="stylesheet"/>
-        <!-- NProgress -->
-        <link href="<?php echo base_url() ?>theme/vendors/nprogress/nprogress.css" rel="stylesheet"/>
-        <!-- iCheck -->
-        <!--<link href="<?php echo base_url() ?>theme/vendors/iCheck/skins/flat/green.css" rel="stylesheet">-->
-
-        <!-- bootstrap-progressbar -->
-        <link href="<?php echo base_url() ?>theme/vendors/bootstrap-progressbar/css/bootstrap-progressbar-3.3.4.min.css" rel="stylesheet"/>
-
-        <!-- bootstrap-daterangepicker -->
-        <link href="<?php echo base_url() ?>theme/vendors/bootstrap-daterangepicker/daterangepicker.css" rel="stylesheet"/>
-
-        <!-- jQuery custom content scroller -->
-        <link href="<?php echo base_url() ?>theme/vendors/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.min.css" rel="stylesheet"/>
-        <!-- Custom Theme Style -->
-        <link href="<?php echo base_url() ?>theme/default/css/custom.css" rel="stylesheet"/>
-
-        <!-- PNotify -->
-        <link href="<?php echo base_url() ?>theme/vendors/pnotify/dist/pnotify.css" rel="stylesheet"/>
-        <link href="<?php echo base_url() ?>theme/vendors/pnotify/dist/pnotify.buttons.css" rel="stylesheet"/>
-        <link href="<?php echo base_url() ?>theme/vendors/pnotify/dist/pnotify.nonblock.css" rel="stylesheet"/>
-
-        <!-- Datatables -->
-        <link href="<?php echo base_url() ?>theme/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet"/>    
-        <!-- jQuery -->
+        <title>Billing & Switch Software</title>
+        <link href="<?php echo base_url() ?>theme/vendors/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"/>
+        <link href="<?php echo base_url() ?>theme/vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet"/>
+        <link href="<?php echo base_url() ?>theme/default/css/custom.css?v=1" rel="stylesheet"/>        
         <script src="<?php echo base_url() ?>theme/vendors/jquery/dist/jquery.min.js"></script>
-        <!-- Bootstrap -->
-        <script src="<?php echo base_url() ?>theme/vendors/bootstrap/dist/js/bootstrap.min.js"></script>
-
+        <script src="<?php echo base_url() ?>theme/vendors/bootstrap/dist/js/bootstrap.min.js"></script>       
     </head>
     <body class="nav-md">
         <script>BASE_URL = "<?php echo base_url(); ?>";</script>

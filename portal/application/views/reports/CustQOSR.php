@@ -1,36 +1,9 @@
-<!--
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019-2020 Chinna Technologies   
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
-// http://www.openvoips.com  http://www.openvoips.org
-//
-//
-// OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
-//
-//
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
--->
+<link href="<?php echo base_url() ?>theme/vendors/nprogress/nprogress.css" rel="stylesheet"/>
+<link href="<?php echo base_url() ?>theme/vendors/bootstrap-daterangepicker/daterangepicker.css" rel="stylesheet"/>
+<link href="<?php echo base_url() ?>theme/vendors/pnotify/dist/pnotify.css" rel="stylesheet"/>
+<link href="<?php echo base_url() ?>theme/vendors/pnotify/dist/pnotify.buttons.css" rel="stylesheet"/>
+<link href="<?php echo base_url() ?>theme/vendors/pnotify/dist/pnotify.nonblock.css" rel="stylesheet"/>
+<link href="<?php echo base_url() ?>/theme/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet"/>   
 <div class="col-md-12 col-sm-12 col-xs-12">
     <div class="x_panel">
         <div class="x_title">
@@ -59,7 +32,7 @@
                             <input type="text" name="frmcode" id="frmcode" value="<?php if (isset($_SESSION['search_data']['s_code'])) echo $_SESSION['search_data']['s_code']; ?>" class="form-control data-search-field" placeholder="Account Code">
                         </div>
 
-                    </div> <!-- end of the row-->
+                    </div> 
                     <br />
                     <div class="row"> 
 
@@ -83,7 +56,7 @@
                     <div class="row">
 
                         <div class="form-group">
-                            <?php if (!check_logged_account_type(array('RESELLER'))) : ?>
+                            <?php if (!check_logged_user_group(array('RESELLER'))) : ?>
                                 <label class="control-label col-md-1 col-sm-3 col-xs-12">Carrier</label>
                                 <div class="col-md-3 col-sm-9 col-xs-12">
                                     <!--<input type="text" name="frmcarrier" id="frmcarrier" value="<?php if (isset($_SESSION['search_data']['s_carrier'])) echo $_SESSION['search_data']['s_carrier']; ?>" class="form-control data-search-field" placeholder="Carrier">-->
@@ -110,7 +83,7 @@
                             </div>
                         </div>
 
-                    </div>  <!--end of the row-->
+                    </div> 
 
                     <div class="ln_solid"></div>
 
@@ -152,7 +125,7 @@
                                     <input type="checkbox" name="g_user" <?php if (isset($_SESSION['search_data']['s_g_user']) && $_SESSION['search_data']['s_g_user'] == 'Y') echo 'checked'; ?>> Customer
                                 </label>
                             </div>
-                            <?php if (!check_logged_account_type(array('RESELLER'))) : ?>
+                            <?php if (!check_logged_user_group(array('RESELLER'))) : ?>
                                 <div class="checkbox col-md-2 col-sm-6 col-xs-12">
                                     <label>
                                         <input type="checkbox" name="g_carrier" <?php if (isset($_SESSION['search_data']['s_g_carrier']) && $_SESSION['search_data']['s_g_carrier'] == 'Y') echo 'checked'; ?>> Carrier
@@ -175,7 +148,7 @@
                     <div class="form-group">
                         <input type="submit" value="Search" name="OkFilter" id="OkFilter" class="btn btn-primary">                          
                         <input type="button" value="Reset" name="search_reset" class="btn btn-info" onclick="location.href = ''">                           
-                     
+
                     </div>
             </form>		
         </div>  
@@ -199,11 +172,12 @@
         <?php endif; ?>
 
         <div class="x_title">
-            <h2>Total Records : <?php if (isset($listing_count))
-            echo $listing_count;
-        else
-            echo '0';
-        ?></h2>
+            <h2>Total Records : <?php
+                if (isset($listing_count))
+                    echo $listing_count;
+                else
+                    echo '0';
+                ?></h2>
             <div class="clearfix"></div>
         </div>	
         <div class="x_content">
@@ -216,9 +190,9 @@
                             <?php if (isset($_SESSION['search_data']['s_g_date']) && $_SESSION['search_data']['s_g_date'] == 'Y') echo '<th class="column-title">Date</th>'; ?>
                             <?php if (isset($_SESSION['search_data']['s_g_hour']) && $_SESSION['search_data']['s_g_hour'] == 'Y') echo '<th class="column-title">Hour</th>'; ?>
                             <?php if (isset($_SESSION['search_data']['s_g_hour']) && $_SESSION['search_data']['s_g_minute'] == 'Y') echo '<th class="column-title">Minute</th>'; ?>
-<?php if (isset($_SESSION['search_data']['s_g_prefix']) && $_SESSION['search_data']['s_g_prefix'] == 'Y') echo '<th class="column-title">Prefix</th>'; ?>
+                            <?php if (isset($_SESSION['search_data']['s_g_prefix']) && $_SESSION['search_data']['s_g_prefix'] == 'Y') echo '<th class="column-title">Prefix</th>'; ?>
 
-<?php if (isset($_SESSION['search_data']['s_g_dest']) && $_SESSION['search_data']['s_g_dest'] == 'Y') echo'<th class="column-title">Destination</th>'; ?>
+                            <?php if (isset($_SESSION['search_data']['s_g_dest']) && $_SESSION['search_data']['s_g_dest'] == 'Y') echo'<th class="column-title">Destination</th>'; ?>
                             <th class="column-title" width="">Total Duration</th>
                             <th class="column-title" width="">Total Calls</th>
                             <th class="column-title" width="">Ans Calls</th>
@@ -275,9 +249,9 @@
 
                                     <?php if (isset($_SESSION['search_data']['s_g_date']) && $_SESSION['search_data']['s_g_date'] == 'Y') echo '<td>' . $listing_row['call_date'] . '</td>'; ?>
                                     <?php if (isset($_SESSION['search_data']['s_g_hour']) && $_SESSION['search_data']['s_g_hour'] == 'Y') echo '<td>' . $listing_row['calltime_h'] . '</td>'; ?>
-        <?php if (isset($_SESSION['search_data']['s_g_minute']) && $_SESSION['search_data']['s_g_minute'] == 'Y') echo '<td>' . $listing_row['calltime_m'] . '</td>'; ?>
-        <?php if (isset($_SESSION['search_data']['s_g_prefix']) && $_SESSION['search_data']['s_g_prefix'] == 'Y') echo '<td>' . $listing_row['prefix'] . '</td>'; ?>
-        <?php if (isset($_SESSION['search_data']['s_g_dest']) && $_SESSION['search_data']['s_g_dest'] == 'Y') echo '<td>' . $listing_row['prefix_name'] . '</td>'; ?>
+                                    <?php if (isset($_SESSION['search_data']['s_g_minute']) && $_SESSION['search_data']['s_g_minute'] == 'Y') echo '<td>' . $listing_row['calltime_m'] . '</td>'; ?>
+                                    <?php if (isset($_SESSION['search_data']['s_g_prefix']) && $_SESSION['search_data']['s_g_prefix'] == 'Y') echo '<td>' . $listing_row['prefix'] . '</td>'; ?>
+                                    <?php if (isset($_SESSION['search_data']['s_g_dest']) && $_SESSION['search_data']['s_g_dest'] == 'Y') echo '<td>' . $listing_row['prefix_name'] . '</td>'; ?>
                                     <td><?php echo $listing_row['total_duration']; ?></td>
                                     <td><?php echo $listing_row['total_calls']; ?></td>
                                     <td><?php echo $listing_row['answered_calls']; ?></td>
@@ -302,16 +276,16 @@
                                     ?>
                                 </tr>
 
-        <?php
-    }
-} else {
-    ?>
-                    <!--<tr>
-                            <td colspan="11" align="center"><strong>No Record Found</strong></td>
-                    </tr>-->
-    <?php
-}
-?>
+                                <?php
+                            }
+                        } else {
+                            ?>
+
+                        <td colspan="7" align="center"><strong>No Record Found</strong></td>
+
+                        <?php
+                    }
+                    ?>
                     </tbody>
                 </table>
             </div>
@@ -327,6 +301,24 @@
     .alert_red{ background-color:#F14E66; color:#ffffff;}
     table.jambo_table tbody tr:hover td { color:#8b87bb; background-color:#f0faf8;}
 </style>
+
+
+
+<!-- FastClick -->
+<script src="<?php echo base_url() ?>theme/vendors/fastclick/lib/fastclick.js"></script>
+<!-- NProgress -->
+<script src="<?php echo base_url() ?>theme/vendors/nprogress/nprogress.js"></script>
+<!-- bootstrap-progressbar -->
+<script src="<?php echo base_url() ?>theme/vendors/bootstrap-progressbar/bootstrap-progressbar.min.js"></script>
+
+<!-- PNotify -->
+<script src="<?php echo base_url() ?>theme/vendors/pnotify/dist/pnotify.js"></script>
+<script src="<?php echo base_url() ?>theme/vendors/pnotify/dist/pnotify.buttons.js"></script>
+<script src="<?php echo base_url() ?>theme/vendors/pnotify/dist/pnotify.nonblock.js"></script>
+
+<!-- Datatables -->
+<script src="<?php echo base_url() ?>theme/vendors/datatables.net/js/jquery.dataTables.min.js"></script> 
+<script src="<?php echo base_url() ?>theme/vendors/bootstrap-daterangepicker/daterangepicker.js"></script>
 
 <script>
     $(document).ready(function () {
@@ -345,19 +337,18 @@
                 'Today': [moment().startOf('days'), moment().endOf('days')],
                 'Yesterday': [moment().subtract(1, 'days').startOf('days'), moment().subtract(1, 'days').endOf('days')],
                 'Last 7 Days': [moment().subtract(6, 'days').startOf('days'), moment()],
-                /*'Last 30 Days': [moment().subtract(29, 'days').startOf('days'), moment()],*/
                 'This Month': [moment().startOf('month'), moment().endOf('month')],
                 'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
             }
         });
 
-        $('#analytics').DataTable({
+       /* $('#analytics').DataTable({
             searching: false,
             paging: false,
             bInfo: false,
-//			scrollY: 400,
-//        	scrollX: true
-        });
+        });*/
+		
+		 showDatatable('analytics', [], [1, "asc"]);
     });
 
 </script>

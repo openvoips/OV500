@@ -1,61 +1,23 @@
-<!--
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019-2020 Chinna Technologies   
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
-// http://www.openvoips.com  http://www.openvoips.org
-//
-//
-// OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
-//
-//
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
--->
 <?php
-//echo '<pre>';
-//print_r($ratecard_data);
-//print_r($data);
-//echo '</pre>';
 $ratecard_for = '';
 ?>
-<!-- Parsley -->
 <script src="<?php echo base_url() ?>theme/vendors/parsleyjs/dist/parsley.min.js"></script>
 
 <div class="">
     <div class="clearfix"></div>  
-    
-     <div class="col-md-12 col-sm-12 col-xs-12 right">
+
+    <div class="col-md-12 col-sm-12 col-xs-12 right">
         <div class="x_title">
             <h2>Rate Configuration Management</h2>
             <ul class="nav navbar-right panel_toolbox">     
-                <li><a href="<?php  echo base_url('rates'); ?>"><button class="btn btn-danger" type="button">Back to Rate Listing Page</button></a> </li>
+                <li><a href="<?php echo base_url('rates'); ?>"><button class="btn btn-danger" type="button">Back to Rate Listing Page</button></a> </li>
             </ul>
             <div class="clearfix"></div>
         </div>
 
     </div>
-    
-    
+
+
     <div class="row">
         <div class="col-md-12 col-sm-12 col-xs-12">
             <div class="x_panel">
@@ -82,7 +44,7 @@ $ratecard_for = '';
                                         <select name="frm_card" id="frm_card" class="form-control data-search-field" disabled="disabled" data-parsley-required="">
                                             <option value="">Select Route</option>
                                             <?php for ($i = 0; $i < $ratecard_data['total']; $i++) { ?>								
-                                                <option value="<?php echo $ratecard_data['result'][$i]['ratecard_id']; ?>" <?php if ($data['ratecard_id'] == $ratecard_data['result'][$i]['ratecard_id']) echo 'selected'; ?>><?php echo  $ratecard_data['result'][$i]['currency_name']." :: ".$ratecard_data['result'][$i]['ratecard_name'] . ' (' . $ratecard_data['result'][$i]['ratecard_id']  . ')'; ?></option>
+                                                <option value="<?php echo $ratecard_data['result'][$i]['ratecard_id']; ?>" <?php if ($data['ratecard_id'] == $ratecard_data['result'][$i]['ratecard_id']) echo 'selected'; ?>><?php echo $ratecard_data['result'][$i]['currency_name'] . " :: " . $ratecard_data['result'][$i]['ratecard_name'] . ' (' . $ratecard_data['result'][$i]['ratecard_id'] . ')'; ?></option>
                                                 <?php
                                                 if ($data['ratecard_id'] == $ratecard_data['result'][$i]['ratecard_id']) {
                                                     $ratecard_for = strtolower($ratecard_data['result'][$i]['ratecard_for']);
@@ -217,18 +179,18 @@ $ratecard_for = '';
             </div>
         </div>
     </div>
-    
-     <div class="col-md-12 col-sm-12 col-xs-12 right">
+
+    <div class="col-md-12 col-sm-12 col-xs-12 right">
         <div class="x_title">
             <h2>Rate Configuration Management</h2>
             <ul class="nav navbar-right panel_toolbox">     
-                <li><a href="<?php  echo base_url('rates'); ?>"><button class="btn btn-danger" type="button">Back to Rate Listing Page</button></a> </li>
+                <li><a href="<?php echo base_url('rates'); ?>"><button class="btn btn-danger" type="button">Back to Rate Listing Page</button></a> </li>
             </ul>
             <div class="clearfix"></div>
         </div>
 
     </div>
-    
+
 </div>    
 <script>
     window.Parsley

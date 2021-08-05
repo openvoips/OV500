@@ -14,42 +14,23 @@
 
 <!-- div to open modal--->
 <div id="idMyModal"></div>  
+<div class="overlay-img hide col-md-12 col-sm-12 col-xs-12" id="overlay-img-id" style="text-align: center;top: 320px;position: absolute;">
+    <img src="<?php echo base_url() ?>/theme/default/images/processing.gif" align="middle" >
+</div>
 
 
-<!-- FastClick -->
-<script src="<?php echo base_url() ?>theme/vendors/fastclick/lib/fastclick.js"></script>
-<!-- NProgress -->
-<script src="<?php echo base_url() ?>theme/vendors/nprogress/nprogress.js"></script>
-<!-- bootstrap-progressbar -->
-<script src="<?php echo base_url() ?>theme/vendors/bootstrap-progressbar/bootstrap-progressbar.min.js"></script>
+<!--<script src="<?php echo base_url() ?>theme/vendors/bootstrap-daterangepicker/daterangepicker.js"></script>-->
 
-<!-- PNotify -->
-<script src="<?php echo base_url() ?>theme/vendors/pnotify/dist/pnotify.js"></script>
-<script src="<?php echo base_url() ?>theme/vendors/pnotify/dist/pnotify.buttons.js"></script>
-<script src="<?php echo base_url() ?>theme/vendors/pnotify/dist/pnotify.nonblock.js"></script>
-
-<!-- Datatables -->
-<script src="<?php echo base_url() ?>theme/vendors/datatables.net/js/jquery.dataTables.min.js"></script>
-<!--<script src="<?php echo base_url() ?>theme/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
-<script src="<?php echo base_url() ?>theme/vendors/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
-<script src="<?php echo base_url() ?>theme/vendors/datatables.net-buttons-bs/js/buttons.bootstrap.min.js"></script>
-<script src="<?php echo base_url() ?>theme/vendors/datatables.net-buttons/js/buttons.flash.min.js"></script>
-<script src="<?php echo base_url() ?>theme/vendors/datatables.net-buttons/js/buttons.html5.min.js"></script>
-<script src="<?php echo base_url() ?>theme/vendors/datatables.net-buttons/js/buttons.print.min.js"></script>-->
-
-<!-- bootstrap-daterangepicker -->
 <script src="<?php echo base_url() ?>theme/vendors/moment/min/moment.min.js"></script>
 <script src="<?php echo base_url() ?>theme/vendors/moment/min/moment-timezone-with-data.js"></script>
 <script>
     moment.tz.setDefault('<?php echo MOMENT_TIMEZONE; ?>');
 </script>
-<script src="<?php echo base_url() ?>theme/vendors/bootstrap-daterangepicker/daterangepicker.js"></script>
-
-
-
-<!-- jQuery custom content scroller -->
+<link href="<?php echo base_url() ?>theme/vendors/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.min.css" rel="stylesheet"/>
 <script src="<?php echo base_url() ?>theme/vendors/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.concat.min.js"></script>
-<!-- Custom Theme Scripts -->
-<script src="<?php echo base_url() ?>theme/default/js/custom.js"></script>
+<script src="<?php echo base_url() ?>theme/vendors/bootstrap-daterangepicker/daterangepicker.js"></script>
+<link href="<?php echo base_url() ?>theme/vendors/bootstrap-daterangepicker/daterangepicker.css" rel="stylesheet"/>
+
+<script src="<?php echo base_url() ?>theme/default/js/custom.js?v=1"></script>
 </body>
 </html>

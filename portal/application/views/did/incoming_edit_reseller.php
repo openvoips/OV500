@@ -1,35 +1,4 @@
-<!--
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019-2020 Chinna Technologies   
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
-// http://www.openvoips.com  http://www.openvoips.org
-//
-//
-// OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
-//
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
--->
+
 <?php
 $currency_array = array();
 foreach ($currency_options as $currency_options_temp) {
@@ -89,9 +58,9 @@ switch ($did_status) {
 }
 
 /* manage which fields not to display */
-if (check_logged_account_type('RESELLER')) {
+if (check_logged_user_group('RESELLER')) {
     unset($display_field_array['carrier_id']);
-} elseif (check_logged_account_type('CUSTOMER')) {
+} elseif (check_logged_user_group('CUSTOMER')) {
     unset($display_field_array['carrier_id']);
     unset($updatable_field_array);
     $updatable_field_array['channels'] = true; //one item only
@@ -317,7 +286,7 @@ $tab_index = 1;
                         </div>
                     </div>
 
-                    <?php if (!check_logged_account_type('CUSTOMER')) { ?>
+                    <?php if (!check_logged_user_group('CUSTOMER')) { ?>
                         <div class="ln_solid"></div>
                         <div class="form-group">
                             <div class="col-md-8 col-sm-6 col-xs-12 col-md-offset-4">

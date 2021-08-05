@@ -12,3 +12,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |	https://codeigniter.com/user_guide/general/hooks.html
 |
 */
+
+$hook['post_controller_constructor'] = array(
+'class' => 'Activityloghook',
+'function' => 'post_controller_constructor',
+'filename' => 'activitylog-hook.php',
+'filepath' => 'modules/activitylog',
+'params' => ""
+);

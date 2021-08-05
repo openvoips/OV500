@@ -2,15 +2,14 @@
 
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019 Chinna Technologies  
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
+// OV500 Version 2.0.0
+// Copyright (C) 2019-2021 Openvoips Technologies   
 // http://www.openvoips.com  http://www.openvoips.org
-//
-//
-//OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// The Initial Developer of the Original Code is
+// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
+// Portions created by the Initial Developer are Copyright (C)
+// the Initial Developer. All Rights Reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -45,7 +44,8 @@ class Ratecard_mod extends CI_Model {
             $data_array['ratecard_currency_id'] = $data['frm_currency'];
         if (isset($data['frm_type']))
             $data_array['ratecard_type'] = strtoupper($data['frm_type']);
-        $data_array['created_by'] = get_logged_account_id();
+        $data_array['account_id'] = get_logged_account_id();
+        $data_array['created_by'] = get_logged_user_id();
         $data_array['ratecard_id'] = generate_key($data['frm_name'], '');
         if (isset($data['ratecard_for']))
             $data_array['ratecard_for'] = $data['ratecard_for'];
@@ -135,7 +135,7 @@ class Ratecard_mod extends CI_Model {
                 }
 
                 $log_data_array[] = array('activity_type' => 'delete_recovery', 'sql_table' => 'RATECARD', 'sql_key' => param_decrypt($id), 'sql_query' => $str);
-                set_activity_log($log_data_array);
+                
             }
 
             if ($this->db->trans_status() === FALSE) {
@@ -194,7 +194,7 @@ class Ratecard_mod extends CI_Model {
             if (count($filter_data) > 0) {
                 foreach ($filter_data as $key => $value) {
                     if ($value != '') {
-                        if ($key == 'id' || $key == 'ratecard_currency_id' || $key == 'ratecard_id')
+                        if ($key == 'id' || $key == 'ratecard_currency_id' || $key == 'ratecard_id' || $key == 'account_id')
                             $this->db->where($key, $value);
                         elseif (in_array($key, array('logged_account_type', 'logged_current_customer_id', 'logged_account_level'))) {
                             
@@ -206,14 +206,7 @@ class Ratecard_mod extends CI_Model {
             }
 
 
-            if (get_logged_account_level() != 0) {
-                $this->db->where('created_by', get_logged_account_id());
-            } else {
-                $sub = $this->subquery->start_subquery('where_in');
-                $sub->select('account_id')->from('customers');
-                $sub->where("account_type = 'ADMIN' or account_type ='SUBADMIN'");
-                $this->subquery->end_subquery('created_by', TRUE);
-            }
+
             if (is_string($order_by) && $order_by == '') {
                 $this->db->order_by('id', 'DESC');
             } else {
@@ -226,7 +219,7 @@ class Ratecard_mod extends CI_Model {
             }
             $this->db->limit(intval($limit_from), intval($limit_to));
             $q = $this->db->get('ratecard');
-            // echo $this->db->last_query();
+
             if (!$q) {
                 $error_array = $this->db->error();
                 throw new Exception($error_array['message']);

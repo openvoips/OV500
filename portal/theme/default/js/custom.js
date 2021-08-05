@@ -138,7 +138,7 @@ $.fn.popover.Constructor.prototype.leave = function(a) {
         hide: 400
     }
 }), $(document).ready(function() {
-   /* init_sparklines(), init_flot_chart(), init_sidebar(), init_wysiwyg(), init_InputMask(), init_JQVmap(), init_cropper(), init_knob(), init_IonRangeSlider(), init_ColorPicker(), init_TagsInput(), init_parsley(), init_daterangepicker(), init_daterangepicker_right(), init_daterangepicker_single_call(), init_daterangepicker_reservation(), init_SmartWizard(), init_EasyPieChart(), init_charts(), init_echarts(), init_morris_charts(), init_skycons(), init_select2(), init_validator(), init_DataTables(), init_chart_doughnut(), init_gauge(), init_PNotify(), init_starrr(), init_calendar(), init_compose(), init_CustomNotification(), init_autosize(), init_autocomplete()*/
+
    init_sidebar()
 });
 
@@ -426,22 +426,39 @@ function doConfirmDelete(delete_val,delete_action_url='', delete_type='')
 	});
 }
 
+$(document).ready(function() {
+	$('#OkFilter').click(function(){
+		var no_of_records=$('#no_of_records').val();				
+		$('#no_of_rows').val(no_of_records);			
+	});
+});
+
 /*datatable */
 function showDatatable(table_id, ignore_array, orderby_array)
 {    	 
-	$('head').append('<link rel="stylesheet" type="text/css" href="'+BASE_URL+'theme/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css">');
+ 	if ($('#'+table_id).length)
+	{
+		var rows_count = $('#'+table_id).find('tbody').children().length;
+		//console.log(rows_count);
+		if(rows_count>1)
+		{
+			$('head').append('<link rel="stylesheet" type="text/css" href="'+BASE_URL+'theme/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css">');
+			
+			$.getScript( BASE_URL+"theme/vendors/datatables.net/js/jquery.dataTables.min.js",true )
+			.done(function( script, textStatus ) {
+					$('#'+table_id).DataTable({
+					searching: false,
+					paging: false,
+					bInfo : false,
+					"aoColumnDefs" : [{
+					   "bSortable" : false,
+					   "aTargets" : ignore_array ,	
+					 }],
+					"order": [orderby_array],
+				 });
+			});
+		}
+	}
 	
-	$.getScript( BASE_URL+"theme/vendors/datatables.net/js/jquery.dataTables.min.js",true )
-	.done(function( script, textStatus ) {
-			$('#'+table_id).DataTable({
-			searching: false,
-			paging: false,
-			bInfo : false,
-			"aoColumnDefs" : [{
-			   "bSortable" : false,
-			   "aTargets" : ignore_array ,	
-			 }],
-			"order": [orderby_array],
-		 });
-	}); 
+ 
 }

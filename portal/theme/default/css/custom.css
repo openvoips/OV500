@@ -8,6 +8,9 @@ html , body{
 .full-height{
     height:100%;
 }
+.dataTables_paginate span{
+    background: #fff!important;
+}
 .pagination {
     display: inline-block;
     padding-left: 0;
@@ -25,12 +28,16 @@ html , body{
 }
 
 .red1 {
-    color: #c10d1e;
+    color: #DD4814;
 }
+
+
 
 .red2 {
     color: #e60c0c;
-}    
+}
+
+
 .daterangepicker .input-mini {
     background-color: #eee;
     border: 1px solid #ccc;
@@ -174,7 +181,7 @@ html , body{
 }
 .nav-sm .hidden-small {
     visibility: hidden;
-   
+
 }
 .nav-sm .container.body .right_col {
     padding: 10px 20px;
@@ -197,8 +204,10 @@ html , body{
     border-radius: 50%
 }
 .site_title img {
-    max-height: 66px;
+    max-height: 55px;
     max-width: 180px;
+    position: absolute;
+    top: 0px;
 }
 .nav-sm .main_container .top_nav {
     display: block;
@@ -208,7 +217,7 @@ html , body{
 .nav-sm .nav.side-menu li a {
     text-align: center !important;
     font-weight: 400;
-    font-size: 10px;
+    font-size: 12px;
     padding: 10px 5px
 }
 .nav-sm .nav.child_menu li.active,
@@ -374,7 +383,7 @@ body .container.body .right_col {
     float: left;
     background: #ECECEC;
     border-radius: 0;
-    height: 100px
+    height: 57px
 }
 @media (max-width: 991px) {
     .nav-md .container.body .right_col,
@@ -702,7 +711,7 @@ a:focus {
 }
 .top_nav .navbar-right {
     margin: 0;
-    width: 70%;
+    /*    width: 70%;*/
     float: right
 }
 .top_nav .navbar-right li {
@@ -1307,9 +1316,27 @@ table.countries_list td {
     border-top: 1px solid #eeeeee
 }
 .dataTables_paginate a {
-    padding: 6px 9px !important;
-    background: #ddd !important;
-    border-color: #ddd !important
+    padding: 8px 11px !important;
+    background: #fff!important;
+    z-index: 2;
+    border-right: 1px solid #ddd;
+}
+.dataTables_paginate a:last-child{
+    border-right: none;
+}
+a.paginate_button:hover {
+    z-index: 2;
+    color: #464646;
+    background-color: #eeeeee;
+    border-color: #ddd;
+    cursor: grabbing;
+}
+a.paginate_button.current {
+    z-index: 3;
+    color: #fff;
+    cursor: grabbing;
+    background-color: #01233f!important;
+    border-color: #01233f!important;
 }
 .paging_full_numbers a.paginate_active {
     background-color: rgba(38, 185, 154, 0.59) !important;
@@ -1344,10 +1371,16 @@ table.jambo_table tbody tr.selected td {
 .dataTables_paginate a {
     background: #ff0000
 }
+div.dataTables_wrapper div.dataTables_paginate {
+    border: 1px solid #ddd;
+    padding: 6px;
+    border-radius: 4px;
+}
 .dataTables_wrapper {
     position: relative;
     clear: both;
-    zoom: 1
+    zoom: 1;
+    margin-bottom: 45px;
 }
 .dataTables_processing {
     position: absolute;
@@ -1416,7 +1449,8 @@ table.display thead td:active {
     outline: none
 }
 .dataTables_scroll {
-    clear: both
+    clear: both;
+    margin-bottom: 8px;
 }
 .dataTables_scrollBody {
     *margin-top: -1px;
@@ -1695,7 +1729,7 @@ span.right {
     position: fixed;
     width: 230px;
     /*background: #D9DEE4;*/
-     background: #C1B9B6;
+    background: #C1B9B6;
     z-index:999;
 }
 .sidebar-footer a {
@@ -1706,12 +1740,12 @@ span.right {
     display: block;
     float: left;
     /*background: #DD4814;*/
-     background: #C1B9B6;
+    background: #C1B9B6;
     cursor: pointer;
 }
 .sidebar-footer a:hover {
     background: #FFF;
-     background: #C1B9B6;
+    background: #C1B9B6;
 }
 .tile_count {
     margin-bottom: 20px;
@@ -4284,7 +4318,7 @@ table thead .checkbox.radio { margin-top:-7px;margin-top:-21px; }
 
 
 a {
-   /* color: #DD4814;*/
+    /* color: #DD4814;*/
     text-decoration: none;
 }
 .btn-primary.disabled:hover,
@@ -4324,8 +4358,8 @@ fieldset[disabled] .btn-primary.focus {
     padding: 6px 12px;
     margin-left: -1px;
     line-height: 1.42857143;
-      /* color: #DD4814;*/
-      color: #464646 ;
+    /* color: #DD4814;*/
+    color: #464646 ;
     text-decoration: none;
     background-color: #fff;
     border: 1px solid #ddd;
@@ -4341,8 +4375,17 @@ fieldset[disabled] .btn-primary.focus {
 
 .pagination > li > a:hover, .pagination > li > span:hover, .pagination > li > a:focus, .pagination > li > span:focus {
     z-index: 2;
-   /* color: #DD4814;*/
-      color: #464646 ; 
+    /* color: #DD4814;*/
+    color: #464646 ; 
     background-color: #eeeeee;
     border-color: #ddd;
 }
+
+.clockOuter{float:left; margin:12px 0px 1px 0px;}
+.clock {text-align:center;vertical-align:middle; font-size: 20px;letter-spacing: 1px;}
+@media (max-width:767px){
+    .clockOuter{ display:none;}
+}
+
+.pad8{padding-top: 8px;}
+.required{color:maroon;}

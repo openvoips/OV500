@@ -1,40 +1,4 @@
-<!--
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019-2020 Chinna Technologies   
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
-// http://www.openvoips.com  http://www.openvoips.org
-//
-//
-// OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
-//
-//
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
--->
 <?php
-//echo '<pre>';
-//print_r($listing_data);
-//echo '</pre>';
 $delete_option = '';
 ?>
 <div class="col-md-12 col-sm-6 col-xs-12">
@@ -65,7 +29,7 @@ $delete_option = '';
                     </div>
                 </div>
                 <div class="form-group">
-                    <?php if (!check_logged_account_type(array('RESELLER'))) : ?>
+                    <?php if (!check_logged_user_group(array('RESELLER'))) : ?>
                         <label class="control-label col-md-2 col-sm-3 col-xs-12">Currency</label>
                         <div class="col-md-4 col-sm-8 col-xs-12">
                             <select name="currency" id="currency" class="form-control data-search-field">
@@ -102,7 +66,7 @@ $delete_option = '';
                             <option value="0" <?php if ($_SESSION['search_tariff_data']['s_tariff_status'] == '0') echo 'selected'; ?>>Inactive</option>
                         </select>
                     </div>				  
-                    <div class="searchBar ">
+                    <div class="searchBar text-right">
                         <input type="submit" value="Search" name="OkFilter" id="OkFilter" class="btn btn-primary">                          
                         <input type="button" value="Reset" name="search_reset" id="search_reset" class="btn btn-info">                           
                         <div class="btn-group">
@@ -131,13 +95,10 @@ $delete_option = '';
                 <table class="table table-striped jambo_table bulk_action table-bordered" id="table-sort">
                     <thead>
                         <tr class="headings thc">                          
-                            <th class="column-title">Tariff Name</th>                            
-                            <th class="column-title">Currency</th>             
-                            <th class="column-title">Who can Use</th>  
-                            <th class="column-title">Open Routes</th>
-
-
-
+                            <th class="column-title">Tariff Name</th>
+                            <th class="column-title">Who can Use</th> 
+                            <th class="column-title">Currency</th> 
+                            <th class="column-title">Open Routes</th>                           
                             <th class="column-title">Status </th>
                             <th class="column-title no-link last"><span class="nobr">Actions</span> </th>
                             <th class="bulk-actions" colspan="6">
@@ -155,18 +116,16 @@ $delete_option = '';
                                 else
                                     $status = '<span class="label label-danger">Inactive</span>';
 
-									
-								if($listing_row['ratecard_count'] == 0 && $listing_row['carrier_count'] == 0  && $listing_row['user_count'] == 0) 
-									$delete_option = true;
-								else 
-									$delete_option = false;	
-									
-									
+
+                                if ($listing_row['ratecard_count'] == 0 && $listing_row['carrier_count'] == 0 && $listing_row['user_count'] == 0)
+                                    $delete_option = true;
+                                else
+                                    $delete_option = false;
                                 ?>
                                 <tr>                                    
                                     <td><?php echo $listing_row['tariff_name'] . " (" . $listing_row['tariff_id'] . ")"; ?></td>
-                                    <td ><?php echo $listing_row['currency_symbol'] . " - " . $listing_row['currency_name']; ?></td>
-                                    
+
+
                                     <?php
                                     if ($listing_row['ratecard_count'] > 0)
                                         $outrates = '<span class="label label-success">PSTN</span>';
@@ -177,13 +136,12 @@ $delete_option = '';
                                         $inrates = '<span class="label label-success">DID</span>';
                                     else
                                         $inrates = '<span class="label label-danger">DID</span>';
-
-                             
                                     ?>
 
-                                    <td ><?php echo $listing_row['tariff_type']; ?></td>                               
+                                    <td ><?php echo $listing_row['tariff_type']; ?></td>    
+                                    <td ><?php echo $listing_row['currency_name'] . " (" . $listing_row['currency_symbol'] . ")"; ?></td>
                                     <td ><?php
-                                        echo $outrates . " " . $inrates ;
+                                        echo $outrates . " " . $inrates;
                                         $inrates = '';
                                         $outrates = '';
                                         ?> </td>       
@@ -203,14 +161,14 @@ $delete_option = '';
                                             <a href="javascript:doConfirmDelete('<?php echo param_encrypt($listing_row['tariff_id']); ?>','tariffs');" title="Delete" class="delete"><i class="fa fa-trash"></i></a>						
                                         <?php } else { ?>
                                             <a href="javascript:void(0);" onclick="new PNotify({
-                                                                    title: 'Data deletion',
-                                                                    text: 'You can not delete tariff as it is attached with [Ratecard, Carrier, User].',
-                                                                    type: 'info',
-                                                                    styling: 'bootstrap3',
-                                                                    addclass: 'dark'
-                                                                });" title="Delete" class="text-dark"><i class="fa fa-trash"></i><a/>
-        <?php } ?>
-        <?php //endif;  ?>	
+                                                        title: 'Data deletion',
+                                                        text: 'You can not delete tariff as it is attached with [Ratecard, Carrier, User].',
+                                                        type: 'info',
+                                                        styling: 'bootstrap3',
+                                                        addclass: 'dark'
+                                                    });" title="Delete" class="text-dark"><i class="fa fa-trash"></i><a/>
+                                           <?php } ?>
+                                           <?php //endif;  ?>	
 
                                     </td>
                                 </tr>
@@ -228,11 +186,11 @@ $delete_option = '';
                     </tbody>
                 </table>
             </div>                    
-            <?php echo '<div class="btn-toolbar" role="toolbar">
-				  <div class="btn-group pull-right navigation-bar col-md-6 col-sm-12 col-xs-12 text-right">
-						   ' . $pagination . '
-				  </div>
-				</div>'; ?>
+            <div class="row">  
+                <?php
+                dispay_pagination_row_bottom($total_records, $_SESSION['search_tariff_data']['s_no_of_records'], $pagination);
+                ?>    
+            </div>
 
             <?php
             $attributes = array('name' => 'view_frm', 'id' => 'view_frm');
@@ -252,10 +210,6 @@ $delete_option = '';
 <script language="javascript" type="text/javascript">
     $(document).ready(function () {
         showDatatable('table-sort', [6], [1, "asc"]);
-        $('#OkFilter').click(function () {
-            var no_of_records = $('#no_of_records').val();
-            $('#no_of_rows').val(no_of_records);
-        });
     });
     $('.rates').click(function () {
         $('#view_frm #tariff').val($(this).data('id'));

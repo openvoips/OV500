@@ -1,0 +1,41 @@
+p.h1_title{color: #BAB8B8; 
+           font-size:18px;
+           line-height: 1.1;}
+p.h2_title{color: #BAB8B8; 
+           font-size:18px;
+           line-height: 1.1;}
+p.h2_count {
+    font-size: 28px;
+    font-weight: bold;
+    line-height: 2;
+}
+
+.tile-stats .icon {
+    width: 16px;
+    height: 13px;
+    color: #BAB8B8;
+    position: absolute;
+    right: 53px;
+    top: 29px;
+}
+.tile-stats .icon i {
+    margin: 0;
+    font-size: 45px;
+}
+.bg-success{background-color: #28a745 !important;}
+.bg-info{background-color: #D95A4C !important;}
+.bg-warning{background-color: #ffc107 !important;}
+.bg-danger {background-color: #dc3545 !important;}
+.bg-primary{background-color: #007bff;}
+.text-dark{ color:#343a40;}
+.text-light{color:#f8f9fa;}
+.space{padding-left:5%;}
+
+.red1{background-color:#AA0000;color: white;}/*FF3535*/
+.red2{background-color:#FE6363;color: white;}
+.red3{background-color:#FEA7A7;color:#F0F3F4;}
+.red4{background-color:#FFDFDF;}
+.div_duration{margin-top:5px;}   
+#incoming_calls_bar_chart, #outgoing_calls_bar_chart{padding-top:3px;}
+.div_asd{color:#D95A4C}
+.box_title{font-size:18px;letter-spacing: 2px;}

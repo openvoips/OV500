@@ -1,47 +1,10 @@
-<?php
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019-2020 Chinna Technologies   
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
-// http://www.openvoips.com  http://www.openvoips.org
-//
-//
-// OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
-//
-//
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
-//echo '<pre>';
-//print_r($data);
-//print_r($account_type_array);
-//echo '</pre>';
-?>
+
 <div class="col-md-12 col-sm-6 col-xs-12">
     <div class="x_panel">
         <div class="x_title">
             <h2>
                 <?php
-              
-                    echo 'Admin & Accounts Users';
+                echo 'Admin & Accounts Users';
                 ?>
             </h2>
             <ul class="nav navbar-right panel_toolbox">
@@ -81,7 +44,7 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <?php if (!check_logged_account_type(array('SUPERAGENT'))): ?>
+                    <?php if (!check_logged_user_type(array('SUPERAGENT'))): ?>
                         <label class="control-label col-md-2 col-sm-3 col-xs-12">User Type</label>
                         <div class="col-md-4 col-sm-8 col-xs-12">
                             <select name="account_type" id="account_type" class="form-control data-search-field">
@@ -174,7 +137,7 @@
                                             <a href="<?php echo base_url(); ?>admins/editA/<?php echo param_encrypt($accounts_data['account_id']); ?>" title="Edit" class="edit"><i class="fa fa-pencil-square-o"></i></a>
                                             <?php
                                         endif;
-                                        if ($accounts_type != 'ADMIN' && check_logged_account_type(array('ADMIN', 'SUBADMIN'))):
+                                        if ($accounts_type != 'ADMIN' && check_logged_user_type(array('ADMIN', 'SUBADMIN'))):
                                             ?>
                                             <!--<a href="<?php echo base_url(); ?>roles/user_permission/<?php echo param_encrypt($accounts_data['account_id']); ?>" title="Permissions"><i class="fa fa-key"></i></a>-->                                    
                                             <?php
@@ -186,7 +149,7 @@
                                         <?php endif; ?> 
 
                                         <?php
-                                        if (!in_array($accounts_type, array('ADMIN', 'ACCOUNTS')) && check_logged_account_type(array('ADMIN'))):
+                                        if (!in_array($accounts_type, array('ADMIN', 'ACCOUNTS')) && check_logged_user_type(array('ADMIN'))):
                                             ?>
                                             <a href="<?php echo base_url(); ?>autologin/<?php echo param_encrypt($accounts_data['account_id']); ?>" title="Login As User"><i class="fa fa-sign-in"></i></a>               
                                                 <?php

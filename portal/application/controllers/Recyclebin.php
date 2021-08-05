@@ -1,15 +1,15 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019 Chinna Technologies  
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
+// OV500 Version 2.0.0
+// Copyright (C) 2019-2021 Openvoips Technologies   
 // http://www.openvoips.com  http://www.openvoips.org
-//
-//
-//OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// The Initial Developer of the Original Code is
+// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
+// Portions created by the Initial Developer are Copyright (C)
+// the Initial Developer. All Rights Reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -28,7 +28,7 @@
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
-class Recyclebin extends CI_Controller {
+class Recyclebin extends MY_Controller {
 
     function __construct() {
         parent::__construct();
@@ -39,7 +39,7 @@ class Recyclebin extends CI_Controller {
         //permission check		
         if (!check_is_loggedin())
             redirect(base_url(), 'refresh');
-        if (!check_logged_account_type(array('ADMIN', 'SUBADMIN')))
+        if (!check_logged_user_group('admin'))
             show_404('403');
 
         //$this->output->enable_profiler(ENABLE_PROFILE);		
@@ -147,20 +147,20 @@ class Recyclebin extends CI_Controller {
         switch ($main_data['sql_table']) {
             case 'NOTPERMITTED':
                 $this->session->set_flashdata('err_msgs', 'Rollback not implemented for this');
-                redirect(base_url() . 'recyclebin/details/' . param_encrypt($activity_id), 'location', '301'); 
+                redirect(base_url() . 'recyclebin/details/' . param_encrypt($activity_id), 'location', '301');
 
                 break;
 
             default:
                 $result = $this->log_mod->rollback($activity_id);
                 //var_dump($result);die;
-                if ($result === true) {				
+                if ($result === true) {
                     $this->session->set_flashdata('suc_msgs', 'Rollback Complete Successfully');
-                    redirect(base_url() . 'recyclebin', 'location', '301'); 					
+                    redirect(base_url() . 'recyclebin', 'location', '301');
                 } else {
                     $err_msgs = $result;
                     $this->session->set_flashdata('err_msgs', $err_msgs);
-                    redirect(base_url() . 'recyclebin/details/' . param_encrypt($activity_id), 'location', '301'); 
+                    redirect(base_url() . 'recyclebin/details/' . param_encrypt($activity_id), 'location', '301');
                 }
                 exit();
 

@@ -1,42 +1,3 @@
-<?php
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019-2020 Chinna Technologies   
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
-// http://www.openvoips.com  http://www.openvoips.org
-//
-//
-// OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
-//
-//
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
-
-$tab_index = 1;
-//echo '<pre>';
-//print_r($currency_conversion['result']);
-//print_r($data['result'][1]);
-//echo '</pre>';	
-?>
 <style type="text/css">
     .new_comment {
         appearance:none;
@@ -52,6 +13,11 @@ $tab_index = 1;
     }
 
 </style>
+<?php
+$tab_index = 1;
+$status_array = get_t_status();
+?>
+<link href="<?php echo base_url() ?>theme/vendors/bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css" rel="stylesheet">
 <link href="<?php echo base_url() ?>theme/default/css/ticket.css" rel="stylesheet">
 <div class="col-md-12 col-sm-6 col-xs-12">
     <div class="x_panel">
@@ -81,13 +47,20 @@ $tab_index = 1;
                     <div class="col-md-2 col-sm-6 col-xs-12">
                         <input type="text" name="account_id" id="account_id" value="<?php echo $_SESSION['search_t_data']['s_account_id']; ?>" class="form-control col-md-7 col-xs-12 data-search-field" >
                     </div>	
-                    <label class="control-label col-md-1 col-sm-3 col-xs-12 col-md-offset-1" >Status</label>
-                    <div class="col-md-2 col-sm-6 col-xs-12">
+                    <label class="control-label col-md-1 col-sm-3 col-xs-12" >Status</label>
+                    <div class="col-md-3 col-sm-6 col-xs-12">
                         <select name="status" id="status" class="form-control data-search-field">
                             <option value="">Select</option>
-                            <option value="open" <?php if ($_SESSION['search_t_data']['s_status'] == 'open') echo 'selected="selected"'; ?> >Open</option>
-                            <option value="closed" <?php if ($_SESSION['search_t_data']['s_status'] == 'closed') echo 'selected="selected"'; ?>>Closed</option>
 
+                            <?php
+                            foreach ($status_array as $status_key => $status_value) {
+                                $selected = '';
+                                if ($_SESSION['search_t_data']['s_status'] == $status_key)
+                                    $selected = 'selected="selected"';
+
+                                echo '<option value="' . $status_key . '" ' . $selected . '>' . $status_value . '</option>';
+                            }
+                            ?>                
                             <option value="new" <?php if ($_SESSION['search_t_data']['s_status'] == 'new') echo 'selected="selected"'; ?> class="new_ticket" >New Ticket</option>
                             <option value="customer_replied" <?php if ($_SESSION['search_t_data']['s_status'] == 'customer_replied') echo 'selected="selected"'; ?> class="new_comment" >New Comment</option>
                         </select>
@@ -135,6 +108,7 @@ $tab_index = 1;
                     <div class="col-md-2 col-sm-6 col-xs-12">
                         <select name="assigned_to_id" id="assigned_to_id" class="form-control data-search-field">
                             <option value="">Select</option> 
+                            <option value="myself" <?php if ($_SESSION['search_t_data']['s_assigned_to_id'] == 'myself') echo '  selected="selected" '; ?>>Myself</option> 
                             <?php
                             $str = '';
                             if (isset($assignto_data['result']) && count($assignto_data['result']) > 0) {
@@ -150,11 +124,47 @@ $tab_index = 1;
                         </select>
                     </div>	
 
+                    <label class="control-label col-md-1 col-sm-3 col-xs-12" >Subject</label>
+                    <div class="col-md-3 col-sm-6 col-xs-12">
+                        <input type="text" name="subject" id="subject" value="<?php echo $_SESSION['search_t_data']['s_subject']; ?>" class="form-control col-md-7 col-xs-12 data-search-field" >
+                    </div>	
+
+
+                </div> 
+                <div class="form-group">
+                    <label class="control-label col-md-2 col-sm-3 col-xs-12" >Create Date Range</label>                   
+
+                    <div class="col-md-4 col-sm-6 col-xs-12">
+                        <input type="text" name="create_dt" id="create_dt" value="<?php echo $_SESSION['search_t_data']['s_create_dt']; ?>"  readonly="readonly"  class="form-control col-md-7 col-xs-12 data-search-field">                            
+                    </div>
+
+                </div>					
+
+                <div class="form-group">
+
+
+                    <div class="col-md-3 col-sm-6 col-xs-12">
+                        <input type="checkbox" name="assigned_to_me" id="assigned_to_me" value="Y" <?php if ($_SESSION['search_t_data']['s_assigned_to_id'] == 'myself') echo 'checked="checked"'; ?>  />&nbsp;&nbsp;&nbsp;Assigned to me
+                    </div>
+
+
                     <div class="searchBar ">  
                         <input type="submit" value="Search" name="OkFilter" id="OkFilter" class="btn btn-primary">
                         <input type="button" value="Reset" name="search_reset" id="search_reset" class="btn btn-info" >
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-dark  dropdown-toggle" data-toggle="dropdown" value="Export" name="search_export" id="search_export">
+                                Export <span class="caret"></span></button>
+                            <ul class="dropdown-menu" role="menu">
+                                <?php
+                                $export_format_array = get_export_formats();
+                                foreach ($export_format_array as $export_format) {
+                                    echo '<li><a href="' . base_url() . 'ticket/index/-1/export/' . param_encrypt($export_format) . '">' . strtoupper($export_format) . '</a></li>';
+                                }
+                                ?>                            
+                            </ul>
+                        </div>
                     </div>
-                </div>   
+                </div>
 
             </form>
         </div>
@@ -189,7 +199,7 @@ $tab_index = 1;
                             </td>
                             <td class="td_3">
                                 <p>
-                                    <a href="<?php echo base_url('customers/edit/') . param_encrypt($ticket_data['account_id']); ?>" target="_blank" class="tag2"><?php echo $ticket_data['account_id']; ?></a>
+                                    <a href="<?php echo base_url('customers/edit/') . param_encrypt($ticket_data['account_id']); ?>" class="tag2"><?php echo $ticket_data['account_id']; ?></a>
                                     <?php
                                     if ($ticket_data['company_name'] != '') {
                                         echo '<br />' . $ticket_data['company_name'];
@@ -219,11 +229,21 @@ $tab_index = 1;
 
                             </td>
                             <td class="td_5">
-                                <?php if ($ticket_data['status'] == 'open') { ?>
-                                    <button type="button" class="btn btn-success btn-xs">Open</button>
-                                <?php } else { ?> 
-                                    <button type="button" class="btn btn-danger btn-xs">Closed</button>
-                                <?php } ?>
+                                <?php
+                                $status_array = get_t_status();
+                                $ticket_status = $ticket_data['status'];
+                                if (in_array($ticket_status, array('open', 'assigned', 'working', 'waiting-confirmation', 'not-fixed')))
+                                    $btn_success = 'btn-success';
+                                else
+                                    $btn_success = 'btn-danger';
+
+                                if (isset($status_array[$ticket_status]))
+                                    $ticket_status_display = $status_array[$ticket_status];
+                                else
+                                    $ticket_status_display = $ticket_status;
+
+                                echo '<button type="button" class="btn ' . $btn_success . ' btn-xs">' . $ticket_status_display . '</button>';
+                                ?>
                             </td>
                             <td class="td_6" align="center" >
                                 <p>
@@ -232,14 +252,19 @@ $tab_index = 1;
                                     <strong><?php echo $ticket_data['total_post']; ?></strong> Comments
                                     <br />
                                     Category:<i># <strong><?php echo $ticket_data['category']['category_name']; ?></strong></i>
-                                    <br />Assigned to:<i># <strong><?php echo $ticket_data['assigned_to']['assigned_to_name']; ?></strong></i>
+                                    <br />Assigned to:<i># <strong><?php
+                                            echo $ticket_data['assigned_to']['assigned_to_name'];
+                                            if (isset($ticket_data['assigned_to_user_name']) && $ticket_data['assigned_to_user_name'] != '')
+                                                echo ' / ' . $ticket_data['assigned_to_user_name'];
+                                            ?></strong></i>
                                 </p>
                             </td>
                         </tr>
 
                         <?php
                     }
-                } else {
+                }
+                else {
                     ?>
                     <tr>
                         <td colspan="6" align="center"><strong>No Record Found</strong></td>
@@ -260,8 +285,31 @@ $tab_index = 1;
     </div>                
 
 </div> 
+<script src="<?php echo base_url() ?>theme/vendors/moment/min/moment.min.js"></script>
+<script src="<?php echo base_url() ?>theme/vendors/moment/min/moment-timezone-with-data.js"></script>
+<script src="<?php echo base_url() ?>theme/vendors/bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script> 
 <script>
     $(document).ready(function () {
+
+        $("#create_dt").daterangepicker({
+            timePicker: !0,
+            timePickerIncrement: 1,
+            locale: {
+                format: "YYYY-MM-DD HH:mm"
+            },
+            timePicker24Hour: true,
+            ranges: {
+                'Last 15 Minute': [moment().subtract(15, 'minute'), moment()],
+                'Last 30 Minute': [moment().subtract(30, 'minute'), moment()],
+                'Last 1 Hour': [moment().subtract(1, 'hour'), moment()],
+                'Today': [moment().startOf('days'), moment().endOf('days')],
+                'Yesterday': [moment().subtract(1, 'days').startOf('days'), moment().subtract(1, 'days').endOf('days')],
+                'Last 7 Days': [moment().subtract(6, 'days').startOf('days'), moment()],
+                'This Month': [moment().startOf('month'), moment().endOf('month')],
+                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            }
+        });
+
         $('#OkFilter').click(function () {
             var no_of_records = $('#no_of_records').val();
             $('#no_of_rows').val(no_of_records);
