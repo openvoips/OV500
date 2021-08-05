@@ -2,15 +2,14 @@
 
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019 Chinna Technologies  
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
+// OV500 Version 2.0.0
+// Copyright (C) 2019-2021 Openvoips Technologies   
 // http://www.openvoips.com  http://www.openvoips.org
-//
-//
-//OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// The Initial Developer of the Original Code is
+// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
+// Portions created by the Initial Developer are Copyright (C)
+// the Initial Developer. All Rights Reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -26,6 +25,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 // ##############################################################################
 
+
 class Utils_model extends CI_Model {
 
     function __construct() {
@@ -33,7 +33,14 @@ class Utils_model extends CI_Model {
     }
 
     function get_countries() {
-        $sql = "SELECT country_id, country_name, country_prefix, country_abbr FROM sys_countries WHERE status_id='1' ORDER BY display_sequence DESC, country_name";
+        $sql = "SELECT country_id, country_name, country_prefix, country_abbr, country_iso FROM sys_countries WHERE status_id='1' ORDER BY display_sequence DESC, country_name";
+        $query = $this->db->query($sql);
+        $rows = $query->result();
+        return $rows;
+    }
+
+    function get_languages() {
+        $sql = "SELECT id, language, shortcode FROM languages  ORDER BY language";
         $query = $this->db->query($sql);
         $rows = $query->result();
         return $rows;
@@ -43,15 +50,6 @@ class Utils_model extends CI_Model {
         $sql = "SELECT currency_id, name, symbol FROM sys_currencies ORDER BY name";
         $query = $this->db->query($sql);
         $rows = $query->result_array();
-
-        $rows = Array(
-            '0' => Array('currency_id' => 1, 'name' => 'USD', 'symbol' => '$', 'detail_name' => 'United States Dollar'),
-            '1' => Array('currency_id' => 2, 'name' => 'GBP', 'symbol' => '£', 'detail_name' => 'British Pound'),
-            '2' => Array('currency_id' => 3, 'name' => 'INR', 'symbol' => '&#x20b9;', 'detail_name' => 'Indian Rupee'),
-            '3' => Array('currency_id' => 4, 'name' => 'SGD', 'symbol' => 'S$', 'detail_name' => 'Singapore Dollar'),
-            '4' => Array('currency_id' => 5, 'name' => 'EURO', 'symbol' => '&euro;', 'detail_name' => 'Euro'),
-        );
-
         return $rows;
     }
 
@@ -80,19 +78,15 @@ class Utils_model extends CI_Model {
     }
 
     function get_tariffs($user_type, $tariff_type = '', $created_by = '') {
-        $sql = "SELECT id, tariff_id, tariff_name, tariff_currency_id, tariff_type FROM tariff t INNER JOIN customers ua ON t.created_by=ua.account_id WHERE t.tariff_status='1' ";
-        if (in_array($user_type, array('ADMIN', 'SUBADMIN', 'ACCOUNTS'))) {
-            $sql .= " AND ua.account_type IN('ADMIN','SUBADMIN','ACCOUNTS')";
-        } elseif (in_array($user_type, array('RESELLER'))) {
-            $sql .= " AND ua.account_type='RESELLER'";
-        } else
-            return false;
+        $sql = "SELECT id, tariff_id, tariff_name, tariff_currency_id, tariff_type FROM tariff t WHERE t.tariff_status='1' ";
+
+        $logged_account_id = get_logged_account_id();
+        $sql .= " AND t.account_id= '$logged_account_id'";
+
+
 
         if ($tariff_type != '')
             $sql .= " AND t.tariff_type='" . $tariff_type . "'";
-
-        if ($created_by != '')
-            $sql .= " AND t.created_by='" . $created_by . "'";
 
         $sql .= " ORDER BY t.tariff_type, t.tariff_name";
         $query = $this->db->query($sql);
@@ -195,6 +189,70 @@ class Utils_model extends CI_Model {
         $final_return_array['message'] = 'Currency Conversion fetched successfully';
 
         return $final_return_array;
+    }
+
+    function get_data_total_count($sql, $db = 'default') {
+        try {
+            $count_sql = generate_count_total_sql($sql);
+            if (substr($count_sql, 0, 5) == 'error') {
+                throw new Exception($count_sql);
+            }
+            //echo $this->select_sql.'<br>'. $count_sql;
+            $this->total_count_sql = $count_sql;
+            if ($db == 'default')
+                $query_count = $this->db->query($count_sql);
+            else
+                $query_count = $this->cdrdb->query($count_sql);
+            $row_count = $query_count->row();
+            //$this->total_count = $row_count->total;
+            return $row_count->total;
+            /*
+              $query_count = $this->db->query($sql);
+              $row_count = $query_count->row();
+              $this->total_count = $row_count->total;
+             */
+        } catch (Exception $e) {
+            //echo $e->getMessage();
+            return 0;
+        }
+
+        return 0; //$this->total_count;
+    }
+
+    /* generate unique key */
+
+    function generate_key($name, $prefix1, $table, $unique_field_name) {
+        $prefix2 = '';
+        $key = generate_key($name, ''); //generate unique key
+
+        $sql = "SELECT $unique_field_name as table_key FROM " . $table . " ";
+        $query = $this->db->query($sql);
+        $row = $query->row();
+        if (isset($row)) {
+            $max_key = $row->table_key;
+            $new_key_int = $max_key;
+
+            while (1) {
+                $new_key = $prefix1 . $prefix2 . $key . rand(100, 999);
+                $new_key = sprintf('%-015s', $new_key);
+
+                $sql = "SELECT $unique_field_name
+				 FROM " . $table . " 
+				 WHERE  $unique_field_name ='" . $new_key . "'";
+                $query = $this->db->query($sql);
+                $row = $query->row();
+                if (isset($row)) {
+                    
+                } else {
+                    break;
+                }
+            }
+        } else {
+            $new_key = $prefix1 . $prefix2 . $key . rand(100, 999);
+            $new_key = sprintf('%-015s', $new_key);
+        }
+        //echo $new_key.'--'.strlen($new_key);die;
+        return $new_key;
     }
 
 }

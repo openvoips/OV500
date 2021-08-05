@@ -1,36 +1,4 @@
-<!--
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019-2020 Chinna Technologies   
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
-// http://www.openvoips.com  http://www.openvoips.org
-//
-//
-// OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
-//
-//
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
--->
+
 <div class="col-md-12 col-sm-12 col-xs-12">
     <div class="x_panel">
         <div class="x_title">
@@ -57,7 +25,7 @@
                         <!--<select name="frmcarrier" id="frmcarrier" class="form-control data-search-field">
                             <option value="">ALL</option>
                         <?php foreach ($carrier_data as $k => $v) { ?>								
-                                    <option value="<?php echo $carrier_data[$k]['carrier_id_name']; ?>" <?php if ($_SESSION['search_data']['s_carrier'] == $carrier_data[$k]['carrier_id_name']) echo 'selected'; ?>><?php echo $carrier_data[$k]['carrier_name']; ?></option>
+                                            <option value="<?php echo $carrier_data[$k]['carrier_id_name']; ?>" <?php if ($_SESSION['search_data']['s_carrier'] == $carrier_data[$k]['carrier_id_name']) echo 'selected'; ?>><?php echo $carrier_data[$k]['carrier_name']; ?></option>
                         <?php } ?>
                         </select>-->
                     </div>                    
@@ -166,8 +134,12 @@
 
     <div class="x_panel">
         <div class="x_title">
-            <h2>Total Records : <?php if (isset($listing_count)) echo $listing_count;
-        else echo '0'; ?></h2>
+            <h2>Total Records : <?php
+                if (isset($listing_count))
+                    echo $listing_count;
+                else
+                    echo '0';
+                ?></h2>
             <div class="clearfix"></div>
         </div>	
         <div class="x_content">
@@ -182,21 +154,23 @@
                             <?php if (isset($_SESSION['search_data']['s_g_hour']) && $_SESSION['search_data']['s_g_minute'] == 'Y') echo '<th class="column-title">Minute</th>'; ?>
                             <?php if (isset($_SESSION['search_data']['s_g_prefix']) && $_SESSION['search_data']['s_g_prefix'] == 'Y') echo '<th class="column-title">Prefix</th>'; ?>
 
-                            <?php if (isset($_SESSION['search_data']['s_g_dest']) && $_SESSION['search_data']['s_g_dest'] == 'Y') echo'<th class="column-title">Destination</th>'; ?>
+<?php if (isset($_SESSION['search_data']['s_g_dest']) && $_SESSION['search_data']['s_g_dest'] == 'Y') echo'<th class="column-title">Destination</th>'; ?>
                             <th class="column-title" >Total Duration</th>
                             <th class="column-title" >Total Calls</th>
                             <th class="column-title" >Answered Calls</th>
                             <th class="column-title">ACD</th>
                             <th class="column-title">ASR</th>
                             <th class="column-title">Avg PDD</th>
-                            <?php if (isset($_SESSION['search_data']['s_g_sip']) && $_SESSION['search_data']['s_g_sip'] == 'Y')
+                            <?php
+                            if (isset($_SESSION['search_data']['s_g_sip']) && $_SESSION['search_data']['s_g_sip'] == 'Y')
                                 echo'<th class="column-title">SIP Code</th>';
                             ?>
-                            <?php if (isset($_SESSION['search_data']['s_g_q850']) && $_SESSION['search_data']['s_g_q850'] == 'Y')
+                            <?php
+                            if (isset($_SESSION['search_data']['s_g_q850']) && $_SESSION['search_data']['s_g_q850'] == 'Y')
                                 echo'<th class="column-title">Q850 Code</th>';
                             ?>
                             <?php
-                            if ((isset($_SESSION['search_data']['s_g_carrier']) && $_SESSION['search_data']['s_g_carrier'] == 'Y') || $_SESSION['search_data']['s_carrier'] != '') {                                 
+                            if ((isset($_SESSION['search_data']['s_g_carrier']) && $_SESSION['search_data']['s_g_carrier'] == 'Y') || $_SESSION['search_data']['s_carrier'] != '') {
                                 echo '<th class="column-title">Cost</th>';
                             }
                             ?>
@@ -242,9 +216,9 @@
                                     <?php if (isset($_SESSION['search_data']['s_g_ip']) && $_SESSION['search_data']['s_g_ip'] == 'Y') echo '<td>' . $listing_row['ip_address'] . '</td>'; ?>
 
                                     <?php if (isset($_SESSION['search_data']['s_g_date']) && $_SESSION['search_data']['s_g_date'] == 'Y') echo '<td>' . $listing_row['call_date'] . '</td>'; ?>
-        <?php if (isset($_SESSION['search_data']['s_g_hour']) && $_SESSION['search_data']['s_g_hour'] == 'Y') echo '<td>' . $listing_row['calltime_h'] . '</td>'; ?>
-        <?php if (isset($_SESSION['search_data']['s_g_minute']) && $_SESSION['search_data']['s_g_minute'] == 'Y') echo '<td>' . $listing_row['calltime_m'] . '</td>'; ?>
-        <?php if (isset($_SESSION['search_data']['s_g_prefix']) && $_SESSION['search_data']['s_g_prefix'] == 'Y') echo '<td>' . $listing_row['prefix'] . '</td>'; ?>
+                                    <?php if (isset($_SESSION['search_data']['s_g_hour']) && $_SESSION['search_data']['s_g_hour'] == 'Y') echo '<td>' . $listing_row['calltime_h'] . '</td>'; ?>
+                                    <?php if (isset($_SESSION['search_data']['s_g_minute']) && $_SESSION['search_data']['s_g_minute'] == 'Y') echo '<td>' . $listing_row['calltime_m'] . '</td>'; ?>
+                                    <?php if (isset($_SESSION['search_data']['s_g_prefix']) && $_SESSION['search_data']['s_g_prefix'] == 'Y') echo '<td>' . $listing_row['prefix'] . '</td>'; ?>
         <?php if (isset($_SESSION['search_data']['s_g_dest']) && $_SESSION['search_data']['s_g_dest'] == 'Y') echo '<td>' . $listing_row['prefix_name'] . '</td>'; ?>
                                     <td><?php echo $listing_row['total_duration']; ?></td>
                                     <td><?php echo $listing_row['total_calls']; ?></td>
@@ -256,16 +230,16 @@
                                     <?php if (isset($_SESSION['search_data']['s_g_sip']) && $_SESSION['search_data']['s_g_sip'] == 'Y') echo '<td>' . $listing_row['SIPCODE'] . '</td>'; ?>
                                     <?php if (isset($_SESSION['search_data']['s_g_q850']) && $_SESSION['search_data']['s_g_q850'] == 'Y') echo '<td>' . $listing_row['Q850CODE'] . '</td>'; ?>
                                     <?php
-                                    if ((isset($_SESSION['search_data']['s_g_carrier']) && $_SESSION['search_data']['s_g_carrier'] == 'Y') || $_SESSION['search_data']['s_carrier'] != '') {                           
+                                    if ((isset($_SESSION['search_data']['s_g_carrier']) && $_SESSION['search_data']['s_g_carrier'] == 'Y') || $_SESSION['search_data']['s_carrier'] != '') {
                                         echo '<td>' . $currency_abbr($listing_row['currency_id']) . ' ' . $listing_row['cost'] . '</td>';
                                     }
                                     ?>
                                 </tr>
 
-        <?php
-    }
-}
-?>
+                                <?php
+                            }
+                        }
+                        ?>
                     </tbody>
                 </table>
             </div>

@@ -1,36 +1,4 @@
-<!--
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019-2020 Chinna Technologies   
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
-// http://www.openvoips.com  http://www.openvoips.org
-//
-//
-// OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
-//
-//
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
--->
+
 <script src="<?php echo base_url() ?>theme/vendors/combo-box-typeahead/js/bootstrap-combobox.js"></script>
 <link href="<?php echo base_url() ?>theme/vendors/combo-box-typeahead/css/bootstrap-combobox.css" rel="stylesheet" type="text/css">
 <script>
@@ -42,11 +10,11 @@
 <script src="<?php echo base_url() ?>theme/vendors/parsleyjs/dist/parsley.min.js"></script>
 <div class="">
     <div class="clearfix"></div> 
-     <div class="col-md-12 col-sm-12 col-xs-12 right">
+    <div class="col-md-12 col-sm-12 col-xs-12 right">
         <div class="x_title">
             <h2>Rate Configuration Management</h2>
             <ul class="nav navbar-right panel_toolbox">     
-                <li><a href="<?php  echo base_url('rates'); ?>"><button class="btn btn-danger" type="button">Back to Rate Listing Page</button></a> </li>
+                <li><a href="<?php echo base_url('rates'); ?>"><button class="btn btn-danger" type="button">Back to Rate Listing Page</button></a> </li>
             </ul>
             <div class="clearfix"></div>
         </div>
@@ -58,7 +26,7 @@
                 <div class="x_title">
                     <h2>Rate (ADD)</h2>
                     <ul class="nav navbar-right panel_toolbox">
-                        
+
                     </ul>
                     <div class="clearfix"></div>
                 </div>
@@ -83,7 +51,7 @@
                                                 $selected = '';
                                                 if (set_value('frm_card') == $ratecard_data['result'][$i]['ratecard_id'])
                                                     $selected = ' selected="selected"';
-                                                $option_str = '<option data-ratecard-for="' . $ratecard_data['result'][$i]['ratecard_for'] . '" value="' . $ratecard_data['result'][$i]['ratecard_id'] . '" ' . $selected . '>' . $ratecard_data['result'][$i]['currency_name']. " :: ".$ratecard_data['result'][$i]['ratecard_name'] . ' (' . $ratecard_data['result'][$i]['ratecard_id'] . ')' . '</option>';
+                                                $option_str = '<option data-ratecard-for="' . $ratecard_data['result'][$i]['ratecard_for'] . '" value="' . $ratecard_data['result'][$i]['ratecard_id'] . '" ' . $selected . '>' . $ratecard_data['result'][$i]['currency_name'] . " :: " . $ratecard_data['result'][$i]['ratecard_name'] . ' (' . $ratecard_data['result'][$i]['ratecard_id'] . ')' . '</option>';
                                                 if ($ratecard_data['result'][$i]['ratecard_for'] == 'INCOMING') {
                                                     $incoming_str .= $option_str;
                                                 } else {
@@ -105,7 +73,7 @@
                                 <div class="form-group">
                                     <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Destination <span class="required">*</span></label>
                                     <div class="col-md-8 col-sm-6 col-xs-12">
-                                        <input type="text" name="frm_dest" id="frm_dest" value="<?php echo set_value('frm_dest'); ?>" class="form-control col-md-7 col-xs-12" data-parsley-required="" data-parsley-alphanumspace="">
+                                        <input type="text" name="frm_dest" id="frm_dest" value="<?php echo set_value('frm_dest'); ?>" class="form-control col-md-7 col-xs-12" data-parsley-required="" data-parsley-minlength="3">
                                     </div>
                                 </div> 
                                 <div class="form-group">
@@ -213,11 +181,11 @@
             </div>
         </div>
     </div>
-     <div class="col-md-12 col-sm-12 col-xs-12 right">
+    <div class="col-md-12 col-sm-12 col-xs-12 right">
         <div class="x_title">
             <h2>Rate Configuration Management</h2>
             <ul class="nav navbar-right panel_toolbox">     
-                <li><a href="<?php  echo base_url('rates'); ?>"><button class="btn btn-danger" type="button">Back to Rate Listing Page</button></a> </li>
+                <li><a href="<?php echo base_url('rates'); ?>"><button class="btn btn-danger" type="button">Back to Rate Listing Page</button></a> </li>
             </ul>
             <div class="clearfix"></div>
         </div>

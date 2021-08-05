@@ -1,8 +1,8 @@
 <script src="<?php echo base_url() ?>theme/vendors/parsleyjs/dist/parsley.min.js"></script>
 <script src="<?php echo base_url() ?>theme/vendors/combo-box-typeahead/js/bootstrap-combobox.js"></script>
 <link href="<?php echo base_url() ?>theme/vendors/combo-box-typeahead/css/bootstrap-combobox.css" rel="stylesheet" type="text/css">
- <meta http-equiv="refresh" content="30">
- 
+<meta http-equiv="refresh" content="30">
+
 <div class="clearfix"></div>    
 
 
@@ -86,8 +86,10 @@
                         foreach ($switch_data['result'] as $row) {
                             ?>
                             <tr>  <td class="text-left"><?php echo $row['fs_host']; ?></td>
-                                <td class="text-left"><?php echo $row['anscalls'] . " / " . $row['calls'];
-                    ; ?></td>
+                                <td class="text-left"><?php
+                                    echo $row['anscalls'] . " / " . $row['calls'];
+                                    ;
+                                    ?></td>
                             </tr>
                             <?php
                         }
@@ -151,7 +153,7 @@
                         <tr>
                             <td colspan="3" align="center"><strong>No Record Found</strong></td>
                         </tr>
-<?php // } ?>
+<?php // }   ?>
 
                 </tbody>
             </table>
@@ -204,7 +206,7 @@
                         <tr>
                             <td colspan="3" align="center"><strong>No Record Found</strong></td>
                         </tr>
-                    <?php } ?>
+<?php } ?>
 
                 </tbody>
             </table>

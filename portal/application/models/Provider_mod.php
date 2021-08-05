@@ -1,15 +1,15 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019 Chinna Technologies  
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
+// OV500 Version 2.0.0
+// Copyright (C) 2019-2021 Openvoips Technologies   
 // http://www.openvoips.com  http://www.openvoips.org
-//
-//
-//OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// The Initial Developer of the Original Code is
+// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
+// Portions created by the Initial Developer are Copyright (C)
+// the Initial Developer. All Rights Reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -98,8 +98,9 @@ class Provider_mod extends CI_Model {
             $provider_data_array['currency_id'] = $data['currency_id'];
             $provider_data_array['provider_address'] = $data['provider_address'];
             $provider_data_array['provider_emailid'] = $data['provider_emailid'];
-            $provider_data_array['created_by'] = $data['created_by'];
-            $provider_data_array['create_date'] = date('Y-m-d H:i:s');
+            $provider_data_array['account_id'] = get_logged_account_id();
+            $provider_data_array['created_by'] = get_logged_user_id();
+            $provider_data_array['created_dt'] = date('Y-m-d H:i:s');
             $sql = "SELECT provider_name FROM providers WHERE provider_name='" . $provider_data_array['provider_name'] . "'";
             $query = $this->db->query($sql);
             $row = $query->row_array();
@@ -164,7 +165,7 @@ class Provider_mod extends CI_Model {
             if (isset($data['status_id']))
                 $provider_data_array['status_id'] = $data['status_id'];
             if (isset($data['modify_by']))
-                $provider_data_array['modify_by'] = $data['modify_by'];
+                $provider_data_array['updated_by'] = $data['modify_by'];
             if (isset($provider_data_array['provider_name'])) {
                 $sql = "SELECT provider_name FROM providers WHERE provider_name='" . $provider_data_array['provider_name'] . "' AND provider_id !='" . $data['provider_id'] . "'";
                 $query = $this->db->query($sql);

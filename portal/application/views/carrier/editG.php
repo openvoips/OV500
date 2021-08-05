@@ -1,37 +1,4 @@
-<!--
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019-2020 Chinna Technologies   
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
-// http://www.openvoips.com  http://www.openvoips.org
-//
-//
-// OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
-//
-//
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
--->
-<!-- Parsley -->
+
 <script src="<?php echo base_url() ?>theme/vendors/parsleyjs/dist/parsley.min.js"></script>
 <?php
 $carrier_ip_data = $data;
@@ -41,24 +8,24 @@ $carrier_ip_data = $data;
 <div class="">
     <div class="clearfix"></div>    
 
-        <div class="col-md-12 col-sm-12 col-xs-12 right">       
+    <div class="col-md-12 col-sm-12 col-xs-12 right">       
         <div class="x_title">
             <h2>Carrier IP-Address Configuration Management</h2>
             <ul class="nav navbar-right panel_toolbox">     
-                <li><a href="<?php echo base_url() . 'carriers/edit/' . param_encrypt($carrier_ip_data['carrier_id']); ?>"><button class="btn btn-danger" type="button" >Back to Carrier Edit Page</button></a> </li>
+                <li><a href="<?php echo base_url() . 'carriers/edit/' . param_encrypt($carrier_ip_data['carrier_id']); ?>/<?php echo $active_tab; ?>"><button class="btn btn-danger" type="button" >Back to Carrier Edit Page</button></a> </li>
             </ul>
             <div class="clearfix"></div>
         </div>
 
     </div>
-    
-    
+
+
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
             <div class="x_title">
                 <h2>Carrier IP-Address (EDIT) </h2>
                 <ul class="nav navbar-right panel_toolbox">
-                    
+
                 </ul>
                 <div class="clearfix"></div>
             </div>
@@ -67,6 +34,7 @@ $carrier_ip_data = $data;
                 <form action="" method="post" name="carrier_form" id="carrier_form" data-parsley-validate class="form-horizontal form-label-left">
                     <input type="hidden" name="button_action" id="button_action" value="">
                     <input type="hidden" name="action" value="OkSaveData"> 
+                    <input type="hidden" name="tab" value="<?php echo $active_tab; ?>">
                     <input type="hidden" name="id" value="<?php echo $carrier_ip_data['id']; ?>"/>
                     <input type="hidden" name="carrier_id" value="<?php echo $carrier_ip_data['carrier_id']; ?>"/>    
                     <input type="hidden" name="carrier_key" value="<?php echo $carrier_ip_data['carrier_id']; ?>"/>                         <div class="form-group">
@@ -143,7 +111,7 @@ $carrier_ip_data = $data;
                         <div class="col-md-8 col-sm-6 col-xs-12">
                             <div class="radio">
                                 <label><input type="radio" name="ip_status" id="status1" value="1"  <?php if ($carrier_ip_data['ip_status'] == 1) { ?> checked="checked" <?php } ?> /> Active</label>
-                           
+
                                 <label> <input type="radio" name="ip_status" id="status0" value="0" <?php if ($carrier_ip_data['ip_status'] == 0) { ?> checked="checked" <?php } ?> /> Inactive</label>
                             </div>
 
@@ -169,18 +137,18 @@ $carrier_ip_data = $data;
     </div>
 
 
-      <div class="col-md-12 col-sm-12 col-xs-12 right">
+    <div class="col-md-12 col-sm-12 col-xs-12 right">
         <div class="ln_solid"></div>
         <div class="x_title">
             <h2>Carrier IP-Address Configuration Management</h2>
             <ul class="nav navbar-right panel_toolbox">     
-                <li><a href="<?php echo base_url() . 'carriers/edit/' . param_encrypt($carrier_ip_data['carrier_id']); ?>"><button class="btn btn-danger" type="button" >Back to Carrier Edit Page</button></a> </li>
+                <li><a href="<?php echo base_url() . 'carriers/edit/' . param_encrypt($carrier_ip_data['carrier_id']); ?>/<?php echo $active_tab; ?>"><button class="btn btn-danger" type="button" >Back to Carrier Edit Page</button></a> </li>
             </ul>
             <div class="clearfix"></div>
         </div>
 
     </div>
-    
+
 
 </div>    
 <script>

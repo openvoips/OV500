@@ -2,15 +2,14 @@
 
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019 Chinna Technologies  
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
+// OV500 Version 2.0.0
+// Copyright (C) 2019-2021 Openvoips Technologies   
 // http://www.openvoips.com  http://www.openvoips.org
-//
-//
-//OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// The Initial Developer of the Original Code is
+// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
+// Portions created by the Initial Developer are Copyright (C)
+// the Initial Developer. All Rights Reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -25,6 +24,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 // ##############################################################################
+
 
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
@@ -161,6 +161,20 @@ class Dialplan_mod extends CI_Model {
     function get_data($order_by, $limit_to, $limit_from, $filter_data, $option_param = array()) {
         try {
             $this->db->select("SQL_CALC_FOUND_ROWS *", FALSE);
+			
+			////
+			$sub = $this->subquery->start_subquery('select');
+            $sub->select('dialplan_name')->from('dialplan');
+            $sub->where('dialplan_prefix_list.dialplan_id = dialplan.dialplan_id');
+            $this->subquery->end_subquery('dialplan_name');
+			////
+			////
+			$sub = $this->subquery->start_subquery('select');
+            $sub->select('carrier_name')->from('carrier');
+            $sub->where('dialplan_prefix_list.carrier_id = carrier.carrier_id');
+            $this->subquery->end_subquery('carrier_name');
+			////
+			
             if (count($filter_data) > 0) {
                 foreach ($filter_data as $key => $value) {
                     if ($value != '') {

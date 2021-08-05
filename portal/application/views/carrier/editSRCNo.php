@@ -1,40 +1,6 @@
-<!--
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019-2020 Chinna Technologies   
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
-// http://www.openvoips.com  http://www.openvoips.org
-//
-//
-// OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
-//
-//
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
--->
-<!-- Parsley -->
+
 <script src="<?php echo base_url() ?>theme/vendors/parsleyjs/dist/parsley.min.js"></script>
 <?php
-//	echo '<pre>';print_r($data); echo '</pre>';
 $callerid_data = $data['callerid'];
 
 $allowed_rules = $disallowed_rules = '';
@@ -59,20 +25,21 @@ foreach ($callerid_data as $callerid_data_temp) {
         <div class="x_title">
             <h2>Carrier Caller ID Translation Rules</h2>
             <ul class="nav navbar-right panel_toolbox">     
-                <li><a href="<?php echo base_url() . 'carriers/edit/' . param_encrypt($data['carrier_id']); ?>"><button class="btn btn-danger" type="button" >Back to Carrier Edit Page</button></a> </li>
+                <li><a href="<?php echo base_url() . 'carriers/edit/' . param_encrypt($data['carrier_id']); ?>/<?php echo $active_tab; ?>"><button class="btn btn-danger" type="button" >Back to Carrier Edit Page</button></a> </li>
             </ul>
             <div class="clearfix"></div>
         </div>
     </div>
     <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
-            
+
             <div class="x_content">             
                 <form action="" method="post" name="carrier_form" id="carrier_form" data-parsley-validate class="form-horizontal form-label-left">
                     <input type="hidden" name="button_action" id="button_action" value="">
                     <input type="hidden" name="action" value="OkSaveData"> 
                     <input type="hidden" name="carrier_id" value="<?php echo $data['carrier_id']; ?>"/>    
-                    <input type="hidden" name="carrier_key" value="<?php echo $data['carrier_id']; ?>"/>        
+                    <input type="hidden" name="carrier_key" value="<?php echo $data['carrier_id']; ?>"/>  
+                    <input type="hidden" name="tab" value="<?php echo $active_tab; ?>">
 
 
                     <div class="form-group">
@@ -141,7 +108,7 @@ foreach ($callerid_data as $callerid_data_temp) {
         <div class="x_title">
             <h2>Carrier Caller ID Translation Rules</h2>
             <ul class="nav navbar-right panel_toolbox">     
-                <li><a href="<?php echo base_url() . 'carriers/edit/' . param_encrypt($data['carrier_id']); ?>"><button class="btn btn-danger" type="button" >Back to Carrier Edit Page</button></a> </li>
+                <li><a href="<?php echo base_url() . 'carriers/edit/' . param_encrypt($data['carrier_id']); ?>/<?php echo $active_tab; ?>"><button class="btn btn-danger" type="button" >Back to Carrier Edit Page</button></a> </li>
             </ul>
             <div class="clearfix"></div>
         </div>

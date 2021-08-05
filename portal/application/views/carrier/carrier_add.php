@@ -1,48 +1,9 @@
-<!--
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019-2020 Chinna Technologies   
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
-// http://www.openvoips.com  http://www.openvoips.org
-//
-//
-// OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
-//
-//
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
--->
-<!-- Parsley -->
+
 <script src="<?php echo base_url() ?>theme/vendors/parsleyjs/dist/parsley.min.js"></script>
 <?php
 $tab_index = 1;
 $dp = 4;
 $vatflag_array = array('NONE', 'TAX', 'VAT');
-
-//echo '<pre>';
-//print_r($provider_data);
-//print_r($tariff_options);
-//print_r($currency_options);
-//echo '</pre>';
 ?>    
 <div class="">
     <div class="clearfix"></div>    
@@ -158,15 +119,7 @@ $vatflag_array = array('NONE', 'TAX', 'VAT');
                     </div>
  </div>
 
-                    <div class="form-group" >
-                        <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Carrier Type <span class="required">*</span></label>
-                        <div class="col-md-7 col-sm-6 col-xs-12">
-                            <select name="carrier_type" id="carrier_type" class="form-control data-search-field" data-parsley-required="" tabindex="<?php echo $tab_index++; ?>">
-                                <option value="INBOUND"  <?php echo set_select('carrier_type', 'inbound', true); ?>>DID Provider</option>
-                                <option value="OUTBOUND"  <?php echo set_select('carrier_type', 'outbound'); ?>>VoIP Minute Provider</option>
-                            </select>
-                        </div>
-                    </div>
+
                     <div class="form-group">
                         <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Currency <span class="required">*</span></label>
                         <div class="col-md-7 col-sm-6 col-xs-12">
@@ -429,17 +382,6 @@ if (count($tariff_options) > 0) {
 
 
 
-    function carrier_type_changed()
-    {
-        if ($("#carrier_type").val() == 'INBOUND')
-        {
-            $('#id_incoming_cdr_billing_div').show();
-        } else
-        {
-            $('#id_incoming_cdr_billing_div').hide();
-        }
-
-    }
 
     function currency_changed()
     {
@@ -502,15 +444,11 @@ if (count($tariff_options) > 0) {
         }
     }
     $(document).ready(function () {
-        //$( "#menu_toggle" ).trigger( "click" );
-        //currency_changed();
-        carrier_type_changed();
+        
          tax_chnaged();
     });
 
-    $("#carrier_type").change(function () {
-        carrier_type_changed();
-    });
+ 
     $("#carrier_currency_id").change(function () {
         currency_changed();
     });

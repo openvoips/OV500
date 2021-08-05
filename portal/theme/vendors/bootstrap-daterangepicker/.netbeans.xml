@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<auxiliary-configuration xmlns="http://www.netbeans.org/ns/auxiliary-configuration/1">
+    <preferences xmlns="http://www.netbeans.org/ns/auxiliary-configuration-preferences/1">
+        <module name="org-netbeans-modules-css-prep">
+            <property name="sass.configured" value="true"/>
+            <property name="sass.enabled" value="true"/>
+            <property name="sass.mappings" value="/scss:/css"/>
+        </module>
+        <module name="org-netbeans-modules-editor-indent">
+            <node name="CodeStyle"/>
+        </module>
+        <module name="org-netbeans-modules-javascript2-requirejs"/>
+    </preferences>
+</auxiliary-configuration>

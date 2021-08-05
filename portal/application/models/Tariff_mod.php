@@ -1,15 +1,15 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019 Chinna Technologies  
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
+// OV500 Version 2.0.0
+// Copyright (C) 2019-2021 Openvoips Technologies   
 // http://www.openvoips.com  http://www.openvoips.org
-//
-//
-//OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// The Initial Developer of the Original Code is
+// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
+// Portions created by the Initial Developer are Copyright (C)
+// the Initial Developer. All Rights Reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -25,6 +25,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 // ##############################################################################
 
+
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
@@ -32,6 +33,93 @@ class Tariff_mod extends CI_Model {
     public function __construct() {
         parent::__construct();
         $this->load->database();
+    }
+
+    public function get_data($order_by, $limit_to, $limit_from, $filter_data, $option_param = array()) {
+        try {
+            $am_ratecard_id_name_array = array();
+            if (isset($filter_data['logged_account_type']) && isset($filter_data['logged_current_customer_id']) && $filter_data['logged_account_type'] == 'agent') {
+                $sub_sql = "SELECT DISTINCT u.tariff_id FROM customers ua, account u WHERE ua.account_id=u.account_id AND  ua.account_manager='" . $filter_data['logged_current_customer_id'] . "' AND u.tariff_id IS NOT NULL";
+                $query = $this->db->query($sub_sql);
+                if (!$query) {
+                    $error_array = $this->db->error();
+                    throw new Exception($error_array['message']);
+                }
+                if ($query->num_rows() > 0) {
+                    foreach ($query->result_array() as $row) {
+                        $am_ratecard_id_name_array[] = $row['tariff_id'];
+                    }
+                }
+            }
+
+            $this->db->select("SQL_CALC_FOUND_ROWS *", FALSE);
+            $sub = $this->subquery->start_subquery('select');
+            $sub->select('name')->from('sys_currencies');
+            $sub->where('sys_currencies.currency_id = tariff.tariff_currency_id');
+            $this->subquery->end_subquery('currency_name');
+            $sub = $this->subquery->start_subquery('select');
+            $sub->select('symbol')->from('sys_currencies');
+            $sub->where('sys_currencies.currency_id = tariff.tariff_currency_id');
+            $this->subquery->end_subquery('currency_symbol');
+            $sub = $this->subquery->start_subquery('select');
+            $sub->select('count(*)')->from('tariff_ratecard_map');
+            $sub->where('tariff.tariff_id = tariff_ratecard_map.tariff_id and ratecard_for = "OUTGOING"');
+            $this->subquery->end_subquery('ratecard_count');
+            $sub = $this->subquery->start_subquery('select');
+            $sub->select('count(*)')->from('tariff_ratecard_map');
+            $sub->where('tariff.tariff_id = tariff_ratecard_map.tariff_id and ratecard_for = "INCOMING"');
+            $this->subquery->end_subquery('ratecard_in_count');
+            $sub = $this->subquery->start_subquery('select');
+            $sub->select('count(*)')->from('carrier');
+            $sub->where('tariff.tariff_id = carrier.tariff_id');
+            $this->subquery->end_subquery('carrier_count');
+//            $sub = $this->subquery->start_subquery('select');
+//            $sub->select('count(*)')->from('account');
+//            $sub->where('tariff.tariff_id = account.tariff_id');
+//            $this->subquery->end_subquery('user_count');
+
+            if (count($filter_data) > 0) {
+                foreach ($filter_data as $key => $value) {
+                    if ($value != '') {
+                        if ($key == 'id' || $key == 'tariff_currency_id' || $key == 'tariff_id')
+                            $this->db->where($key, $value);
+                        elseif (in_array($key, array('logged_account_type', 'logged_current_customer_id', 'logged_account_level'))) {
+                            
+                        } elseif ($key == 'account_id') {
+                            $this->db->where('account_id', $value);
+                        } else
+                            $this->db->like($key, $value, 'after');
+                    }
+                }
+            }
+            if (count($am_ratecard_id_name_array) > 0) {
+                $this->db->where_in('tariff_id', $am_ratecard_id_name_array);
+            }
+            if (is_string($order_by) && $order_by == '') {
+                $this->db->order_by('id', 'DESC');
+            } else {
+                foreach ($order_by as $k => $v)
+                    $this->db->order_by($k, $v);
+            }
+            $this->db->limit(intval($limit_from), intval($limit_to));
+            $q = $this->db->get('tariff');
+            if (!$q) {
+                $error_array = $this->db->error();
+                throw new Exception($error_array['message']);
+            }
+            $final_return_array['result'] = $q->result_array();
+
+            $query = $this->db->query('SELECT FOUND_ROWS() AS Count');
+            $final_return_array["total"] = $query->row()->Count;
+
+            $final_return_array['status'] = 'success';
+            $final_return_array['message'] = 'Tariff List fetched successfully';
+            return $final_return_array;
+        } catch (Exception $e) {
+            $final_return_array['status'] = 'failed';
+            $final_return_array['message'] = $e->getMessage();
+            return $final_return_array;
+        }
     }
 
     public function add($data) {
@@ -48,7 +136,8 @@ class Tariff_mod extends CI_Model {
         if (isset($data['frm_status']))
             $data_array['tariff_status'] = $data['frm_status'];
         $data_array['tariff_id'] = generate_key($data['frm_name'], '');
-        $data_array['created_by'] = get_logged_account_id();
+        $data_array['account_id'] = get_logged_account_id();
+        $data_array['created_by'] = get_logged_user_id();
         $data_array['update_dt'] = $data_array['create_dt'] = date('Y-m-d H:i:s');
         $str = $this->db->insert_string('tariff', $data_array);
         $result = $this->db->query($str);
@@ -98,95 +187,6 @@ class Tariff_mod extends CI_Model {
         }
     }
 
-    public function updateBundle($data) {
-        $log_data_array = array();
-        $data_array = array();
-        $data_array_incoming = array();
-        $data_array['package_option'] = '0';
-        $data_array['monthly_charges'] = 0;
-        $data_array['bundle_option'] = '0';
-        $data_array['bundle1_type'] = $data_array['bundle2_type'] = $data_array['bundle3_type'] = 'MINUTE';
-        $data_array['bundle1_value'] = 0;
-        $data_array['bundle2_value'] = $data_array['bundle3_value'] = '';
-        $data_array_incoming['bundle1_prefix'] = $data_array_incoming['bundle2_prefix'] = $data_array_incoming['bundle3_prefix'] = '';
-        if ($data['frm_plan'] == 1) {
-            $data_array['package_option'] = '1';
-            $data_array['monthly_charges'] = $data['frm_monthly_charge'];
-            if ($data['frm_bundle'] == 1) {
-                $data_array['bundle_option'] = '1';
-                $data_array['bundle1_type'] = $data['bundle1_type'];
-                $data_array['bundle1_value'] = $data['bundle1_value'];
-                $data_array_incoming['bundle1_prefix'] = $data['bundle1_prefix'];
-                $data_array['bundle2_type'] = $data['bundle2_type'];
-                $data_array['bundle2_value'] = $data['bundle2_value'];
-                $data_array_incoming['bundle2_prefix'] = $data['bundle2_prefix'];
-                $data_array['bundle3_type'] = $data['bundle3_type'];
-                $data_array['bundle3_value'] = $data['bundle3_value'];
-                $data_array_incoming['bundle3_prefix'] = $data['bundle3_prefix'];
-            }
-        }
-        $data_array['update_dt'] = date('Y-m-d H:i:s');
-        if (isset($data['frm_key'])) {
-            $this->db->trans_begin();
-            if (count($data_array) > 0) {
-                if ($data_array['bundle2_value'] == '')
-                    $data_array['bundle2_value'] = NULL;
-                if ($data_array['bundle3_value'] == '')
-                    $data_array['bundle3_value'] = NULL;
-                $where = "tariff_id='" . $data['frm_key'] . "'";
-                $str = $this->db->update_string('tariff', $data_array, $where);
-                $result = $this->db->query($str);
-                $log_data_array[] = array('activity_type' => 'update', 'sql_table' => 'tariff', 'sql_key' => $where, 'sql_query' => $str);
-                $str = $this->db->where('tariff_id', $data['frm_key'])->get_compiled_delete('tariff_bundle_prefixes');
-                $result = $this->db->query($str);
-                if (!$result) {
-                    $error_array = $this->db->error();
-                    throw new Exception($error_array['message']);
-                }
-                $data_in = array();
-                $prefix1 = explode(',', $data_array_incoming['bundle1_prefix']);
-                if (count($prefix1) > 0) {
-                    for ($x = 0; $x < count($prefix1); $x++) {
-                        if ($prefix1[$x] != '')
-                            $data_in[] = array('tariff_id' => $data['frm_key'], 'bundle_id' => 1, 'prefix' => $prefix1[$x]);
-                    }
-                }
-                $prefix2 = explode(',', $data_array_incoming['bundle2_prefix']);
-                if (count($prefix2) > 0) {
-                    for ($x = 0; $x < count($prefix2); $x++) {
-                        if ($prefix2[$x] != '')
-                            $data_in[] = array('tariff_id' => $data['frm_key'], 'bundle_id' => 2, 'prefix' => $prefix2[$x]);
-                    }
-                }
-                $prefix3 = explode(',', $data_array_incoming['bundle3_prefix']);
-                if (count($prefix3) > 0) {
-                    for ($x = 0; $x < count($prefix3); $x++) {
-                        if ($prefix3[$x] != '')
-                            $data_in[] = array('tariff_id' => $data['frm_key'], 'bundle_id' => 3, 'prefix' => $prefix3[$x]);
-                    }
-                }
-                if (count($data_in) != 0) {
-                    $result = $this->db->insert_batch('tariff_bundle_prefixes', $data_in);
-                    if (!$result) {
-                        $error_array = $this->db->error();
-                        throw new Exception($error_array['message']);
-                    }
-                }
-            }
-            if ($this->db->trans_status() === FALSE) {
-                $error_array = $this->db->error();
-                $this->db->trans_rollback();
-                return array('status' => false, 'msg' => $error_array['message']);
-            } else {
-                $this->db->trans_commit();
-                set_activity_log($log_data_array);
-                return array('status' => true, 'msg' => 'Successfully updated');
-            }
-        } else {
-            return array('status' => false, 'msg' => 'KEY not found');
-        }
-    }
-
     public function delete($data) {
         try {
             $this->db->trans_begin();
@@ -207,7 +207,7 @@ class Tariff_mod extends CI_Model {
                 }
 
                 $log_data_array[] = array('activity_type' => 'delete_recovery', 'sql_table' => 'TARIFF', 'sql_key' => param_decrypt($id), 'sql_query' => $str);
-                set_activity_log($log_data_array);
+                // set_activity_log($log_data_array);
             }
 
             if ($this->db->trans_status() === FALSE) {
@@ -221,109 +221,6 @@ class Tariff_mod extends CI_Model {
         } catch (Exception $e) {
             $this->db->trans_rollback();
             return array('status' => false, 'msg' => 'failed deletion :: ' . $e->getMessage());
-        }
-    }
-
-    public function get_data($order_by, $limit_to, $limit_from, $filter_data, $option_param = array()) {
-        try {
-            $am_ratecard_id_name_array = array();
-            if (isset($filter_data['logged_account_type']) && isset($filter_data['logged_current_customer_id']) && $filter_data['logged_account_type'] == 'agent') {
-                $sub_sql = "SELECT DISTINCT u.tariff_id FROM customers ua, account u WHERE ua.account_id=u.account_id AND  ua.account_manager='" . $filter_data['logged_current_customer_id'] . "' AND u.tariff_id IS NOT NULL";
-                $query = $this->db->query($sub_sql);
-                if (!$query) {
-                    $error_array = $this->db->error();
-                    throw new Exception($error_array['message']);
-                }
-                if ($query->num_rows() > 0) {
-                    foreach ($query->result_array() as $row) {
-                        $am_ratecard_id_name_array[] = $row['tariff_id'];
-                    }
-                }
-            }
-
-            $this->db->select("SQL_CALC_FOUND_ROWS *", FALSE);
-            $sub = $this->subquery->start_subquery('select');
-            $sub->select('name')->from('sys_currencies');
-            $sub->where('sys_currencies.currency_id = tariff.tariff_currency_id');
-            $this->subquery->end_subquery('currency_name');
-            $sub = $this->subquery->start_subquery('select');
-            $sub->select('symbol')->from('sys_currencies');
-            $sub->where('sys_currencies.currency_id = tariff.tariff_currency_id');
-            $this->subquery->end_subquery('currency_symbol');
-            $sub = $this->subquery->start_subquery('select');
-            $sub->select('count(*)')->from('tariff_ratecard_map');
-            $sub->where('tariff.tariff_id = tariff_ratecard_map.tariff_id and ratecard_for = "OUTGOING"');
-            $this->subquery->end_subquery('ratecard_count');
-            $sub = $this->subquery->start_subquery('select');
-            $sub->select('count(*)')->from('tariff_ratecard_map');
-            $sub->where('tariff.tariff_id = tariff_ratecard_map.tariff_id and ratecard_for = "INCOMING"');
-            $this->subquery->end_subquery('ratecard_in_count');
-            $sub = $this->subquery->start_subquery('select');
-            $sub->select('count(*)')->from('carrier');
-            $sub->where('tariff.tariff_id = carrier.tariff_id');
-            $this->subquery->end_subquery('carrier_count');
-            $sub = $this->subquery->start_subquery('select');
-            $sub->select('count(*)')->from('account');
-            $sub->where('tariff.tariff_id = account.tariff_id');
-            $this->subquery->end_subquery('user_count');
-
-            if (count($filter_data) > 0) {
-                foreach ($filter_data as $key => $value) {
-                    if ($value != '') {
-                        if ($key == 'id' || $key == 'tariff_currency_id' || $key == 'tariff_id')
-                            $this->db->where($key, $value);
-                        elseif (in_array($key, array('logged_account_type', 'logged_current_customer_id', 'logged_account_level'))) {
-                            
-                        } elseif ($key == 'created_by') {
-                            if ($value == 'admin') {
-                                $sub = $this->subquery->start_subquery('where_in');
-                                $sub->select('account_id')->from('customers');
-                                //     $sub->where("account_type in ('ADMIN','SUBADMIN'') ");
-                                $this->subquery->end_subquery('created_by', TRUE);
-                            } else {
-                                $this->db->where('created_by', $value);
-                            }
-                        } else
-                            $this->db->like($key, $value, 'after');
-                    }
-                }
-            }
-            if (count($am_ratecard_id_name_array) > 0) {
-                $this->db->where_in('tariff_id', $am_ratecard_id_name_array);
-            }
-            if (is_string($order_by) && $order_by == '') {
-                $this->db->order_by('id', 'DESC');
-            } else {
-                foreach ($order_by as $k => $v)
-                    $this->db->order_by($k, $v);
-            }
-            $this->db->limit(intval($limit_from), intval($limit_to));
-            $q = $this->db->get('tariff');
-            if (!$q) {
-                $error_array = $this->db->error();
-                throw new Exception($error_array['message']);
-            }
-            $final_return_array['result'] = $q->result_array();
-
-            $query = $this->db->query('SELECT FOUND_ROWS() AS Count');
-            $final_return_array["total"] = $query->row()->Count;
-
-            if ($final_return_array['result']) {
-                if (strlen($final_return_array['result'][0]['tariff_id']) > 0) {
-                    $q = $this->db->query("SELECT bundle_id, group_concat(prefix) as prefixes FROM tariff_bundle_prefixes WHERE tariff_id = '" . $final_return_array['result'][0]['tariff_id'] . "' group by bundle_id order by bundle_id");
-                    $final_return_array['bundle'] = $q->result_array();
-                }
-            } else {
-                $final_return_array['bundle'] = '';
-            }
-
-            $final_return_array['status'] = 'success';
-            $final_return_array['message'] = 'Tariff List fetched successfully';
-            return $final_return_array;
-        } catch (Exception $e) {
-            $final_return_array['status'] = 'failed';
-            $final_return_array['message'] = $e->getMessage();
-            return $final_return_array;
         }
     }
 

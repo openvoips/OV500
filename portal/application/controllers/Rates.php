@@ -2,15 +2,14 @@
 
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019 Chinna Technologies  
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
+// OV500 Version 2.0.0
+// Copyright (C) 2019-2021 Openvoips Technologies   
 // http://www.openvoips.com  http://www.openvoips.org
-//
-//
-//OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// The Initial Developer of the Original Code is
+// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
+// Portions created by the Initial Developer are Copyright (C)
+// the Initial Developer. All Rights Reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -29,7 +28,7 @@
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
-class Rates extends CI_Controller {
+class Rates extends MY_Controller {
 
     public $search_serialize = '';
 
@@ -140,6 +139,7 @@ class Rates extends CI_Controller {
             } else {
                 $export_header = array('Prefix', 'Destination', 'PPM', 'PPC', 'Minimal', 'Resolution', 'GracePeriod', 'Multiplier', 'Addition', 'Status');
             }
+			$file_name = $file_name.'_'.$ratecard_for;
 
             $downloaded_message = $this->export->download($file_name, $format, $search_data, $export_header, $export_data);
             if (gettype($downloaded_message) == 'string')
@@ -147,11 +147,8 @@ class Rates extends CI_Controller {
             else
                 $is_file_downloaded = true;
         }
-        $ratecard_search_data = array(
-            'logged_account_type' => get_logged_account_type(),
-            'logged_current_customer_id' => get_logged_account_id(),
-            'logged_account_level' => get_logged_account_level(),
-        );
+
+        $ratecard_search_data['account_id'] = get_logged_account_id();
 
         $data['ratecard_dropdown'] = $this->ratecard_mod->get_data(array('ratecard_name' => 'ASC'), 0, '', $ratecard_search_data, array());
         if (isset($_SESSION['search_rate_data']['s_tariff']) && $_SESSION['search_rate_data']['s_tariff'] == '')
@@ -161,15 +158,8 @@ class Rates extends CI_Controller {
             $data['ratecard_data'] = $this->tariff_mod->get_mapping('', 0, '', array('tariff_id' => $tariff), array());
         }
 
-        if (check_logged_account_type(array('RESELLER', 'CUSTOMER'))) {
-            $tariff_search_data['created_by'] = get_logged_account_id();
-        } else {
-            $tariff_search_data['created_by'] = 'admin';
-        }
 
-        $tariff_search_data['logged_account_type'] = get_logged_account_type();
-        $tariff_search_data['logged_current_customer_id'] = get_logged_account_id();
-        $tariff_search_data['logged_account_level'] = get_logged_account_level();
+        $tariff_search_data['account_id'] = get_logged_account_id();
         $data['tariff_data'] = $this->tariff_mod->get_data(array('tariff_name' => 'ASC'), 0, '', $tariff_search_data);
 
         if ($is_file_downloaded === false) {
@@ -201,11 +191,11 @@ class Rates extends CI_Controller {
             show_404('403');
 
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-        $data['ratecard_data'] = $this->ratecard_mod->get_data('', 0, 2000, array(), array());
+        $data['ratecard_data'] = $this->ratecard_mod->get_data('', 0, 2000, array('account_id' => get_logged_account_id()), array());
 
         if (isset($_POST['action']) && $_POST['action'] == 'OkSaveData') {
             $this->form_validation->set_rules('frm_prefix', 'Prefix', 'trim|required|numeric|min_length[1]|max_length[15]');
-            $this->form_validation->set_rules('frm_dest', 'Destination', 'trim|required|alpha_numeric_spaces|min_length[1]|max_length[40]');
+            $this->form_validation->set_rules('frm_dest', 'Destination', 'trim|required|min_length[1]|max_length[40]');
             $this->form_validation->set_rules('frm_ppm', 'Rate', 'trim|required');
             $this->form_validation->set_rules('frm_ppc', 'Connection charge', 'trim|required');
             $this->form_validation->set_rules('frm_min', 'Minimal Time', 'trim|required|is_natural_no_zero');
@@ -350,14 +340,14 @@ class Rates extends CI_Controller {
     public function MyRates() {
         $page_name = "rate_MyRates";
         $is_searched = false;
-        $data['searching'] = 0;
-        if (!check_logged_account_type(array('CUSTOMER', 'RESELLER')))
+        $data['searching'] = true;
+        if (!check_logged_user_group(array('CUSTOMER', 'RESELLER')))
             show_404('403');
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
         $data['page_name'] = $page_name;
         $search_data = array();
         if (isset($_POST['search_action'])) {
-            $_SESSION['search_myrate'] = array('s_myrate_prefix' => $_POST['prefix'], 's_myrate_dest' => $_POST['dest'], 's_myrate_ratecard_for' => $_POST['ratecard_for']);
+            $_SESSION['search_myrate'] = array('s_myrate_prefix' => $_POST['prefix'], 's_myrate_dest' => $_POST['dest'], 's_myrate_ratecard_for' => $_POST['ratecard_for'], 'no_of_rows' => $_POST['no_of_rows']);
             if ($_SESSION['search_myrate']['s_myrate_prefix'] != '' || $_SESSION['search_myrate']['s_myrate_dest'] != '' || $_SESSION['search_myrate']['s_myrate_ratecard_for'] != '') {
                 $is_searched = true;
             }
@@ -365,11 +355,19 @@ class Rates extends CI_Controller {
             $_SESSION['search_myrate']['s_myrate_prefix'] = isset($_SESSION['search_myrate']['s_myrate_prefix']) ? $_SESSION['search_myrate']['s_myrate_prefix'] : '';
             $_SESSION['search_myrate']['s_myrate_dest'] = isset($_SESSION['search_myrate']['s_myrate_dest']) ? $_SESSION['search_myrate']['s_myrate_dest'] : '';
             $_SESSION['search_myrate']['s_myrate_ratecard_for'] = isset($_SESSION['search_myrate']['s_myrate_ratecard_for']) ? $_SESSION['search_myrate']['s_myrate_ratecard_for'] : '';
+			$_SESSION['search_myrate']['no_of_rows'] = isset($_SESSION['search_myrate']['no_of_rows']) ? $_SESSION['search_myrate']['no_of_rows'] : RECORDS_PER_PAGE;
         }
-        if ($is_searched) {
+		
+	
+		$pagination_uri_segment = 2;
+        list($per_page, $segment) = get_pagination_param($pagination_uri_segment, 'search_myrate');
+	//	print_r($_POST);echo '--'.$per_page.'--'.$segment;
+       // if ($is_searched) 
+	   {
             $account_id = get_logged_account_id();
             $option_param = array();
             $user_result = $this->member_mod->get_account_by_key('account_id', $account_id, $option_param);
+
             $tariff_id = $user_result['tariff_id'];
             $search_data = array(
                 'tariff_id' => $tariff_id,
@@ -378,11 +376,20 @@ class Rates extends CI_Controller {
                 'ratecard_for' => $_SESSION['search_myrate']['s_myrate_ratecard_for'],
             );
             $order_by = '';
-            $rate_data = $this->rate_mod->get_MyRates($order_by, 0, 1000, $search_data);
-            $data['searching'] = 1;
-            $data['pagination'] = $this->pagination->create_links();
+            $rate_data = $this->rate_mod->get_MyRates($order_by, $segment, $per_page,  $search_data);
+           
+			
+			
+			
+           
             $data['listing_data'] = $rate_data['result'];
-            $data['listing_count'] = $rate_data['total'];
+            $data['total_records'] = $data['listing_count'] = $rate_data['total'];
+			
+			$config = array();
+			$config = $this->utils_model->setup_pagination_option($data['total_records'], 'MyRates', $per_page, $pagination_uri_segment);
+			$this->pagination->initialize($config);
+			 $data['pagination'] = $this->pagination->create_links();
+			
         }
         $data['is_searched'] = $is_searched;
 
@@ -392,7 +399,7 @@ class Rates extends CI_Controller {
     }
 
     function download($tariff_type = 'out', $account_id = '') {
-        if (!check_logged_account_type(array('CUSTOMER', 'RESELLER')))
+        if (!check_logged_user_group(array('CUSTOMER', 'RESELLER')))
             show_404();
         ini_set('memory_limit', '2048M');
         set_time_limit(500);
@@ -446,23 +453,7 @@ class Rates extends CI_Controller {
 
             fclose($file);
             exit;
-        } else {//incoming
-//            $search_data = array('tariff_id' => $tariff_id);
-//             $search_data = array(
-//                'tariff_id' => $tariff_id,                
-//                'ratecard_for' => 'OUTGOING',
-//            );
-//            $rate_data = $this->rate_mod->get_MyRates('', 0, '', $search_data);
-//            
-//            $tariff_response = $this->tariff_mod->get_data('', '', '', $search_data, array());
-//
-//            $tariff_data = current($tariff_response['result']);
-//
-//            $ratecard_id = $tariff_data['incoming_ratecard_id'];
-//            if ($ratecard_id_name != '') {
-//                $search_data = array('ratecard_id_name' => $ratecard_id_name);
-//                $rate_data = $this->rate_mod->get_data('', 0, '', $search_data);
-//            }
+        } else {
             $search_data = array(
                 'tariff_id' => $tariff_id,
                 'ratecard_for' => 'INCOMING',

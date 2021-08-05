@@ -1,15 +1,15 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019 Chinna Technologies  
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
+// OV500 Version 2.0.0
+// Copyright (C) 2019-2021 Openvoips Technologies   
 // http://www.openvoips.com  http://www.openvoips.org
-//
-//
-//OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// The Initial Developer of the Original Code is
+// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
+// Portions created by the Initial Developer are Copyright (C)
+// the Initial Developer. All Rights Reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -25,10 +25,11 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 // ##############################################################################
 
+
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
-class Sitesetup extends CI_Controller {
+class Sitesetup extends MY_Controller {
 
     function __construct() {
         parent::__construct();
@@ -41,13 +42,11 @@ class Sitesetup extends CI_Controller {
         $page_name = "sitesetup_index";
         $data['page_name'] = $page_name;
 
-        if (!check_logged_account_type(array('ADMIN', 'SUBADMIN')))
+        if (!check_logged_user_type(array('ADMIN', 'SUBADMIN')))
             show_404('403');
 
         if (isset($_POST['action']) && $_POST['action'] == 'OkSaveData') {
-            $this->form_validation->set_rules('data[site_name]', 'Site Name', 'trim|required');
-            $this->form_validation->set_rules('data[mail_sent_from]', 'Mail Sent From', 'trim');
-            $this->form_validation->set_rules('data[mail_sent_to]', 'Mail Sent To', 'trim');
+           $this->form_validation->set_rules('action', 'Site Name', 'trim|required');
 
             if ($this->form_validation->run() == FALSE) {// error
                 $data['err_msgs'] = validation_errors();
@@ -56,18 +55,11 @@ class Sitesetup extends CI_Controller {
 
                 if ($result === true) {
                     $this->session->set_flashdata('suc_msgs', 'Site Settings Updated Successfully');
-                    if (isset($_POST['button_action']) && trim($_POST['button_action']) != '') {
-                        $action = trim($_POST['button_action']);
-                        if ($action == 'save')
-                            redirect(base_url() . 'sitesetup', 'location', '301');
-                        elseif ($action == 'save_close')
-                            redirect(base_url() . 'dashboard', 'location', '301');
-                    }
-                    else {
-                        redirect(base_url() . 'dashboard', 'location', '301'); 	
-                    }
-
-                    redirect(base_url() . 'sitesetup', 'location', '301'); 					
+                    if (isset($_POST['button_action']) && trim($_POST['button_action']) == 'save') 
+						redirect(base_url() . 'sitesetup', 'location', '301');
+					else
+						redirect(base_url() . 'dashboard', 'location', '301');
+                    
                 } else {
                     $err_msgs = $result;
                     $data['err_msgs'] = $err_msgs;

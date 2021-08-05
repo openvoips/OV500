@@ -1,36 +1,4 @@
-<!--
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019-2020 Chinna Technologies   
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
-// http://www.openvoips.com  http://www.openvoips.org
-//
-//
-// OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
-//
-//
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
--->
+
 <div class="col-md-12 col-sm-12 col-xs-12">
     <div class="x_panel">
         <div class="x_title">
@@ -201,56 +169,57 @@
                     <tfoot>
                         <tr class="headings thc">
 
-<?php
-foreach ($all_field_array as $field_lebel) {
-    echo '<th class="column-title">' . $field_lebel . '</th>';
-}
-?>
+                            <?php
+                            foreach ($all_field_array as $field_lebel) {
+                                echo '<th class="column-title">' . $field_lebel . '</th>';
+                            }
+                            ?>
 
                         </tr>
                     </tfoot>
 
                     <tbody>
-<?php
-if (isset($listing_count) && $listing_count > 0) {
-    foreach ($listing_data as $listing_row) {
-        //var_dump($listing_row);
-        echo '<tr>';
-        foreach ($all_field_array as $field_name => $field_lebel) {
-            echo '<td><nobr>';
-            if ($field_name == 'Account') {
+                        <?php
+                        if (isset($listing_count) && $listing_count > 0) {
+                            foreach ($listing_data as $listing_row) {
+                                //var_dump($listing_row);
+                                echo '<tr>';
+                                foreach ($all_field_array as $field_name => $field_lebel) {
+                                    echo '<td><nobr>';
+                                    if ($field_name == 'Account') {
 
-                if ($listing_row['customer_company_name'] != '') {
+                                        if ($listing_row['customer_company_name'] != '') {
 
-                    echo $listing_row['customer_company_name'] . ' ( ' . $listing_row[$field_name] . ' ) ';
-                } else {
-                    echo $listing_row[$field_name];
-                }
-            } else {
+                                            echo $listing_row['customer_company_name'] . ' ( ' . $listing_row[$field_name] . ' ) ';
+                                        } else {
+                                            echo $listing_row[$field_name];
+                                        }
+                                    } else {
 
-                echo $listing_row[$field_name];
-            }
+                                        echo $listing_row[$field_name];
+                                    }
 
-            echo '</nobr></td>';
-        }
-        echo '</tr>';
-    }
-}
-?>
+                                    echo '</nobr></td>';
+                                }
+                                echo '</tr>';
+                            }
+                        }
+                        ?>
                     </tbody>
                 </table>
             </div>
             <br />
-                        <?php echo '<div class="btn-toolbar" role="toolbar">
+            <?php
+            echo '<div class="btn-toolbar" role="toolbar">
 							  <div class="btn-group col-md-5 col-sm-12 col-xs-12">';
 
-                        echo '</div>
+            echo '</div>
 						
 							  <div class="btn-group pull-right navigation-bar col-md-6 col-sm-12 col-xs-12 text-right">
 									   ' . $pagination . '
 							  </div>
 							</div>';
-                        ?>
+            ?>
 
         </div>
     </div>
@@ -286,15 +255,8 @@ if (isset($listing_count) && $listing_count > 0) {
             }
         });
 
-        var table = $('#analytics').DataTable({
-            searching: false,
-            paging: false,
-            bInfo: false,
-            /*scrollY: 400,*/
-            scrollX: true,
-            "order": [[1, "desc"]],
-        });
 
+        showDatatable('analytics', [], [1, "desc"]);
         $('#OkFilter').click(function () {
             var no_of_records = $('#no_of_records').val();
             $('#no_of_rows').val(no_of_records);

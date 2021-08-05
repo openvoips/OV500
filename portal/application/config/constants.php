@@ -100,14 +100,12 @@ define('SCRIPT_DATE_FORMAT_1', 'DD-MM-YYYY HH:mm');
 define('DAY_FROM_WEEK', serialize(array(0 => 'Sunday', 1 => 'Monday', 2 => 'Tuesday', 3 => 'Wednesday', 4 => 'Thursday', 5 => 'Friday', 6 => 'Saturday')));
 
 
-define('RECORDS_PER_PAGE', 5);
+define('RECORDS_PER_PAGE', 10);
 
 define('KEY_PREFIX', 'SW');
 
-define('ENABLE_PROFILE', FALSE);
+define('ENABLE_PROFILE', false);
 
-
-define('CDR_DIRECTORY', "uploads/USERDATA/{{ACCOUNT_ID}}/cdr/{{FOLDER}}/");
 
 
 
@@ -121,7 +119,7 @@ $help_text_array['cli_riles'] = array(
     array('%=>919949800228', 'allowing all CLI and replacing incoming CLI with 919949800228.')
 );
 $help_text_array['trans_riles'] = array(
-    array('%=>%', 'allow all dialed number without any translation.'),
+    array('%=>%', 'allow all dialed number without any  translation.'),
     array('44|%=>%', 'allow only 44 prefix Dialed number and removing 44 prefix from dialed number.'),
     array('44|%=>0044%', 'allow only 44 prefix dialed number and removing 44 and adding 0044 prefix in dialed number.'),
     array('44{4}|%=>%', 'allowing only 44 prefix dialed number with 4 length and removing 44 from the dialed number.'),
@@ -130,7 +128,7 @@ $help_text_array['trans_riles'] = array(
 );
 
 $help_text_array['term_prefix_riles'] = array(
-    array('%=>%', 'allow all dialed number without any translation.'),
+    array('%=>%', 'allow all dialed number without any  translation.'),
     array('44|%=>%', 'allow only 44 prefix Dialed number and removing 44 prefix from dialed number.'),
     array('44|%=>0044%', 'allow only 44 prefix dialed number and removing 44 and adding 0044 prefix in dialed number.'),
     array('44{4}|%=>%', 'allowing only 44 prefix dialed number with 4 length and removing 44 from the dialed number.'),
@@ -138,21 +136,32 @@ $help_text_array['term_prefix_riles'] = array(
     array('%=>919949800228', 'allowing all dialed number and replacing incoming dialed number with 919949800228.'),
 );
 
-
-define('SITE_NAME', 'OV500 Billing and Switching Software');
-define('SITE_FULL_NAME', 'OV500 Billing and Switching Software');
-define('SDR_API_URL', 'https://openvoips.org/portal/api/sdrapi.php');
+define('SITE_SUBDOMAIN', 'OV500');
+define('SITE_NAME', 'Telecoms Billing Solution');
+define('SITE_FULL_NAME', 'Telecoms Billing Solution');
+define('SDR_API_URL', 'https://localhost/portal/api/sdrapi.php');
 define('LOGO_IMAGE', 'logo.png');
 
-define('MOMENT_TIMEZONE', 'GMT0');
 
 
-define('SITE_MAIL_FROM', 'kanand81@gmail.com');
-define('SITE_MAIL_TO', 'kanand81@gmail.com');
+define('MOMENT_TIMEZONE', 'GMT');
 
-define('CREDIT_MAIL_TO', 'kanand81@gmail.com');
+
+define('CUSTOMERCODEPREFIX','STC');
+define('RESELLERCODEPREFIX','STR');
+
+
+define('CUSTOMERCOMPANY','OpenVoips Technologies');
+
+
+
+define('SITE_MAIL_FROM', 'support@suretel.co.za');
+define('SITE_MAIL_TO', 'support@suretel.co.za');
+define('CREDIT_MAIL_TO', 'accounts@suretel.co.za');
+
 
 //define('PAYPAL_LINK', 'https://www.sandbox.paypal.com/cgi-bin/webscr');
 define('PAYPAL_LINK', 'https://www.paypal.com/cgi-bin/webscr');
 
-define('RECORDS_PER_PAGE_ARRAY', serialize(array(5,10, 20, 30, 50, 100, 200,500,1000)));
+define('RECORDS_PER_PAGE_ARRAY', serialize(array(1,2,3,10, 20, 30, 50, 100, 200,500,1000)));
+define('ADMIN_ACCOUNT_ID', 'SYSTEM');

@@ -1,40 +1,8 @@
-<!--
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019-2020 Chinna Technologies   
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
-// http://www.openvoips.com  http://www.openvoips.org
-//
-//
-// OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
-//
-//
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
--->
+
 <div class="col-md-12 col-sm-12 col-xs-12">
     <div class="x_panel">
         <div class="x_title">
-            <h2>Profit & Loss Reports</h2>
+            <h2>Traffic Profit & Loss Reports</h2>
             <div class="clearfix"></div>
         </div>
         <div class="x_content">
@@ -84,7 +52,7 @@
                             <input type="text" name="frmprefix" id="frmprefix" value="<?php if (isset($_SESSION['search_data']['s_prefix'])) echo $_SESSION['search_data']['s_prefix']; ?>" class="form-control data-search-field" placeholder="Prefix">
                         </div>
                         <div class="form-group">
-                            <?php if (!check_logged_account_type(array('RESELLER'))) : ?>
+                            <?php if (!check_logged_user_group(array('RESELLER'))) : ?>
                                 <label class="control-label col-md-1 col-sm-3 col-xs-12">Carrier</label>
                                 <div class="col-md-3 col-sm-9 col-xs-12">
                                     <!--<input type="text" name="frmcarrier" id="frmcarrier" value="<?php if (isset($_SESSION['search_data']['s_carrier'])) echo $_SESSION['search_data']['s_carrier']; ?>" class="form-control data-search-field" placeholder="Carrier">-->
@@ -145,7 +113,7 @@
                                     <input type="checkbox" name="g_user" <?php if (isset($_SESSION['search_data']['s_g_user']) && $_SESSION['search_data']['s_g_user'] == 'Y') echo 'checked'; ?>> Customer
                                 </label>
                             </div>
-                            <?php if (!check_logged_account_type(array('RESELLER'))) : ?>
+                            <?php if (!check_logged_user_group(array('RESELLER'))) : ?>
                                 <div class="checkbox col-md-2 col-sm-6 col-xs-12">
                                     <label>
                                         <input type="checkbox" name="g_carrier" <?php if (isset($_SESSION['search_data']['s_g_carrier']) && $_SESSION['search_data']['s_g_carrier'] == 'Y') echo 'checked'; ?>> Carrier
@@ -277,9 +245,9 @@
                             }
                         } else {
                             ?>
-                                    <!--<tr>
-                                            <td colspan="11" align="center"><strong>No Record Found</strong></td>
-                                    </tr>-->
+                                           <!--<tr>
+                                                    <td colspan="11" align="center"><strong>No Record Found</strong></td>
+                                            </tr>-->
                             <?php
                         }
                         ?>
@@ -322,13 +290,9 @@
             }
         });
 
-        $('#analytics').DataTable({
-            searching: false,
-            paging: false,
-            bInfo: false,
-//			scrollY: 400,
-//        	scrollX: true
-        });
+        showDatatable('analytics', [], [1, "asc"]);
+
+
     });
 
 </script>

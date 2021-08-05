@@ -2,15 +2,14 @@
 
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019 Chinna Technologies  
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
+// OV500 Version 2.0.0
+// Copyright (C) 2019-2021 Openvoips Technologies   
 // http://www.openvoips.com  http://www.openvoips.org
-//
-//
-//OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// The Initial Developer of the Original Code is
+// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
+// Portions created by the Initial Developer are Copyright (C)
+// the Initial Developer. All Rights Reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -26,6 +25,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 // ##############################################################################
 
+
 class Currency_mod extends CI_Model {
 
     function __construct() {
@@ -40,31 +40,14 @@ class Currency_mod extends CI_Model {
             $this->db->select("SQL_CALC_FOUND_ROWS *, '$currencies_table' as table_name", FALSE);
             $this->db->order_by('currency_id', 'DESC');
             $q = $this->db->get($currencies_table);
-            if (count($filter_data) > 0) {
-                foreach ($filter_data as $key => $value) {
-                    if ($value != '') {
-                        if ($key == 'id' || $key == 'currency_id') {
-                            $this->db->where($key, $value);
-                        } else {
-                            $this->db->where($key, $value);
-                        }
-                    }
-                }
-            }
 
 
-            $rows = Array(
-                '0' => Array('currency_id' => 1, 'name' => 'USD', 'symbol' => '$', 'detail_name' => 'United States Dollar'),
-                '1' => Array('currency_id' => 2, 'name' => 'GBP', 'symbol' => '£', 'detail_name' => 'British Pound'),
-                '2' => Array('currency_id' => 3, 'name' => 'INR', 'symbol' => '&#x20b9;', 'detail_name' => 'Indian Rupee'),
-                '3' => Array('currency_id' => 4, 'name' => 'SGD', 'symbol' => 'S$', 'detail_name' => 'Singapore Dollar'),
-                '4' => Array('currency_id' => 5, 'name' => 'EURO', 'symbol' => '&euro;', 'detail_name' => 'Euro'),
-            );
 
-
-            $final_return_array['result'] = $rows;
+            $final_return_array['result'] = $q->result_array();
             $query = $this->db->query('SELECT FOUND_ROWS() AS Count');
-            $final_return_array["total"] = 5; //$query->row()->Count;
+            $final_return_array["total"] = $query->row()->Count;
+
+
             $final_return_array['status'] = 'success';
             $final_return_array['message'] = 'Currency List fetched successfully';
             return $final_return_array;
@@ -114,8 +97,6 @@ class Currency_mod extends CI_Model {
                 $error_array = $this->db->error();
             }
 
-//            $sql = $this->db->last_query();
-//            echo $sql;
             $final_return_array['result'] = $q->result_array();
 
             $query = $this->db->query('SELECT FOUND_ROWS() AS Count');
@@ -123,7 +104,7 @@ class Currency_mod extends CI_Model {
             $final_return_array['status'] = 'success';
             $final_return_array['message'] = 'Currency exchange Rates List fetched successfully';
 
-            //var_dump($final_return_array);
+            
             return $final_return_array;
         } catch (Exception $e) {
             $final_return_array['status'] = 'failed';

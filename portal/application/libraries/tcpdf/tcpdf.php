@@ -20379,7 +20379,7 @@ class TCPDF {
                     $l = $size / 3;
                     $lspace += $l;
                     if ($this->rtl) {
-;
+                        ;
                         $this->x += $lspace;
                     } else {
                         $this->x -= $lspace;
@@ -20391,7 +20391,7 @@ class TCPDF {
                     // 1=>type, 2=>width, 3=>height, 4=>image.ext
                     $lspace += $img[2];
                     if ($this->rtl) {
-;
+                        ;
                         $this->x += $lspace;
                     } else {
                         $this->x -= $lspace;
@@ -24362,7 +24362,7 @@ class TCPDF {
     protected function endSVGElementHandler($parser, $name) {
         $name = $this->removeTagNamespace($name);
         if ($this->svgdefsmode AND ! in_array($name, array('defs', 'clipPath', 'linearGradient', 'radialGradient', 'stop'))) {
-;
+            ;
             if (end($this->svgdefs) !== FALSE) {
                 $last_svgdefs_id = key($this->svgdefs);
                 if (isset($this->svgdefs[$last_svgdefs_id]['attribs']['child_elements'])) {
@@ -24478,4 +24478,3 @@ class TCPDF {
 
 //============================================================+
 // END OF FILE
-//============================================================+

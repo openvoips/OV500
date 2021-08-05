@@ -1,15 +1,16 @@
 <?php
+
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019 Chinna Technologies  
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
+// OV500 Version 2.0.0
+// Copyright (C) 2019-2021 Openvoips Technologies   
 // http://www.openvoips.com  http://www.openvoips.org
-//
-//
-//OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// The Initial Developer of the Original Code is
+// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
+// Portions created by the Initial Developer are Copyright (C)
+// the Initial Developer. All Rights Reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -30,6 +31,8 @@ class Carrier_mod extends CI_Model {
     public $id;
     public $carrier_id;
     public $total_count;
+    public $select_sql;
+    public $total_count_sql;
 
     function __construct() {
         parent::__construct();
@@ -46,8 +49,7 @@ class Carrier_mod extends CI_Model {
             }
         
             $query = $this->db->query($sql);
-            
-         //   echo $this->db->last_query();
+          
             if (!$query) {
                 $error_array = $this->db->error();
                 throw new Exception($error_array['message']);
@@ -72,7 +74,7 @@ class Carrier_mod extends CI_Model {
         $final_return_array = $carrier_id_array = $tariff_id_array = array();
         $tariff_id_carrier_id_mapping_array = array();
         try {
-            $sql = "SELECT SQL_CALC_FOUND_ROWS id, carrier_type, carrier_id, carrier_name, tariff_id, carrier_status, carrier_cps, carrier_cc, carrier_currency_id, carrier_progress_timeout, carrier_ring_timeout, cli_prefer, carrier_codecs, dp, cli_prefer, tax1,tax2,tax3,tax_type,tax_number,vat_flag, provider_id, sys_currencies.name cname, sys_currencies.symbol FROM carrier  INNER JOIN sys_currencies on sys_currencies.currency_id = carrier.carrier_currency_id  WHERE 1 ";
+            $sql = "SELECT SQL_CALC_FOUND_ROWS id,  carrier_id, carrier_name, tariff_id, carrier_status, carrier_cps, carrier_cc, carrier_currency_id, carrier_progress_timeout, carrier_ring_timeout, cli_prefer, carrier_codecs, dp, cli_prefer, tax1,tax2,tax3,tax_type,tax_number,vat_flag, provider_id, sys_currencies.name cname, sys_currencies.symbol FROM carrier  INNER JOIN sys_currencies on sys_currencies.currency_id = carrier.carrier_currency_id  WHERE 1 ";
             $carrier_ip_sql = '';
             if (count($filter_data) > 0) {
                 foreach ($filter_data as $key => $value) {
@@ -319,7 +321,7 @@ class Carrier_mod extends CI_Model {
             if (count($carrier_data_array) > 0) {
                 $str = $this->db->insert_string('carrier', $carrier_data_array);
                 $result = $this->db->query($str);
-                echo $this->db->last_query();
+           
                 if (!$result) {
                     $error_array = $this->db->error();
                     throw new Exception($error_array['message']);

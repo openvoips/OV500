@@ -1,15 +1,15 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019 Chinna Technologies  
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
+// OV500 Version 2.0.0
+// Copyright (C) 2019-2021 Openvoips Technologies   
 // http://www.openvoips.com  http://www.openvoips.org
-//
-//
-//OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// The Initial Developer of the Original Code is
+// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
+// Portions created by the Initial Developer are Copyright (C)
+// the Initial Developer. All Rights Reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -28,7 +28,7 @@
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
-class Providers extends CI_Controller {
+class Providers extends MY_Controller {
 
     function __construct() {
         parent::__construct();
@@ -37,16 +37,16 @@ class Providers extends CI_Controller {
         $this->load->model('provider_mod');
         if (!check_is_loggedin())
             redirect(base_url(), 'refresh');
-        if (!check_logged_account_type(array('ADMIN', 'SUBADMIN', 'NOC')))
+        if (!check_logged_user_type(array('ADMIN', 'SUBADMIN')))
             redirect(base_url(), 'refresh');
     }
 
-    function index($arg1 = '', $format = '') {       
+    function index($arg1 = '', $format = '') {
         $page_name = "provider_index";
         $data['page_name'] = $page_name;
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
         if (isset($_POST['action']) && $_POST['action'] == 'OkDeleteData') {
-            if (!check_logged_account_type(array('ADMIN', 'SUBADMIN'))) {
+            if (!check_logged_user_type(array('ADMIN', 'SUBADMIN'))) {
                 $this->session->set_flashdata('err_msgs', 'Dont have enough permission');
                 redirect(base_url() . 'providers', 'location', '301');
             }
@@ -144,7 +144,7 @@ class Providers extends CI_Controller {
         }
         if ($is_file_downloaded === false) {
             $pagination_uri_segment = 3;
-           
+
             if ($this->uri->segment($pagination_uri_segment) == '') {
                 $segment = 0;
             } else {
@@ -335,7 +335,7 @@ class Providers extends CI_Controller {
         ////////////////////////////////////////////////
 
         if (isset($_POST['action']) && $_POST['action'] == 'OkDeleteData') {
-            if (!check_logged_account_type(array('ADMIN', 'SUBADMIN', 'NOC'))) {
+            if (!check_logged_user_group('admin')) {
                 $this->session->set_flashdata('err_msgs', 'Dont have enough permission');
                 redirect(base_url() . 'servers', 'location', '301');
             }
@@ -641,7 +641,7 @@ class Providers extends CI_Controller {
                 }
             }
         }
-      
+
 
         if (!empty($id)) {
             $server_id = param_decrypt($id);

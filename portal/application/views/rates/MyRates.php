@@ -1,48 +1,16 @@
-<!--
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019-2020 Chinna Technologies   
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
-// http://www.openvoips.com  http://www.openvoips.org
-//
-//
-// OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
-//
-//
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
--->
 <div class="col-md-12 col-sm-6 col-xs-12">
     <div class="x_panel">
         <div class="x_title">
             <h2>PSTN Call & DID Call Rates</h2>
             <ul class="nav navbar-right panel_toolbox">
-                
+
             </ul>
             <div class="clearfix"></div>
         </div>
         <div class="x_content"> 
             <form class="block-content form-horizontal " id="search_form" name="search_form"  method="post" action="">
                 <input type="hidden" name="search_action" value="search" />
+                <input type="hidden" name="no_of_rows" id="no_of_rows" value="" />
 
                 <div class="form-group">
                     <label class="control-label col-md-2 col-sm-4 col-xs-12">Prefix</label>
@@ -66,7 +34,7 @@
                         </select>
                     </div>                
                     <div class="searchBar">
-                        <input type="submit" value="Search" name="OkFilter" id="OkFilter" class="btn btn-primary">
+                        <input type="submit" value="Search" name="OkFilter" id="OkFilter" class="btn btn-primary">           
                         <input type="button" value="Reset" name="search_reset" id="search_reset" class="btn btn-info">
                         <a href="javascript:void(0);"  onclick=doOpenModal() title="Delete"><input type="button" value="Download Rate Card" name="add_link" class="btn btn-primary"></a>
                     </div>
@@ -78,8 +46,9 @@
             <div class="clearfix"></div>
             <div class="ln_solid"></div>
             <?php if ($searching): ?>
-                <?php echo '<div class="btn-toolbar" role="toolbar"> <div class="btn-group pull-right navigation-bar col-md-6 col-sm-12 col-xs-12 text-right"> ' . $pagination . '</div>
-				</div>'; ?>
+                 <div class="row">  
+                <?php dispay_pagination_row($total_records, $_SESSION['search_myrate']['no_of_rows'], $pagination); ?>
+            </div>
                 <div class="table-responsive">
                     <table class="table table-striped jambo_table  table-bordered">
                         <thead>
@@ -92,7 +61,7 @@
                                 <th class="column-title">Fix Charge per call</th>
                                 <th class="column-title">Grace Period</th>
                                 <th class="column-title">Billing Pulse slab</th>					
-                                <?php if (!check_logged_account_type(array('CUSTOMER', 'RESELLER'))): ?>
+                                <?php if (!check_logged_user_group(array('CUSTOMER', 'RESELLER'))): ?>
                                     <th class="column-title">Rate Multiplier</th>                                   
                                 <?php endif; ?>
 
@@ -121,7 +90,7 @@
                                         <td class="column-title"><?php echo $listing_row['rate_addition']; ?></td>
                                         <td class="column-title"><?php echo $listing_row['grace_period']; ?></td>
                                         <td class="column-title"><?php echo $listing_row['minimal_time'] . "/" . $listing_row['resolution_time']; ?></td> 
-                                        <?php if (!check_logged_account_type(array('CUSTOMER', 'RESELLER'))): ?>
+                                        <?php if (!check_logged_user_group(array('CUSTOMER', 'RESELLER'))): ?>
                                             <td class="column-title"><?php echo $listing_row['rate_multiplier']; ?> </td>
                                         <?php endif; ?>
                                         <td ><?php echo $rate_type . " " . $status; ?></td>                                   

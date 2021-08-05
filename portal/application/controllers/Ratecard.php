@@ -1,15 +1,15 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019 Chinna Technologies  
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
+// OV500 Version 2.0.0
+// Copyright (C) 2019-2021 Openvoips Technologies   
 // http://www.openvoips.com  http://www.openvoips.org
-//
-//
-//OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// The Initial Developer of the Original Code is
+// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
+// Portions created by the Initial Developer are Copyright (C)
+// the Initial Developer. All Rights Reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -28,7 +28,7 @@
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
-class Ratecard extends CI_Controller {
+class Ratecard extends MY_Controller {
 
     public $search_serialize = '';
 
@@ -36,6 +36,9 @@ class Ratecard extends CI_Controller {
         parent::__construct();
 
         $this->load->library('pagination');
+        // HMVC CallBack
+        $this->load->library(array('my_form_validation'));
+        $this->form_validation->run($this);
         $this->form_validation->set_error_delimiters('', '');
         $this->load->model('ratecard_mod');
         $this->load->model('Utils_model');
@@ -108,20 +111,25 @@ class Ratecard extends CI_Controller {
             'logged_account_type' => get_logged_account_type(),
             'logged_current_customer_id' => get_logged_account_id(),
             'logged_account_level' => get_logged_account_level(),
+            'account_id' => get_logged_account_id()
         );
 
-               
-        $order_by =  array('id'=>'DESC');
+
+        $order_by = array('id' => 'DESC');
         if ($arg1 == 'export' && $format != '') {
+			//if outgoing
+			//Prefix	Destination	ppm	ppc	minimal	resolution	grace	multiplier	addition	status
+
             $this->load->library('Export');
             $format = param_decrypt($format);
             $option_param = array('tariff' => true);
             $response_data = $this->ratecard_mod->get_data($order_by, '', '', $search_data, $option_param);
-            $export_header = array('Name', 'Currency');
+            $export_header = array('Prefix', 'Destination', 'ppm', 'ppc', 'minimal', 'resolution', '	grace', 'multiplier', 'addition', 'status');
 
             if ($response_data['total'] > 0) {
-                foreach ($response_data['result'] as $row) {
-                    $export_data[] = array($row['ratecard_name'], $row['currency_abbr']);
+                foreach ($response_data['result'] as $row) {ddd($row);die;
+                    //$export_data[] = array($row['ratecard_name'], $row['currency_abbr']);
+					$export_data[] = array('Prefix', 'Destination', 'ppm', 'ppc', 'minimal', 'resolution', '	grace', 'multiplier', 'addition', 'status');
                 }
             } else {
                 $export_data = array('');
@@ -164,10 +172,14 @@ class Ratecard extends CI_Controller {
             $this->form_validation->set_rules('frm_name', 'Name', 'trim|required|min_length[5]|max_length[30]');
             $this->form_validation->set_rules('frm_currency', 'Currency', 'trim|min_length[0]|max_length[10]');
             $this->form_validation->set_rules('ratecard_for', 'Ratecard For', 'trim|required');
-			if ($_POST['frm_type'] == 'CARRIER')
+            if ($_POST['frm_type'] == 'CARRIER')
                 $_POST['frm_type'] = 'CARRIER';
             else
                 $_POST['frm_type'] = 'CUSTOMER';
+
+            if (check_logged_user_group(array('RESELLER'))) {
+                $_POST['frm_type'] = 'CUSTOMER';
+            }
             if ($this->form_validation->run() == FALSE) {
                 $data['err_msgs'] = validation_errors();
             } else {
@@ -195,7 +207,7 @@ class Ratecard extends CI_Controller {
     }
 
     public function editRC() {
-        $data['page_name'] = "ratecard_edit";
+        $data['page_name'] = "ratecard_index";
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
         if (!check_account_permission('ratecard', 'edit'))
             show_404('403');
@@ -261,6 +273,7 @@ class Ratecard extends CI_Controller {
                         $error_msg = '';
                         $csv_data = array();
                         while (!feof($file)) {
+							
                             $d = fgetcsv($file);
                             $csv_data[] = $d;
                             if ($cnt > 0 && is_array($d)) {
@@ -270,7 +283,9 @@ class Ratecard extends CI_Controller {
                                     $error++;
                                     $error_type .= 'Prefix (' . $pref . ')';
                                 }
-                                $dest = trim($d[1]);
+                                $sdata = Array('+', '-', '`', '@', '#', '$', '%', '^', '=', '+', '-', ',', '~');
+                                $rdata = Array(' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+                                $dest = trim(str_replace($sdata, $rdata, $d[1]));
                                 if (!preg_match('/^[a-z0-9 \/ \-()&\.]+$/i', $dest)) {
                                     $error++;
                                     $error_type .= 'Destination (' . $dest . ')';
@@ -308,7 +323,7 @@ class Ratecard extends CI_Controller {
                                 $add = trim($d[8]);
                                 if (!ctype_digit($add)) {
                                     $error++;
-                                    $error_type .= 'Addition';
+                                    $error_type .= 'Addition '.$add ;
                                 }
 
                                 $stat = trim($d[9]);
@@ -386,7 +401,7 @@ class Ratecard extends CI_Controller {
 
         $show_404 = false;
         if (strlen($ratecard_id) > 0) {
-            $search_data = array('ratecard_id' => $ratecard_id);
+            $search_data = array('ratecard_id' => $ratecard_id, 'account_id' => get_logged_account_id());
             $response_data = $this->ratecard_mod->get_data('', 0, RECORDS_PER_PAGE, $search_data, array());
             if ($response_data['total'] > 0) {
                 $data['data'] = $response_data['result'][0];
@@ -394,7 +409,7 @@ class Ratecard extends CI_Controller {
                 $ratecard_response_data = $this->tariff_mod->get_mapping('', 0, RECORDS_PER_PAGE, array('ratecard_id' => $response_data['result'][0]['ratecard_id']), array());
                 $data['data_tariff'] = $ratecard_response_data['result'];
                 $this->load->model('ratecard_mod');
-                $data['ratecard_data'] = $this->ratecard_mod->get_data('', 0, '', array('ratecard_currency_id' => $data['data']["ratecard_currency_id"], 'ratecard_for' => $data['data']['ratecard_for']), array());
+                $data['ratecard_data'] = $this->ratecard_mod->get_data('', 0, '', array('ratecard_currency_id' => $data['data']["ratecard_currency_id"], 'ratecard_for' => $data['data']['ratecard_for'], 'account_id' => get_logged_account_id()), array());
             } else
                 $show_404 = true;
         } else

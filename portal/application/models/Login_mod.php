@@ -1,15 +1,15 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019 Chinna Technologies  
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
+// OV500 Version 2.0.0
+// Copyright (C) 2019-2021 Openvoips Technologies   
 // http://www.openvoips.com  http://www.openvoips.org
-//
-//
-//OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// The Initial Developer of the Original Code is
+// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
+// Portions created by the Initial Developer are Copyright (C)
+// the Initial Developer. All Rights Reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -33,55 +33,89 @@ class Login_mod extends CI_Model {
     }
 
     function get_user($admin_login, $admin_password) {
-        $sql = "select customers.customer_id, account_id, name, account_type, emailaddress from web_access INNER JOIN customers on web_access.customer_id = customers.customer_id  where username='" . $admin_login . "' AND secret ='" . $admin_password . "'";
+        $sql = "select u.user_id, u.account_id, u.user_type, u.name, u.status_id, u.gcode  
+		FROM users u
+		where username='" . $admin_login . "' AND secret = '" . $admin_password . "' limit 1;";
         $query = $this->db->query($sql);
         $num_rows = $query->num_rows();
-
-        if ($num_rows === 1) {
+        if ($num_rows == 1) {
+            $user_types_group = get_user_types();
             $row = $query->row();
-            $account_type = $row->account_type;
-            $account_id = $row->account_id;
 
-            if (in_array($account_type, array('ADMIN', 'SUBADMIN', 'ACCOUNTS'))) {
-                $sql = "SELECT account_id,  account_status  from customers where account_id ='" . $account_id . "';";
+            $user_type = $row->user_type;
+            $user_id_name = $row->user_id_name;
+            $account_id = $row->account_id;
+            if (isset($user_types_group[1][$user_type])) {
+                $permissions = $this->get_user_acl($user_type);               
+                $data_array = array(
+                    'user_status' => $row->status_id,
+                    'user_id' => $row->user_id,
+                    'name' => $row->name,
+                    'user_type' => $row->user_type,
+                    'gcode' => $row->gcode,
+                    'account_status' => $row->status_id,
+                    'account_id' => ADMIN_ACCOUNT_ID,
+                    'account_name' => '',
+                    'account_type' => ADMIN_ACCOUNT_ID,
+                    'currency_id' => '',
+                    'account_level' => 0,
+                    'permissions' => $permissions,
+                );			 
+                return $data_array;
+            } elseif (isset($user_types_group[2][$user_type])) {
+                $sql = "SELECT 
+				a.status_id, a.account_id, a.account_type, a.currency_id, a.account_level,
+				c.company_name
+				FROM account a INNER JOIN resellers c on c.account_id = a.account_id 
+				WHERE a.account_id ='" . $account_id . "'";
                 $query = $this->db->query($sql);
                 $row_sub = $query->row();
                 if (isset($row_sub)) {
-                    $permissions = $this->get_account_acl($row->account_id, $account_type);
+                    $permissions = $this->get_user_acl($row_sub->account_id, $user_type);
+
                     $data_array = array(
-                        'account_status' => $row_sub->account_status,
-                        'customer_id' => $row->customer_id,
-                        'account_id' => $row->account_id,
+                        'user_status' => $row->status_id,
+                        'user_id' => $row->user_id,
                         'name' => $row->name,
-                        'account_type' => $row->account_type,
-                        'currency_id' => '',
-                        'account_level' => 0,
-                        'key' => $account_id,
+                        'user_type' => $row->user_type,
+                        'gcode' => $row->gcode,
+                        'account_status' => $row_sub->status_id,
+                        'account_id' => $row_sub->account_id,
+                        'account_name' => $row_sub->company_name,
+                        'account_type' => $row_sub->account_type,
+                        'currency_id' => $row_sub->currency_id,
+                        'account_level' => $row_sub->account_level,
                         'permissions' => $permissions,
-                        'username' => $admin_login,
                     );
-                    return arrayToObject($data_array);
+                    return $data_array;
                 }
-            } elseif (in_array($account_type, array('CUSTOMER', 'RESELLER'))) {
-                $sql = "SELECT account.id, account.account_id, customers.account_status, currency_id, account_level, username FROM account INNER JOIN customers on customers.account_id = account.account_id INNER JOIN web_access on customers.customer_id =  web_access.customer_id WHERE account.account_id ='" . $account_id . "' ";
+            } elseif (isset($user_types_group[3][$user_type])) {
+                $sql = "SELECT 
+				a.status_id, a.account_id, a.account_type, a.currency_id, a.account_level,
+				c.company_name
+				FROM account a INNER JOIN customers c on c.account_id = a.account_id 
+				WHERE a.account_id ='" . $account_id . "'";
                 $query = $this->db->query($sql);
                 //echo $sql;
                 $row_sub = $query->row();
                 if (isset($row_sub)) {
-                    $permissions = $this->get_account_acl($row->account_id, $account_type);
+                    $permissions = $this->get_user_acl($row_sub->account_id, $user_type);
+
                     $data_array = array(
-                        'account_status' => $row_sub->account_status,
-                        'currency_id' => $row_sub->currency_id,
-                        'customer_id' => $row->customer_id,
-                        'account_id' => $row->account_id,
+                        'user_status' => $row->status_id,
+                        'user_id' => $row->user_id,
                         'name' => $row->name,
-                        'account_type' => $row->account_type,
+                        'user_type' => $row->user_type,
+                        'gcode' => $row->gcode,
+                        'account_status' => $row_sub->status_id,
+                        'account_id' => $row_sub->account_id,
+                        'account_name' => $row_sub->company_name,
+                        'account_type' => $row_sub->account_type,
+                        'currency_id' => $row_sub->currency_id,
                         'account_level' => $row_sub->account_level,
-                        'key' => $account_id,
                         'permissions' => $permissions,
-                        'username' => $row_sub->username,
                     );
-                    return arrayToObject($data_array);
+                    return $data_array;
                 }
             } else {
                 return false;
@@ -93,24 +127,24 @@ class Login_mod extends CI_Model {
         return false;
     }
 
-    function get_account_acl($account_id, $account_type) {
+    function get_user_acl($user_type) {
         $permissions_str = '';
-        $sql = "SELECT id,account_id,permissions FROM customer_permissions WHERE account_id='" . $account_id . "' LIMIT 0,1";
+        $sql = "SELECT id,user_type,permissions FROM " . $this->db->dbprefix('user_type_permissions') . " WHERE user_type='" . $user_type . "' LIMIT 0,1";
+			 
         $query = $this->db->query($sql);
-        $num_rows = $query->num_rows();
-        if ($num_rows === 1) {
+        if ($query->num_rows() == 1) {
             $row = $query->row();
             $permissions_str = $row->permissions;
-        } else {
-            $sql = "SELECT id,account_type,permissions FROM customer_default_permissions WHERE account_type='" . $account_type . "' LIMIT 0,1";
-
-            $query = $this->db->query($sql);
-            if ($query->num_rows() == 1) {
-                $row = $query->row();
-                $permissions_str = $row->permissions;
-            }
         }
         return $permissions_str;
+    }
+
+    function set_gcode($user_id, $gcode) {
+        $sql = "UPDATE users
+		SET gcode='$gcode'		
+		WHERE user_id = '" . $user_id . "'";
+        $query = $this->db->query($sql);
+        return true;
     }
 
 }

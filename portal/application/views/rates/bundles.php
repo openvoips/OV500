@@ -1,36 +1,3 @@
-<!--
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019-2020 Chinna Technologies   
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
-// http://www.openvoips.com  http://www.openvoips.org
-//
-//
-// OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
-//
-//
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
--->
 <?php
 $delete_option = '';
 ?>
@@ -62,7 +29,7 @@ $delete_option = '';
                     </div>
                 </div>
                 <div class="form-group">
-                    <?php if (!check_logged_account_type(array('RESELLER'))) : ?>
+                    <?php if (!check_logged_user_group(array('RESELLER'))) : ?>
                         <label class="control-label col-md-2 col-sm-3 col-xs-12">Currency</label>
                         <div class="col-md-4 col-sm-8 col-xs-12">
                             <select name="currency" id="currency" class="form-control data-search-field">
@@ -70,9 +37,9 @@ $delete_option = '';
                                 <?php for ($i = 0; $i < count($currency_data); $i++) { ?>								
 
                                     <?php if (get_logged_account_level() == 0): ?>	
-              <option value="<?php echo $currency_data[$i]['currency_id']; ?>" 
-			  <?php if ($_SESSION['search_bundle_data']['s_bundle_package_currency'] == $currency_data[$i]['currency_id']) echo 'selected'; ?>><?php echo $currency_data[$i]['name'] . ' (' . $currency_data[$i]['symbol'] . ')'; ?></option>
-                                    <?php elseif (get_logged_account_level() != 0 && get_logged_account_currency() == $currency_data[$i]['currency_id']): ?>
+                                        <option value="<?php echo $currency_data[$i]['currency_id']; ?>" 
+                                                <?php if ($_SESSION['search_bundle_data']['s_bundle_package_currency'] == $currency_data[$i]['currency_id']) echo 'selected'; ?>><?php echo $currency_data[$i]['name'] . ' (' . $currency_data[$i]['symbol'] . ')'; ?></option>
+                                            <?php elseif (get_logged_account_level() != 0 && get_logged_account_currency() == $currency_data[$i]['currency_id']): ?>
                                         <option value="<?php echo $currency_data[$i]['currency_id']; ?>" <?php if ($_SESSION['search_bundle_data']['s_bundle_package_currency'] == $currency_data[$i]['currency_id']) echo 'selected'; ?>><?php echo $currency_data[$i]['name'] . ' (' . $currency_data[$i]['symbol'] . ')'; ?></option>
                                     <?php endif; ?>
 
@@ -80,23 +47,23 @@ $delete_option = '';
                             </select>
                         </div>		
 
-                       <label class="control-label col-md-2 col-sm-3 col-xs-12">Status</label>
-                    <div class="col-md-4 col-sm-8 col-xs-12">
-                        <select name="status" id="status" class="form-control data-search-field">
-                            <option value="">ALL</option>
-                            <option value="1" <?php if ($_SESSION['search_bundle_data']['s_bundle_package_status'] == '1') echo 'selected'; ?>>Active</option>
-                            <option value="0" <?php if ($_SESSION['search_bundle_data']['s_bundle_package_status'] == '0') echo 'selected'; ?>>Inactive</option>
-                        </select>
-                    </div>			
+                        <label class="control-label col-md-2 col-sm-3 col-xs-12">Status</label>
+                        <div class="col-md-4 col-sm-8 col-xs-12">
+                            <select name="status" id="status" class="form-control data-search-field">
+                                <option value="">ALL</option>
+                                <option value="1" <?php if ($_SESSION['search_bundle_data']['s_bundle_package_status'] == '1') echo 'selected'; ?>>Active</option>
+                                <option value="0" <?php if ($_SESSION['search_bundle_data']['s_bundle_package_status'] == '0') echo 'selected'; ?>>Inactive</option>
+                            </select>
+                        </div>			
                     <?php endif; ?>
                 </div>
                 <div class="form-group">
 
-                    	  
+
                     <div class="searchBar text-right">
                         <input type="submit" value="Search" name="OkFilter" id="OkFilter" class="btn btn-primary">                          
                         <input type="button" value="Reset" name="search_reset" id="search_reset" class="btn btn-info">                           
-                        
+
                     </div>
                 </div>
             </form> 
@@ -112,12 +79,9 @@ $delete_option = '';
                 <table class="table table-striped jambo_table bulk_action table-bordered" id="table-sort">
                     <thead>
                         <tr class="headings thc">                          
-                            <th class="column-title">Bundle Name</th>                            
-                            <th class="column-title">Currency</th>
-                            <th class="column-title">Monthly Charge</th>                       
+                            <th class="column-title">Bundle</th>
+                            <th class="column-title">Monthly Charge</th>
 
-                            <th class="column-title">Package Status </th>
-                            <th class="column-title">Bundle</th>             
                             <th class="column-title">Bundle1 Type</th> 
                             <th class="column-title">Bundle1 Value</th> 
                             <th class="column-title">Bundle2 Type</th> 
@@ -125,9 +89,11 @@ $delete_option = '';
                             <th class="column-title">Bundle3 Type</th> 
                             <th class="column-title">Bundle3 Value</th> 
 
-
+                            <th class="column-title">Currency</th>
+                            <th class="column-title">Package Status </th>
+                            <th class="column-title">Bundle Status</th>  
                             <th class="column-title no-link last"><span class="nobr">Actions</span> </th>
-                            
+
                         </tr>
                     </thead>		
                     <tbody>
@@ -153,20 +119,22 @@ $delete_option = '';
                                 ?>
                                 <tr>                                    
                                     <td><?php echo $listing_row['bundle_package_name'] . " (" . $listing_row['bundle_package_id'] . ")"; ?></td>
-                                    <td ><?php echo $listing_row['currency_symbol'] . " - " . $listing_row['currency_name']; ?></td>
-                                    <td ><?php echo number_format($listing_row['monthly_charges'],2); ?></td>
+
+                                    <td ><?php echo number_format($listing_row['monthly_charges'], 2); ?></td>
 
 
+
+                                    <td ><?php echo $listing_row['bundle1_type']; ?></td>
+                                    <td ><?php echo empty($listing_row['bundle1_value']) ? '0.00' : number_format(round($listing_row['bundle1_value'], 2), 2); ?></td>    
+                                    <td ><?php echo $listing_row['bundle2_type']; ?></td>
+                                    <td ><?php echo empty($listing_row['bundle2_value']) ? '0.00' : number_format(round($listing_row['bundle2_value'], 2), 2); ?></td>
+                                    <td ><?php echo $listing_row['bundle3_type']; ?></td>
+                                    <td ><?php echo empty($listing_row['bundle3_value']) ? '0.00' : number_format(round($listing_row['bundle3_value'], 2), 2); ?></td>    
+
+                                    <td ><?php echo $listing_row['currency_name'] . " (" . $listing_row['currency_symbol'] . ")"; ?></td>
 
                                     <td ><?php echo $status; ?></td>   
                                     <td ><?php echo $bundle_option; ?></td>
-                                    <td ><?php echo $listing_row['bundle1_type']; ?></td>
-                                    <td ><?php echo empty($listing_row['bundle1_value']) ? '0.00' : number_format(round($listing_row['bundle1_value'], 2),2); ?></td>    
-                                    <td ><?php echo $listing_row['bundle2_type']; ?></td>
-                                    <td ><?php echo empty($listing_row['bundle2_value']) ? '0.00' : number_format(round($listing_row['bundle2_value'], 2),2); ?></td>
-                                    <td ><?php echo $listing_row['bundle3_type']; ?></td>
-                                    <td ><?php echo empty($listing_row['bundle3_value'])? '0.00' : number_format(round($listing_row['bundle3_value'], 2),2); ?></td>    
-
                                     <td class="last" >
                                         <?php if (check_account_permission('bundle', 'edit')): ?>
                                             <a href="<?php echo base_url(); ?>bundle/editBP/<?php echo param_encrypt($listing_row['bundle_package_id']); ?>" title="Edit" class="edit"><i class="fa fa-pencil-square-o"></i></a>
@@ -176,12 +144,12 @@ $delete_option = '';
                                             <a href="javascript:doConfirmDelete('<?php echo param_encrypt($listing_row['bundle_package_id']); ?>','bundle');" title="Delete" class="delete"><i class="fa fa-trash"></i></a>						
                                         <?php } else { ?>
                                             <a href="javascript:void(0);" onclick="new PNotify({
-                                                                    title: 'Data deletion',
-                                                                    text: 'You can not delete bundle as it is already used.',
-                                                                    type: 'info',
-                                                                    styling: 'bootstrap3',
-                                                                    addclass: 'dark'
-                                                                });" title="Delete" class="text-dark"><i class="fa fa-trash"></i><a/>
+                                                        title: 'Data deletion',
+                                                        text: 'You can not delete bundle as it is already used.',
+                                                        type: 'info',
+                                                        styling: 'bootstrap3',
+                                                        addclass: 'dark'
+                                                    });" title="Delete" class="text-dark"><i class="fa fa-trash"></i><a/>
                                             <?php } ?>
                                             <?php //endif;  ?>	
 

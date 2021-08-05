@@ -1,47 +1,12 @@
-<!--
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019-2020 Chinna Technologies   
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
-// http://www.openvoips.com  http://www.openvoips.org
-//
-//
-// OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
-//
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
--->
-<?php
-//echo '<pre>';print_r($did_data);echo '</pre>';
-?>
 <div class="col-md-12 col-sm-6 col-xs-12">
     <div class="x_panel">
         <div class="x_title">
             <h2>Incoming Numbers</h2>
             <ul class="nav navbar-right panel_toolbox">
-                
-                <?php if (check_logged_account_type(array('ADMIN', 'SUBADMIN'))): ?>
+
+                <?php if (check_logged_user_group(array(ADMIN_ACCOUNT_ID))): ?>
                     <li><a href="<?php echo base_url() ?>dids/add"><input type="button" value="Add Incoming Number" name="add_link" class="btn btn-primary"></a></li>
-                <?php elseif (check_logged_account_type(array('CUSTOMER', 'RESELLER'))): ?>
+                <?php elseif (check_logged_user_group(array('CUSTOMER', 'RESELLER'))): ?>
                     <li><a href="<?php echo base_url() ?>dids/purchase_did"><input type="button" value="Purchase DID" name="add_link" class="btn btn-primary"></a></li>
                 <?php endif; ?>
             </ul>
@@ -58,7 +23,7 @@
                     </div>            
                     <?php
                     //if type user, dont display
-                    if (!check_logged_account_type(array('CUSTOMER'))):
+                    if (!check_logged_user_group(array('CUSTOMER'))):
                         ?>
                         <label class="control-label col-md-2 col-sm-3 col-xs-12">Assigned To</label>
                         <div class="col-md-2 col-sm-8 col-xs-12">
@@ -72,7 +37,7 @@
                                 <option value="NEW" <?php if ($_SESSION['search_did_data']['s_status'] == 'NEW') echo 'selected="selected"'; ?> >NEW</option>
                                 <option value="USED" <?php if ($_SESSION['search_did_data']['s_status'] == 'USED') echo 'selected="selected"'; ?>>USED</option>
                                 <?php
-                                if (check_logged_account_type(array('ADMIN', 'SUBADMIN'))) {
+                                if (check_logged_user_type(array('ADMIN', 'SUBADMIN'))) {
                                     ?>
                                     <option value="DEAD" <?php if ($_SESSION['search_did_data']['s_status'] == 'DEAD') echo 'selected="selected"'; ?>>DEAD</option>
                                     <option value="BLOCKED" <?php if ($_SESSION['search_did_data']['s_status'] == 'BLOCKED') echo 'selected="selected"'; ?>>BLOCKED</option>
@@ -85,8 +50,33 @@
                     <?php endif; ?>
                 </div>
                 <div class="form-group">
+                <?php
+                    if (!check_logged_user_group(array('CUSTOMER'))):
+                        ?>
+                	 <label class="control-label col-md-1 col-sm-3 col-xs-12">Carrier</label>
+                	 <div class="col-md-3 col-sm-3 col-xs-4">
+                     <select name="carrier_id" id="carrier_id" class="form-control data-search-field combobox1">
+                          <option value="">Select</option>
+                           <?php
+							$str = '';
+							if (count($carriers_data['result']) > 0) {
+								foreach ($carriers_data['result'] as $key => $carrier_array) {
+									$carrier_currency_id = $carrier_array['carrier_currency_id'];
+									$currency_name = $currency_array[$carrier_currency_id];
 
-                    <div class="searchBar ">
+									$selected = ' ';
+									if ($_SESSION['search_did_data']['s_carrier_id'] == $carrier_array['carrier_id'])
+										$selected = '  selected="selected" ';
+									$str .= '<option value="' . $carrier_array['carrier_id'] . '" ' . $selected . ' >' . $carrier_array['carrier_name'] . ' [' . $carrier_array['carrier_id'] . ']</option>';
+								}
+							}
+							echo $str;
+							?>
+                      </select>          
+                     </div>
+               <?php endif; ?>       
+
+                    <div class="searchBar text-right">
                         <input type="submit" value="Search" name="OkFilter" id="OkFilter" class="btn btn-primary ">                          
                         <input type="button" value="Reset" name="search_reset" id="search_reset" class="btn btn-info ">
                         <div class="btn-group">
@@ -144,15 +134,15 @@
                             $status = ucfirst($did_status);
                             $is_deletable = false;
                             $is_cancelable = false;
-                            if (check_logged_account_type(array('CUSTOMER'))) {
+                            if (check_logged_user_group(array('CUSTOMER'))) {
                                 $is_cancelable = true;
-                            } elseif (check_logged_account_type(array('RESELLER'))) {
+                            } elseif (check_logged_user_group(array('RESELLER'))) {
                                 if ($did_data['account_id'] == '')
                                     $is_cancelable = true;
                             }
 
 
-                            if (check_logged_account_type(array('ADMIN', 'SUBADMIN'))) {
+                            if (check_logged_user_type(array('ADMIN', 'SUBADMIN'))) {
                                 if ($did_status == 'new')
                                     $is_deletable = true;
                             }
@@ -202,7 +192,7 @@
                                 echo '</td>';
                             }
                             echo '<td class=" last">';
-                            if (check_logged_account_type('CUSTOMER')) {
+                            if (check_logged_user_group('CUSTOMER')) {
                                 echo '<a href="' . base_url() . 'dids/edit/' . param_encrypt($did_data['did_id']) . '" title="Details"><i class="fa fa-list"></i></a>';
                                 echo '<a href="' . base_url() . 'dids/config/' . param_encrypt($did_data['did_id']) . '" title="Edit"><i class="fa fa-pencil-square-o"></i></a>';
                             } else
@@ -231,15 +221,16 @@
                 </tbody>
             </table>
         </div>             
-        <?php
-        echo '<div class="btn-toolbar" role="toolbar">  <div class="btn-group pull-right navigation-bar col-md-6 col-sm-12 col-xs-12 text-right">
-                           ' . $pagination . '
-                  </div>
-                </div>';
-        ?>   
+        <div class="row">  
+            <?php
+            dispay_pagination_row_bottom($total_records, $_SESSION['search_did_data']['s_no_of_records'], $pagination);
+            ?>    
+        </div>
 
     </div>
 </div>
+<script src="<?php echo base_url() ?>theme/vendors/combo-box-typeahead/js/bootstrap-combobox.js"></script>
+<link href="<?php echo base_url() ?>theme/vendors/combo-box-typeahead/css/bootstrap-combobox.css" rel="stylesheet" type="text/css">
 <script>
     $(document).ready(function () {
         $('#OkFilter').click(function () {
@@ -249,5 +240,8 @@
     });
     $(document).ready(function () {
         showDatatable('table-sort', [0, 8], [2, "desc"]);
+    });
+	    $(document).ready(function () {
+        $('.combobox').combobox()
     });
 </script>

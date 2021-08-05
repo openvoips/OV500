@@ -1,31 +1,5 @@
 <?php
 
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019 Chinna Technologies  
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
-// http://www.openvoips.com  http://www.openvoips.org
-//
-//
-//OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
-
 class Export {
 
     function __construct() {
@@ -34,7 +8,8 @@ class Export {
 
     // Load table data from file
     public function download($file_name, $format, $search_array, $result_header, $result_data) {
-        // die("aaaaaaaaaaaaa");
+
+
         $CI = & get_instance();
         switch ($format) {
             case 'csv':
@@ -304,24 +279,48 @@ class Export {
                 }
                 //////
 
-                header('Content-Disposition: attachment;filename="' . $file_name . '.' . $format . '"');
-                header('Cache-Control: max-age=0');
-                header('Cache-Control: max-age=1');
-                header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
-                header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
-                header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
-                header('Pragma: public'); // HTTP/1.0
+                $rand = rand(1, 1000);
 
-                if ($format == 'xls') {
-                    header('Content-Type: application/vnd.ms-excel');
-                    $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
-                } else {
-                    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                    $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
-                }
+                $path = FCPATH . 'uploads/rand' . $rand . '.xlsx';
+
+                $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+                PHPExcel_Settings::setZipClass(PHPExcel_Settings::PCLZIP);
+                $objWriter->save($path);
+
+                $file = $path;
+// define file $mime type here
+                ob_end_clean(); // this is solution
+                header('Content-Description: File Transfer');
+                header('Content-Type: ' . $mime);
+                header("Content-Transfer-Encoding: Binary");
+                header("Content-disposition: attachment; filename=\"" . basename($file) . "\"");
+                header('Content-Transfer-Encoding: binary');
+                header('Expires: 0');
+                header('Cache-Control: must-revalidate');
+                header('Pragma: public');
+                readfile($file);
+
+                /* 	header('Content-Disposition: attachment;filename="' . $file_name . '.' . $format . '"');
+                  header('Cache-Control: max-age=0');
+                  header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+                  header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
+                  header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+                  header('Pragma: public'); // HTTP/1.0
+
+                  if ($format == 'xls') {
+                  header('Content-Type: application/vnd.ms-excel');
+                  $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+                  } else {
+                  header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                  // $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+                  }
 
 
-                $objWriter->save('php://output');
+                  //$objWriter->save('php://output');
+                  $objWriter = new PHPExcel_Writer_Excel2007($objPHPExcel);
+                  $objWriter->setOffice2003Compatibility(true);
+                  $objWriter->save('php://output'); */
+                exit;
 
 
                 break;
@@ -333,7 +332,63 @@ class Export {
         }//switch
     }
 
+    public function aadownload($file_name, $format, $search_array, $result_header, $result_data) {
+        //error_reporting(E_ALL);
+//ini_set('display_errors', TRUE);
+//ini_set('display_startup_errors', TRUE);
+//date_default_timezone_set('Europe/London');
+
+        $CI = & get_instance();
+
+//////////////
+        require_once dirname(__FILE__) . '/PHPExcel/Classes/PHPExcel.php';
+
+// Create new PHPExcel object
+        $objPHPExcel = new PHPExcel();
+
+// Set document properties
+        $objPHPExcel->getProperties()->setCreator("Maarten Balliauw")
+                ->setLastModifiedBy("Maarten Balliauw")
+                ->setTitle("Office 2007 XLSX Test Document")
+                ->setSubject("Office 2007 XLSX Test Document")
+                ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+                ->setKeywords("office 2007 openxml php")
+                ->setCategory("Test result file");
+
+
+// Add some data
+        $objPHPExcel->setActiveSheetIndex(0)
+                ->setCellValue('A1', 'Hello')
+                ->setCellValue('B2', 'world!')
+                ->setCellValue('C1', 'Hello')
+                ->setCellValue('D2', 'world!');
+
+// Miscellaneous glyphs, UTF-8
+        $objPHPExcel->setActiveSheetIndex(0)
+                ->setCellValue('A4', 'Miscellaneous glyphs')
+                ->setCellValue('A5', 'ggg');
+
+// Rename worksheet
+        $objPHPExcel->getActiveSheet()->setTitle('Simple');
+
+
+// Set active sheet index to the first sheet, so Excel opens this as the first sheet
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        $rand = rand(1, 1000);
+        $path = '/var/www/html/portal/uploads/rand' . $rand . '.xlsx';
+
+        $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+        PHPExcel_Settings::setZipClass(PHPExcel_Settings::PCLZIP);
+        $objWriter->save($path);
+        echo 'done-->' . $rand;
+        die;
+        exit;
+        exit;
+    }
+
     public function download_pdf($file_name, $report_data, $sdr_terms, $user_dp, $monthyear, $account_id) {
+
         $CI = & get_instance();
         require_once dirname(__FILE__) . '/tcpdf/tcpdf.php';
         require_once dirname(__FILE__) . '/tcpdf/PdfReceipt.php';
@@ -542,11 +597,11 @@ class Export {
 
         $css_td_20 = 'style="width: 15%; text-align: left; padding:5px;border:1px solid #ccc;font-size:11px;line-height:16px;"';
         $css_td_50 = 'style="width: 50%; text-align: left; padding:5px;border:1px solid #ccc;font-size:11px;line-height:16px;"';
-
-
-
+        $invoice_box = 'styele= max-width: 800px; margin: auto;padding: 30px;border: 1px solid #eee;box-shadow: 0 0 10px rgba(0, 0, 0, .15);font-size: 16px; line-height: 24px;font-family: "Helvetica Neue", "Helvetica", Helvetica, Arial, sans-serif;color: #555;';
+        $page_content = '';
+        $invoice_logo = base_url() . 'theme/default/images/' . $configdata->logo;
         $page_content .= '<table ' . $css_table . ' align="center">
-			
+	   
 						<tr>
 							<td style="text-align: left;"> Account No : ' . $account_id . ' </td>
 							<td style="text-align: right;">Generated Date : ' . $stmt_gen_date . ' </td>
@@ -634,7 +689,7 @@ class Export {
 
         $pdf->writeHTML($page_content, true, false, true, false, '');
 
-
+        $page_footer = '';
         $page_footer .= '<page_footer>';
         $page_footer .= '<table style="width: 100%;">
 					<tr>
@@ -673,7 +728,7 @@ class Export {
         if (count($report_data['result']) > 0) {
             $rowCount = 0;
             foreach ($report_data['result'] as $sdr_data) {
-                $debit = $credit = '';
+                $debit = $credit = 0;
                 $display_text = '';
                 $rule_type = $sdr_data['rule_type'];
 
@@ -816,9 +871,9 @@ class Export {
 						
 						<tr >
 							<td >
-								  <tr><td colspan="4"><strong>Account No </strong> : ' . $account_id . '</td></tr>						 
+								  <tr><td colspan="4"><strong>Account Statement of Account No </strong> : ' . $account_id . '</td></tr>						 
 								  <tr><td colspan="4"><strong>Generated Date </strong> : ' . $stmt_gen_date . '</td></tr> 
-								<tr><td colspan="4"><strong>Account Statements (' . $monthyear . ')</strong></td></tr> 								  
+								 	  
 							</td>
 						</tr>
 								
@@ -859,6 +914,17 @@ class Export {
 									<td ></td>
 								  </tr>
 								
+
+
+                                                                <tr>    
+										<td></td>
+										<td align="right"><strong>Last Due Balance</strong> </td>
+										<td> </td>
+										<td>' . $openingbalance . '</td>
+										
+								</tr>
+
+
 								<tr>
 										<td></td>
 										<td align="right"><strong>Total Payment</strong> </td>
@@ -909,7 +975,8 @@ class Export {
 
         $objPHPExcel = new PHPExcel();
 
-        $gdImage = imagecreatefromjpeg(base_url() . '/theme/default/images/logo.png');
+
+        $gdImage = imagecreatefrompng(base_url() . '/theme/default/images/logo.png');
 
         $objDrawing = new PHPExcel_Worksheet_MemoryDrawing();
         $objDrawing->setName('Logo Image');
@@ -1072,23 +1139,103 @@ class Export {
                     ->getColumnDimension($col)
                     ->setAutoSize(true);
         }
-        //header('Content-type: application/excel');
-        header('Content-Disposition: attachment;filename="' . $file_name . '.' . $format . '"');
-        header('Cache-Control: max-age=0');
-        header('Cache-Control: max-age=1');
-        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
-        header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
-        header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
-        header('Pragma: public'); // HTTP/1.0
 
-        if ($format == 'xlsx') {
-            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+        //change 3
+        $rand = rand(1000, 9000);
+        $path = FCPATH . 'uploads/statements/statement' . date('Ymdhis') . '.xlsx';
+
+        $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+        PHPExcel_Settings::setZipClass(PHPExcel_Settings::PCLZIP);
+        $objWriter->save($path);
+
+        $file = $path;
+// define file $mime type here
+        ob_end_clean(); // this is solution
+        header('Content-Description: File Transfer');
+        header('Content-Type: ' . $mime);
+        header("Content-Transfer-Encoding: Binary");
+        header("Content-disposition: attachment; filename=\"" . basename($file) . "\"");
+        header('Content-Transfer-Encoding: binary');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        readfile($file);
+
+
+        die;
+    }
+
+    function download_invoice($file_name, $monthyear, $account_id, $configdata) {
+        $CI = & get_instance();
+        require_once dirname(__FILE__) . '/tcpdf/tcpdf.php';
+        require_once dirname(__FILE__) . '/tcpdf/PdfReceipt.php';
+
+
+
+        $CI->load->library('Pdf');
+
+
+
+        $pdf = new Pdf(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+        $logoimg = $configdata->logo;
+        $pdf->setLogo($logoimg);
+        $pdf->SetCreator(PDF_CREATOR);
+        $pdf->SetAuthor('I-Solution');
+        $pdf->SetTitle('Invoice Receipt');
+        $pdf->SetSubject('Invoice Receipt');
+        $pdf->setFooterData(array(0, 64, 0), array(0, 64, 128));
+        // set header and footer fonts
+        $pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
+        $pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
+
+        // set default monospaced font
+        $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+
+        // set margins
+        $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+        $pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
+        $pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+
+        // set auto page breaks
+        $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+
+        // set image scale factor
+        $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+
+        // set some language-dependent strings (optional)
+        if (@file_exists(dirname(__FILE__) . '/lang/eng.php')) {
+            require_once(dirname(__FILE__) . '/lang/eng.php');
+            $pdf->setLanguageArray($l);
         }
 
+        // ---------------------------------------------------------
+        // set font
+        $pdf->SetFont('helvetica', '', 10);
 
-        $objWriter->save('php://output');
-        die;
+        // add a page
+        $pdf->AddPage();
+        $configdata;
+
+
+
+        $header_content = '';
+        $header_content .= '<table>
+	 <tr><td style="text-align: left;"> ' . $configdata->company_name . ' </td> </tr> 
+	<tr> <td style="text-align: left;"> ' . $configdata->address . ' </td> </tr>
+	    <tr> <td style="text-align: left;"> ' . $configdata->support_text . ' </td> </tr>
+	    </table>';
+
+        $pdf->writeHTML($header_content, true, false, true, false, '');
+
+
+
+
+        $pdf->writeHTML($page_footer, true, false, true, false, '');
+
+        $pdf->lastPage();
+        //Close and output PDF document			
+
+        $pdf->Output($file_name . '.pdf', 'I');
     }
 
 }

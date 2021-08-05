@@ -1,15 +1,15 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019 Chinna Technologies  
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
+// OV500 Version 2.0.0
+// Copyright (C) 2019-2021 Openvoips Technologies   
 // http://www.openvoips.com  http://www.openvoips.org
-//
-//
-//OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// The Initial Developer of the Original Code is
+// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
+// Portions created by the Initial Developer are Copyright (C)
+// the Initial Developer. All Rights Reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -28,7 +28,7 @@
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
-class Carriers extends CI_Controller {
+class Carriers extends MY_Controller {
 
     function __construct() {
         parent::__construct();
@@ -124,7 +124,7 @@ class Carriers extends CI_Controller {
         }
 
         if ($is_file_downloaded === false) {
-           $pagination_uri_segment = 3;
+            $pagination_uri_segment = 3;
 
             if ($this->uri->segment($pagination_uri_segment) == '') {
                 $segment = 0;
@@ -132,7 +132,7 @@ class Carriers extends CI_Controller {
                 $segment = $this->uri->segment($pagination_uri_segment);
             }
 
-          
+
             if (isset($_SESSION['search_carrier_data']['s_no_of_records']) && $_SESSION['search_carrier_data']['s_no_of_records'] != '')
                 $per_page = $_SESSION['search_carrier_data']['s_no_of_records'];
             else
@@ -198,7 +198,7 @@ class Carriers extends CI_Controller {
                 }
             }
         }
-        $logged_user_type = get_logged_account_type();
+        $logged_user_type = get_logged_user_group();
         $data['currency_options'] = $this->utils_model->get_currencies();
         $data['tariff_options'] = $this->utils_model->get_tariffs($logged_user_type, 'CARRIER');
         $data['provider_data'] = $this->provider_mod->get_data('', '', '', array(), array());
@@ -207,11 +207,12 @@ class Carriers extends CI_Controller {
         $this->load->view('basic/footer', $data);
     }
 
-    public function edit($id = -1) {
+    public function edit($id = -1, $active_tab = 1) {
         if ($id == -1)
             show_404();
         if (!check_account_permission('carrier', 'edit'))
             show_404('403');
+        $data['active_tab'] = $active_tab;
         $this->load->model('provider_mod');
         $page_name = "carrier_edit";
         $data['page_name'] = $page_name;
@@ -257,6 +258,7 @@ class Carriers extends CI_Controller {
         if (isset($_POST['action']) && $_POST['action'] == 'OkSaveData') {
             $carrier_id = $_POST['carrier_id'];
             $data['carrier_id'] = $carrier_id;
+            $data['active_tab'] = $_POST['tab'];
             $this->form_validation->set_rules('carrier_id', 'Carrier ID', 'trim|required');
             $this->form_validation->set_rules('carrier_name', 'Name', 'trim|required');
             $this->form_validation->set_rules('carrier_cc', 'CC', 'trim|required');
@@ -281,18 +283,8 @@ class Carriers extends CI_Controller {
 
                 if ($result === true) {
                     $this->session->set_flashdata('suc_msgs', 'Carrier Updated Successfully');
-                    if (isset($_POST['button_action']) && trim($_POST['button_action']) != '') {
-                        $action = trim($_POST['button_action']);
-                        if ($action == 'save')
-                            redirect(base_url() . 'carriers/edit/' . param_encrypt($carrier_id), 'location', '301');
-                        elseif ($action == 'save_close')
-                            redirect(base_url() . 'carriers', 'location', '301');
-                    }
-                    else {
-                        redirect(base_url() . 'carriers', 'location', '301');
-                    }
-
-                    redirect(base_url() . 'carriers/edit/' . param_encrypt($carrier_id), 'location', '301');
+                    redirect(site_url('carriers/edit/' . param_encrypt($carrier_id) . '/' . $data['active_tab']), 'location', '301');
+                    exit();
                 } else {
                     $err_msgs = $result;
                     $data['err_msgs'] = $err_msgs;
@@ -306,7 +298,7 @@ class Carriers extends CI_Controller {
             $segment = 0;
             if (strlen($carrier_id) > 0)
                 $search_data = array('carrier_id' => $carrier_id);
-            $option_param = array('tariff' => true, 'customers' => true, 'ip' => true, 'callerid' => true, 'prefix' => true, 'callerid_incoming' => true, 'prefix_incoming' => true);
+            $option_param = array('tariff' => true, 'customers' => true, 'ip' => true, 'callerid' => true, 'prefix' => true, 'callerid_incoming' => true, 'prefix_incoming' => true, 'randomcli' => true);
             $carriers_data_temp = $this->carrier_mod->get_data($order_by, $per_page, $segment, $search_data, $option_param);
             if (isset($carriers_data_temp['result']))
                 $carriers_data = current($carriers_data_temp['result']);
@@ -318,7 +310,7 @@ class Carriers extends CI_Controller {
         }
         $data['data'] = $carriers_data;
         $data['carrier_id'] = $carrier_id;
-        $logged_user_type = get_logged_account_type();
+        $logged_user_type = get_logged_user_group();
         $data['currency_options'] = $this->utils_model->get_currencies();
         $data['tariff_options'] = $this->utils_model->get_tariffs($logged_user_type, 'CARRIER');
         $data['provider_data'] = $this->provider_mod->get_data('', '', '', array(), array());
@@ -327,20 +319,20 @@ class Carriers extends CI_Controller {
         $this->load->view('basic/footer', $data);
     }
 
-    public function addG($id1 = -1) {
+    public function addG($id1 = -1, $active_tab = 1) {
         $carrier_id = param_decrypt($id1);
         if (strlen($carrier_id) < 1)
             show_404();
         $page_name = "carrier_addG";
         $data['page_name'] = $page_name;
-
+        $data['active_tab'] = $active_tab;
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
 
         if (isset($_POST['action']) && $_POST['action'] == 'OkSaveData') {
             $carrier_id = $_POST['carrier_id'];
             $id = $_POST['id'];
             $data['carrier_id'] = $carrier_id;
-
+            $data['active_tab'] = $_POST['tab'];
             $this->form_validation->set_rules('carrier_id', 'Carrier ID', 'trim|required');
             $this->form_validation->set_rules('ipaddress_name', 'Gateway Name', 'trim|required');
             $this->form_validation->set_rules('ipaddress', 'Gateway IP', 'trim|required');
@@ -363,14 +355,14 @@ class Carriers extends CI_Controller {
                         $action = trim($_POST['button_action']);
                         $id = $result['result']['id'];
                         if ($action == 'save')
-                            redirect(base_url() . 'carriers/editG/' . param_encrypt($carrier_id) . '/' . param_encrypt($id), 'location', '301');
+                            redirect(base_url() . 'carriers/editG/' . param_encrypt($carrier_id) . '/' . param_encrypt($id) . '/' . $data['active_tab'], 'location', '301');
                         elseif ($action == 'save_close')
-                            redirect(base_url() . 'carriers/edit/' . param_encrypt($carrier_id), 'location', '301');
+                            redirect(site_url('carriers/edit/' . param_encrypt($carrier_id) . '/' . $data['active_tab']), 'location', '301');
                     }
                     else {
                         redirect(base_url() . 'carriers', 'location', '301');
                     }
-                    redirect(base_url() . 'carriers/edit/' . param_encrypt($carrier_id) . '/' . param_encrypt($id), 'location', '301');
+                    redirect(base_url() . 'carriers/edit/' . param_encrypt($carrier_id) . '/' . param_encrypt($id) . '/' . $data['active_tab'], 'location', '301');
                 } else {
                     $err_msgs = $result['result']['id'];
                     $data['err_msgs'] = "Duplicate gateway"; //$err_msgs;
@@ -400,12 +392,12 @@ class Carriers extends CI_Controller {
         $this->load->view('basic/footer', $data);
     }
 
-    public function editG($id1 = -1, $id2 = -1) {
+    public function editG($id1 = -1, $id2 = -1, $active_tab = 1) {
         $carrier_id = param_decrypt($id1);
         $id = param_decrypt($id2);
         if (strlen($carrier_id) < 1 || $id2 == -1)
             show_404();
-
+        $data['active_tab'] = $active_tab;
         $page_name = "carrier_editG";
         $data['page_name'] = $page_name;
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
@@ -413,6 +405,7 @@ class Carriers extends CI_Controller {
             $carrier_id = $_POST['carrier_id'];
             $id = $_POST['id'];
             $data['carrier_id'] = $carrier_id;
+            $data['active_tab'] = $_POST['tab'];
             $this->form_validation->set_rules('carrier_id', 'Carrier ID', 'trim|required');
             $this->form_validation->set_rules('id', 'Gateway ID', 'trim|required');
             $this->form_validation->set_rules('ipaddress_name', 'Gateway Name', 'trim|required');
@@ -435,13 +428,13 @@ class Carriers extends CI_Controller {
                     if (isset($_POST['button_action']) && trim($_POST['button_action']) != '') {
                         $action = trim($_POST['button_action']);
                         if ($action == 'save')
-                            redirect(base_url() . 'carriers/editG/' . param_encrypt($carrier_id) . '/' . param_encrypt($id), 'location', '301');
+                            redirect(base_url() . 'carriers/editG/' . param_encrypt($carrier_id) . '/' . param_encrypt($id) . '/' . $data['active_tab'], 'location', '301');
                         elseif ($action == 'save_close')
-                            redirect(base_url() . 'carriers/edit/' . param_encrypt($carrier_id), 'location', '301');
+                            redirect(base_url() . 'carriers/edit/' . param_encrypt($carrier_id) . '/' . $data['active_tab'], 'location', '301');
                     } else {
                         redirect(base_url() . 'carriers', 'location', '301');
                     }
-                    redirect(base_url() . 'carriers/edit/' . param_encrypt($carrier_id) . '/' . param_encrypt($id), 'location', '301');
+                    redirect(base_url() . 'carriers/edit/' . param_encrypt($carrier_id) . '/' . param_encrypt($id) . '/' . $data['active_tab'], 'location', '301');
                 } else {
                     $err_msgs = $result;
                     $data['err_msgs'] = $err_msgs;
@@ -471,15 +464,17 @@ class Carriers extends CI_Controller {
         $this->load->view('basic/footer', $data);
     }
 
-    public function editSRCNo($id1 = -1) {
+    public function editSRCNo($id1 = -1, $active_tab = 1) {
         if ($id1 == -1)
             show_404();
         $page_name = "carrier_editSRCNo";
         $data['page_name'] = $page_name;
+        $data['active_tab'] = $active_tab;
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
         if (isset($_POST['action']) && $_POST['action'] == 'OkSaveData') {
             $carrier_id = $_POST['carrier_id'];
             $data['carrier_id'] = $carrier_id;
+            $data['active_tab'] = $_POST['tab'];
             $this->form_validation->set_rules('carrier_id', 'Carrier ID', 'trim|required');
             $this->form_validation->set_rules('allowed_rules', 'Allowed Rules', 'trim');
             $this->form_validation->set_rules('disallowed_rules', 'Disallowed Rules', 'trim');
@@ -503,13 +498,13 @@ class Carriers extends CI_Controller {
                     if (isset($_POST['button_action']) && trim($_POST['button_action']) != '') {
                         $action = trim($_POST['button_action']);
                         if ($action == 'save')
-                            redirect(base_url() . 'carriers/editSRCNo/' . param_encrypt($carrier_id), 'location', '301');
+                            redirect(base_url() . 'carriers/editSRCNo/' . param_encrypt($carrier_id) . '/' . $data['active_tab'], 'location', '301');
                         elseif ($action == 'save_close')
-                            redirect(base_url() . 'carriers/edit/' . param_encrypt($carrier_id), 'location', '301');
+                            redirect(base_url() . 'carriers/edit/' . param_encrypt($carrier_id) . '/' . $data['active_tab'], 'location', '301');
                     } else {
                         redirect(base_url() . 'carriers', 'location', '301');
                     }
-                    redirect(base_url() . 'carriers/edit/' . param_encrypt($carrier_id) . '/' . param_encrypt($id), 'location', '301');
+                    redirect(base_url() . 'carriers/edit/' . param_encrypt($carrier_id) . '/' . param_encrypt($id) . '/' . $data['active_tab'], 'location', '301');
                 } else {
                     $err_msgs = $result;
                     $data['err_msgs'] = $err_msgs;
@@ -541,15 +536,17 @@ class Carriers extends CI_Controller {
         $this->load->view('basic/footer', $data);
     }
 
-    public function editDSTNo($id1 = -1) {
+    public function editDSTNo($id1 = -1, $active_tab = 1) {
         if ($id1 == -1)
             show_404();
         $page_name = "carrier_editDSTNo";
         $data['page_name'] = $page_name;
+        $data['active_tab'] = $active_tab;
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
         if (isset($_POST['action']) && $_POST['action'] == 'OkSaveData') {
             $carrier_id = $_POST['carrier_id'];
             $id = $_POST['id'];
+            $data['active_tab'] = $_POST['tab'];
             $data['carrier_id'] = $carrier_id;
             $this->form_validation->set_rules('carrier_id', 'Carrier ID', 'trim|required');
             $this->form_validation->set_rules('rules', 'Rules', 'trim');
@@ -569,13 +566,13 @@ class Carriers extends CI_Controller {
                     if (isset($_POST['button_action']) && trim($_POST['button_action']) != '') {
                         $action = trim($_POST['button_action']);
                         if ($action == 'save')
-                            redirect(base_url() . 'carriers/editDSTNo/' . param_encrypt($carrier_id), 'location', '301');
+                            redirect(base_url() . 'carriers/editDSTNo/' . param_encrypt($carrier_id) . '/' . $data['active_tab'], 'location', '301');
                         elseif ($action == 'save_close')
-                            redirect(base_url() . 'carriers/edit/' . param_encrypt($carrier_id), 'location', '301');
+                            redirect(base_url() . 'carriers/edit/' . param_encrypt($carrier_id) . '/' . $data['active_tab'], 'location', '301');
                     } else {
                         redirect(base_url() . 'carriers', 'location', '301');
                     }
-                    redirect(base_url() . 'carriers/edit/' . param_encrypt($carrier_id) . '/' . param_encrypt($id), 'location', '301');
+                    redirect(base_url() . 'carriers/edit/' . param_encrypt($carrier_id) . '/' . param_encrypt($id) . '/' . $data['active_tab'], 'location', '301');
                 } else {
                     $err_msgs = $result;
                     $data['err_msgs'] = $err_msgs;
@@ -606,16 +603,18 @@ class Carriers extends CI_Controller {
         $this->load->view('basic/footer', $data);
     }
 
-    public function editINSRCNo($id1 = -1) {
+    public function editINSRCNo($id1 = -1, $active_tab = 1) {
         if ($id1 == -1)
             show_404();
         $page_name = "carrier_editINSRCNo";
         $data['page_name'] = $page_name;
+        $data['active_tab'] = $active_tab;
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
         if (isset($_POST['action']) && $_POST['action'] == 'OkSaveData') {
             $carrier_id = $_POST['carrier_id'];
             $id = $_POST['id'];
             $data['carrier_id'] = $carrier_id;
+            $data['active_tab'] = $_POST['tab'];
             $this->form_validation->set_rules('carrier_id', 'Carrier ID', 'trim|required');
             $this->form_validation->set_rules('allowed_rules', 'Allowed Rules', 'trim');
             $this->form_validation->set_rules('disallowed_rules', 'Disallowed Rules', 'trim');
@@ -638,13 +637,13 @@ class Carriers extends CI_Controller {
                     if (isset($_POST['button_action']) && trim($_POST['button_action']) != '') {
                         $action = trim($_POST['button_action']);
                         if ($action == 'save')
-                            redirect(base_url() . 'carriers/editINSRCNo/' . param_encrypt($carrier_id), 'location', '301');
+                            redirect(base_url() . 'carriers/editINSRCNo/' . param_encrypt($carrier_id) . '/' . $data['active_tab'], 'location', '301');
                         elseif ($action == 'save_close')
-                            redirect(base_url() . 'carriers/edit/' . param_encrypt($carrier_id), 'location', '301');
+                            redirect(base_url() . 'carriers/edit/' . param_encrypt($carrier_id) . '/' . $data['active_tab'], 'location', '301');
                     } else {
                         redirect(base_url() . 'carriers', 'location', '301');
                     }
-                    redirect(base_url() . 'carriers/edit/' . param_encrypt($carrier_id) . '/' . param_encrypt($id), 'location', '301');
+                    redirect(base_url() . 'carriers/edit/' . param_encrypt($carrier_id) . '/' . param_encrypt($id) . '/' . $data['active_tab'], 'location', '301');
                 } else {
                     $err_msgs = $result;
                     $data['err_msgs'] = $err_msgs;
@@ -674,9 +673,10 @@ class Carriers extends CI_Controller {
         $this->load->view('basic/footer', $data);
     }
 
-    public function editINDSTNo($id1 = -1) {
+    public function editINDSTNo($id1 = -1, $active_tab = 1) {
         if ($id1 == -1)
             show_404();
+        $data['active_tab'] = $active_tab;
         $page_name = "carrier_editINDSTNo";
         $data['page_name'] = $page_name;
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
@@ -684,7 +684,7 @@ class Carriers extends CI_Controller {
             $carrier_id = $_POST['carrier_id'];
             $id = $_POST['id'];
             $data['carrier_id'] = $carrier_id;
-
+            $data['active_tab'] = $_POST['tab'];
             $this->form_validation->set_rules('carrier_id', 'Carrier ID', 'trim|required');
             $this->form_validation->set_rules('rules', 'Rules', 'trim');
 
@@ -703,15 +703,15 @@ class Carriers extends CI_Controller {
                     if (isset($_POST['button_action']) && trim($_POST['button_action']) != '') {
                         $action = trim($_POST['button_action']);
                         if ($action == 'save')
-                            redirect(base_url() . 'carriers/editINDSTNo/' . param_encrypt($carrier_id), 'location', '301');
+                            redirect(base_url() . 'carriers/editINDSTNo/' . param_encrypt($carrier_id) . '/' . $data['active_tab'], 'location', '301');
                         elseif ($action == 'save_close')
-                            redirect(base_url() . 'carriers/edit/' . param_encrypt($carrier_id), 'location', '301');
+                            redirect(base_url() . 'carriers/edit/' . param_encrypt($carrier_id) . '/' . $data['active_tab'], 'location', '301');
                     }
                     else {
                         redirect(base_url() . 'carriers', 'location', '301');
                     }
 
-                    redirect(base_url() . 'carriers/edit/' . param_encrypt($carrier_id) . '/' . param_encrypt($id), 'location', '301');
+                    redirect(base_url() . 'carriers/edit/' . param_encrypt($carrier_id) . '/' . $data['active_tab'], 'location', '301');
                 } else {
                     $err_msgs = $result;
                     $data['err_msgs'] = $err_msgs;

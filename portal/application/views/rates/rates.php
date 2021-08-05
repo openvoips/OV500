@@ -1,41 +1,3 @@
-<!--
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019-2020 Chinna Technologies   
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
-// http://www.openvoips.com  http://www.openvoips.org
-//
-//
-// OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
-//
-//
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
--->
-<?php
-//echo '<pre>';
-//print_r($tariff_data); print_r($ratecard_data); 
-//echo "total_records $total_records"; echo '</pre>';
-?>
 <script src="<?php echo base_url() ?>theme/vendors/combo-box-typeahead/js/bootstrap-combobox.js"></script>
 <link href="<?php echo base_url() ?>theme/vendors/combo-box-typeahead/css/bootstrap-combobox.css" rel="stylesheet" type="text/css">
 <script>
@@ -58,7 +20,7 @@
             <form class="block-content form-horizontal " id="search_form" name="search_form"  method="post" action="<?php echo base_url(); ?>rates/index/">
                 <input type="hidden" name="search_action" value="search" />
                 <input type="hidden" name="no_of_rows" id="no_of_rows" value="" />
-                <div style="color: red;">*One item must be select from the Tariff or Ratecard.</div>
+                <!--<div style="color: red;">*One item must be select from the Tariff or Ratecard.</div> -->
                 <div class="form-group">
                     <label class="control-label col-md-2 col-sm-3 col-xs-12">Tariff Name</label>
                     <div class="col-md-4 col-sm-8 col-xs-12">
@@ -103,7 +65,7 @@
                             </select>
                         </div>	
 
-                        <div class="searchBar ">
+                        <div class="searchBar text-right">
                             <input type="submit" value="Search" name="OkFilter" id="OkFilter" class="btn btn-primary">                          
                             <input type="button" value="Reset" name="search_reset" id="search_reset" class="btn btn-info">                           
                             <div class="btn-group">
@@ -238,7 +200,7 @@ for ($i = 0; $i < $ratecard_dropdown['total']; $i++)
     });
 
     $(document).ready(function () {
-   showDatatable('table-sort', [5], [1, "asc"]);
+        showDatatable('table-sort', [5], [1, "asc"]);
         $('#OkFilter').click(function () {
             var no_of_records = $('#no_of_records').val();
             $('#no_of_rows').val(no_of_records);

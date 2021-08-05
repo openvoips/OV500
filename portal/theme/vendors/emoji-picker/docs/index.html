@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>jQuery emojiarea.js: Emoji Picker Demos</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width">
+        <link rel="stylesheet" href="./assets/css/reset.css">
+        <link rel="stylesheet" href="./assets/css/style.css">
+        <link rel="stylesheet" href="stylesheet.css">
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+        <script src="./assets/js/jquery.emojiarea.js"></script>
+        <script src="./assets/js/main.js"></script>
+    </head>
+    <body>
+        <h1>jquery.emojiarea.js Example</h1>
+        <div class="jquery-script-ads"><script type="text/javascript"><!--
+google_ad_client = "ca-pub-2783044520727903";
+/* jQuery_demo */
+google_ad_slot = "2780937993";
+google_ad_width = 728;
+google_ad_height = 90;
+//-->
+</script>
+<script type="text/javascript"
+src="https://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script></div>
+        <div class="example">
+            <h2>Unicode</h2>
+            <div data-emojiarea data-type="unicode" data-global-picker="false">
+                <div class="emoji-button">&#x1f604;</div>
+                <textarea id="input1" rows="5">You can insert unicode emojis here &#x1f604;</textarea>
+            </div>
+            <h3>Value:</h3>
+            <div class="value"><pre id="value1"></pre></div>
+            <script>
+                $('#input1').on('input', function() {
+                  $('#value1').text($('#input1').val());
+                });
+                $('#value1').text($('#input1').val());
+            </script>
+        </div>
+        <div class="example">
+            <h2>CSS Background Image</h2>
+            <div data-emojiarea data-type="css" data-global-picker="false">
+                <i class="emoji emoji-smile emoji-button">&#x1f604;</i>
+                <textarea id="input2" rows="5">This editor will show all unicode emojis with a CSS Image overlay &#x1f604;</textarea>
+            </div>
+            <h3>Value:</h3>
+            <div class="value"><pre id="value2"></pre></div>
+            <script>
+              $('#input2').on('input', function() {
+                $('#value2').text($('#input2').val());
+              });
+              $('#value2').text($('#input2').val());
+            </script>
+        </div>
+        <div class="example">
+            <h2>HTML Image Element</h2>
+            <div data-emojiarea data-type="image" data-global-picker="false">
+                <i class="emoji emoji-smile emoji-button">&#x1f604;</i>
+                <textarea id="input3" rows="5">And here an overlay is created with a dedicated html image element. &#x1f604;</textarea>
+            </div>
+            <h3>Value:</h3>
+            <div class="value"><pre id="value3"></pre></div>
+            <script>
+              $('#input3').on('input', function() {
+                $('#value3').text($('#input3').val());
+              });
+              $('#value3').text($('#input3').val());
+            </script>
+        </div>
+        <script>
+        </script>
+    </body>
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-36251023-1']);
+  _gaq.push(['_setDomainName', 'jqueryscript.net']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</html>

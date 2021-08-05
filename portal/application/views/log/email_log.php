@@ -1,22 +1,14 @@
-<?php
-//echo '<pre>';print_r($type_options);echo '</pre>';
-//echo '<pre>';print_r($data);echo '</pre>';
-?>
 <script src="<?php echo base_url() ?>theme/vendors/parsleyjs/dist/parsley.min.js"></script>
-
 <div class="col-md-12 col-sm-6 col-xs-12">
     <div class="x_panel">
         <div class="x_title">
             <h2>Search </h2>
             <ul class="nav navbar-right panel_toolbox">
-                
+
             </ul>
             <div class="clearfix"></div>
         </div>
-
         <div class="x_content">
-
-
             <form action="<?php echo base_url(); ?>recyclebin/email_log" method="post" name="search_form" id="search_form" data-parsley-validate class="form-horizontal form-label-left">
 
                 <input type="hidden" name="search_action" value="search" />
@@ -67,7 +59,7 @@
         <div class="x_title">
             <h2>Email Log</h2>
             <ul class="nav navbar-right panel_toolbox">
-                
+
             </ul>
             <div class="clearfix"></div>
         </div>

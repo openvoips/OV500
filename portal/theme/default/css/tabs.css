@@ -1,0 +1,50 @@
+ul.bar_tabs2 {
+    overflow: visible;
+    height: 25px;
+    margin: 24px 0 0px;
+    padding-left: 0;
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    border-bottom: none
+}
+ul.bar_tabs2>li {
+    color: #DD4814 !important;
+    margin-top: -17px;
+    background: #fff;
+    border: none;
+    border-left: 1px solid #fff;
+}
+.nav-tabs>li.active>a, .nav-tabs>li.active>a:focus, .nav-tabs>li.active>a:hover{
+    border:none !important;
+}
+.nav-tabs>li>a{
+    border-radius: 0;
+}
+ul.bar_tabs2>li.active  {
+    margin-top: -17px !important;
+    margin-top: -15px
+}
+ul.bar_tabs2>li a {
+    padding: 10px 17px;
+    background: #DD4814;
+    margin: 0;
+    color: #fff !important;
+    border-top-right-radius: 0;
+}
+ul.bar_tabs2>li a:hover {
+    border: 1px solid transparent;
+    background: #AEAEAE;
+}
+ul.bar_tabs2>li.active a {
+    border: none;
+    background-color: #AEAEAE !important;
+    padding: 11px 17px;
+    margin: 0;
+}
+ul.bar_tabs2.right {
+    padding-right: 14px
+}
+ul.bar_tabs2.right li {
+    float: right
+}

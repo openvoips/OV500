@@ -59,7 +59,7 @@ $autoload['packages'] = array();
   |
   |	$autoload['libraries'] = array('user_agent' => 'ua');
  */
-$autoload['libraries'] = array('database', 'session', 'xmlrpc', 'form_validation', 'subquery');
+$autoload['libraries'] = array('database', 'session', 'xmlrpc', 'form_validation', 'subquery','plugins');
 
 /*
   | -------------------------------------------------------------------
@@ -133,4 +133,7 @@ $autoload['language'] = array();
   |
   |	$autoload['model'] = array('first_model' => 'first');
  */
-$autoload['model'] = array('utils_model', 'sitesetup_mod', 'member_mod');
+ 
+ $autoload['model'] = array('utils_model', 'sitesetup_mod', 'member_mod');
+ 
+//$autoload['model'] = array('utils_model', 'sitesetup_mod', 'member_mod');

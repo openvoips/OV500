@@ -52,12 +52,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 $route['default_controller'] = 'login';
 $route['404_override'] = 'page'; ///custom404';
-$route['profile'] = 'admins/profile';
+$route['profile'] = 'users/profile';
 $route['my_balance'] = 'payment/my_balance';
 $route['MyRates'] = 'rates/MyRates';
+$route['MyRates/(:any)'] = 'rates/MyRates/$1';
+$route['MyPlan'] = 'customers/myplan';
 $route['MyPlan/(:any)'] = 'customers/myplan/$1';
-$route['MyPackage/(:any)'] = 'resellers/myplan/$1';
+//$route['MyPackage/(:any)'] = 'resellers/myplan/$1';
+$route['MyPackage/(:any)'] = 'resellers/mypackage/$1';
+$route['autologin/(:any)'] = 'users/autologin/$1';
+$route['autologin/(:any)/(:any)'] = 'users/autologin/$1/$2';
+$route['reautologin/(:any)'] = 'users/reautologin/$1';
+$route['reautologin/(:any)/(:any)'] = 'users/reautologin/$1/$2';
+$route['cuautologin/(:any)'] = 'users/cuautologin/$1';
+$route['cuautologin/(:any)/(:any)'] = 'users/cuautologin/$1/$2';
 
-$route['autologin/(:any)'] = 'admins/autologin/$1';
-$route['autologin/(:any)/(:any)'] = 'admins/autologin/$1/$2';
-$route['translate_uri_dashes'] = FALSE;
+$route['translate_uri_dashes'] = TRUE;

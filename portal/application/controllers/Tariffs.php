@@ -1,15 +1,15 @@
 <?php
+
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019 Chinna Technologies  
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
+// OV500 Version 2.0.0
+// Copyright (C) 2019-2021 Openvoips Technologies   
 // http://www.openvoips.com  http://www.openvoips.org
-//
-//
-//OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// The Initial Developer of the Original Code is
+// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
+// Portions created by the Initial Developer are Copyright (C)
+// the Initial Developer. All Rights Reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -25,10 +25,11 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 // ##############################################################################
 
+
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
-class Tariffs extends CI_Controller {
+class Tariffs extends MY_Controller {
 
     public $search_serialize = '';
 
@@ -130,11 +131,11 @@ class Tariffs extends CI_Controller {
             'tariff_type' => $_SESSION['search_tariff_data']['s_tariff_type']
         );
 
-        if (check_logged_account_type(array('RESELLER', 'CUSTOMER'))) {
-            $search_data['created_by'] = get_logged_account_id();
-        } else {
-            $search_data['created_by'] = 'admin';
-        }
+
+
+
+        $search_data['account_id'] = get_logged_account_id();
+
         $order_by = '';
         if ($arg1 == 'export' && $format != '') {
             $this->load->library('Export');
@@ -197,6 +198,9 @@ class Tariffs extends CI_Controller {
             $this->form_validation->set_rules('frm_currency', 'Currency', 'trim|min_length[0]|max_length[10]');
             $this->form_validation->set_rules('frm_status', 'Status', 'trim|required');
             $this->form_validation->set_rules('frm_desc', 'Description', 'trim|min_length[0]|max_length[50]');
+            if (check_logged_user_group(array('RESELLER'))) {
+                $_POST['frm_type'] = 'CUSTOMER';
+            }
             if ($this->form_validation->run() == FALSE) {
                 $data['err_msgs'] = validation_errors();
             } else {
@@ -260,47 +264,7 @@ class Tariffs extends CI_Controller {
                 }
             }
         } elseif (isset($_POST['action']) && $_POST['action'] == 'OkUpdateData') {
-            $this->form_validation->set_rules('frm_id', 'Route ID', 'trim|required');
-            $this->form_validation->set_rules('frm_plan', 'Plan', 'trim|required|in_list[1,0]');
-            $this->form_validation->set_rules('frm_monthly_charge', 'Plan', 'trim|required|numeric');
-            if ($_POST['frm_bundle'] == 1) {
-                $this->form_validation->set_rules('bundle1_type', 'Bundle1 Type', 'trim|required|in_list[MINUTE,COST]');
-                $this->form_validation->set_rules('bundle1_value', 'Bundle1 Value', 'trim|required|numeric');
-                $this->form_validation->set_rules('bundle1_prefix', 'Bundle1 Prefix', 'trim|required|regex_match[/^[0-9,]*$/]');
-
-                if ($_POST['bundle2_value'] != '' || $_POST['bundle2_prefix'] != '') {
-                    $this->form_validation->set_rules('bundle2_type', 'Bundle2 Type', 'trim|required|in_list[MINUTE,COST]');
-                    $this->form_validation->set_rules('bundle2_value', 'Bundle2 Value', 'trim|required|numeric');
-                    $this->form_validation->set_rules('bundle2_prefix', 'Bundle2 Prefix', 'trim|required|regex_match[/^[0-9,]*$/]');
-                }
-
-                if ($_POST['bundle3_value'] != '' || $_POST['bundle3_prefix'] != '') {
-                    $this->form_validation->set_rules('bundle3_type', 'Bundle3 Type', 'trim|required|in_list[MINUTE,COST]');
-                    $this->form_validation->set_rules('bundle3_value', 'Bundle3 Value', 'trim|required|numeric');
-                    $this->form_validation->set_rules('bundle3_prefix', 'Bundle3 Prefix', 'trim|required|regex_match[/^[0-9,]*$/]');
-                }
-            }
-            if ($this->form_validation->run() == FALSE) {
-                $data['err_msgs'] = validation_errors();
-            } else {
-                $result = $this->tariff_mod->updateBundle($_POST);
-                if ($result['status']) {
-                    $this->session->set_flashdata('suc_msgs', 'Bundle Updated Successfully');
-                    if (isset($_POST['button_action_p_s']) && trim($_POST['button_action_p_s']) != '') {
-                        $action = trim($_POST['button_action_p_s']);
-                        if ($action == 'save')
-                            redirect(base_url() . 'tariffs/editTP/' . param_encrypt($tariff_id), 'location', '301');
-                        elseif ($action == 'save_close')
-                            redirect(base_url() . 'tariffs', 'location', '301');
-                    }
-                    else {
-                        redirect(base_url() . 'tariffs', 'location', '301');
-                    }
-                    redirect(base_url() . 'tariffs/editTP/' . param_encrypt($tariff_id), 'location', '301');
-                } else {
-                    $data['err_msgs'] = $result['msg'];
-                }
-            }
+            
         }
         $show_404 = false;
         if (!empty($tariff_id) && strlen($tariff_id) > 0) {
@@ -308,7 +272,6 @@ class Tariffs extends CI_Controller {
             $response_data = $this->tariff_mod->get_data('', 0, RECORDS_PER_PAGE, $search_data, array());
             if ($response_data['total'] > 0) {
                 $data['data'] = $response_data['result'][0];
-                $data['bundle'] = $response_data['bundle'];
                 $ratecard_response_data = $this->tariff_mod->get_mapping('', 0, RECORDS_PER_PAGE, array('tariff_id' => $response_data['result'][0]['tariff_id'], 'ratecard_for' => 'OUTGOING'), array());
                 $data['data_ratecard'] = $ratecard_response_data['result'];
 
@@ -321,21 +284,6 @@ class Tariffs extends CI_Controller {
                     $data['data_carrier'] = $carrier_response_data['result'];
                 else
                     $data['data_carrier'] = array();
-
-//                $this->load->model('customer_mod');
-//                $user_response_data = $this->customer_mod->get_data('', 0, RECORDS_PER_PAGE, array('tariff_id' => $response_data['result'][0]['tariff_id']), array());
-//                if (isset($user_response_data['result'])) {
-//                    $data['data_user'] = $user_response_data['result'];
-//                } else {
-//                    $data['data_user'] = array();
-//                }
-//                $this->load->model('reseller_mod');
-//                $user_response_data = $this->reseller_mod->get_data('', 0, RECORDS_PER_PAGE, array('tariff_id' => $response_data['result'][0]['tariff_id']), array());
-//                if (isset($user_response_data['result'])) {
-//                    $data['data_reseller'] = $user_response_data['result'];
-//                } else {
-//                    $data['data_reseller'] = array();
-//                }
             } else {
                 $show_404 = true;
             }
@@ -353,7 +301,8 @@ class Tariffs extends CI_Controller {
 
     public function editTMP() {
         $data['page_name'] = "mapping_edit";
-        $this->member_mod->check_permission('');
+
+
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
         $mapping_id = param_decrypt($this->uri->segment(3));
         if (isset($_POST['action']) && $_POST['action'] == 'OkSaveData') {
@@ -413,7 +362,7 @@ class Tariffs extends CI_Controller {
 
     public function addTMP() {
         $data['page_name'] = "mapping_add";
-        $this->member_mod->check_permission('');
+        //$this->member_mod->check_permission('');		
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
         $tariff_data = param_decrypt($this->uri->segment(3));
         $tariff_data = explode('@', $tariff_data);
@@ -461,7 +410,7 @@ class Tariffs extends CI_Controller {
                 $tariff_data = $response_data['result'][0];
                 $data['data'] = $tariff_data;
                 $this->load->model('ratecard_mod');
-                $data['ratecard_data'] = $this->ratecard_mod->get_data('', 0, '', array('ratecard_for' => $ratecard_for, 'ratecard_currency_id' => $tariff_data['tariff_currency_id'], 'ratecard_type' => $tariff_data['tariff_type']), array());
+                $data['ratecard_data'] = $this->ratecard_mod->get_data('', 0, '', array('ratecard_for' => $ratecard_for, 'ratecard_currency_id' => $tariff_data['tariff_currency_id'], 'ratecard_type' => $tariff_data['tariff_type'], 'account_id' => get_logged_account_id()), array());
             } else
                 $show_404 = true;
         } else

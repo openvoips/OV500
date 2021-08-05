@@ -1,36 +1,3 @@
-<!--
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-//
-// Copyright (C) 2019-2020 Chinna Technologies   
-// Seema Anand <openvoips@gmail.com>
-// Anand <kanand81@gmail.com>
-// http://www.openvoips.com  http://www.openvoips.org
-//
-//
-// OV500 Version 1.0.3
-// License https://www.gnu.org/licenses/agpl-3.0.html
-//
-//
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
--->
 <script>
     var randomColorFactor = function () {
         return Math.round(Math.random() * 255);
@@ -52,11 +19,6 @@ function randomColor($opacity = '0.7') {
     return $str;
 }
 
-//echo '<pre>';
-//print_r($report_data['result']);
-//echo '</pre>';
-
-
 $sipcode_meaningfull_array = array(
     'connected' => array('Connected', '#71B37C'),
     'others' => array('Others', '#2A3F54'),
@@ -75,21 +37,16 @@ $sipcode_meaningfull_array = array(
 <div class="">
     <div class="clearfix"></div>   
     <div class="col-md-12 col-sm-12 col-xs-12">
-
         <div class="clearfix"></div>
         <div class="x_content">
-
-
             <div class="col-md-12 col-sm-12 col-xs-12 x_panel">
-
-
                 <form class="block-content form-horizontal" id="search_form" name="search_form" method="post" data-parsley-validate action="">
                     <input type="hidden" name="search_action" value="search" />
 
                     <div class="form-group">
-<?php if ($account_id == get_logged_account_id()) { ?>					
+                        <?php if ($account_id == get_logged_account_id()) { ?>					
                             <div class="col-md-6 col-sm-3 col-xs-12"><h2>Your Calls</h2></div>
-                        <?php } else { ?>
+<?php } else { ?>
 
                             <label class="control-label col-md-2 col-sm-3 col-xs-12">Account ID </label>
                             <div class="col-md-3 col-sm-6 col-xs-12">                	
@@ -101,53 +58,31 @@ $sipcode_meaningfull_array = array(
                         <div class="col-md-3 col-sm-6 col-xs-12">                	
                             <input type="text" name="src_ipaddress" id="src_ipaddress" value="<?php echo $src_ipaddress; ?>" class="form-control" tabindex="<?php echo $tab_index++; ?>">       
                         </div>
-
-
-
-
                     </div>
                     <div class="form-group">   
                         <label class="control-label col-md-1 col-sm-3 col-xs-12">Date </label>
                         <div class="col-md-4 col-sm-9 col-xs-12">
                             <input type="text" name="report_time" id="report_time" class="form-control" value="<?php if (isset($_SESSION['search_data']['s_time'])) echo $_SESSION['search_data']['s_time']; ?>" readonly="readonly" />
                         </div> 
-
-
-
                         <label class="control-label col-md-2 col-sm-3 col-xs-12">Destination</label>
                         <div class="col-md-3 col-sm-6 col-xs-12">                	
                             <input type="text" name="prefix_name" id="prefix_name" value="<?php echo $prefix_name; ?>" class="form-control" tabindex="<?php echo $tab_index++; ?>">       
                         </div>
-
-
-
-
-
-
-
-
-
-
-
                         <div class="searchBar ">      
                             <input type="submit" value="Search" name="OkFilter" id="OkFilter" class="btn btn-primary">
                         </div>                        
 
                     </div>
-
-
                 </form>                 
-<?php
-if ($account_id != '') {
-    if (count($report_data['result']) == 0) {
-        echo '<div class="text-center"><strong>No Call Record Found</strong></div>';
-    }
-}
-?>
+                <?php
+                if ($account_id != '') {
+                    if (count($report_data['result']) == 0) {
+                        echo '<div class="text-center"><strong>No Call Record Found</strong></div>';
+                    }
+                }
+                ?>
 
             </div>
-
-
             <?php
             if (count($report_data['result']) > 0) {
                 ?>
@@ -169,10 +104,6 @@ if ($account_id != '') {
 
                         </div>         
                     </div>
-
-
-
-
                     <div class="col-md-6 col-sm-12 col-xs-12">
                         <div class="x_panel">
                             <div class="x_title">
@@ -220,22 +151,6 @@ if ($account_id != '') {
                     <div class="clearfix"></div>         
 
                 </div>  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 <div class="row">           
 
                     <div class="col-md-12 col-sm-6 col-xs-12">
@@ -282,18 +197,8 @@ if ($account_id != '') {
                         </div>
 
                     </div>
-
                     <div class="clearfix"></div>         
-
                 </div>    
-
-
-
-
-
-
-
-
 
                 <?php
             }//if(count($report_data['result'])>0)
@@ -522,92 +427,86 @@ if (count($report_data['result']) > 0) {
 
     <script>
 
-            $('#OkFilter').click(function () {
+        $('#OkFilter').click(function () {
 
-                var is_ok = $("#search_form").parsley().isValid();
+            var is_ok = $("#search_form").parsley().isValid();
 
-                if (is_ok === true)
-                {
-                    $("#search_form").submit();
+            if (is_ok === true)
+            {
+                $("#search_form").submit();
 
-                } else
-                {
-                    $('#search_form').parsley().validate();
+            } else
+            {
+                $('#search_form').parsley().validate();
+            }
+
+
+        });
+
+        console.log(pie_data_array);
+
+        function pie_chart()
+        {
+            var config = {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                            data: pie_data_array,
+                            backgroundColor: pie_color_array,
+                        }],
+                    labels: pie_label_array
+                },
+                options: {
+                    responsive: true
                 }
+            };
+            console.log(config);
+            var ctx = document.getElementById("chart-area").getContext("2d");
+            window.myPie = new Chart(ctx, config);
+        }
 
 
-            });
-    //console.log(bar_final_array);
-    //console.log(pie_label_array);
-            console.log(pie_data_array);
-
-            function pie_chart()
-            {
-                var config = {
-                    type: 'doughnut',
-                    data: {
-                        datasets: [{
-                                data: pie_data_array,
-                                backgroundColor: pie_color_array,
+        function bar_stacked()
+        {
+            var ctx = document.getElementById("canvas").getContext("2d");
+            window.myBar = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: bar_label_array,
+                    datasets: bar_final_array
+                },
+                options: {
+                    responsive: true,
+                    title: {
+                        display: false,
+                    },
+                    tooltips: {
+                        mode: 'label'
+                    },
+                    scales: {
+                        xAxes: [{
+                                stacked: true,
+                                ticks: {autoSkip: false}
                             }],
-                        labels: pie_label_array
-                    },
-                    options: {
-                        responsive: true
+                        yAxes: [{
+                                stacked: true
+                            }]
                     }
-                };
-                console.log(config);
-                var ctx = document.getElementById("chart-area").getContext("2d");
-                window.myPie = new Chart(ctx, config);
-            }
+                }
+            });
+        }
+        ;
 
+        function key_metrics_fun()
+        {
+            $str = '<li><h4 class="text-primary"><i class="fa fa-hand-o-right"></i> Total Calls: <?php echo $pie_totalcalls; ?></h4></li>' +
+                    '<li><h4 class="text-primary"><i class="fa fa-hand-o-right"></i> Connected Calls: <?php echo $pie_answeredcalls; ?> (<?php echo $pie_answeredcalls_percentage; ?>%)</h4></li>' +
+                    '<li><h4 class="text-primary"><i class="fa fa-hand-o-right"></i> Average Duration: <?php echo $pie_bill_duration_average; ?> Sec</h4></li>' +
+                    '<li><h4 class="text-primary"><i class="fa fa-hand-o-right"></i> Total Call Cost: <?php echo $total_call_cost; ?></h4></li>';
+            $('#key_metrics').html($str);
+            $('#key_metrics').removeClass('hide');
 
-            function bar_stacked()
-            {
-                var ctx = document.getElementById("canvas").getContext("2d");
-                window.myBar = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: bar_label_array,
-                        datasets: bar_final_array
-                    },
-                    options: {
-                        responsive: true,
-                        title: {
-                            display: false,
-                        },
-                        tooltips: {
-                            mode: 'label'
-                        },
-
-                        scales: {
-                            xAxes: [{
-                                    stacked: true,
-                                    ticks: {autoSkip: false}
-                                }],
-                            yAxes: [{
-                                    stacked: true
-                                }]
-                        }
-                    }
-                });
-            }
-            ;
-
-            function key_metrics_fun()
-            {
-                $str = '<li><h4 class="text-primary"><i class="fa fa-hand-o-right"></i> Total Calls: <?php echo $pie_totalcalls; ?></h4></li>' +
-                        '<li><h4 class="text-primary"><i class="fa fa-hand-o-right"></i> Connected Calls: <?php echo $pie_answeredcalls; ?> (<?php echo $pie_answeredcalls_percentage; ?>%)</h4></li>' +
-                        '<li><h4 class="text-primary"><i class="fa fa-hand-o-right"></i> Average Duration: <?php echo $pie_bill_duration_average; ?> Sec</h4></li>' +
-                        '<li><h4 class="text-primary"><i class="fa fa-hand-o-right"></i> Total Call Cost: <?php echo $total_call_cost; ?></h4></li>';
-
-
-
-
-                $('#key_metrics').html($str);
-                $('#key_metrics').removeClass('hide');
-
-            }
+        }
     </script>
 
     <script>
@@ -633,8 +532,7 @@ if (count($report_data['result']) > 0) {
                 format: "YYYY-MM-DD HH:mm:ss"
             },
             timePicker24Hour: true,
-            //minDate: moment().startOf('days'),		
-            //maxDate: moment().endOf('days'),
+
             showCustomRangeLabel: false,
             ranges: {
                 'Last 15 Minute': [moment().subtract(15, 'minute'), moment()],
@@ -643,7 +541,6 @@ if (count($report_data['result']) > 0) {
                 'Today': [moment().startOf('days'), moment().endOf('days')],
                 'Yesterday': [moment().subtract(1, 'days').startOf('days'), moment().subtract(1, 'days').endOf('days')],
                 'Day Before Yesterday': [moment().subtract(2, 'days').startOf('days'), moment().subtract(2, 'days').endOf('days')],
-
             }
         });
 
@@ -652,13 +549,5 @@ if (count($report_data['result']) > 0) {
 </script>   
 <?php
 if (count($report_data['result']) > 0) {
-
-//	echo 'Pie data ::';
-//echo '<pre>';print_r($pie_data_array);echo '</pre>';
-////
-//echo 'Bar data ::';
-//echo '<pre>';print_r($bar_data_array);echo '</pre>';
-////
-//echo 'query returned data ::';
-//echo '<pre>';print_r($report_data['result']);echo '</pre>';
+    
 }?>

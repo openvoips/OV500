@@ -25,8 +25,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
   |
  */
 
-
-$config['base_url'] = "https://".$_SERVER['HTTP_HOST'].'/';
+$config['base_url'] =  "http://".$_SERVER['HTTP_HOST'].'/portal/';
+//$config['base_url'] =  "http://".$_SERVER['HTTP_HOST'].'/portal/';
 date_default_timezone_set("GMT");
 
 /*
@@ -104,7 +104,7 @@ $config['charset'] = 'UTF-8';
   | setting this variable to TRUE (boolean).  See the user guide for details.
   |
  */
-$config['enable_hooks'] = FALSE;
+$config['enable_hooks'] = TRUE;
 
 /*
   |--------------------------------------------------------------------------
