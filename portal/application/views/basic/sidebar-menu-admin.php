@@ -39,7 +39,7 @@ if (check_account_permission('reports', 'CarrQOSR')) {
 
 
 ////////////////////	
-$menu_title = 'Rates & Pachage';
+$menu_title = 'Rates & Package';
 $menu_array[$menu_title] = array(
     'icon' => '<i class="fa fa-registered"></i>'
 );
