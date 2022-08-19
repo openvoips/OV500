@@ -44,6 +44,16 @@ class Activityloghook {
             $log_data_insert_array['ci_class_method'] = $CI->router->fetch_class() . '/' . $CI->router->fetch_method();
             $class_name = $CI->router->fetch_class();
 
+			
+			$request_uri = trim($_SERVER["REQUEST_URI"]);
+			$ignore_words = array('/theme/','billing/api');
+			foreach($ignore_words as $word)
+			{
+				if(stripos($request_uri,$word) !== false) 
+					return;
+			}
+		
+		
             if (in_array($class_name, $this->ignore_classes)) {
                 
             } else {

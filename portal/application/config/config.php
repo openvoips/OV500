@@ -26,9 +26,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 
 $config['base_url'] =  "http://".$_SERVER['HTTP_HOST'].'/portal/';
-//$config['base_url'] =  "http://".$_SERVER['HTTP_HOST'].'/portal/';
-date_default_timezone_set("GMT");
-
+date_default_timezone_set('Asia/Kolkata');
 /*
   |--------------------------------------------------------------------------
   | Index File

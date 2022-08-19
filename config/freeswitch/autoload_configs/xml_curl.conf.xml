@@ -7,7 +7,7 @@
 	   what's in this file only on-the-fly (leave it commented if you dont
 	   need it) -->
       <!-- one or more |-delim of configuration|directory|dialplan -->
-      <param name="gateway-url" value="https://localhost/api/index.php" bindings="dialplan"/> 
+      <param name="gateway-url" value="http://localhost/portal/api/index.php" bindings="dialplan"/> 
       <!-- set this to provide authentication credentials to the server -->
       <!--<param name="gateway-credentials" value="muser:mypass"/>-->
       <!--<param name="auth-scheme" value="basic"/>-->

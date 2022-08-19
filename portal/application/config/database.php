@@ -3,14 +3,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $active_group = 'default';
 $query_builder = TRUE;
 $db['default'] = array( 
-'dsn' => 'mysql:host=localhost;dbname=sasswtch',
+'dsn' => 'mysql:host=localhost;dbname=switch',
 'hostname' => '', 
-'username' => 'root', 
-'password' => '', 
+'username' => 'ovswitch', 
+'password' => 'ovswitch123', 
 'database' => '', 
 'dbdriver' => 'pdo', 
 'dbprefix' => '', 
-'pconnect' => FALSE, 
+'pconnect' => TRUE, 
 'db_debug' => TRUE, 
 'cache_on' => FALSE, 
 'cachedir' => '', 
@@ -42,46 +42,4 @@ $db['cdrdb'] = array(
 'stricton' => FALSE,
 'failover' => array(),
 'save_queries' => TRUE
-);
-$db['thirddb'] = array(
-'dsn' => 'mysql:host=localhost;dbname=switchcdr',
-'hostname' => '',
-'username' => 'ovswitch', 
-'password' => 'ovswitch123',
-'database' => '',
-'dbdriver' => 'pdo',
-'dbprefix' => '',
-'pconnect' => FALSE,
-'db_debug' => FALSE,
-'cache_on' => FALSE,
-'cachedir' => '',
-'char_set' => 'utf8',
-'dbcollat' => 'utf8_general_ci',
-'swap_pre' => '',
-'encrypt' => FALSE,
-'compress' => FALSE,
-'stricton' => FALSE,
-'failover' => array(),
-'save_queries' => TRUE
-);
-
-$db['cloudpbx1'] = array( 
-'dsn' => 'mysql:host=13.245.64.246;dbname=asterisk',
-'hostname' => '', 
-'username' => 'billing', 
-'password' => '326&.7K4:5UFBf;h5Unq!Tf?A-p8&f', 
-'database' => 'mirta', 
-'dbdriver' => 'pdo', 
-'dbprefix' => '', 
-'pconnect' => FALSE, 
-'db_debug' => TRUE, 
-'cache_on' => FALSE, 
-'cachedir' => '', 
-'char_set' => 'utf8', 
-'dbcollat' => 'utf8_general_ci',
-'swap_pre' => '', 
-'encrypt' => FALSE, 
-'compress' => FALSE, 
-'stricton' => FALSE, 
-'failover' => array() 
 );

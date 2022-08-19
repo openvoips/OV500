@@ -4,7 +4,7 @@
  * Plugin Name: Billing & Invoice Management
  * Plugin URI: http://openvoips.org/
  * Version: 1.0
- * Description: Billing & Invoice Related
+ * Description: Billing & Invoice basic module. Full billing inviceing features available in pro version.
  * Author: Seema Anand  openvoips@gmail.com
  * Author URI: http://openvoips.org/
  */

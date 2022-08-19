@@ -144,7 +144,7 @@ define('LOGO_IMAGE', 'logo.png');
 
 
 
-define('MOMENT_TIMEZONE', 'GMT');
+define('MOMENT_TIMEZONE', 'Asia/Kolkata');
 
 
 define('CUSTOMERCODEPREFIX','STC');

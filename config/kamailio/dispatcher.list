@@ -3,8 +3,8 @@
 # setit(int) destination(sip uri) flags(int,opt) priority(int,opt) attributes(str,opt)
 
 # Freeswitch IPS
-2 sip:192.168.1.25:5070
+2 sip:OV500FSIPADDRESS:5070
 #Allw incoming calls from Freeswitch IP  
-4 sip:192.168.1.25:5070
+4 sip:OV500FSIPADDRESS:5070
 #List of carrier DID provider
 5 sip:10.10.10.10

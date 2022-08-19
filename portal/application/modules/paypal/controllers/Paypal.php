@@ -48,7 +48,7 @@ class Paypal extends MY_Controller {
         $this->load->model('payment_mod');
         $this->load->model('paypal_mod');
         $this->load->helper('paypal_helper');
-        $this->$testingMode = true;
+        $this->$testingMode = false;
     }
 
     function get_paypal_url() {
@@ -102,8 +102,8 @@ class Paypal extends MY_Controller {
         $data['account_result'] = $account_result;
         $data['payment_gateways_result'] = $payment_gateways_result['result']['paypal'];
 
-        if (isset($_GET['tx']) && $_GET['tx'] != '') {//response from paypal
-        } elseif (isset($_POST['action']) && $_POST['action'] == 'OkPay') {//	payment form submitted
+        if (isset($_GET['tx']) && $_GET['tx'] != '') {
+        } elseif (isset($_POST['action']) && $_POST['action'] == 'OkPay') {
             $this->form_validation->set_rules('amount', 'Amount', 'trim|required');
             $this->form_validation->set_rules('method', 'Method', 'trim|required|in_list[paypal]', array('in_list' => 'You must provide a %s.')
             );
