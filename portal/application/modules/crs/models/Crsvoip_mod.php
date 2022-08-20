@@ -31,7 +31,7 @@ class Crsvoip_mod extends CI_Model {
  as company_name , customer_balance.balance, customer_balance.credit_limit,
 sys_currencies.symbol, sys_currencies.name currency_name, account.dp  , users.username as web_username ,
 
-(select username  from customer_sip_account where customer_sip_account.account_id =  account.account_id ) as  sip_user
+(select username  from customer_sip_account where customer_sip_account.account_id =  account.account_id limit 1) as  sip_user
 
 FROM account 
 INNER JOIN sys_currencies on sys_currencies.currency_id = account.currency_id
