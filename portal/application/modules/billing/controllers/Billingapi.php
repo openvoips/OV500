@@ -33,6 +33,7 @@ class Billingapi extends MY_Controller {
 
     public function cron() {
         $date = date('Y-m-d');
+ 
         $this->Billingapi_mod->carrier_usage_data($date);
         $account = '';
         $account_type = 'CUSTOMER';

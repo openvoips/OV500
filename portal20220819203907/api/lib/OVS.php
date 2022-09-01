@@ -493,7 +493,7 @@ class OVS extends PDO {
         $this->currencies_data();
         $lb = $this->Hunt_Network_Addr;
         $lb = $this->lb;
-        $query = sprintf("SELECT did.did_number, did.did_status, did.carrier_id, did.account_id, did.reseller1_account_id, did.reseller2_account_id, did.reseller3_account_id   from did   where did.did_number  like concat('%%', TRIM(LEADING '0' FROM  TRIM(LEADING '+' FROM '%s')))  ORDER BY did.did_number limit 1;", $this->incomingcarrierdst, $this->incomingcarrier);
+        $query = sprintf("SELECT did.did_number, did.did_status, did.carrier_id, did.account_id, did.reseller1_account_id, did.reseller2_account_id, did.reseller3_account_id,  did_dst.account_id, did_dst.dst_type, did_dst.dst_destination, did_dst.dst_destination2, did_dst.dst_type2  from did INNER JOIN did_dst on did.account_id = did_dst.account_id where did.did_number  like concat('%%', TRIM(LEADING '0' FROM  TRIM(LEADING '+' FROM '%s')))  ORDER BY did.did_number limit 1;", $this->incomingcarrierdst, $this->incomingcarrier);
 
 
 
@@ -530,7 +530,7 @@ class OVS extends PDO {
         }
 
 
-        $query = sprintf("SELECT did.did_number, did.did_status, did.carrier_id, did.account_id, did.reseller1_account_id, did.reseller2_account_id, did.reseller3_account_id   from did   where did.did_number  like concat('%%', TRIM(LEADING '0' FROM  TRIM(LEADING '+' FROM '%s')))  ORDER BY did.did_number limit 1;", $this->carrierdata['did_number'] );
+        $query = sprintf("SELECT did.did_number, did.did_status, did.carrier_id, did.account_id, did.reseller1_account_id, did.reseller2_account_id, did.reseller3_account_id,  did_dst.account_id, did_dst.dst_type, did_dst.dst_destination, did_dst.dst_destination2, did_dst.dst_type2  from did INNER JOIN did_dst on did.account_id = did_dst.account_id where did_dst.did_number  like concat('%', TRIM(LEADING '0' FROM  TRIM(LEADING '+' FROM '%s')))  ORDER BY did.did_number limit 1;", $this->incomingcarrierdst, $this->incomingcarrier);
 
         $this->writelog($query);
         $this->query('SWITCH', $query);
@@ -539,18 +539,6 @@ class OVS extends PDO {
             $this->carrierdata[$key] = $value;
         }
 
-         $query = sprintf("SELECT   did_dst.account_id, did_dst.dst_type, did_dst.dst_destination, did_dst.dst_destination2, did_dst.dst_type2  from     did_dst  where did_number  like concat('%%', TRIM(LEADING '0' FROM  TRIM(LEADING '+' FROM '%s')))  ORDER BY did_number limit 1;", $this->carrierdata['did_number'] );
-
-        $this->writelog($query);
-        $this->query('SWITCH', $query);
-        $rs = $this->resultset();
-        foreach ($rs[0] as $key => $value) {
-            $this->carrierdata[$key] = $value;
-        }
-        
-        
-        
-        
         if (strlen($this->carrierdata['did_number']) > 0) {
             $did_after_carrier_dst_rule = $this->carrierdata['did_number'];
         }

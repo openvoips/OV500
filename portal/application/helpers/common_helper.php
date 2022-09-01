@@ -1279,13 +1279,14 @@ function create_menu_html($menu_array, $page_name) {
 }
 
 function get_currency($currency_id, $format = 'name') {
+/*
     $currency_array = array(
         '1' => array('name' => 'USD', 'symbol' => '<i class="fa fa-usd"></i>'), //'&#36;'
         '2' => array('name' => 'GBP', 'symbol' => '<i class="fa fa-gbp"></i>'), //'&#163;'
         '3' => array('name' => 'EUR', 'symbol' => '<i class="fa fa-eur"></i>'), //'&#128;'
         '4' => array('name' => 'INR', 'symbol' => '<i class="fa fa-inr"></i>'), //'&#x20B9;'
     );
-
+*/
     if (isset($currency_array[$currency_id])) {
         $currency_single_array = $currency_array[$currency_id];
 
