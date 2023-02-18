@@ -41,8 +41,6 @@ define('SWITCH_DSN_LOGIN', 'ovswitch');
 define('SWITCH_DSN_PASSWORD', 'ovswitch123');
 define('LOGPATH', 'log/');
 define('LOGWRITE', '1');
-define('APIDOAMIN','http://portal.openvoips.org/portal/');
-define('LB', '209.126.76.246');
 
 
 ?>

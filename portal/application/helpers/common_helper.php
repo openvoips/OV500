@@ -1312,7 +1312,7 @@ function get_logo() {
     $current_url = current_url();
     $default_logo = base_url() . 'theme/default/images/' . LOGO_IMAGE;
     $logo = $default_logo;
-    if (function_exists(get_subdomain_logo)) {
+    if (function_exists('get_subdomain_logo')) {
         $subdomain_logo = get_subdomain_logo();
         if ($subdomain_logo != '')
             $logo = $subdomain_logo;

@@ -136,7 +136,7 @@ $help_text_array['term_prefix_riles'] = array(
     array('%=>919949800228', 'allowing all dialed number and replacing incoming dialed number with 919949800228.'),
 );
 
-define('SITE_SUBDOMAIN', 'OV500');
+if (!defined('SITE_SUBDOMAIN')) define('SITE_SUBDOMAIN', 'OV500');
 define('SITE_NAME', 'Telecoms Billing Solution');
 define('SITE_FULL_NAME', 'Telecoms Billing Solution');
 define('SDR_API_URL', 'https://localhost/portal/api/sdrapi.php');
