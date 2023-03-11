@@ -298,6 +298,8 @@ class Dids extends MY_Controller {
                 $this->load->view('did/incoming_numbers', $data);
             }
 
+
+
             $this->load->view('basic/footer', $data);
         }
     }

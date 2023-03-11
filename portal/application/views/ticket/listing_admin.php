@@ -190,7 +190,7 @@ $status_array = get_t_status();
             </thead>
             <tbody>
                 <?php
-                if (isset($data['result']) && count($data['result']) > 0) {
+                if (count($data['result']) > 0) {
                     foreach ($data['result'] as $ticket_data) {
                         ?>
                         <tr>                  

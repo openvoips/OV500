@@ -68,7 +68,7 @@ $tab_index = 1;
             <tbody>
 
                 <?php
-                if (isset($data['result']) && count($data['result']) > 0) {
+                if (count($data['result']) > 0) {
                     foreach ($data['result'] as $ticket_data) {
                         ?>
 

@@ -154,7 +154,7 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                 }
             }
 
-            if (isset($option_param['did_dst']) && isset($final_return_array['result']) && $option_param['did_dst'] == true && count($final_return_array['result']) > 0) {
+            if (isset($option_param['did_dst']) && $option_param['did_dst'] == true && count($final_return_array['result']) > 0) {
                 $prefix_did_id_mapping_array = array_flip($did_id_prefix_mapping_array);
 
                 $prefix_str = implode("','", $did_id_prefix_mapping_array);
