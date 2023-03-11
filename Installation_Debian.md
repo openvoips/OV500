@@ -251,7 +251,7 @@ Test odbc connection
     isql -v freeswitch ovswitch ovswitch123 
     quit
 
-# Set ownership and permissions
+## Set ownership and permissions
 
 Run this any time there are any changes/moves/adds/upgrades or if experiencing problems.
 
