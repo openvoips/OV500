@@ -145,7 +145,7 @@ This is installed on the same server as Kamailio if using multiple servers.
 Download
 
     cd /usr/src
-    git clone -b custom2 https://github.com/powerpbx/OV500.git
+    git clone -b 2.0.1 https://github.com/powerpbx/OV500.git
 
 ## Web server
 
