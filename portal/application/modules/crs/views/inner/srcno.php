@@ -38,7 +38,7 @@
                     <?php
                 }
             }
-            if (count($data['dst_src_cli']) > 0) {
+            if (isset($data['dst_scr_cli']) && count($data['dst_src_cli']) > 0) {
                 foreach ($data['dst_src_cli'] as $callerid_data) {
                     $status = '<span class="label label-info">DST Prefix Based</span>';
                     ?>

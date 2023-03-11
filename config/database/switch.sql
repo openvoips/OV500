@@ -1519,7 +1519,7 @@ CREATE TABLE `did_dst` (
 -- ----------------------------
 -- Records of did_dst
 -- ----------------------------
-INSERT INTO `did_dst` VALUES ('1', '19496743649', 'STC300000', 'CUSTOMER', 'AnandKumar', '2021-07-31 00:00:00', null, '', '');
+INSERT INTO `did_dst` VALUES ('1', '19496743649', 'STC300000', 'CUSTOMER', 'AnandKumar', '2021-07-31 00:00:00', null, 'CUSTOMER', '');
 
 -- ----------------------------
 -- Table structure for `emaillog`
@@ -2671,7 +2671,7 @@ CREATE TABLE `users` (
 -- ----------------------------
 -- Records of users
 -- ----------------------------
-INSERT INTO `users` VALUES ('2', 'ADMIN', 'SYSTEM', null, 'ADMIN', 'admin', 'Ov500@786', 'Open Voips', 'openvoips@gmail.com', '919949800228', 'India', '100', '1', '2021-01-22 20:26:31', '', '0000-00-00 00:00:00', 'ADMIN');
+INSERT INTO `users` VALUES ('2', 'ADMIN', 'SYSTEM', null, 'ADMIN', 'admin', 'admin', 'Open Voips', 'openvoips@gmail.com', '919949800228', 'India', '100', '1', '2021-01-22 20:26:31', '', '0000-00-00 00:00:00', 'ADMIN');
 INSERT INTO `users` VALUES ('253', 'UR000253446', 'STR100000', null, 'RESELLERADMIN', 'testuserqqq', '1q2w#E$RRRR', 'test reseller', 'tesrrrrrgr@mail.com', '', '', '0', '1', '2021-07-31 12:32:11', '', null, '');
 INSERT INTO `users` VALUES ('256', 'UC000256589', 'STC300000', null, 'CUSTOMERADMIN', 'kanand81', 'Kanand@81', 'Anand kumar', 'kanand81@gmail.com', '', '', '0', '1', '2021-07-31 15:55:12', '', null, '');
 
@@ -2688,7 +2688,7 @@ CREATE TABLE `version` (
 -- ----------------------------
 -- Records of version
 -- ----------------------------
-INSERT INTO `version` VALUES ('customer_sip_account', '6');
+INSERT INTO `version` VALUES ('customer_sip_account', '7');
 
 -- ----------------------------
 -- Table structure for `voicemail`
