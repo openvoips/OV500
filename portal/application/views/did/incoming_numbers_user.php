@@ -105,7 +105,7 @@
 
                 <tbody>
                     <?php
-                    if (isset($did_data['result']) && count($did_data['result']) > 0) {
+                    if (count($did_data['result']) > 0) {
                         foreach ($did_data['result'] as $did_data) {
                             $did_status = strtolower($did_data['did_status']);
                             $status = ucfirst($did_status);
