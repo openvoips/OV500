@@ -44,7 +44,9 @@ and many more
 #### 1.0.1 (21/08/2019)
  - First release of OV500
 
-
+#### 2.0.1 (11/03/2023)
+ - First release of OV500
+ 
 <a href="https://ov500.openvoips.org/">OV500</a> Installation documentation
 --------------------------
 For a standard installation please follow the <a href="https://ov500.openvoips.org/documentation/installation/">Setup instructions</a>
