@@ -27,6 +27,9 @@ Features list are as below...
 
 and many more
 ## Release Notes
+#### 2.0.1 (11/03/2023)
+ - Debian 11 release of OV500
+ - <a href="https://github.com/openvoips/OV500/blob/2.0.1/Installation_Debian.md">OV500</a> Debian 11 Installation documentation 
 #### 2.0  (05/08/2021)
 - Portal architecture from MVC to HMVC
 - DID Calls monitoring
@@ -43,9 +46,8 @@ and many more
 - Bulk rate Upload changes
 #### 1.0.1 (21/08/2019)
  - First release of OV500
+ 
 
-#### 2.0.1 (11/03/2023)
- - First release of OV500
  
 <a href="https://ov500.openvoips.org/">OV500</a> Installation documentation
 --------------------------
