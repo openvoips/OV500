@@ -147,7 +147,7 @@ Download
     cd /usr/src
     git clone -b custom2 https://github.com/powerpbx/OV500.git
 
-# Web server
+## Web server
 
     cp /usr/src/OV500/config/nginx/ov500.conf /etc/nginx/sites-available/ov500.conf
     ln -s /etc/nginx/sites-available/ov500.conf /etc/nginx/sites-enabled/ov500.conf
@@ -157,15 +157,15 @@ Download
     mkdir -p /etc/nginx/ssl
     openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx.key -out /etc/nginx/ssl/nginx.crt
 
-# PHP-fpm
+## PHP-fpm
 
-sed -i "s/;request_terminate_timeout = 0/request_terminate_timeout = 300/" /etc/php/8.1/fpm/pool.d/www.conf
-sed -i "s#short_open_tag = Off#short_open_tag = On#g" /etc/php/8.1/fpm/php.ini
-sed -i "s#;cgi.fix_pathinfo=1#cgi.fix_pathinfo=1#g" /etc/php/8.1/fpm/php.ini
-sed -i "s/max_execution_time = 30/max_execution_time = 3000/" /etc/php/8.1/fpm/php.ini
-sed -i "s/upload_max_filesize = 2M/upload_max_filesize = 20M/" /etc/php/8.1/fpm/php.ini
-sed -i "s/post_max_size = 8M/post_max_size = 20M/" /etc/php/8.1/fpm/php.ini
-sed -i "s/memory_limit = 128M/memory_limit = 512M/" /etc/php/8.1/fpm/php.ini
+    sed -i "s/;request_terminate_timeout = 0/request_terminate_timeout = 300/" /etc/php/8.1/fpm/pool.d/www.conf
+    sed -i "s#short_open_tag = Off#short_open_tag = On#g" /etc/php/8.1/fpm/php.ini
+    sed -i "s#;cgi.fix_pathinfo=1#cgi.fix_pathinfo=1#g" /etc/php/8.1/fpm/php.ini
+    sed -i "s/max_execution_time = 30/max_execution_time = 3000/" /etc/php/8.1/fpm/php.ini
+    sed -i "s/upload_max_filesize = 2M/upload_max_filesize = 20M/" /etc/php/8.1/fpm/php.ini
+    sed -i "s/post_max_size = 8M/post_max_size = 20M/" /etc/php/8.1/fpm/php.ini
+    sed -i "s/memory_limit = 128M/memory_limit = 512M/" /etc/php/8.1/fpm/php.ini
 
 Enable web server changes
 
