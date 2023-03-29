@@ -52,7 +52,7 @@ class MX_Router extends CI_Router {
                 isset($segments[$v]) && $segments[$v] = str_replace('-', '_', $segments[$v]);
             }
         }
-        //tonmoy_interest
+                    
         $segments = $this->locate($segments);
 
         if ($this->located == -1) {
@@ -112,7 +112,7 @@ class MX_Router extends CI_Router {
         foreach (Modules::$locations as $location => $offset) {
             /* module exists? */
             if (is_dir($source = $location . $module . '/controllers/')) {
-                //tonmoy_interest//
+                    
                 $is_active = true;
                 try {
                     require_once APPPATH . 'config/database' . EXT;
@@ -163,7 +163,7 @@ class MX_Router extends CI_Router {
 
                     /* module controller exists? */
                     if (is_file($source . ucfirst($module) . $ext)) {
-                        //tonmoy_interest//
+                    
                         $this->located = 1;
                         return $segments;
                     }

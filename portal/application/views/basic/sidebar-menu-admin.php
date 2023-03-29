@@ -184,17 +184,7 @@ $menu_array[$menu_title]['reports/ProfitLoss'] = array(
 
 
 
-$menu_array[$menu_title]['reports/topup'] = array(
-    'page_name' => array('report_topup'),
-    'page_url' => 'reports/topup',
-    'menu_name' => 'Topup Daily Summary'
-);
 
-$menu_array[$menu_title]['reports/topup_monthly'] = array(
-    'page_name' => array('report_topup_monthly'),
-    'page_url' => 'reports/topup_monthly',
-    'menu_name' => 'Topup Monthly Summary'
-);
 
 
 // Admin/ Subadmin  system management
@@ -211,10 +201,6 @@ $menu_array[$menu_title]['currency'] = array(
 );
 
 
-$menu_array[$menu_title]['ticket'] = array(
-    'page_name' => array('ticket_index', 'ticket_details', 'ticket_add'),
-    'page_url' => 'ticket',
-    'menu_name' => 'Support Ticket'
-);
+
 
 ?>

@@ -179,10 +179,7 @@
 
 
 
-
-
-
-            <!-- tonmoy -->
+ 
             <div class="col-md-3 col-sm-7 col-xs-12" style="padding: 0 0 0 1px;">
                 <div class="x_panel tile fixed_height_box">
                     <div class="x_title">

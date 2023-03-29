@@ -71,11 +71,5 @@ if (check_account_permission('reports', 'report_statement')) {
 }
 
 
-$menu_array['supportticket'] = array(
-    'icon' => '<i class="fa fa-ticket"></i>',
-    'page_name' => array('ticket_index'),
-    'page_url' => 'ticket',
-    'menu_name' => 'Support HelpDesk'
-);
  
 ?>

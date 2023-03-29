@@ -409,7 +409,7 @@ if (isset($payment_history) && count($payment_history) > 0) {
                                                                 <td class="text-center" >
         <?php
         $account_id = $payment_data['account_id'];
-        // $dir_path = '/home/telcoportal/webroot/switch/mt/uploads/' . strtolower(SITE_SUBDOMAIN) . '/payment_receipt/' . $account_id . '/';
+        
         $dir_path = '';
         if ($payment_data['file_name'] != '') {
             $file_name = $payment_data['file_name'] . '.pdf';

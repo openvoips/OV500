@@ -52,7 +52,7 @@ class MX_Router extends CI_Router {
                 isset($segments[$v]) && $segments[$v] = str_replace('-', '_', $segments[$v]);
             }
         }
-        //tonmoy_interest
+                    
         $segments = $this->locate($segments);
 
         if ($this->located == -1) {
@@ -114,7 +114,7 @@ class MX_Router extends CI_Router {
             //echo 'Routers.php => '.$location.$module.'<br>';
             /* module exists? */
             if (is_dir($source = $location . $module . '/controllers/')) {
-                //tonmoy_interest//
+                    
                 $is_active = true;
                 try {
                     require_once APPPATH . 'config/database' . EXT;
@@ -166,7 +166,7 @@ class MX_Router extends CI_Router {
                     /* module controller exists? */
 
                     if (is_file($source . ucfirst($module) . $ext)) {//echo $source.ucfirst($module);
-                        //tonmoy_interest//
+                    
                         $this->located = 1;
                         return $segments;
                     }
