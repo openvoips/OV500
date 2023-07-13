@@ -1281,6 +1281,7 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                     throw new Exception('SDR Problem:' . $api_result['message']);
                 }
 
+                $this->db->trans_commit();
                 return true;
             }
         } catch (Exception $e) {

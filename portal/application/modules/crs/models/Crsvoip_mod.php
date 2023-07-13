@@ -1175,6 +1175,97 @@ if( account_type = 'CUSTOMER',( select company_name from customers where custome
         }
     }
 
+  function priceplan_update($data) {
+        try {
+
+            $this->db->trans_begin();
+
+            if (!isset($data['account_id']) || $data['account_id'] == '')
+                throw new Exception('Account ID Missing');
+            $account_id = $data['account_id'];
+
+            $sql = "SELECT count(account_id) AS total_count FROM bill_customer_priceplan WHERE account_id='$account_id' LIMIT 1";
+            $query = $this->db->query($sql);
+            $row = $query->row_array();
+            $insert_data = array();
+            if ($row['total_count'] == 0) {
+
+                $insert_data['account_id'] = $data['account_id'];
+                $insert_data['billing_cycle'] = $data['billing_cycle'];
+                //$insert_data['priceplan_id'] = $data['priceplan_id'];
+                $insert_data['payment_terms'] = $data['payment_terms'];
+                $insert_data['itemised_billing'] = $data['itemised_billing'];
+                $insert_data['invoice_via_email'] = $data['invoice_via_email'];
+                $insert_data['created_by'] = $data['created_by'];
+                if (isset($data['monthly_charges_day']))
+                    $insert_data['monthly_charges_day'] = $data['monthly_charges_day'];
+                if (isset($data['billing_day'])) {
+                    $insert_data['billing_day'] = $data['billing_day'];
+                    $insert_data['monthly_charges_day'] = $data['billing_day'];
+                } else {
+                    $insert_data['billing_day'] = 26;
+                    $insert_data['monthly_charges_day'] = 26;
+                }
+                if ($insert_data['billing_cycle'] == 'DAILY') {
+                    $next_invoice_date = date('Y-m-d', strtotime('+1 day'));
+                } elseif ($insert_data['billing_cycle'] == 'WEEKLY') {
+                    $next_invoice_date = date('Y-m-d', strtotime('+7 day'));
+                } else {
+                    $next_invoice_date = date('Y-m-d', strtotime('+1 month'));
+                }
+                $insert_data['next_invoice_date'] = $next_invoice_date;
+                $insert_data['created_dt'] = date('Y-m-d');
+                $str = $this->db->insert_string('bill_customer_priceplan', $insert_data);
+                $result = $this->db->query($str);
+                if (!$result) {
+                    $error_array = $this->db->error();
+                    throw new Exception($error_array['message']);
+                }
+            } else {
+                if (isset($data['billing_cycle']))
+                    $insert_data['billing_cycle'] = $data['billing_cycle'];
+                if (isset($data['payment_terms']))
+                    $insert_data['payment_terms'] = $data['payment_terms'];
+                if (isset($data['itemised_billing']))
+                    $insert_data['itemised_billing'] = $data['itemised_billing'];
+                if (isset($data['priceplan_id']))
+                    $insert_data['priceplan_id'] = $data['priceplan_id'];
+                if (isset($data['invoice_via_email']))
+                    $insert_data['invoice_via_email'] = $data['invoice_via_email'];
+                if (isset($data['created_by']))
+                    $insert_data['created_by'] = $data['created_by'];
+                if (isset($data['monthly_charges_day']))
+                    $insert_data['monthly_charges_day'] = $data['monthly_charges_day'];
+                if (isset($data['billing_day']))
+                    $insert_data['billing_day'] = $data['billing_day'];
+                if (count($insert_data) > 0) {
+                    $where = "account_id='" . $account_id . "'";
+                    $str = $this->db->update_string('bill_customer_priceplan', $insert_data, $where);
+                    $result = $this->db->query($str);
+                    if (!$result) {
+                        $error_array = $this->db->error();
+                        throw new Exception($error_array['message']);
+                    }
+                }
+            }
+
+
+
+
+            if ($this->db->trans_status() === FALSE) {
+                $error_array = $this->db->error();
+                $this->db->trans_rollback();
+                return $error_array['message'];
+            } else {
+                $this->db->trans_commit();
+                set_activity_log($log_data_array);
+            }
+            return true;
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            return $e->getMessage();
+        }
+    }
     function get_account_details($account_id, $search_data, $option_param = array()) {
         $sql = "SELECT account_id, account_type FROM account 
 			WHERE account_id ='" . $account_id . "' LIMIT 0,1 ";
@@ -1254,6 +1345,15 @@ if( account_type = 'CUSTOMER',( select company_name from customers where custome
             }
         }     
 
+     if (isset($option_param['customer_priceplan']) && $option_param['customer_priceplan'] == true) {
+            $sql = "SELECT * FROM bill_customer_priceplan WHERE account_id='$account_id' LIMIT 1";
+            $query = $this->db->query($sql);
+            if (!$query) {
+                $error_array = $this->db->error();
+                throw new Exception($error_array['message']);
+            }
+            $final_array['customer_priceplan'] = $query->row_array();
+        }
         return $final_array;
     }
 

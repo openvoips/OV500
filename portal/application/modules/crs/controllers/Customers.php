@@ -611,8 +611,11 @@ class Customers extends MY_Controller {
         if ($is_file_downloaded === false) {
             if (isset($account_id) && $account_id != '') {
 
-                $report_data = $this->report_mod->sdr_statement($account_id, $search_data);
+              $invoice_data = $this->report_mod->invoice_list($account_id);
+                $data['invoice_list'] = $invoice_data['result'];
 
+                $report_data = $this->report_mod->sdr_statement($account_id, $search_data);
+ 
                 $data['customer_data'] = $customer_result;
                 $data['sdr_terms'] = $this->utils_model->get_sdr_terms();
                 $data['searched_account_id'] = $account_id;

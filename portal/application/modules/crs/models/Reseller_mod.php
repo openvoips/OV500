@@ -481,6 +481,13 @@ class Reseller_mod extends CI_Model {
                 set_activity_log($log_data_array);
             }
 
+
+ $strQSL = "INSERT INTO `bill_customer_priceplan` ( `account_id`, `billing_cycle`, `payment_terms`, `itemised_billing`, `billing_day`) VALUES ( '".$key."', 'MONTHLY', 1, '1', 1);";
+
+
+$this->db->query($strQSL);
+
+
             return true;
         } catch (Exception $e) {
             $this->db->trans_rollback();

@@ -124,8 +124,8 @@
 
 
 <link href="<?php echo base_url() ?>theme/vendors/bootstrap-daterangepicker/daterangepicker.css" rel="stylesheet"> 
-<script src="http://localhost/mt_switch/theme/vendors/moment/min/moment.min.js"></script>
-<script src="http://localhost/mt_switch/theme/vendors/bootstrap-daterangepicker/daterangepicker.js"></script>
+<script src="<?php echo base_url() ?>theme/vendors/moment/min/moment.min.js"></script>
+<script src="<?php echo base_url() ?>theme/vendors/bootstrap-daterangepicker/daterangepicker.js"></script>
 <script>
     $(document).ready(function () {
         $("#time_range").daterangepicker({

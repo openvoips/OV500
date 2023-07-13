@@ -424,6 +424,29 @@ class Crs extends MY_Controller {
                     $data['err_msgs'] = $err_msgs;
                 }
             }
+        } elseif (isset($_POST['action']) && $_POST['action'] == 'OkSaveInvoice') {
+            $data['active_tab'] = $_POST['tab'];
+
+            $this->form_validation->set_rules('account_id', 'Customer ID', 'trim|required');
+            $this->form_validation->set_rules('billing_cycle', 'Billing Cycle', 'trim|required');
+            $this->form_validation->set_rules('payment_terms', 'Payment Terms', 'trim|required');
+            if ($this->form_validation->run() == FALSE) {
+                $data['err_msgs'] = validation_errors();
+            } else {
+                //$result = $this->crsvoip_mod->edit_voip_data($_POST);
+                $_POST['created_by'] = get_logged_user_id();
+                $result = $this->crsvoip_mod->priceplan_update($_POST);
+
+
+                if ($result === true) {
+                    $this->session->set_flashdata('suc_msgs', 'Invoice Congiguration Updated Successfully.');
+                    redirect(site_url('crs/editvoip/' . $id . '/' . $data['active_tab']), 'location', '301');
+                    exit();
+                } else {
+                    $err_msgs = $result;
+                    $data['err_msgs'] = $err_msgs;
+                }
+            }
         }  elseif (isset($_POST['action']) && $_POST['action'] == 'OkDeleteData') {
             if (!isset($_POST['delete_parameter_two'])) {
                 $this->session->set_flashdata('err_msgs', 'Insufficient Parameters');
@@ -527,7 +550,8 @@ class Crs extends MY_Controller {
         /* $option_param = array('ip' => true, 'callerid' => true, 'sipuser' => true, 'tariff' => true, 'user' => false, 'prefix' => false, 'dialplan' => true, 'translation_rules' => true, 'callerid_incoming' => true, 'translation_rules_incoming' => true, 'bundle_package_group_by' => true); */
         $option_param = array('voipminuts' => true, 'bundle_package_group_by' => true, 'customer_priceplan' => true, 'dialplan' => true, 'customer_pricelist' => true, 'callerid' => TRUE, 'translation_rules' => true, 'callerid_incoming' => true, 'translation_rules_incoming' => true, 'ip' => true, 'sipuser' => true);
         $customers_data_temp = $this->crsvoip_mod->get_account_details($account_id, $search_data, $option_param);
-
+ 
+ 
         if (is_array($customers_data_temp) && count($customers_data_temp) > 0)
             $customers_data = $customers_data_temp;
         else {

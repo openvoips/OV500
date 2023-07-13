@@ -1,14 +1,5 @@
 <?php
 
-/* Copyright (C) Openvoips Technologies - All Rights Reserved
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential, Only allow to use 
- * OV500Pro Version 2.1.0
- * Written by Seema Anand <openvoips@gmail.com> , 2021 
- * http://www.openvoips.com 
- * License https://www.openvoips.com/license.html
- */
-
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Billingapi extends MY_Controller {
@@ -26,19 +17,20 @@ class Billingapi extends MY_Controller {
         } else {
             $REQUEST = $_REQUEST;
         }
- 
+
         $result = $this->Billingapi_mod->billing($REQUEST);
         echo json_encode($result);
     }
 
     public function cron() {
         $date = date('Y-m-d');
- 
+
         $this->Billingapi_mod->carrier_usage_data($date);
         $account = '';
         $account_type = 'CUSTOMER';
         $this->Billingapi_mod->cdr_service($account, $date, $account_type);
         $this->Billingapi_mod->monthlycharges($date);
+        $this->Billingapi_mod->generateinvoice($date);
         $this->ManageBalance();
     }
 
@@ -46,114 +38,175 @@ class Billingapi extends MY_Controller {
         $this->Billingapi_mod->creditmanagement();
     }
 
-    function ManageBalance() {
+    function sendinvoice() {
+
         $DB1 = $this->load->database('default', true);
-        $sql = "select account_id from customer_balance";
+        $sql = "SELECT bi.*, a.account_type, a.parent_account_id  FROM 
+			bill_invoice bi INNER JOIN bill_customer_priceplan bcp ON bi.account_id=bcp.account_id 
+			INNER JOIN account a ON bi.account_id=a.account_id 
+			WHERE bi.status_id='generated' AND bcp.invoice_via_email='1' AND DATEDIFF(NOW(),bi.create_dt)<3
+			ORDER BY parent_account_id, bi.id LIMIT 5";
         $query = $DB1->query($sql);
         if (!$query) {
-            $error_array = $DB1->error();
-            throw new Exception($error_array['message']);
+            $error_array = $DB1->db->error();
+//throw new Exception($error_array['message']);
         }
-        $result = $query->result_array();
-        if (count($result) > 0) {
-            foreach ($result as $sdr_data) {
-                $account_id = $sdr_data['account_id'];
-                $me = $this->calculate_total_available_balance($account_id);
-                $sql = "UPDATE customer_balance SET balance ='" . -1 * $me['current_balance'] . "' WHERE account_id='" . $me['account_id'] . "';";
-                echo $sql . PHP_EOL;
+        echo $sql;
+        foreach ($query->result_array() as $row) {
+            try {
+                $account_id = $row['account_id'];
+                $account_type = $row['account_type'];
+                $parent_account_id = $row['parent_account_id'];
+                $invoice_id = $row['invoice_id'];
+                if ($parent_account_id == '')
+                    $parent_account_id = ADMIN_ACCOUNT_ID;
+
+                echo '<br>' . $account_id . '--' . $invoice_id;
+
+                if ($account_type == 'CUSTOMER') {
+                    $sql = "SELECT contact_name, company_name, address, country_id, state_code_id, phone, emailaddress, pincode FROM customers WHERE account_id ='$account_id'";
+                } else {
+                    $sql = "SELECT contact_name, company_name, address, country_id, state_code_id, phone, emailaddress, pincode FROM resellers WHERE account_id ='$account_id'";
+                }
+                $query = $DB1->query($sql);
+                if (!$query) {
+                    $error_array = $DB1->db->error();
+                    throw new Exception($error_array['message']);
+                }
+                $account_details = $query->row_array();
+                if ($account_details['emailaddress'] == '') {
+                    throw new Exception('Customer Email ID missing');
+                }
+/////////Fetch Parent Settings/////////////	
+//ajax_get_mail_content
+                $sql = "SELECT et.email_subject, et.email_body, et.email_bcc, et.email_cc, et.email_daemon, et.smtp_id,
+				 sc.smtp_auth, sc.smtp_secure, sc.smtp_host, sc.smtp_port, sc.smtp_username, sc.smtp_password, sc.smtp_from, sc.smtp_from_name, sc.smtp_xmailer, sc.smtp_host_name
+				FROM bill_email_templates et LEFT JOIN bill_smtp_config sc ON et.smtp_id=sc.smtp_config_id
+				WHERE et.account_id ='$parent_account_id' AND et.template_for='INVOICEEMAIL'";
+                $query = $DB1->query($sql);
+                if (!$query) {
+                    $error_array = $DB1->db->error();
+                    throw new Exception($error_array['message']);
+                }
+                $num_rows = $query->num_rows();
+                if ($num_rows == 0) {
+                    throw new Exception('Invoice Template Not Found');
+                }
+                $mail_template = $query->row_array();
+//-------------//
+                $invoice_config = $this->customerinvoiceconfig_mod->inConfig_data($parent_account_id);
+                if (!$invoice_config) {
+                    throw new Exception('Invoice Configuration Not Found');
+                }
+/////////////////
+
+                $search_data = array();
+                $search_data['invoice_id'] = $invoice_id;
+// below data function need to move here 
+// Feedback -1 
+// It is providing bill invoice last invoice data (single  row)
+
+                $customerinvoice_data = $this->customerinvoice_mod->get_data('', 1, 0, $search_data);
+
+                if (isset($customerinvoice_data['result']) && count($customerinvoice_data['result']) > 0)
+                    $customerinvoice_data = current($customerinvoice_data['result']);
+                else
+                    throw new Exception('Invoice Not Found');
+
+//$sdr_data = $this->customerinvoice_mod->get_sdr_data($invoice_id);
+
+                $sql = "SELECT
+bill_services.service_name,
+sys_sdr_terms.service_id,
+bill_sdr.account_id,
+bill_sdr.invoice_id,
+bill_sdr.item_id,
+if(bill_itemlist.item_name is null, bill_sdr.item_name, bill_itemlist.item_name ) dst,
+bill_sdr.rate,
+sum(bill_sdr.quantity) quantity,
+sum(bill_sdr.tax1_amount) tax1_amount,
+sum(bill_sdr.tax2_amount) tax2_amount,
+sum(bill_sdr.tax3_amount) tax3_amount,
+sum(bill_sdr.charges) charges,
+sum(bill_sdr.total_charges) total_charges
+FROM `bill_sdr`
+INNER JOIN sys_sdr_terms on bill_sdr.item_id = sys_sdr_terms.term
+INNER JOIN bill_services on bill_services.service_id = sys_sdr_terms.service_id
+left JOIN bill_itemlist on bill_itemlist.item_id = bill_sdr.item_id where invoice_id = '" . $invoice_id . "'
+GROUP BY service_id, rate, bill_sdr.item_name";
+                $query = $DB1->query($sql);
+                $sdr_data = $query->result_array();
+
+//////////////
+                $account_manager_details = array();
+                if ($customerinvoice_data['account_manager'] != '') {
+                    $sql = "SELECT name,emailaddress,phone FROM users WHERE user_id ='" . $customerinvoice_data['account_manager'] . "'";
+                    $query = $DB1->query($sql);
+                    $account_manager_details = $query->row_array();
+                }
+////////////
+/////
+                $message = $mail_template['email_body'];
+                $replace_array = array(
+                    '{{CUSTOMER_NAME}}' => $account_details['contact_name'],
+                    '{{AMOUNT}}' => number_format($customerinvoice_data['bill_amount'], 2),
+                    '{{COMPANY_NAME}}' => $account_details['company_name'],
+                    '{{SITE_URL}}' => site_url()
+                );
+//$message = $temp_data['email_body'];
+                $message = replace_mail_variables($message, $replace_array);
+
+                $heading = '';
+                $body = file_get_contents(FCPATH . 'email_templates/blank.html');
+                $body = str_replace("#HEADING#", $heading, $body);
+                $body = str_replace("#BODY#", $message, $body);
+//var_dump($invoice_config);
+//echo $body;
+//die;
+////
+
+
+                $file_save_path = FCPATH . 'uploads' . DIRECTORY_SEPARATOR . 'temp' . DIRECTORY_SEPARATOR;
+                $pdf_file_name = 'invoice' . time();
+                $r = $this->customerinvoicepdf_custom($customerinvoice_data, $sdr_data, $invoice_config, $account_manager_details, $file_save_path, $pdf_file_name);
+
+                $file_full_path = $file_save_path . $pdf_file_name . '.pdf';
+                if (file_exists($file_full_path)) {
+                    $mail_to = $account_details['emailaddress'];
+                    $subject = $mail_template['email_subject'];
+                    $mail_from = SITE_MAIL_FROM;
+                    $mail_from_name = SITE_FULL_NAME;
+                    $cc = $mail_template['email_cc'];
+                    $bcc = $mail_template['email_bcc'];
+                    $actionfrom = 'SEND-INVOICE';
+                    $attachment_array = array();
+                    $attachment_array[] = array($file_full_path, 'invoice.pdf');
+//$attachment_array[] = array($file_full_path, 'paymentreceipt.pdf');
+                    $smpt_details = array();
+                    if ($mail_template['email_daemon'] == 'SMTP') {
+                        $smpt_details = $mail_template;
+// sc.smtp_auth, sc.smtp_secure, sc.smtp_host, sc.smtp_port, sc.smtp_username, sc.smtp_password, sc.smtp_from, sc.smtp_from_name, sc.smtp_xmailer, sc.smtp_host_name						
+                    }
+//  echo '<br>'.$cc.'<br>'.$bcc.'<br>'.$mail_to;//die;
+
+                    $mail_to = 'kanand81@gmail.com';
+                    send_mail($body, $subject, $mail_to, $mail_from, $mail_from_name, $cc, $bcc, $account_id, $actionfrom, $attachment_array, $smpt_details);
+                } else {
+                    throw new Exception('Invoice File Not Found ->' . $file_full_path);
+                }
+//////////////////////////
+
+                $sql = "UPDATE bill_invoice SET status_id='mail-sent', status_message='' WHERE account_id ='$account_id' AND invoice_id='$invoice_id'";
+                echo '<br>' . $sql;
+                $query = $DB1->query($sql);
+//enum('no-mail','mail-sent','failed','generated')
+            } catch (Exception $e) {
+                $message = 'Exception: ' . $e->getMessage();
+
+                $sql = "UPDATE bill_invoice SET status_id='failed', status_message='$message' WHERE account_id ='$account_id' AND invoice_id='$invoice_id'";
                 $query = $DB1->query($sql);
             }
         }
-    }
-
-    function calculate_total_available_balance($account_id, $invoice_id = '') {
-        $DB1 = $this->load->database('default', true);
-        $customer_dp = 3;
-        $sql = "SELECT
-			id,
-			rule_type,
-			billing_date as action_date,
-			group_concat(DISTINCT  service_number ORDER BY service_number ASC SEPARATOR ', ')  notes,
-			startdate service_startdate,
-			enddate service_stopdate,
-			account_id,
-			SUM(totalcost) total_cost,
-			sys_sdr_terms.term,
-			sys_sdr_terms.term_group,
-			sys_sdr_terms.cost_calculation_formula	 
-	FROM bill_account_sdr INNER JOIN sys_sdr_terms ON bill_account_sdr.rule_type=sys_sdr_terms.term
-	WHERE account_id ='" . $account_id . "' ";
-
-        if (strlen(trim($invoice_id)) > 0)
-            $sql .= " AND invoice_id ='" . $invoice_id . "' ";
-        else
-            $sql .= " AND (invoice_id IS NULL OR invoice_id = '')  ";
-
-        $sql .= " GROUP BY rule_type, date(billing_date)  ";
-        $query = $DB1->query($sql);
-        if (!$query) {
-            $error_array = $DB1->error();
-            throw new Exception($error_array['message']);
-        }
-        $result = $query->result_array();
-
-        $openingbalance = $addbalance = $removebalance = $usage = 0;
-        $debit_sum = $credit_sum = 0;
-
-        if (count($result) > 0) {
-            foreach ($result as $sdr_data) {
-                $debit = $credit = 0;
-                $display_text = '';
-                $rule_type = $sdr_data['rule_type'];
-                $term_group = $sdr_data['term_group'];
-                $display_text = '';
-                $cost_calculation_formula = trim($sdr_data['cost_calculation_formula']);
-
-                $total_cost = round($sdr_data['total_cost'], $customer_dp);
-                if ($term_group == 'opening') {
-                    if ($cost_calculation_formula == '+') {
-                        $openingbalance = $openingbalance + $total_cost;
-                        $credit = $total_cost;
-                    } elseif ($cost_calculation_formula == '-') {
-                        $openingbalance = $openingbalance - $total_cost;
-                        $debit = $total_cost;
-                    }
-                } elseif ($term_group == 'balance') {
-                    if ($cost_calculation_formula == '+') {
-                        $addbalance = $addbalance + $total_cost;
-                        $credit = $total_cost;
-                    } elseif ($cost_calculation_formula == '-') {
-                        $removebalance = $removebalance + $total_cost;
-                        $debit = $total_cost;
-                    }
-                } else {
-                    if ($cost_calculation_formula == '+') {
-                        $usage = $usage + $total_cost;
-                        $credit = $total_cost;
-                    } elseif ($cost_calculation_formula == '-') {
-                        $usage = $usage + $total_cost;
-                        $debit = $total_cost;
-                    }
-                }
-
-
-                $debit_sum += $debit;
-                $credit_sum += $credit;
-
-                if ($cost_calculation_formula == '')
-                    continue;
-            }
-        }
-        $current_balance = $openingbalance + $addbalance - $removebalance - $usage;
-
-        return array('current_balance' => $current_balance,
-            'openingbalance' => $openingbalance,
-            'addbalance' => $addbalance,
-            'removebalance' => $removebalance,
-            'usage' => $usage,
-            'account_id' => $account_id,
-            'invoice_id' => $invoice_id
-        );
     }
 
 }

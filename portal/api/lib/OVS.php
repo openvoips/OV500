@@ -555,13 +555,13 @@ class OVS extends PDO {
             $did_after_carrier_dst_rule = $this->carrierdata['did_number'];
         }
 
-        $query = sprintf("SELECT LENGTH(maching_string) lndata, remove_string, add_string, action_type FROM carrier_callerid where carrier_id = '%s' and '%s' and route = 'INBOUND' like maching_string ORDER BY lndata desc limit 1;", $this->incomingcarrier, $this->caller_number);
+        $query = sprintf("SELECT LENGTH(maching_string) lndata, remove_string, add_string, action_type FROM carrier_callerid where carrier_id = '%s' and '%s' like concat(maching_string,'%%') and route = 'INBOUND' like maching_string ORDER BY lndata desc limit 1;", $this->incomingcarrier, $this->caller_number);
 
         $this->writelog($query);
         $this->query('SWITCH', $query);
         $carrier_caller = $this->resultset();
         if (count($carrier_caller) == 0) {
-            $otherinfo = $this->incomingcarrier;
+            $otherinfo = $this->incomingcarrier . " ".$this->caller_number;
             $this->fail_route_xml_inbound('CARRIERCLIISSUE', $otherinfo);
             return;
         }
@@ -1665,7 +1665,7 @@ class OVS extends PDO {
             /*
              * Checking CLI when this option enabled
              */
-            if ($this->customers['cli_check'] == '1') {
+            //if ($this->customers['cli_check'] == '1') {
                 /*
                  * Check the CallerIDs
                  */
@@ -1680,7 +1680,7 @@ class OVS extends PDO {
                     $this->customersdata['user'] = $this->customers;
                     return;
                 }
-            }
+            //}
 
 
             /*

@@ -101,7 +101,7 @@ class Billingapi_mod extends CI_Model {
             if ($data['REQUEST'] == 'DIDEXTRACHRENTAL') {
                 $extrachannels = 0;
             }
-			$this->data=Array();
+            $this->data = Array();
             $this->request = Array();
             $this->request['account_id'] = $data['account_id'];
             $this->request['service_number'] = $data['service_number'];
@@ -116,14 +116,14 @@ class Billingapi_mod extends CI_Model {
             if ($this->debug)
                 print_r($this->request);
 
-			$this->customertype();
-			if ($this->request['account_type'] == 'RESELLER') {
-				$this->resellerinfo();
-			} else {
-				$this->customerinfo();
-			}
-					
-					
+            $this->customertype();
+            if ($this->request['account_type'] == 'RESELLER') {
+                $this->resellerinfo();
+            } else {
+                $this->customerinfo();
+            }
+
+
             if ($this->debug)
                 print_r($this->request);
 
@@ -135,7 +135,7 @@ class Billingapi_mod extends CI_Model {
             } else {
                 $error_message = $this->data['message'];
                 header('Content-Type: application/json');
-                $op = array("status" => "FAILED", "message" =>  $this->data['message'], "error" => 1);
+                $op = array("status" => "FAILED", "message" => $this->data['message'], "error" => 1);
                 return $op;
             }
         }
@@ -271,19 +271,17 @@ class Billingapi_mod extends CI_Model {
                     $this->service_startdate = $service_startdate;
                     $this->service_stopdate = $service_stopdate;
 
-
-
                     $this->customertype();
                     if ($this->request['account_type'] == 'RESELLER') {
                         $this->resellerinfo();
                     } else {
                         $this->customerinfo();
                     }
-					
-					if($this->prorata_billing){
-						$total_cost = $this->charges_cal_bundle($total_cost, $service_startdate, $service_stopdate);
-					} 
-	 						
+
+                    if ($this->prorata_billing) {
+                        $total_cost = $this->charges_cal_bundle($total_cost, $service_startdate, $service_stopdate);
+                    }
+
                     $charges_data = $this->tax_calculation($this->accountinfo, $total_cost);
 
                     $account_id = $this->request['account_id'];
@@ -352,7 +350,6 @@ class Billingapi_mod extends CI_Model {
 
     function additionalmonthlycharges($account_id, $date, $account_type) {
         $query = sprintf("SELECT lastbilldate, account.account_type, billingeventid, bill_billing_event.account_id, item_id, price_id, item_product_id, sum(if(bill_billing_event.status_id = '1', quantity,0)) - sum(if(bill_billing_event.status_id = '0', quantity,0)) as quantity, start_dt, bill_billing_event.status_id, stop_dt, lastbilldate, lastbill_execute_date, r1lastbilldate, r2lastbilldate, r3lastbilldate, r1lastbill_execute_date , r2lastbill_execute_date, r3lastbill_execute_date from bill_billing_event INNER JOIN account on account.account_id = bill_billing_event.account_id where  bill_billing_event.account_id = '%s' GROUP BY item_id,price_id;", $account_id);
-
 
         if ($this->debug)
             echo $query . PHP_EOL;
@@ -681,8 +678,6 @@ class Billingapi_mod extends CI_Model {
                     $data_array['billingeventid'] = $data['ACCOUNTID'] . $data['ITEMID'] . $this->generate_string(6);
                     $this->billingeventid = $data_array['billingeventid'];
 
-
-
                     $str = $this->db->insert_string('bill_billing_event', $data_array) . ' ON DUPLICATE KEY UPDATE quantity=quantity + values(quantity)';
                     if ($this->debug)
                         echo $str . PHP_EOL;
@@ -872,7 +867,6 @@ class Billingapi_mod extends CI_Model {
                 $this->quantity = $data['QUANTITY'];
                 $result = $this->db->query($str);
 
-
                 $data_array = array();
                 $data_array['account_id'] = $data['ACCOUNTID'];
                 $data_array['item_id'] = $data['ITEMID'];
@@ -892,7 +886,6 @@ class Billingapi_mod extends CI_Model {
                 if ($this->debug)
                     echo $str . PHP_EOL;
                 $result = $this->db->query($str);
-
 
                 $query = sprintf("select account_id, parent_account_id, account_type, account_level from account where account_id = (select parent_account_id from account where account_id = '%s')", $data['ACCOUNTID']);
                 if ($this->debug)
@@ -1141,7 +1134,6 @@ class Billingapi_mod extends CI_Model {
         $sallercostdata['sallercost'] = '0';
         $sallercostdata['totalsallercost'] = '0';
 
-
         $sallercostdata = $this->sallercost($data_array, $account_id);
         $data = $data . "sallerunit = '" . $sallercostdata['sallerunit'] . "',";
         $data = $data . "sallerrate = '" . $sallercostdata['sallerrate'] . "',";
@@ -1152,7 +1144,6 @@ class Billingapi_mod extends CI_Model {
         $data = $data . "createdate = '" . date('Y-m-d') . "',";
         $data = $data . "startdate = '" . $data_array['start_dt'] . "',";
         $data = $data . "enddate = '" . date('Y-m-d', strtotime($data_array['start_dt'] . ' +1 month')) . "',";
-
 
         $data = rtrim($data, ',');
         $data = "insert into bill_account_sdr  set " . $data . ";";
@@ -1184,9 +1175,8 @@ class Billingapi_mod extends CI_Model {
                 }
             }
 
-           
-            $query = sprintf("select  bill_billing_event.price_id, bill_billing_event.item_id,  bill_pricelist.currency_id, bill_pricelist.description, bill_pricelist.reguler_charges, bill_pricelist.free_item, bill_pricelist.charges, bill_pricelist.additional_charges_as, bill_pricelist.additional_charges, 'CUSTOM' priceplan_id  from bill_billing_event  INNER JOIN bill_pricelist on bill_pricelist.price_id = bill_billing_event.price_id where bill_billing_event.account_id  = '%s' and bill_billing_event.item_id = '%s' and bill_billing_event.price_id = '%s';", $this->customer['customer']['account_id'], $this->customer['customer']['item_id'], $this->customer['customer']['price_id']);
 
+            $query = sprintf("select  bill_billing_event.price_id, bill_billing_event.item_id,  bill_pricelist.currency_id, bill_pricelist.description, bill_pricelist.reguler_charges, bill_pricelist.free_item, bill_pricelist.charges, bill_pricelist.additional_charges_as, bill_pricelist.additional_charges, 'CUSTOM' priceplan_id  from bill_billing_event  INNER JOIN bill_pricelist on bill_pricelist.price_id = bill_billing_event.price_id where bill_billing_event.account_id  = '%s' and bill_billing_event.item_id = '%s' and bill_billing_event.price_id = '%s';", $this->customer['customer']['account_id'], $this->customer['customer']['item_id'], $this->customer['customer']['price_id']);
 
             if ($this->debug)
                 echo $query . PHP_EOL;
@@ -1321,7 +1311,6 @@ class Billingapi_mod extends CI_Model {
             $this->customer['customer']['destination'] = $this->customer['customer']['item_id'];
             $this->customer['customer']['rate'] = $this->customer['customer']['charges'];
 
-
             if ($this->debug)
                 print_r($this->customer);
             return;
@@ -1416,10 +1405,8 @@ class Billingapi_mod extends CI_Model {
             }
         }
 
-      
+
         $query = sprintf("select  bill_billing_event.price_id, bill_billing_event.item_id,  bill_pricelist.currency_id, bill_pricelist.description, bill_pricelist.reguler_charges, bill_pricelist.free_item, bill_pricelist.charges, bill_pricelist.additional_charges_as, bill_pricelist.additional_charges, 'CUSTOM' priceplan_id  from bill_billing_event  INNER JOIN bill_pricelist on bill_pricelist.price_id = bill_billing_event.price_id where bill_billing_event.account_id  = '%s' and bill_billing_event.item_id = '%s' and bill_billing_event.price_id = '%s';", $customerinfo['account_id'], $data_array['item_id'], $customerinfo['price_id']);
-
-
 
         if ($this->debug)
             echo $query . PHP_EOL;
@@ -1618,8 +1605,7 @@ class Billingapi_mod extends CI_Model {
             }
         }
 
-             $query = sprintf("select  bill_billing_event.price_id, bill_billing_event.item_id,  bill_pricelist.currency_id, bill_pricelist.description, bill_pricelist.reguler_charges, bill_pricelist.free_item, bill_pricelist.charges, bill_pricelist.additional_charges_as, bill_pricelist.additional_charges, 'CUSTOM' priceplan_id  from bill_billing_event  INNER JOIN bill_pricelist on bill_pricelist.price_id = bill_billing_event.price_id where bill_billing_event.account_id  = '%s' and bill_billing_event.item_id = '%s' and bill_billing_event.price_id = '%s';", $reseelerinfo['account_id'], $data_array['item_id'], $reseelerinfo['price_id']);
-
+        $query = sprintf("select  bill_billing_event.price_id, bill_billing_event.item_id,  bill_pricelist.currency_id, bill_pricelist.description, bill_pricelist.reguler_charges, bill_pricelist.free_item, bill_pricelist.charges, bill_pricelist.additional_charges_as, bill_pricelist.additional_charges, 'CUSTOM' priceplan_id  from bill_billing_event  INNER JOIN bill_pricelist on bill_pricelist.price_id = bill_billing_event.price_id where bill_billing_event.account_id  = '%s' and bill_billing_event.item_id = '%s' and bill_billing_event.price_id = '%s';", $reseelerinfo['account_id'], $data_array['item_id'], $reseelerinfo['price_id']);
 
         if ($this->debug)
             echo $query . PHP_EOL;
@@ -1671,7 +1657,6 @@ class Billingapi_mod extends CI_Model {
                 echo $query . PHP_EOL;
             $query = $this->db->query($query);
             $reseller = $query->row_array();
-
 
             if (count($reseller) > 0) {
                 foreach ($reseller as $data) {
@@ -1754,7 +1739,6 @@ class Billingapi_mod extends CI_Model {
         if ($this->debug)
             echo "Doing Reseller Billing $account_id" . PHP_EOL;
         $query = sprintf("SELECT  account.dp, resellers.emailaddress, resellers.company_name, account.currency_id, account.dp, customer_voipminuts.tariff_id, account.tax3, account.tax2, account.tax1, account.tax_type, parent_account_id, account_level  from account INNER JOIN customer_voipminuts on customer_voipminuts.account_id = account.account_id INNER JOIN resellers on resellers.account_id= account.account_id  WHERE account.account_id = '%s' and account.account_id not in ('-3','-4') limit 1;", $account_id);
-
 
         if ($this->debug)
             echo $query . PHP_EOL;
@@ -2001,16 +1985,15 @@ class Billingapi_mod extends CI_Model {
                     if ($this->requesttype = 'SERVICE') {
                         $data_billdate['billing_charges_new'] = $data['amount'];
                     } else {
-						 if ($this->prorata_billing) {
-							$data_billdate = $this->billing_data($this->service_startdate, $this->billingday, $data['amount']);
-						 }else{
-							  $data_billdate['billing_charges_new'] = $data['amount'];
-						 }
+                        if ($this->prorata_billing) {
+                            $data_billdate = $this->billing_data($this->service_startdate, $this->billingday, $data['amount']);
+                        } else {
+                            $data_billdate['billing_charges_new'] = $data['amount'];
+                        }
                     }
                     $total_cost = $data_billdate['billing_charges_new'];
                     $charges_data = $this->tax_calculation($this->accountinfo, $total_cost);
                     $quantity = 1;
-
 
                     if ($this->request['account_type'] == 'RESELLER') {
                         if ($this->request['account_level'] == '1') {
@@ -2203,7 +2186,6 @@ class Billingapi_mod extends CI_Model {
             echo $query . PHP_EOL;
         $query = $this->db->query($query);
 
-
         $balance = $query->result_array();
         $initial_setup = 0;
         if (count($balance) > 0) {
@@ -2325,10 +2307,10 @@ class Billingapi_mod extends CI_Model {
     }
 
     function didsetupcharge($date, $didsetup = 0, $rental = 0, $extrachannels = 0) {
-		
-		  if ($this->debug)
-            echo "ggggggggggggggggggg $date, $didsetup, $rental, $extrachannels " . PHP_EOL;
-		
+
+        if ($this->debug)
+            echo " $date, $didsetup, $rental, $extrachannels " . PHP_EOL;
+
         try {
             $todaydate = date('Y-m-d');
             $day = date('d', strtotime($date . ' -0 day'));
@@ -2339,7 +2321,6 @@ class Billingapi_mod extends CI_Model {
             }
             $this->billingday = $billingday;
             $this->service_startdate = $date;
-
 
             $charges = 0;
             if ($this->requesttype == 'SERVICE') {
@@ -2423,7 +2404,6 @@ class Billingapi_mod extends CI_Model {
                         echo $query . PHP_EOL;
                     $query = $this->db->query($query);
                     $tariff = $query->row_array();
-
 
                     foreach ($tariff as $key => $value) {
                         $sallerdidrates[$key] = $value;
@@ -2632,8 +2612,6 @@ class Billingapi_mod extends CI_Model {
                 $carrier_setup_charge = $currencyratio * $carrierdidrates['setup_charge'];
                 $carrier_charges_data = $this->tax_calculation($carrierdidrates, $carrier_setup_charge);
 
-
-
                 if ($this->requesttype == 'SERVICE') {
                     
                 } else if ($this->accountinfo['balance'] < $charges_data['total_cost'] and $initial_setup == 0) {
@@ -2763,9 +2741,9 @@ class Billingapi_mod extends CI_Model {
                         $totalsallercost = $saller_charges_data['total_cost'];
                         $startdate = $this->service_startdate;
                         $enddate = $this->service_stopdate;
-						
-						if ($this->debug)
-							echo "<br> Account Detail ------ $account_id, $rule_type, $service_number, $billing_date, $unit, $rate, $cost, $totalcost, $sallerunit, $sallerrate, $sallercost, $totalsallercost, $startdate, $enddate  END<br>" ;
+
+                        if ($this->debug)
+                            echo "<br> Account Detail ------ $account_id, $rule_type, $service_number, $billing_date, $unit, $rate, $cost, $totalcost, $sallerunit, $sallerrate, $sallercost, $totalsallercost, $startdate, $enddate  END<br>";
                         $query_bill_account_sdr = sprintf("INSERT INTO bill_account_sdr (account_id, rule_type, service_number, billing_date, unit, rate, cost, totalcost, sallerunit, sallerrate, sallercost, totalsallercost, startdate, enddate, createdate) values ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', now());", $account_id, $rule_type, $service_number, $billing_date, $unit, $rate, $cost, $totalcost, $sallerunit, $sallerrate, $sallercost, $totalsallercost, $startdate, $enddate);
                     }
                 }
@@ -2785,12 +2763,12 @@ class Billingapi_mod extends CI_Model {
                 $this->request['service_charges'] = $this->accountinfo['rental'];
                 if ($this->requesttype == 'SERVICE') {
                     $current_month_charges = $this->accountinfo['rental'];
-                } else {	
-					 if ($this->prorata_billing) {
-						$current_month_charges = $this->charges($this->accountinfo['rental'], $service_startdate, $service_stopdate);
-					 }else{
-						 $current_month_charges = $this->accountinfo['rental'];
-					 }
+                } else {
+                    if ($this->prorata_billing) {
+                        $current_month_charges = $this->charges($this->accountinfo['rental'], $service_startdate, $service_stopdate);
+                    } else {
+                        $current_month_charges = $this->accountinfo['rental'];
+                    }
                 }
                 $charges_data = $this->tax_calculation($this->accountinfo, $current_month_charges);
 
@@ -2805,12 +2783,12 @@ class Billingapi_mod extends CI_Model {
                 if ($this->requesttype == 'SERVICE') {
                     $sallecurrent_month_charges = $saller_rental_charge;
                 } else {
-					
-					 if ($this->prorata_billing) {						 
-						$sallecurrent_month_charges = $this->charges($saller_rental_charge, $service_startdate, $service_stopdate);
-					 }else{
-						  $sallecurrent_month_charges = $saller_rental_charge;
-					 }
+
+                    if ($this->prorata_billing) {
+                        $sallecurrent_month_charges = $this->charges($saller_rental_charge, $service_startdate, $service_stopdate);
+                    } else {
+                        $sallecurrent_month_charges = $saller_rental_charge;
+                    }
                 }
 
                 $saller_charges_data = $this->tax_calculation($sallerdidrates, $sallecurrent_month_charges);
@@ -2824,11 +2802,11 @@ class Billingapi_mod extends CI_Model {
                 if ($this->requesttype == 'SERVICE') {
                     $carrier_current_month_charges = $carrier_rental_charge;
                 } else {
-					 if ($this->prorata_billing) {			
-						$carrier_current_month_charges = $this->charges($carrier_rental_charge, $service_startdate, $service_stopdate);
-					 }else{
-						 $carrier_current_month_charges = $carrier_rental_charge;
-					 }
+                    if ($this->prorata_billing) {
+                        $carrier_current_month_charges = $this->charges($carrier_rental_charge, $service_startdate, $service_stopdate);
+                    } else {
+                        $carrier_current_month_charges = $carrier_rental_charge;
+                    }
                 }
                 $carrier_charges_data = $this->tax_calculation($carrierdidrates, $carrier_current_month_charges);
 
@@ -2855,7 +2833,6 @@ class Billingapi_mod extends CI_Model {
                         $startdate = $service_startdate;
                         $enddate = $service_stopdate;
 
-
                         $query_bill_account_sdr = sprintf("INSERT INTO bill_account_sdr (account_id, rule_type, service_number, billing_date, unit, rate, cost, totalcost, sallerunit, sallerrate, sallercost, totalsallercost, startdate, enddate, createdate) values ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', now());", $account_id, $rule_type, $service_number, $billing_date, $unit, $rate, $cost, $totalcost, $sallerunit, $sallerrate, $sallercost, $totalsallercost, $startdate, $enddate);
                     } elseif ($this->request['account_level'] == '2') {
                         $account_id = $this->request['account_id'];
@@ -2873,7 +2850,6 @@ class Billingapi_mod extends CI_Model {
                         $startdate = $service_startdate;
                         $enddate = $service_stopdate;
 
-
                         $query_bill_account_sdr = sprintf("INSERT INTO bill_account_sdr (account_id, rule_type, service_number, billing_date, unit, rate, cost, totalcost, sallerunit, sallerrate, sallercost, totalsallercost, startdate, enddate, createdate) values ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', now());", $account_id, $rule_type, $service_number, $billing_date, $unit, $rate, $cost, $totalcost, $sallerunit, $sallerrate, $sallercost, $totalsallercost, $startdate, $enddate);
                     } elseif ($this->request['account_level'] == '3') {
                         $account_id = $this->request['account_id'];
@@ -2890,7 +2866,6 @@ class Billingapi_mod extends CI_Model {
                         $totalsallercost = $saller_charges_data['total_cost'];
                         $startdate = $service_startdate;
                         $enddate = $service_stopdate;
-
 
                         $query_bill_account_sdr = sprintf("INSERT INTO bill_account_sdr (account_id, rule_type, service_number, billing_date, unit, rate, cost, totalcost, sallerunit, sallerrate, sallercost, totalsallercost, startdate, enddate, createdate) values ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', now());", $account_id, $rule_type, $service_number, $billing_date, $unit, $rate, $cost, $totalcost, $sallerunit, $sallerrate, $sallercost, $totalsallercost, $startdate, $enddate);
                     }
@@ -2912,7 +2887,6 @@ class Billingapi_mod extends CI_Model {
                         $startdate = $service_startdate;
                         $enddate = $service_stopdate;
 
-
                         $query_bill_account_sdr = sprintf("INSERT INTO bill_account_sdr (account_id, rule_type, service_number, billing_date, unit, rate, cost, totalcost, sallerunit, sallerrate, sallercost, totalsallercost, startdate, enddate, createdate) values ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', now());", $account_id, $rule_type, $service_number, $billing_date, $unit, $rate, $cost, $totalcost, $sallerunit, $sallerrate, $sallercost, $totalsallercost, $startdate, $enddate);
                     } elseif ($this->accountinfo['account_level'] == '3') {
                         $account_id = $this->request['account_id'];
@@ -2929,7 +2903,6 @@ class Billingapi_mod extends CI_Model {
                         $totalsallercost = $saller_charges_data['total_cost'];
                         $startdate = $service_startdate;
                         $enddate = $service_stopdate;
-
 
                         $query_bill_account_sdr = sprintf("INSERT INTO bill_account_sdr (account_id, rule_type, service_number, billing_date, unit, rate, cost, totalcost, sallerunit, sallerrate, sallercost, totalsallercost, startdate, enddate, createdate) values ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', now());", $account_id, $rule_type, $service_number, $billing_date, $unit, $rate, $cost, $totalcost, $sallerunit, $sallerrate, $sallercost, $totalsallercost, $startdate, $enddate);
                     } elseif ($this->accountinfo['account_level'] == '2') {
@@ -2950,7 +2923,6 @@ class Billingapi_mod extends CI_Model {
                         $startdate = $service_startdate;
                         $enddate = $service_stopdate;
 
-
                         $query_bill_account_sdr = sprintf("INSERT INTO bill_account_sdr (account_id, rule_type, service_number, billing_date, unit, rate, cost, totalcost, sallerunit, sallerrate, sallercost, totalsallercost, startdate, enddate, createdate) values ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', now());", $account_id, $rule_type, $service_number, $billing_date, $unit, $rate, $cost, $totalcost, $sallerunit, $sallerrate, $sallercost, $totalsallercost, $startdate, $enddate);
                     } else {
 
@@ -2970,7 +2942,6 @@ class Billingapi_mod extends CI_Model {
                         $startdate = $service_startdate;
                         $enddate = $service_stopdate;
 
-
                         $query_bill_account_sdr = sprintf("INSERT INTO bill_account_sdr (account_id, rule_type, service_number, billing_date, unit, rate, cost, totalcost, sallerunit, sallerrate, sallercost, totalsallercost, startdate, enddate, createdate) values ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', now());", $account_id, $rule_type, $service_number, $billing_date, $unit, $rate, $cost, $totalcost, $sallerunit, $sallerrate, $sallercost, $totalsallercost, $startdate, $enddate);
                     }
                 }
@@ -2980,7 +2951,7 @@ class Billingapi_mod extends CI_Model {
 
                 if ($this->debug)
                     echo $query . PHP_EOL;
-                
+
                 /*
                  * Deducting Balance
                  */
@@ -2999,11 +2970,11 @@ class Billingapi_mod extends CI_Model {
                     if ($this->requesttype == 'SERVICE') {
                         $current_month_charges = $this->accountinfo['exclusive_per_channel_rental'];
                     } else {
-						 if ($this->prorata_billing) {			
-							$current_month_charges = $this->charges($this->accountinfo['exclusive_per_channel_rental'], $service_startdate, $service_stopdate);
-						 }else{
-							 $current_month_charges = $this->accountinfo['exclusive_per_channel_rental'];
-						 }
+                        if ($this->prorata_billing) {
+                            $current_month_charges = $this->charges($this->accountinfo['exclusive_per_channel_rental'], $service_startdate, $service_stopdate);
+                        } else {
+                            $current_month_charges = $this->accountinfo['exclusive_per_channel_rental'];
+                        }
                     }
 
                     $current_month_charges = $remainingchannels * $current_month_charges;
@@ -3021,11 +2992,11 @@ class Billingapi_mod extends CI_Model {
                     if ($this->requesttype == 'SERVICE') {
                         $sallecurrent_month_charges = $saller_extarental_charge;
                     } else {
-						 if ($this->prorata_billing) {		
-							$sallecurrent_month_charges = $this->charges($saller_extarental_charge, $service_startdate, $service_stopdate);
-						 }else{
-							   $sallecurrent_month_charges = $saller_extarental_charge;
-						 }
+                        if ($this->prorata_billing) {
+                            $sallecurrent_month_charges = $this->charges($saller_extarental_charge, $service_startdate, $service_stopdate);
+                        } else {
+                            $sallecurrent_month_charges = $saller_extarental_charge;
+                        }
                     }
 
                     $saller_charges_data = $this->tax_calculation($sallerdidrates, $sallecurrent_month_charges);
@@ -3038,11 +3009,11 @@ class Billingapi_mod extends CI_Model {
                     if ($this->requesttype == 'SERVICE') {
                         $carrier_current_month_charges = $carrier_extarental_charge;
                     } else {
-						 if ($this->prorata_billing) {		
-							$carrier_current_month_charges = $this->charges($carrier_extarental_charge, $service_startdate, $service_stopdate);	
-						 }else{
-							 $carrier_current_month_charges = $carrier_extarental_charge;
-						}
+                        if ($this->prorata_billing) {
+                            $carrier_current_month_charges = $this->charges($carrier_extarental_charge, $service_startdate, $service_stopdate);
+                        } else {
+                            $carrier_current_month_charges = $carrier_extarental_charge;
+                        }
                     }
                     $carrier_charges_data = $this->tax_calculation($carrierdidrates, $carrier_current_month_charges);
                     $this->request['detail'] = "Addition $remainingchannels incoming channels for " . $this->request['service_number'] . " number";
@@ -3070,7 +3041,6 @@ class Billingapi_mod extends CI_Model {
                             $totalsallercost = $saller_charges_data['total_cost'];
                             $startdate = $service_startdate;
                             $enddate = $service_stopdate;
-
 
                             $query_bill_account_sdr = sprintf("INSERT INTO bill_account_sdr (account_id, rule_type, service_number, billing_date, unit, rate, cost, totalcost, sallerunit, sallerrate, sallercost, totalsallercost, startdate, enddate, createdate) values ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', now());", $account_id, $rule_type, $service_number, $billing_date, $unit, $rate, $cost, $totalcost, $sallerunit, $sallerrate, $sallercost, $totalsallercost, $startdate, $enddate);
                         } elseif ($this->request['account_level'] == '2') {
@@ -3195,7 +3165,7 @@ class Billingapi_mod extends CI_Model {
 
                     if ($this->debug)
                         echo $query_bill_account_sdr . PHP_EOL;
-                    
+
                     $query = sprintf("update customer_balance set balance = balance + '%s' where account_id = '%s';", $charges_data['total_cost'], $this->request['account_id']);
                     if ($this->debug)
                         echo $query . PHP_EOL;
@@ -3203,8 +3173,6 @@ class Billingapi_mod extends CI_Model {
                 }
 
                 $field = $this->request['lastbilldate'];
- 
-            
             }
             /*
              * Additioal channels only
@@ -3390,7 +3358,7 @@ class Billingapi_mod extends CI_Model {
 
                     if ($this->debug)
                         echo $query_bill_account_sdr . PHP_EOL;
-                  
+
                     $query = sprintf("update customer_balance set balance = balance + '%s' where account_id = '%s';", $charges_data['total_cost'], $this->request['account_id']);
                     if ($this->debug)
                         echo $query . PHP_EOL;
@@ -3488,8 +3456,6 @@ class Billingapi_mod extends CI_Model {
                         $this->request['carrier_id'] = $data['carrier_id'];
                         $this->request['lastbilldate'] = 'lastbilldate';
                         $this->data['error'] = '0';
-
-
 
                         $this->customertype();
                         $this->customerinfo();
@@ -3644,7 +3610,7 @@ class Billingapi_mod extends CI_Model {
                 $totalcost_cdr = 'customer_callcost_total';
                 $sallerunit_cdr = 'carrier_duration';
                 $sallerrate_cdr = 'carrier_rate';
-                $sallercost_cdr = 'carrier_callcost_inclusive_usercurrency';
+                $sallercost_cdr = 'carrier_callcost_total';
                 $totalsallercost_cdr = 'carrier_callcost_total_usercurrency';
                 $startdate_cdr = 'end_time';
                 $enddate_cdr = 'end_time';
@@ -3941,7 +3907,7 @@ carrier_ratio as currency_ratio,
 sum(carrier_duration) as unit,
 carrier_rate as rate, 
 sum(carrier_callcost_total) as carriercost,
- sum(carrier_callcost_inclusive_usercurrency) as carriercost_customer_currency,
+ sum(carrier_callcost_total) as carriercost_customer_currency,
 if( LENGTH(trim(reseller1_account_id)) > 0, sum(reseller1_callcost_total),  sum(customer_callcost_total )) customer_cost,
 if( LENGTH(trim(reseller1_account_id)) > 0, reseller1_rate, customer_rate) customer_rate,
 date(end_time) as billing_date ,  count(id) calls
@@ -4075,7 +4041,6 @@ date(end_time) as billing_date ,  count(id) calls
                 if ($data['status_id'] == '0') {
                     $query = sprintf("SELECT id,  credit_limit, account_id, balance  from customer_balance where account_id = '%s' limit 1;", $data['account_id']);
 
-                
                     $aftercredit_limit = 0;
                     $this->userdetail['credit_limit'] = 0;
                     if ($this->debug)
@@ -4131,6 +4096,307 @@ date(end_time) as billing_date ,  count(id) calls
                     $this->db->query($query);
                 }
             }
+        }
+    }
+
+    function calculate_total_available_balance($account_id, $invoice_id = '') {
+
+        $customer_dp = 3;
+        $sql = "SELECT
+			id,
+			rule_type,
+			billing_date as action_date,
+			group_concat(DISTINCT  service_number ORDER BY service_number ASC SEPARATOR ', ')  notes,
+			startdate service_startdate,
+			enddate service_stopdate,
+			account_id,
+			SUM(totalcost) total_cost,
+			sys_sdr_terms.term,
+			sys_sdr_terms.term_group,
+			sys_sdr_terms.cost_calculation_formula	 
+	FROM bill_account_sdr INNER JOIN sys_sdr_terms ON bill_account_sdr.rule_type=sys_sdr_terms.term
+	WHERE account_id ='" . $account_id . "' ";
+
+        if (strlen(trim($invoice_id)) > 0)
+            $sql .= " AND invoice_id ='" . $invoice_id . "' ";
+        else
+            $sql .= " AND (invoice_id IS NULL OR invoice_id = '')  ";
+
+        $sql .= " GROUP BY rule_type, date(billing_date)  ";
+        $query = $this->db->query($sql);
+        if (!$query) {
+            $error_array = $this->db->error();
+            throw new Exception($error_array['message']);
+        }
+        $result = $query->result_array();
+
+        $openingbalance = $addbalance = $removebalance = $usage = 0;
+        $debit_sum = $credit_sum = 0;
+
+        if (count($result) > 0) {
+            foreach ($result as $sdr_data) {
+                $debit = $credit = 0;
+                $display_text = '';
+                $rule_type = $sdr_data['rule_type'];
+                $term_group = $sdr_data['term_group'];
+                $display_text = '';
+                $cost_calculation_formula = trim($sdr_data['cost_calculation_formula']);
+
+                $total_cost = round($sdr_data['total_cost'], $customer_dp);
+                if ($term_group == 'opening') {
+                    if ($cost_calculation_formula == '+') {
+                        $openingbalance = $openingbalance + $total_cost;
+                        $credit = $total_cost;
+                    } elseif ($cost_calculation_formula == '-') {
+                        $openingbalance = $openingbalance - $total_cost;
+                        $debit = $total_cost;
+                    }
+                } elseif ($term_group == 'balance') {
+                    if ($cost_calculation_formula == '+') {
+                        $addbalance = $addbalance + $total_cost;
+                        $credit = $total_cost;
+                    } elseif ($cost_calculation_formula == '-') {
+                        $removebalance = $removebalance + $total_cost;
+                        $debit = $total_cost;
+                    }
+                } else {
+                    if ($cost_calculation_formula == '+') {
+                        $usage = $usage + $total_cost;
+                        $credit = $total_cost;
+                    } elseif ($cost_calculation_formula == '-') {
+                        $usage = $usage + $total_cost;
+                        $debit = $total_cost;
+                    }
+                }
+
+
+                $debit_sum += $debit;
+                $credit_sum += $credit;
+
+                if ($cost_calculation_formula == '')
+                    continue;
+            }
+        }
+        $current_balance = $openingbalance + $addbalance - $removebalance - $usage;
+
+        return array('current_balance' => $current_balance,
+            'openingbalance' => $openingbalance,
+            'addbalance' => $addbalance,
+            'removebalance' => $removebalance,
+            'usage' => $usage,
+            'account_id' => $account_id,
+            'invoice_id' => $invoice_id
+        );
+    }
+
+    function generateinvoice($date) {
+        $day = date('d', strtotime($date . ' -0 day'));
+        $today = date('Y-m-d');
+        $sql = "SELECT
+	sys_currencies.`name` AS currency_name,
+	sys_currencies.symbol AS currency_symbol,	
+	bill_customer_priceplan.id,
+	bill_customer_priceplan.account_id,
+	bill_customer_priceplan.billing_cycle,
+	bill_customer_priceplan.payment_terms,
+	bill_customer_priceplan.itemised_billing,
+	bill_customer_priceplan.invoice_via_email,
+	bill_customer_priceplan.emails,
+	date(bill_customer_priceplan.created_dt) AS last_invoice_date3, 
+	account.account_type,
+	account.parent_account_id,
+	account.currency_id,
+	account.account_level,
+	date(account.create_dt) as customer_create_dt,
+	account.tax_number,
+	account.tax1,
+	account.tax2,
+	account.tax3
+	FROM bill_customer_priceplan INNER JOIN account ON bill_customer_priceplan.account_id = account.account_id 
+	INNER JOIN sys_currencies on sys_currencies.currency_id = account.currency_id
+	WHERE  (billing_day = '$day' or concat('0', billing_day) = '$day') and bill_customer_priceplan.stope_invoicing = '0'  
+	ORDER BY account_type, account.parent_account_id, account.account_id;";
+
+        echo $sql . PHP_EOL;
+        $query = $this->db->query($sql);
+
+        if (!$query) {
+            $error_array = $this->db->error();
+            throw new Exception($error_array['message']);
+        }
+        foreach ($query->result_array() as $row) {
+            try {
+                $sql = "SELECT invoice_id AS last_invoice_id, date(bill_date) AS last_invoice_date FROM bill_invoice WHERE account_id ='" . $row['account_id'] . "' ORDER BY bill_date DESC LIMIT 1";
+                echo $sql . PHP_EOL;
+                $query = $this->db->query($sql);
+                if (!$query) {
+                    $error_array = $this->db->error();
+                    throw new Exception($error_array['message']);
+                }
+                if ($query->num_rows() > 0) {
+                    $last_invoice_details = $query->row_array();
+                } else {
+                    $last_invoice_details = array('last_invoice_id' => '', 'last_invoice_date' => '');
+                }
+
+                $last_invoice_id = 10000;
+                $account_id = $row['account_id'];
+                $account_level = $row['account_level'];
+                $account_type = $row['account_type'];
+                $new_invoice_id = $account_id . "10000";
+
+                $last_invoice_date = '';
+                if ($last_invoice_details['last_invoice_date'] != '') {
+                    $date_parts = explode('-', $last_invoice_details['last_invoice_date']);
+                    if (checkdate($date_parts[1], $date_parts[2], $date_parts[0])) {
+                        $last_invoice_date = $last_invoice_details['last_invoice_date'];
+                    }
+                }
+                if ($last_invoice_date == '' && $row['customer_create_dt'] != '') {
+                    $date_parts = explode('-', $row['customer_create_dt']);
+                    if (checkdate($date_parts[1], $date_parts[2], $date_parts[0])) {
+                        $last_invoice_date = $row['customer_create_dt'];
+                    }
+                }
+                if ($last_invoice_date == '' && $row['last_invoice_date3'] != '') {
+                    $date_parts = explode('-', $row['last_invoice_date3']);
+                    if (checkdate($date_parts[1], $date_parts[2], $date_parts[0])) {
+                        $last_invoice_date = $row['last_invoice_date3'];
+                    }
+                }
+
+                if (strlen(trim($last_invoice_details['last_invoice_id'])) > 0) {
+                    $last_invoice_id = substr($last_invoice_details['last_invoice_id'], strlen($account_id), strlen($last_invoice_details['last_invoice_id']));
+                    $last_invoice_id = $last_invoice_id + 1;
+                    $new_invoice_id = $account_id . "" . $last_invoice_id;
+                }
+
+
+
+                $this->db->trans_begin();
+
+                if ($account_type == 'CUSTOMER') {
+                    $sql = "SELECT (SELECT account_manager FROM account_am WHERE customer_account_id = customers.account_id ORDER BY created_dt desc limit 1 ) account_manager, contact_name, company_name, address, country_id,  phone, emailaddress, pincode FROM customers WHERE account_id ='$account_id'";
+                } else {
+                    $sql = "SELECT (SELECT account_manager FROM account_am WHERE customer_account_id = resellers.account_id ORDER BY created_dt desc limit 1 ) account_manager, contact_name, company_name, address, country_id,  phone, emailaddress, pincode FROM resellers WHERE account_id ='$account_id'";
+                }
+                echo $sql . PHP_EOL;
+                $query = $this->db->query($sql);
+                if (!$query) {
+
+
+                    echo "ACcount type seletion issue" . PHP_EOL;
+                    $error_array = $this->db->error();
+                    throw new Exception($error_array['message']);
+                }
+                $account_details = $query->row_array();
+
+                $last_invoice_balance_row = $this->calculate_total_available_balance($account_id, $last_invoice_details['last_invoice_id']);
+                $new_invoice_balance_row = $this->calculate_total_available_balance($account_id, '');
+
+                $sql = "UPDATE bill_account_sdr SET invoice_id ='" . $new_invoice_id . "' WHERE account_id='" . $account_id . "' AND (invoice_id IS NULL OR invoice_id = '')";
+
+                echo $sql . PHP_EOL;
+                $query = $this->db->query($sql);
+                if (!$query) {
+
+                    echo "ACcount type seletion bill_account_sdr issue" . PHP_EOL;
+                    $error_array = $this->db->error();
+                    throw new Exception($error_array['message']);
+                }
+
+
+                if ($row['billing_cycle'] == 'DAILY') {
+                    $next_next_invoice_date = date('Y-m-d', strtotime($next_invoice_date . ' +1 day'));
+                } elseif ($row['billing_cycle'] == 'WEEKLY') {
+                    $next_next_invoice_date = date('Y-m-d', strtotime($next_invoice_date . ' +7 day'));
+                } else {
+                    $next_next_invoice_date = date('Y-m-d', strtotime($next_invoice_date . ' +1 month'));
+                }
+
+
+                $bill_invoice = array();
+                $bill_invoice['invoice_id'] = $new_invoice_id;
+                $bill_invoice['account_id'] = $account_id;
+                $bill_invoice['account_manager'] = $account_details['account_manager'];
+                $bill_invoice['contact_name'] = $account_details['contact_name'];
+                $bill_invoice['company_name'] = $account_details['company_name'];
+                $bill_invoice['company_address'] = $account_details['address'];
+                $bill_invoice['email_address'] = $account_details['emailaddress'];
+                $bill_invoice['phone_number'] = $account_details['phone'];
+                $bill_invoice['currency_symbol'] = $row['currency_symbol'];
+                $bill_invoice['currency_name'] = $row['currency_name'];
+                $bill_invoice['tax_number'] = $row['tax_number'];
+                $bill_invoice['tax1'] = $row['tax1'];
+                $bill_invoice['tax2'] = $row['tax2'];
+                $bill_invoice['tax3'] = $row['tax3'];
+                $bill_invoice['bill_date'] = $today;
+                $bill_invoice['billing_cycle'] = $row['billing_cycle'];
+                $bill_invoice['payment_terms'] = $row['payment_terms'];
+                $bill_invoice['itemised_billing'] = $row['itemised_billing'];
+                $bill_invoice['billing_date_from'] = $last_invoice_date; // last bill date
+                $bill_invoice['billing_date_to'] = date('Y-m-d', strtotime($next_invoice_date . ' -1 day'));
+                $bill_invoice['last_bill_amount'] = $new_invoice_balance_row['openingbalance'];
+                $bill_invoice['bill_amount'] = $new_invoice_balance_row['current_balance'];
+                $bill_invoice['create_dt'] = date('Y-m-d');
+
+                $str = $this->db->insert_string('bill_invoice', $bill_invoice);
+                echo $str . PHP_EOL;
+
+                $result = $this->db->query($str);
+                if (!$result) {
+
+                    echo "Issue in bill_invoice table SQl" . PHP_EOL;
+                    $error_array = $this->db->error();
+                    throw new Exception($error_array['message']);
+                }
+
+
+                $account_sdr_array = array(
+                    'account_id' => $account_id,
+                    'rule_type' => 'OPENINGBALANCE',
+                    'service_number' => 'OPENINGBALANCE',
+                    'billing_date' => date('Y-m-d'),
+                    'cost' => $new_invoice_balance_row['current_balance'],
+                    'totalcost' => $new_invoice_balance_row['current_balance'],
+                    'startdate' => date('Y-m-d'),
+                    'enddate' => date('Y-m-d'),
+                    'createdate' => date('Y-m-d H:i:s'),
+                );
+                $str = $this->db->insert_string('bill_account_sdr', $account_sdr_array);
+                echo $str . PHP_EOL;
+                $result = $this->db->query($str);
+                if (!$result) {
+                    echo "Issue in bill_account_sdr table SQl" . PHP_EOL;
+                    $error_array = $this->db->error();
+                    throw new Exception($error_array['message']);
+                }
+
+                if ($this->db->trans_status() === FALSE) {
+                    $error_array = $this->db->error();
+                    $message = $error_array['message'];
+
+                    echo "Issue $message" . PHP_EOL;
+                    throw new Exception($message);
+                } else {
+                    $this->db->trans_commit();
+                    echo 'Success';
+                }
+            } catch (Exception $e) {
+                $this->db->trans_rollback();
+
+                $message = 'Generate Invoice Exception: ' . $e->getMessage();
+                $sql = "UPDATE bill_customer_priceplan SET status_message='$message' WHERE account_id ='$account_id'";
+                echo $sql . PHP_EOL;
+                $query = $this->db->query($sql);
+                echo $message;
+            }
+        }
+
+        if (!$query) {
+            $error_array = $this->db->error();
+            echo $error_array;
+            throw new Exception($error_array['message']);
         }
     }
 

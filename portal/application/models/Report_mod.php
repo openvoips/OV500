@@ -1477,6 +1477,30 @@ where account_id ='" . $account_id . "' ";
         }
     }
 
+
+  function invoice_list($account_id) {
+        $final_return_array = array();
+        try {
+            $sql = " select invoice_id,   bill_date  from bill_invoice where account_id ='" . $account_id . "' order by invoice_id desc ";
+            $query = $this->db->query($sql);
+            if (!$query) {
+                $error_array = $this->db->error();
+                throw new Exception($error_array['message']);
+            }
+            $final_return_array['result'] = $query->result_array();
+
+            $final_return_array['status'] = 'success';
+            $final_return_array['message'] = 'SDR statement fetched successfully';
+
+            return $final_return_array;
+        } catch (Exception $e) {
+            $final_return_array['status'] = 'failed';
+            $final_return_array['message'] = $e->getMessage();
+            return $final_return_array;
+        }
+    }
+
+
     function call_statistics($filter_data = array()) {
 
         $final_return_array = array();

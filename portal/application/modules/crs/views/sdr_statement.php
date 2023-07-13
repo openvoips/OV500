@@ -26,10 +26,16 @@ $credit_history = array();
                             echo ' <option value="">UnBilled Invoice</option>';
                             foreach ($invoice_list as $invoice_id) {
 
+
+
+
+
+                                $dd = date('M Y', strtotime($invoice_id['bill_date'])) . "  " . $invoice_id['invoice_id'];
+
                                 $selected = '';
                                 if ($invoice_id['invoice_id'] == $_SESSION[$search_session_key]['invoice_id'])
                                     $selected = ' selected="selected"';
-                                echo '<option value="' . $invoice_id['invoice_id'] . '" ' . $selected . '>' . $invoice_id['invoice_id'] . '</option>';
+                                echo '<option value="' . $invoice_id['invoice_id'] . '" ' . $selected . '>' . $dd . '</option>';
                             }
                             ?>					
                         </select>
@@ -101,8 +107,6 @@ $credit_history = array();
                                 $display_text = '';
                                 $rule_type = $sdr_data['rule_type'];
 
-
-
                                 if (isset($sdr_terms[$rule_type])) {
                                     $term_array = $sdr_terms[$rule_type];
 
@@ -111,8 +115,6 @@ $credit_history = array();
                                     $cost_calculation_formula = trim($term_array['cost_calculation_formula']);
 
                                     $total_cost = round($sdr_data['total_cost'], $customer_dp);
-
-
 
                                     if ($term_group == 'opening') {
                                         if ($cost_calculation_formula == '+') {
@@ -181,7 +183,6 @@ $credit_history = array();
                                         '<td align="right">' . $credit . '</td>' .
                                         '</tr>';
 
-
                                 //keep credit history, display at end
                                 if (in_array($rule_type, array('ADDCREDIT', 'REMOVECREDIT'))) {
                                     $debit_cost = $credit_cost = '';
@@ -214,8 +215,6 @@ $credit_history = array();
                             echo $top_html_str;
                             echo $last_html_str;
 
-
-
                             $current_balance = $openingbalance + $addbalance - $removebalance - $usage;
 
                             echo '<tr><td colspan="2" align="right"><strong>Total</strong></td> <td align="right">' . sprintf($amount_format, $debit_sum) . '</td><td align="right">' . sprintf($amount_format, $credit_sum) . '</td></tr>';
@@ -231,7 +230,6 @@ $credit_history = array();
                             echo '<tr><td colspan="3" align="right"><strong>Total Charges</strong> </td> <td align="right">';
                             echo sprintf($amount_format, $usage);
                             echo '</td></tr>';
-
 
                             echo '<tr><td colspan="3" align="right"><strong>Total Available Balance</strong> </td> <td align="right">';
                             echo '<strong>' . sprintf($amount_format, $current_balance) . '</strong>';
@@ -257,7 +255,7 @@ $credit_history = array();
 
             </div>
 
-        <?php } ?>	
+                    <?php } ?>	
     </div>
 </div>
 
@@ -291,7 +289,7 @@ if ($credit_history_html != '') {
                     </thead>		
                     <tbody>
 
-                        <?php echo $credit_history_html; ?>
+    <?php echo $credit_history_html; ?>
                     </tbody>
                 </table>
             </div>
@@ -328,7 +326,6 @@ for ($i = 0; $i <= 11; $i++) {
     $yearmonth_display = date('F Y', strtotime($date));
     $date = date('Y-m-d', strtotime($date . 'first day of last month'));
 
-
     $year = substr($yearmonth_value, 0, 4);
     $month = substr($yearmonth_value, -2);
     if (intval($year) < 2019 || (intval($year) == 2019 && intval($month) < 4)) {//no invoice before April 2019
@@ -346,14 +343,14 @@ for ($i = 0; $i <= 11; $i++) {
 <?php
 if (check_logged_user_group(array('CUSTOMER', 'RESELLER'))) {
     ?>
-                                            <label class="control-label col-md-6 col-sm-3 col-xs-12">Account : <?php echo $searched_account_id; ?></label>
+                                                <label class="control-label col-md-6 col-sm-3 col-xs-12">Account : <?php echo $searched_account_id; ?></label>
     <?php
 } else {
     ?>     
-                                            <label class="control-label col-md-2 col-sm-3 col-xs-12 col-md-offset-1">Account ID </label>
-                                            <div class="col-md-3 col-sm-6 col-xs-12">                	
-                                                <input type="text" name="account_id" id="account_id" value="<?php echo $searched_account_id; ?>" class="form-control"  data-parsley-required="" tabindex="<?php echo $tab_index++; ?>" placeholder="Account ID">       
-                                            </div>
+                                                <label class="control-label col-md-2 col-sm-3 col-xs-12 col-md-offset-1">Account ID </label>
+                                                <div class="col-md-3 col-sm-6 col-xs-12">                	
+                                                    <input type="text" name="account_id" id="account_id" value="<?php echo $searched_account_id; ?>" class="form-control"  data-parsley-required="" tabindex="<?php echo $tab_index++; ?>" placeholder="Account ID">       
+                                                </div>
 <?php } ?>          
 
 
@@ -387,7 +384,6 @@ if (isset($payment_history) && count($payment_history) > 0) {
     foreach ($payment_history as $payment_data) {
         $create_dt_display = '';
 
-
         $payment_option = $payment_data['payment_option'];
         if ($payment_data['create_dt'] != '') {
             $create_dt = $payment_data['create_dt'];
@@ -397,13 +393,12 @@ if (isset($payment_history) && count($payment_history) > 0) {
 
         $amount = number_format($payment_data['amount'], $customer_dp, '.', '');
         ?>
-                                                            <tr >                          
-                                                                <td class="column-title" ><?php echo $create_dt_display; ?></td>                                 <td ><?php echo $payment_data['file_name']; ?></td>
-                                                                <td class="text-right" ><?php echo $amount; ?></td>  
-                                                                <td class="text-center" >
+                                                                    <tr >                          
+                                                                        <td class="column-title" ><?php echo $create_dt_display; ?></td>                                 <td ><?php echo $payment_data['file_name']; ?></td>
+                                                                        <td class="text-right" ><?php echo $amount; ?></td>  
+                                                                        <td class="text-center" >
         <?php
         $account_id = $payment_data['account_id'];
-         
         $dir_path = '';
         if ($payment_data['file_name'] != '') {
             $file_name = $payment_data['file_name'] . '.pdf';
@@ -412,20 +407,20 @@ if (isset($payment_history) && count($payment_history) > 0) {
             if (file_exists($file_path)) {
                 ?>
 
-                                                                                            <a href="<?php echo base_url('download/payment_receipt/' . param_encrypt($account_id) . '/' . param_encrypt($file_name)); ?>">download</a>
+                                                                                                            <a href="<?php echo base_url('download/payment_receipt/' . param_encrypt($account_id) . '/' . param_encrypt($file_name)); ?>">download</a>
                 <?php
             }
         }
         ?>
-                                                                </td> 								
-                                                            </tr>
+                                                                        </td> 								
+                                                                    </tr>
         <?php
     }
 } else {
     ?>
-                                                <tr>
-                                                    <td colspan="6" align="center"><strong>No Record Found</strong></td>
-                                                </tr>
+                                                    <tr>
+                                                        <td colspan="6" align="center"><strong>No Record Found</strong></td>
+                                                    </tr>
     <?php
 }
 ?>

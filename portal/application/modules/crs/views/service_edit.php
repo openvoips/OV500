@@ -1,8 +1,12 @@
 <?php
+ 
+
+
 $section_array = array();
 $section_array['1'] = array('title' => 'Tariff', 'file_name' => 'inner/edit_tariff.php');
 $section_array['2'] = array('title' => 'Bundle', 'file_name' => 'inner/add_bundle.php');
 $section_array['4'] = array('title' => 'Dialplan', 'file_name' => 'inner/add_dialplan_' . strtolower($accountinfo['account_type']) . '.php');
+$section_array['5'] = array('title' => 'Bill Config', 'file_name' => 'inner/add_invoice.php');
 if ($accountinfo['account_type'] == 'CUSTOMER') {
     $section_array['6'] = array('title' => 'IP-Trunk', 'file_name' => 'inner/ip.php');
     $section_array['7'] = array('title' => 'SIP-Truk', 'file_name' => 'inner/sip.php');

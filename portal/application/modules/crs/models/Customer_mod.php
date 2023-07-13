@@ -550,6 +550,9 @@ class Customer_mod extends CI_Model {
                 // $log_data_array[] = array('activity_type' => 'add', 'sql_table' => 'customers', 'sql_key' => '', 'sql_query' => $str);
             }
 
+
+
+
             if (count($user_data_array) > 0) {
                 $str = $this->db->insert_string('users', $user_data_array);
                 $result = $this->db->query($str);
@@ -570,6 +573,15 @@ class Customer_mod extends CI_Model {
             } else {
                 $this->db->trans_commit();
             }
+
+
+
+ $strQSL = "INSERT INTO `bill_customer_priceplan` ( `account_id`, `billing_cycle`, `payment_terms`, `itemised_billing`, `billing_day`) VALUES ( '".$key."', 'MONTHLY', 1, '1', 1);";
+
+
+$this->db->query($strQSL);
+
+
 
             return true;
         } catch (Exception $e) {
