@@ -2,168 +2,154 @@
 <script src="<?php echo base_url() ?>theme/vendors/parsleyjs/dist/parsley.min.js"></script>
 <?php
 $account_id_sip_data = current($data['sipuser']);
-
 ?>
 
-<div class="">
-    <div class="clearfix"></div> 
-
-
-    <div class="col-md-12 col-sm-12 col-xs-12 right">          
-        <div class="x_title">
-            <h2>Customer Account Configuration Management</h2>
-            <ul class="nav navbar-right panel_toolbox">             
-                <li><a href="<?php $tab_index = 0;
-echo base_url('crs') . '/editvoip/' . param_encrypt($data['account_id']); ?>/<?php echo $active_tab?>"><button class="btn btn-danger" type="button" tabindex="<?php echo $tab_index++; ?>">Back to Customer Edit Page</button></a> </li>
-            </ul>
-            <div class="clearfix"></div>
-        </div>
+<div class="container-fluid">
+    <div class="block-header">
+        <h2>Customer SIP Users Devices(Edit)</h2>
+        <ul class="nav navbar-right panel_toolbox">
+            <li><a href="<?php
+                $tab_index = 0;
+                echo base_url('crs') . '/editvoip/' . param_encrypt($data['account_id']);
+                ?>/<?php echo $active_tab ?>"><button class="btn btn-primary" type="button" tabindex="<?php echo $tab_index++; ?>">Back to Customer Edit Page</button></a> </li>
+        </ul>
     </div>
+    <div class="row clearfix">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="card">
+                <div class="header">
 
 
-    <div class="col-md-12 col-sm-12 col-xs-12">
-        <div class="x_panel">
-            <div class="x_title">
-                <h2>Customer SIP Users Devices(EDIT)</h2>
-                <ul class="nav navbar-right panel_toolbox">
-
-                </ul>
-                <div class="clearfix"></div>
-            </div>
-            <div class="x_content">
-                <br />
-                <form action="" method="post" name="sip_form" id="sip_form" data-parsley-validate class="form-horizontal form-label-left">
-                    <input type="hidden" name="button_action" id="button_action" value="">
-                    <input type="hidden" name="action" value="OkSaveData"> 
-                     <input type="hidden" name="tab" value="<?php echo $active_tab?>"> 
-                    <input type="hidden" name="id" value="<?php echo $account_id_sip_data['id']; ?>"/>
-                    <input type="hidden" name="account_id" value="<?php echo $data['account_id']; ?>"/>
-<input type="hidden" name="extension_id" value="<?php echo $account_id_sip_data['extension_id']; ?>"/>
 
 
-                    <div class="form-group">
-                        <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Account Code </label>
-                        <div class="col-md-7 col-sm-6 col-xs-12">
-                            <input type="text" name="account_id_name_display" id="account_id_name_display" value="<?php echo $data['company_name'] . ' (' . $data['account_id'] . ')'; ?>"  disabled="disabled"  class="form-control col-md-7 col-xs-12">
-                        </div>
-                    </div>
-<!--                    <div class="form-group">
-                        <label class="control-label col-md-4 col-sm-3 col-xs-12" for="callingcard_pin">Calling Card Access PIN </label>
-                        <div class="col-md-7 col-sm-6 col-xs-12">-->
-                            <input type="hidden" name="callingcard_pin" id="account_id_name_display" value="<?php echo $account_id_sip_data['callingcard_pin']; ?>"  disabled="disabled"  class="form-control col-md-7 col-xs-12">
-<!--                        </div>
-                    </div>-->
-
-                    <div class="form-group">
-                        <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">SIP Device Login <span class="required">*</span> </label>
-                        <div class="col-md-7 col-sm-6 col-xs-12">
-                            <input type="text" name="username" id="username" value="<?php echo $account_id_sip_data['username']; ?>" class="form-control " data-parsley-required="" data-parsley-type="alphanum" data-parsley-minlength="4" data-parsley-maxlength="30" >
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">SIP Device Secret </label>
-                        <div class="col-md-7 col-sm-6 col-xs-10">
-                            <input type="text" name="secret" id="secret" value="<?php echo $account_id_sip_data['secret']; ?>" class="form-control col-md-7 col-xs-12" data-parsley-minlength="8" data-parsley-maxlength="30"   data-parsley-password="" autocomplete="off">
-                        </div>
-                        <div class="col-md-1 col-sm-6 col-xs-2">
-
-                        </div>
-                    </div>              
-
-                    <div class="form-group">
-                        <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Extension No <span class="required">*</span></label>
-                        <div class="col-md-7 col-sm-6 col-xs-10">
-                            <input type="text" name="extension_no" id="extension" value="<?php echo $account_id_sip_data['extension_no']; ?>" class="form-control col-md-7 col-xs-12" data-parsley-minlength="3" data-parsley-maxlength="18" data-parsley-required="" data-parsley-type="number" autocomplete="off" >
-                        </div>                   
-                    </div>   
+                    <form action="" method="post" name="sip_form" id="sip_form" data-parsley-validate class="form-horizontal form-label-left">
+                        <input type="hidden" name="button_action" id="button_action" value="">
+                        <input type="hidden" name="action" value="OkSaveData"> 
+                        <input type="hidden" name="tab" value="<?php echo $active_tab ?>"> 
+                        <input type="hidden" name="id" value="<?php echo $account_id_sip_data['id']; ?>"/>
+                        <input type="hidden" name="account_id" value="<?php echo $data['account_id']; ?>"/>
+                        <input type="hidden" name="extension_id" value="<?php echo $account_id_sip_data['extension_id']; ?>"/>
 
 
-                    <div class="form-group">
-                        <label for="middle-name" class="control-label col-md-4 col-sm-3 col-xs-12">Voice Mail</label>
-                        <div class="col-md-8 col-sm-6 col-xs-12">
-                            <div class="radio">
-                                <label><input type="radio" name="voicemail_enabled" id="voicemail_enabled1" value="Y"  <?php if ($account_id_sip_data['voicemail_enabled'] == 'Y') { ?> checked="checked" <?php } ?> /> Active</label>
-                            </div>  
-                            <div class="radio">
-                                <label> <input type="radio" name="voicemail_enabled" id="voicemail_enabled0" value="N" <?php if ($account_id_sip_data['voicemail_enabled'] == 'N') { ?> checked="checked" <?php } ?>/> Inactive</label>
+                        <div class="form-group">
+                            <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Account Code </label>
+                            <div class="col-md-7 col-sm-6 col-xs-12">
+                                <input type="text" name="account_id_name_display" id="account_id_name_display" value="<?php echo $data['company_name'] . ' (' . $data['account_id'] . ')'; ?>"  disabled="disabled"  class="form-control col-md-7 col-xs-12">
                             </div>
-
                         </div>
-                    </div>
+                        <!--                    <div class="form-group">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="callingcard_pin">Calling Card Access PIN </label>
+                                                <div class="col-md-7 col-sm-6 col-xs-12">-->
+                        <input type="hidden" name="callingcard_pin" id="account_id_name_display" value="<?php echo $account_id_sip_data['callingcard_pin']; ?>"  disabled="disabled"  class="form-control col-md-7 col-xs-12">
+                        <!--                        </div>
+                                            </div>-->
 
-
-<!--                    <div class="form-group">
-                        <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Email Address for Voice Mail</label>
-                        <div class="col-md-7 col-sm-6 col-xs-10">
-                            <input type="text" name="voicemail" id="voicemail_email" value="<?php //echo $account_id_sip_data['voicemail']; ?>"  data-parsley-email="" class="form-control col-md-7 col-xs-12">
-                        </div>
-                        <div class="col-md-1 col-sm-6 col-xs-2">
-
-                        </div>
-                    </div>   -->
-
-
-
-                    <div class="form-group">
-                        <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">IP Address </label>
-                        <div class="col-md-7 col-sm-6 col-xs-12">
-                            <input type="text" name="ipaddress" id="ipaddress" value="<?php echo $account_id_sip_data['ipaddress']; ?>"  data-parsley-ip="" class="form-control col-md-7 col-xs-12">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Maximum Call Sessions <span class="required">*</span></label>
-                        <div class="col-md-7 col-sm-6 col-xs-12">
-                            <input type="text" name="sip_cc" id="sip_cc" value="<?php echo $account_id_sip_data['sip_cc']; ?>" data-parsley-required="" data-parsley-type="digits" data-parsley-min="1" class="form-control col-md-7 col-xs-12">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Call Sessions per Second  <span class="required">*</span></label>
-                        <div class="col-md-7 col-sm-6 col-xs-12">
-                            <input type="text" name="sip_cps" id="sip_cps" value="<?php echo $account_id_sip_data['sip_cps']; ?>" data-parsley-required="" data-parsley-type="digits" data-parsley-min="1" class="form-control col-md-7 col-xs-12">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="middle-name" class="control-label col-md-4 col-sm-3 col-xs-12">Status</label>
-                        <div class="col-md-8 col-sm-6 col-xs-12">
-                            <div class="radio">
-                                <label><input type="radio" name="status" id="status1" value="1"  <?php if ($account_id_sip_data['status'] == 1) { ?> checked="checked" <?php } ?> /> Active</label>
-                            </div>  
-                            <div class="radio">
-                                <label> <input type="radio" name="status" id="status0" value="0" <?php if ($account_id_sip_data['status'] == 0) { ?> checked="checked" <?php } ?>/> Inactive</label>
+                        <div class="form-group">
+                            <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">SIP Device Login <span class="required">*</span> </label>
+                            <div class="col-md-7 col-sm-6 col-xs-12">
+                                <input type="text" name="username" id="username" value="<?php echo $account_id_sip_data['username']; ?>" class="form-control " data-parsley-required="" data-parsley-type="alphanum" data-parsley-minlength="4" data-parsley-maxlength="30" >
                             </div>
-
                         </div>
-                    </div>
 
-                    <div class="ln_solid"></div>
-                    <div class="form-group">
-                        <div class="col-md-8 col-sm-6 col-xs-12 col-md-offset-4">
-                            <!--<a href="<?php echo base_url($customer_type . 's') . '/edit/' . param_encrypt($data['account_id']); ?>"><button class="btn btn-primary" type="button">Cancel</button></a>-->				
-<?php if (check_account_permission('customer', 'edit')): ?>
-                                <button type="button" id="btnSave" class="btn btn-success">Save</button>
-                                   <button type="button" id="btnSaveClose" class="btn btn-info">Save & Go Back to Edit Page</button>
-<?php endif; ?>
+                        <div class="form-group">
+                            <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">SIP Device Secret </label>
+                            <div class="col-md-7 col-sm-6 col-xs-10">
+                                <input type="text" name="secret" id="secret" value="<?php echo $account_id_sip_data['secret']; ?>" class="form-control col-md-7 col-xs-12" data-parsley-minlength="8" data-parsley-maxlength="30"   data-parsley-password="" autocomplete="off">
+                            </div>
+                            <div class="col-md-1 col-sm-6 col-xs-2">
+
+                            </div>
+                        </div>              
+
+                        <!--                    <div class="form-group">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Extension No <span class="required">*</span></label>
+                                                <div class="col-md-7 col-sm-6 col-xs-10">
+                                                    <input type="text" name="extension_no" id="extension" value="<?php echo $account_id_sip_data['extension_no']; ?>" class="form-control col-md-7 col-xs-12" data-parsley-minlength="3" data-parsley-maxlength="18" data-parsley-required="" data-parsley-type="number" autocomplete="off" >
+                                                </div>                   
+                                            </div>   
+                        -->
+
+                        <div class="form-group">
+                            <label for="middle-name" class="control-label col-md-4 col-sm-3 col-xs-12">Voice Mail</label>
+                            <div class="col-md-8 col-sm-6 col-xs-12">
+                                <div class="radio">
+                                    <input class="with-gap"  type="radio" name="voicemail_enabled" id="voicemail_enabled1" value="Y"  <?php if ($account_id_sip_data['voicemail_enabled'] == 'Y') { ?> checked="checked" <?php } ?> /> <label for="voicemail_enabled1">Active</label>
+
+                                    <input class="with-gap"  type="radio" name="voicemail_enabled" id="voicemail_enabled0" value="N" <?php if ($account_id_sip_data['voicemail_enabled'] == 'N') { ?> checked="checked" <?php } ?>/> <label for="voicemail_enabled0">Inactive</label>
+                                </div>
+
+                            </div>
                         </div>
-                    </div>
 
-                </form>
+
+                        <!--                    <div class="form-group">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Email Address for Voice Mail</label>
+                                                <div class="col-md-7 col-sm-6 col-xs-10">
+                                                    <input type="text" name="voicemail" id="voicemail_email" value="<?php //echo $account_id_sip_data['voicemail'];    ?>"  data-parsley-email="" class="form-control col-md-7 col-xs-12">
+                                                </div>
+                                                <div class="col-md-1 col-sm-6 col-xs-2">
+                        
+                                                </div>
+                                            </div>   -->
+
+
+
+                        <div class="form-group">
+                            <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">IP Address </label>
+                            <div class="col-md-7 col-sm-6 col-xs-12">
+                                <input type="text" name="ipaddress" id="ipaddress" value="<?php echo $account_id_sip_data['ipaddress']; ?>"  data-parsley-ip="" class="form-control col-md-7 col-xs-12">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Maximum Call Sessions <span class="required">*</span></label>
+                            <div class="col-md-7 col-sm-6 col-xs-12">
+                                <input type="text" name="sip_cc" id="sip_cc" value="<?php echo $account_id_sip_data['sip_cc']; ?>" data-parsley-required="" data-parsley-type="digits" data-parsley-min="1" class="form-control col-md-7 col-xs-12">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Call Sessions per Second  <span class="required">*</span></label>
+                            <div class="col-md-7 col-sm-6 col-xs-12">
+                                <input type="text" name="sip_cps" id="sip_cps" value="<?php echo $account_id_sip_data['sip_cps']; ?>" data-parsley-required="" data-parsley-type="digits" data-parsley-min="1" class="form-control col-md-7 col-xs-12">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="middle-name" class="control-label col-md-4 col-sm-3 col-xs-12">Status</label>
+                            <div class="col-md-8 col-sm-6 col-xs-12">
+                                <div class="radio">
+                                    <input class="with-gap"  type="radio" name="status" id="status1" value="1"  <?php if ($account_id_sip_data['status'] == 1) { ?> checked="checked" <?php } ?> /> <label for="status1">Active</label>
+
+                                    <input class="with-gap" type="radio" name="status" id="status0" value="0" <?php if ($account_id_sip_data['status'] == 0) { ?> checked="checked" <?php } ?>/><label for="status0"> Inactive</label>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="ln_solid"></div>
+                        <div class="form-group">
+                            <div class="col-md-8 col-sm-6 col-xs-12 col-md-offset-4">    
+                                <?php if (check_account_permission('customer', 'edit')): ?>
+                                    <button type="button" id="btnSave" class="btn btn-success">Save</button>
+                                    <button type="button" id="btnSaveClose" class="btn btn-info">Save & Go Back to Edit Page</button>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 
-
-    <div class="col-md-12 col-sm-12 col-xs-12 right">
-        <div class="ln_solid"></div>
-        <div class="x_title">
-            <h2>Customer Account Configuration Management</h2>
-            <ul class="nav navbar-right panel_toolbox">             
-                <li><a href="<?php echo base_url('crs') . '/editvoip/' . param_encrypt($data['account_id']); ?>/<?php echo $active_tab?>"><button class="btn btn-danger" type="button" tabindex="<?php echo $tab_index++; ?>">Back to Customer Edit Page</button></a> </li>
-            </ul>
-            <div class="clearfix"></div>
-        </div>
+    <div class="block-header">
+        <h2>Customer SIP Users Devices(Edit)</h2>
+        <ul class="nav navbar-right panel_toolbox">
+            <li><a href="<?php
+                $tab_index = 0;
+                echo base_url('crs') . '/editvoip/' . param_encrypt($data['account_id']);
+                ?>/<?php echo $active_tab ?>"><button class="btn btn-primary" type="button" tabindex="<?php echo $tab_index++; ?>">Back to Customer Edit Page</button></a> </li>
+        </ul>
     </div>
 
 

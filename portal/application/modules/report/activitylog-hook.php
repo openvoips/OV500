@@ -17,7 +17,7 @@ class Activityloghook {
         $DB1 = $CI->load->database('default', true);
 
         $db_name = $DB1->database;
-        $table_name = $DB1->dbprefix('activity_site_log');
+        $table_name = $DB1->dbprefix('webaccess_log');
 
 
         $sql_check = "SELECT * FROM information_schema.TABLES 
@@ -55,7 +55,7 @@ class Activityloghook {
             if (in_array($class_name, $this->ignore_classes)) {
                 
             } else {
-                $str = $DB1->insert('activity_site_log', $log_data_insert_array);
+                $str = $DB1->insert('webaccess_log', $log_data_insert_array);
             }
         }
         /* if($_SERVER["REMOTE_ADDR"] != "49.248.51.230"){
@@ -74,7 +74,7 @@ class Activityloghook {
           $log_data_insert_array['ip_address'] = trim($_SERVER["REMOTE_ADDR"]);
           //$log_data_insert_array['response_data'] = $result_raw;
           //$log_data_insert_array['function_return'] = $result;
-          //$str = $CI->db->insert('activity_api_log', $log_data_insert_array);
+          //$str = $CI->db->insert('apisdr_log', $log_data_insert_array);
           $str = $DB1->insert('user_audit_trails', $log_data_insert_array); */
     }
 

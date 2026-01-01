@@ -1,29 +1,15 @@
-<div class="">
-    <div class="clearfix"></div>   
 
-    <div class="col-md-12 col-sm-12 col-xs-12 right">
-        <div class="ln_solid"></div>
-        <div class="x_title">
-            <h2>Ratecard Configuration Management</h2>
-            <ul class="nav navbar-right panel_toolbox">     
-                <li><a href="<?php echo base_url('ratecard') ?>"><button class="btn btn-danger" type="button" >Back to Ratecard Listing Page</button></a> </li>
-            </ul>
-            <div class="clearfix"></div>
-        </div>
-
+<div class="container-fluid">
+    <div class="block-header">
+        <h2>Ratecard Configuration Management</h2>
+        <ul class="nav navbar-right panel_toolbox">
+            <li><a href="<?php echo base_url('ratecard') ?>"><input class="btn btn-primary" type="button" value="Back to Ratecard Listing Page" name="add_link" class="btn btn-primary"></a></li>
+        </ul>
     </div>
-    <div class="row">
-        <div class="col-md-12 col-sm-12 col-xs-12">
-            <div class="x_panel">
-                <div class="x_title">
-                    <h2>Ratecard Management (ADD)</h2>
-                    <ul class="nav navbar-right panel_toolbox">
-
-                    </ul>
-                    <div class="clearfix"></div>
-                </div>
-                <div class="x_content">
-                    <br />         
+    <div class="row clearfix">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="card">
+                <div class="header">
                     <form action="<?php echo base_url(); ?>ratecard/addRC" method="post" name="add_form" id="add_form" data-parsley-validate class="form-horizontal form-label-left">
                         <input type="hidden" name="button_action" id="button_action" value="">
                         <input type="hidden" name="action" value="OkSaveData">    
@@ -33,6 +19,7 @@
                             <label class="control-label col-md-2 col-sm-3 col-xs-12" for="first-name">Ratecard Name <span class="required">*</span></label>
                             <div class="col-md-6 col-sm-6 col-xs-12">
                                 <input type="text" name="frm_name" id="frm_name" value="<?php echo set_value('frm_name'); ?>"  data-parsley-required="" data-parsley-alphanumspace="" data-parsley-length="[5, 30]" class="form-control col-md-7 col-xs-12">
+                                <small>Ratecard is group of rates for destination/country.</small>
                             </div>
                         </div>
                         <?php if (!check_logged_user_group(array('RESELLER'))) : ?>
@@ -42,7 +29,7 @@
                                     <select name="frm_type" id="frm_type" class="form-control data-search-field">
                                         <option value="CUSTOMER"  <?php if (strtolower(set_value('frm_type')) == 'customer') echo 'selected'; ?>>Customer</option>
                                         <?php if (get_logged_account_level() == 0): ?>
-                                            <option value="CARRIER"  <?php if (strtolower(set_value('frm_type')) == 'carrier') echo 'selected'; ?>>Provider</option>
+                                            <option value="CARRIER"  <?php if (strtolower(set_value('frm_type')) == 'carrier') echo 'selected'; ?>>vendor</option>
                                         <?php endif; ?>								
                                     </select>
                                 </div>
@@ -91,16 +78,16 @@
         </div>
     </div>
 
-    <div class="col-md-12 col-sm-12 col-xs-12 right">
-        <div class="ln_solid"></div>
-        <div class="x_title">
-            <h2>Ratecard Configuration Management</h2>
-            <ul class="nav navbar-right panel_toolbox">     
-                <li><a href="<?php echo base_url('ratecard') ?>"><button class="btn btn-danger" type="button" >Back to Ratecard Listing Page</button></a> </li>
-            </ul>
-            <div class="clearfix"></div>
-        </div>
+    <div class="clearfix"></div>
 
+    <div class="block-header">
+        <h2>Ratecard Configuration Management</h2>
+        <ul class="nav navbar-right panel_toolbox">     
+            <li><a href="<?php echo base_url('ratecard') ?>"> <input type="button" value="Back to Ratecard Listing Page" name="asasasa" class="btn btn-primary"></a> </li>
+
+
+        </ul>
+        <div class="clearfix"></div>
     </div>
 </div>    
 <script src="<?php echo base_url() ?>theme/vendors/parsleyjs/dist/parsley.min.js"></script>

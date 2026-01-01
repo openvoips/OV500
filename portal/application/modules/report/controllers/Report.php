@@ -1,5 +1,12 @@
 <?php
- 
+/* 
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2023 
+ * http://www.openvoips.com 
+ */
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Report extends MY_Controller {
@@ -29,8 +36,6 @@ class Report extends MY_Controller {
         $this->load->view('report/dashboard', $data);
         $this->load->view('basic/footer', $data);
     }
-	
-	
 
     function clientprofitdetails() {
         $this->load->model('detail_mod');
@@ -142,81 +147,35 @@ class Report extends MY_Controller {
     }
 
     //working
-    function servicedetails() {
+   
+
+    function vendorprofitdetails() {
         $this->load->model('detail_mod');
         $data = array();
-        $page_name = "servicedetails_list";
-        $search_session_key = 'search_' . $page_name;
-        $data['page_name'] = $page_name;
-        $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-        if (!check_logged_user_group(array('SYSTEM', 'RESELLER'))) {
-            show_404('403');
-        }
-
-        $search_parameters = array('account_id', 'service_name', 'no_of_rows');
-
-        if (isset($_POST['search_action'])) {
-            set_post_to_session($search_session_key, $search_parameters);
-        } else {
-            set_session_to_session($search_session_key, $search_parameters);
-        }
-		
-		 
-
-        $search_data = array(
-            'account_id' => trim($_SESSION[$search_session_key]['account_id']),
-            'service_name' => trim($_SESSION[$search_session_key]['service_name']),
-            'logged_customer_type' => get_logged_account_type(),
-            'logged_customer_level' => get_logged_account_level(),
-            'logged_customer_account_id' => get_logged_account_id(),
-        );
-        $is_file_downloaded = false;
-        if ($is_file_downloaded === false) {
-            $pagination_uri_segment = 3;
-            list($per_page, $segment) = get_pagination_param($pagination_uri_segment, $search_session_key);
-
-            $response = $this->detail_mod->get_service_data('', $per_page, $segment, $search_data);
-
-            $total_count = $this->detail_mod->get_data_total_count();
-            $data['pagination'] = setup_pagination_option($total_count, 'report/servicedetails', $per_page, $pagination_uri_segment, $this->pagination);
-
-            $data['listing_data'] = $response;
-            $data['total_records'] = $total_count;
-            $data['search_session_key'] = $search_session_key;
-
-            $this->load->view('basic/header', $data);
-            $this->load->view('report/servicedetails', $data);
-            $this->load->view('basic/footer', $data);
-        }
-    }
-
-    function providerprofitdetails() {
-        $this->load->model('detail_mod');
-        $data = array();
-        $page_name = "providerprofitdetails_list";
+        $page_name = "vendorprofitdetails_list";
         $search_session_key = 'search_' . $page_name;
         $data['page_name'] = $page_name;
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
         if (!check_logged_user_group(array('SYSTEM'))) {
             show_404('403');
         }
-        $search_parameters = array('providertime', 'carrier_name', 'carrier_id', 'no_of_rows');
+        $search_parameters = array('vendortime', 'carrier_name', 'carrier_id', 'no_of_rows');
 
         if (isset($_POST['search_action'])) {
             set_post_to_session($search_session_key, $search_parameters);
         } else {
             set_session_to_session($search_session_key, $search_parameters);
         }
-		
-		if ($_SESSION[$search_session_key]['providertime'] == '') {
+
+        if ($_SESSION[$search_session_key]['vendortime'] == '') {
             $yesterday_timestamp = strtotime("yesterday");
             $yesterday = date('Y-m-d', $yesterday_timestamp);
             $time_range = $yesterday . ' 00:00:00 - ' . $yesterday . ' 23:59:59';
-            $_SESSION[$search_session_key]['providertime'] = $time_range;
+            $_SESSION[$search_session_key]['vendortime'] = $time_range;
         }
 
         $search_data = array(
-            'providertime' => $_SESSION[$search_session_key]['providertime'],
+            'vendortime' => $_SESSION[$search_session_key]['vendortime'],
             'carrier_id' => $_SESSION[$search_session_key]['carrier_id'],
             'carrier_name' => $_SESSION[$search_session_key]['carrier_name'],
         );
@@ -225,20 +184,21 @@ class Report extends MY_Controller {
             $pagination_uri_segment = 3;
             list($per_page, $segment) = get_pagination_param($pagination_uri_segment, $search_session_key);
 
-            $response = $this->detail_mod->get_provider_profitloss_data('', $per_page, $segment, $search_data);
+            $response = $this->detail_mod->get_vendor_profitloss_data('', $per_page, $segment, $search_data);
 
             $total_count = $this->detail_mod->get_data_total_count();
-            $data['pagination'] = setup_pagination_option($total_count, 'report/providerprofitdetails', $per_page, $pagination_uri_segment, $this->pagination);
+            $data['pagination'] = setup_pagination_option($total_count, 'report/vendorprofitdetails', $per_page, $pagination_uri_segment, $this->pagination);
 
             $data['listing_data'] = $response;
             $data['total_records'] = $total_count;
             $data['search_session_key'] = $search_session_key;
 
             $this->load->view('basic/header', $data);
-            $this->load->view('report/providerprofitdetails', $data);
+            $this->load->view('report/vendorprofitdetails', $data);
             $this->load->view('basic/footer', $data);
         }
     }
+
     function ajax_clientprofit() {
 
         if ($_POST['search_action'] == 'searchcustomer') {
@@ -285,16 +245,16 @@ class Report extends MY_Controller {
         }
     }
 
-    function ajax_providerprofit() {
+    function ajax_vendorprofit() {
 
-        if ($_POST['search_action'] == 'searchprovider') {
+        if ($_POST['search_action'] == 'searchvendor') {
             $search_data = array(
-                'providertime' => $_POST['providertime'],
+                'vendortime' => $_POST['vendortime'],
                 'logged_customer_type' => get_logged_account_type(),
                 'logged_customer_level' => get_logged_account_level(),
                 'logged_customer_account_id' => get_logged_account_id(),
             );
-            $client_data = $this->reports_mod->get_provider_profitloss_data($search_data);
+            $client_data = $this->reports_mod->get_vendor_profitloss_data($search_data);
             $str = '';
             if (isset($client_data['result']) && count($client_data['result']) > 0) {
                 foreach ($client_data['result'] as $row) {
@@ -303,7 +263,7 @@ class Report extends MY_Controller {
             } else {
                 $str .= '<tr><td colspan="3" align="center"><strong>No Record</strong></td></tr>';
             }
-            //$str .='<tr><td colspan="3" align="center">'.$this->reports_mod->provider_sql.'</td></tr>';
+            //$str .='<tr><td colspan="3" align="center">'.$this->reports_mod->vendor_sql.'</td></tr>';
             echo $str;
         }
     }
@@ -432,7 +392,6 @@ class Report extends MY_Controller {
 
             $listing_data = $this->detail_mod->get_sales_summary_data('', '', '', $search_data);
 
-
             require_once APPPATH . 'libraries/PHPExcel/Classes/PHPExcel.php'; //die("SS");
             $objPHPExcel = new PHPExcel();
 
@@ -455,7 +414,6 @@ class Report extends MY_Controller {
             );
             $objPHPExcel->getActiveSheet()->getStyle("A1:B1")->applyFromArray($style);
 
-
             $row++;
             $row++;
             ///////table header row
@@ -463,10 +421,8 @@ class Report extends MY_Controller {
             $total_sum_array = array();
             $cost_sum = $sell_cost = $profit_sum = 0;
 
-
             $objPHPExcel->getActiveSheet()->fromArray($table_header_row, NULL, 'A' . $row);
             $objPHPExcel->getActiveSheet()->getStyle("A{$row}:E{$row}")->getFont()->setBold(true);
-
 
             if ($listing_data['result'] > 0) {
                 foreach ($listing_data['result'] as $listing_row) {
@@ -485,8 +441,6 @@ class Report extends MY_Controller {
 
                     $row++;
                     $objPHPExcel->getActiveSheet()->fromArray($result_row, NULL, 'A' . $row);
-
-
 
                     /* if(!isset($total_sum_array[$currency]))
                       {
@@ -528,7 +482,7 @@ class Report extends MY_Controller {
             //$objPHPExcel->getActiveSheet()->getStyle ('G')->getNumberFormat()->setFormatCode ("0.00");
             //PExcel->getActiveSheet()->SetCellValue($letter2.$row, number_format($input['amount'],2,'.',''));
             //////
-            for ($i = 1; $i <= $row; $i ++) {
+            for ($i = 1; $i <= $row; $i++) {
                 $objPHPExcel->getActiveSheet()->getRowDimension($i)->setRowHeight(25);
             }
             /////set auto width/
@@ -556,11 +510,6 @@ class Report extends MY_Controller {
             header('Cache-Control: must-revalidate');
             header('Pragma: public');
             readfile($file);
-
-
-
-
-
 
             $is_file_downloaded = true;
         }
@@ -625,7 +574,6 @@ class Report extends MY_Controller {
 
             $listing_data = $this->detail_mod->get_sales_details_data('', '', '', $search_data);
 
-
             require_once APPPATH . 'libraries/PHPExcel/Classes/PHPExcel.php'; //die("SS");
             $objPHPExcel = new PHPExcel();
 
@@ -647,17 +595,12 @@ class Report extends MY_Controller {
             );
             $objPHPExcel->getActiveSheet()->getStyle("A1:B1")->applyFromArray($style);
 
-
             $row++;
             $row++;
             ///////table header row
             $table_header_row = array('', 'Item Name', 'Units', 'Total Cost excl.', 'Total Sell excl.', 'Profit excl.', 'Currency');
             $total_sum_array = array();
             $cost_sum = $sell_cost = $profit_sum = 0;
-
-
-
-
 
             if ($listing_data['result'] > 0) {
                 $previous_account_id = '';
@@ -708,7 +651,6 @@ class Report extends MY_Controller {
                         $sum_array[$current_account_id]['cname'] = $listing_row['cname'];
                         $sum_array[$current_account_id]['company_name'] = $listing_row['company_name'];
 
-
                         //display detail breakup row
                         $detail_row = array('', $listing_row['display_text'], $listing_row['quantity'], number_format($listing_row['buy_cost'], 2, '.', ''), number_format($listing_row['total_cost'], 2, '.', ''), number_format($listing_row['profit'], 2, '.', ''));
 
@@ -740,7 +682,7 @@ class Report extends MY_Controller {
             //$objPHPExcel->getActiveSheet()->getStyle ('G')->getNumberFormat()->setFormatCode ("0.00");
             //PExcel->getActiveSheet()->SetCellValue($letter2.$row, number_format($input['amount'],2,'.',''));
             //////
-            for ($i = 1; $i <= $row; $i ++) {
+            for ($i = 1; $i <= $row; $i++) {
                 $objPHPExcel->getActiveSheet()->getRowDimension($i)->setRowHeight(25);
             }
             /////set auto width/
@@ -769,11 +711,6 @@ class Report extends MY_Controller {
             header('Pragma: public');
             readfile($file);
 
-
-
-
-
-
             $is_file_downloaded = true;
         }
 
@@ -797,10 +734,8 @@ class Report extends MY_Controller {
         }
     }
 
-    
-
-function carrierreport(){
-       $this->load->model('detail_mod');
+    function carrierreport() {
+        $this->load->model('detail_mod');
         $data = array();
         $page_name = "carrierreport_list";
         $search_session_key = 'search_' . $page_name;
@@ -809,23 +744,23 @@ function carrierreport(){
         if (!check_logged_user_group(array('SYSTEM'))) {
             show_404('403');
         }
-        $search_parameters = array('providertime', 'carrier_name', 'carrier_id', 'no_of_rows');
+        $search_parameters = array('vendortime', 'carrier_name', 'carrier_id', 'no_of_rows');
 
         if (isset($_POST['search_action'])) {
             set_post_to_session($search_session_key, $search_parameters);
         } else {
             set_session_to_session($search_session_key, $search_parameters);
         }
-		
-		if ($_SESSION[$search_session_key]['providertime'] == '') {
+
+        if ($_SESSION[$search_session_key]['vendortime'] == '') {
             $yesterday_timestamp = strtotime("yesterday");
             $yesterday = date('Y-m-d', $yesterday_timestamp);
             $time_range = $yesterday . ' 00:00:00 - ' . $yesterday . ' 23:59:59';
-            $_SESSION[$search_session_key]['providertime'] = $time_range;
+            $_SESSION[$search_session_key]['vendortime'] = $time_range;
         }
 
         $search_data = array(
-            'providertime' => $_SESSION[$search_session_key]['providertime'],
+            'vendortime' => $_SESSION[$search_session_key]['vendortime'],
             'carrier_id' => $_SESSION[$search_session_key]['carrier_id'],
             'carrier_name' => $_SESSION[$search_session_key]['carrier_name'],
         );
@@ -834,7 +769,7 @@ function carrierreport(){
             $pagination_uri_segment = 3;
             list($per_page, $segment) = get_pagination_param($pagination_uri_segment, $search_session_key);
 
-           // $response = $this->detail_mod->get_provider_profitloss_data('', $per_page, $segment, $search_data);
+            // $response = $this->detail_mod->get_vendor_profitloss_data('', $per_page, $segment, $search_data);
 
             $response = $this->detail_mod->get_carrierreport('', $per_page, $segment, $search_data);
             $total_count = $this->detail_mod->get_data_total_count();
@@ -848,6 +783,94 @@ function carrierreport(){
             $this->load->view('report/carrierreport', $data);
             $this->load->view('basic/footer', $data);
         }
-}
-   
+    }
+
+
+    //new
+    function causesummary($arg1 = '', $format = '') {
+      
+        $data = array();
+        $page_name = "causesummary";
+        $search_session_key = 'search_' . $page_name;
+        $search_session_key2= 'search2_' . $page_name;
+        $data['page_name'] = $page_name;
+        $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
+        if (!check_logged_user_group(array('SYSTEM'))) {
+            show_404('403');
+        }
+        $search_parameters = array('daterange','cdr_type', 'sipcode', 'carrier_id', 'no_of_rows');
+
+        if (isset($_POST['search_action'])) {
+            set_post_to_session($search_session_key, $search_parameters);
+        } else {
+            set_session_to_session($search_session_key, $search_parameters);
+        }
+
+         if (isset($_POST['OkFilter'])) {
+            $_SESSION[$search_session_key2] = array(                
+                's_g_sip' => (isset($_POST['g_sip']) ? 'Y' : 'N'),
+                's_g_carrier' => (isset($_POST['g_carrier']) ? 'Y' : 'N'),
+                's_g_cdr_type' => (isset($_POST['g_cdr_type']) ? 'Y' : 'N'),
+                's_g_disposition_cause' => (isset($_POST['g_disposition_cause']) ? 'Y' : 'N'),                 
+                's_g_q850' => (isset($_POST['g_q850']) ? 'Y' : 'N'),
+                's_g_date' => (isset($_POST['g_date']) ? 'Y' : 'N')
+            );
+            $is_make_search = true;
+        } elseif ($arg1 != 'export') {
+            $_SESSION[$search_session_key2] = array(               
+                's_g_sip' => '',
+                's_g_carrier' => '',
+                's_g_cdr_type' => '',
+                's_g_disposition_cause' => '',                
+                's_g_q850' => '',
+                's_g_date' =>''
+            );
+        }
+
+        if ($_SESSION[$search_session_key]['daterange'] == '') {
+            $yesterday_timestamp = strtotime("yesterday");
+            $yesterday = date('Y-m-d', $yesterday_timestamp);
+            $time_range = $yesterday . ' 00:00:00 - ' . $yesterday . ' 23:59:59';
+            $_SESSION[$search_session_key]['daterange'] = $time_range;
+        }
+
+        $search_data = array(
+            'daterange' => $_SESSION[$search_session_key]['daterange'],
+            'cdr_type' => $_SESSION[$search_session_key]['cdr_type'],
+            'sipcode' => $_SESSION[$search_session_key]['sipcode'],
+            'carrier_id' => $_SESSION[$search_session_key]['carrier_id'],
+        );
+       // ddd($_POST);ddd($search_data);die;
+       if($_SESSION[$search_session_key2]['s_g_disposition_cause']=='Y')
+        $_SESSION[$search_session_key2]['s_g_sip']='Y';
+        $group_data=array(
+            'group_by_sip' => $_SESSION[$search_session_key2]['s_g_sip'],
+            'group_by_carrier' => $_SESSION[$search_session_key2]['s_g_carrier'],
+            'group_by_cdr_type' => $_SESSION[$search_session_key2]['s_g_cdr_type'],
+            'group_by_disposition_cause' => $_SESSION[$search_session_key2]['s_g_disposition_cause'],           
+            'group_by_q850' => $_SESSION[$search_session_key2]['s_g_q850'],
+            'group_by_date' => $_SESSION[$search_session_key2]['s_g_date'],
+        );
+        $is_file_downloaded = false;
+        if ($is_file_downloaded === false) {
+            $pagination_uri_segment = 3;
+            list($per_page, $segment) = get_pagination_param($pagination_uri_segment, $search_session_key);
+
+            // $response = $this->detail_mod->get_vendor_profitloss_data('', $per_page, $segment, $search_data);
+
+            $response = $this->reports_mod->get_causesummaryreport('', $per_page, $segment, $search_data, $group_data);
+           // $total_count = $this->reports_mod->get_data_total_count();
+            $data['pagination'] = setup_pagination_option($total_count, 'report/causesummary', $per_page, $pagination_uri_segment, $this->pagination);
+
+            $data['listing_data'] = $response;
+            $data['total_records'] = $total_count;
+            $data['search_session_key'] = $search_session_key;
+            $data['search_session_key2'] = $search_session_key2;
+
+            $this->load->view('basic/header', $data);
+            $this->load->view('report/causesummary', $data);
+            $this->load->view('basic/footer', $data);
+        }
+    }
+
 }

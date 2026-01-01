@@ -406,7 +406,7 @@ class Export {
         if (count($report_data['result']) > 0) {
             $recordCount = 0;
             foreach ($report_data['result'] as $sdr_data) {
-                $debit = $credit = '';
+                $debit = $credit = 0;
                 $display_text = '';
                 $rule_type = $sdr_data['rule_type'];
 
@@ -454,7 +454,7 @@ class Export {
                 if ($display_text == '')
                     $display_text = $sdr_data['rule_type'];
 
-                if ($sdr_data['service_number'] != '')
+                if (isset($sdr_data['service_number']) &&  $sdr_data['service_number'] != '')
                     $display_text .= ' (' . $sdr_data['service_number'] . ')';
 
                 /////////////
@@ -620,8 +620,8 @@ class Export {
 						  <tr>
 							<td style="width: 15%; text-align: left; padding:5px;border:1px solid #ccc;font-size:11px;line-height:16px;background-color:#ccc;"><strong>Activity Date</strong></td>
 							<td style="width: 55%; text-align: left; padding:5px;border:1px solid #ccc;font-size:11px;line-height:16px;background-color:#ccc;"><strong>Activity</strong></td>
-							<td style="width: 15%; text-align: right; padding:5px;border:1px solid #ccc;font-size:11px;line-height:16px;background-color:#ccc;"><strong>Debit</strong></td>
-							<td style="width: 15%; text-align: right; padding:5px;border:1px solid #ccc;font-size:11px;line-height:16px;background-color:#ccc;"><strong>Credit</strong></td>
+							<td style="width: 15%; text-align: right; padding:5px;border:1px solid #ccc;font-size:11px;line-height:16px;background-color:#ccc;"><strong>Usage</strong></td>
+							<td style="width: 15%; text-align: right; padding:5px;border:1px solid #ccc;font-size:11px;line-height:16px;background-color:#ccc;"><strong>Payment</strong></td>
 						  </tr>	
 
 							' . $top_html_str . '
@@ -776,7 +776,7 @@ class Export {
                 if ($display_text == '')
                     $display_text = $sdr_data['rule_type'];
 
-                if ($sdr_data['service_number'] != '')
+                if (isset($sdr_data['service_number']) && $sdr_data['service_number'] != '')
                     $display_text .= ' (' . $sdr_data['service_number'] . ')';
 
                 /////////////
@@ -845,7 +845,7 @@ class Export {
 
 
         $com_address = '<tr><td colspan="4"></td></tr>
-							<tr><td colspan="4"><strong>Web:</strong>' . base_url() . '</tr></td>';
+							<tr><td colspan="4"><strong>Web:</strong>' . base_url() . '</td></tr>';
 
 
 
@@ -869,14 +869,9 @@ class Export {
 						
 						
 						
-						<tr >
-							<td >
-								  <tr><td colspan="4"><strong>Account Statement of Account No </strong> : ' . $account_id . '</td></tr>						 
-								  <tr><td colspan="4"><strong>Generated Date </strong> : ' . $stmt_gen_date . '</td></tr> 
-								 	  
-							</td>
-						</tr>
-								
+                        <tr><td colspan="2"><strong>Account Statement of Account No </strong> : ' . $account_id . '</td></tr>						 
+                        <tr><td colspan="2"><strong>Generated Date </strong> : ' . $stmt_gen_date . '</td></tr> 
+	
 						
 					</table>';
         $excel_html .= '<table>								
@@ -963,13 +958,14 @@ class Export {
 										
 								</tr>
 								<tr>
-									<tr><td align="center" colspan="4">** This is System Generated Report based on ' . $date_time . ' available data.</td></tr>
-									' . $com_address . ' ' . $contact_info . '									
-								</tr>
+									<td align="center" colspan="4">** This is System Generated Report based on ' . $date_time . ' available data.</td>
+                                </tr>
+									' . $com_address . '									
+								
 								
 											
 						</table>';
-
+                    //echo $excel_html;die;
 //////////////////////////////////////////////////////////
 
 

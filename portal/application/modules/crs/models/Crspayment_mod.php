@@ -1,12 +1,11 @@
 <?php
-
-/* Copyright (C) Openvoips Technologies - All Rights Reserved
+/*
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
  * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential, Only allow to use 
- * OV500Pro Version 2.1.0
- * Written by Seema Anand <openvoips@gmail.com> , 2021 
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2026 
  * http://www.openvoips.com 
- * License https://www.openvoips.com/license.html
  */
 
 class Crspayment_mod extends CI_Model {
@@ -19,8 +18,8 @@ class Crspayment_mod extends CI_Model {
         parent::__construct();
         $this->load->database();
     }
-	
-	function add($data) {
+
+    function add($data) {
         $api_log_data_array = array();
         try {
             $api_request = array();
@@ -51,9 +50,7 @@ class Crspayment_mod extends CI_Model {
 
             $api_result = json_decode($api_response, true);
 
-
             $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['REQUEST'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
-
 
             if (!isset($api_result['error']) || $api_result['error'] == '1') {
                 $this->db->trans_rollback();
@@ -83,6 +80,9 @@ class Crspayment_mod extends CI_Model {
                 }
                 $this->id = $this->db->insert_id();
 
+                $query = sprintf("update account_notification set email_status = '0'    where account_id = '%s'  ;", $data['account_id']);
+                $this->db->query($query);
+
                 $log_data_array[] = array('activity_type' => 'add', 'sql_table' => 'credit_scheduler', 'sql_key' => $this->id, 'sql_query' => $str);
             }
             set_activity_log($api_log_data_array);
@@ -92,8 +92,8 @@ class Crspayment_mod extends CI_Model {
             return $e->getMessage();
         }
     }
-	
-	function get_credit_scheduler($filter_data = array()) {
+
+    function get_credit_scheduler($filter_data = array()) {
         $final_return_array = array();
         try {
             $sql = "SELECT *  FROM  credit_scheduler   WHERE 1 ";
@@ -134,8 +134,8 @@ class Crspayment_mod extends CI_Model {
             return $final_return_array;
         }
     }
-	
-	function get_payment_options() {
+
+    function get_payment_options() {
         $final_return_array = array();
         try {
             $sql = "SELECT option_id, option_name FROM sys_rule_options WHERE status_id='1' AND option_group='payment'";
@@ -161,8 +161,8 @@ class Crspayment_mod extends CI_Model {
             return $final_return_array;
         }
     }
-	
-	function cancel_scheduler($account_id, $id_array) {
+
+    function cancel_scheduler($account_id, $id_array) {
         try {
             $this->db->trans_begin();
 
@@ -201,9 +201,9 @@ class Crspayment_mod extends CI_Model {
             return $e->getMessage();
         }
     }
-	
-	////////////////////////report///////////////
-	function paymenthistory($order_by = '', $limit_to = '', $limit_from = '', $search_data = array()) {
+
+    ////////////////////////report///////////////
+    function paymenthistory($order_by = '', $limit_to = '', $limit_from = '', $search_data = array()) {
         $final_return_array = array('result' => array());
         $final_return_array['result'] = array();
         try {
@@ -231,7 +231,6 @@ class Crspayment_mod extends CI_Model {
 			WHERE ";
             $sql_where = " payment_option_id IN('ADDBALANCE','ADDNETOFFBALANCE','REMOVEBALANCE','REMOVENETOFFBALANCE') AND paid_on BETWEEN '$start_dt' AND '$end_dt'";
 
-
             if (count($search_data) > 0) {
                 foreach ($search_data as $key => $value) {
                     if ($value != '') {
@@ -253,8 +252,7 @@ class Crspayment_mod extends CI_Model {
                                 $sql_where .= " AND ph.account_id!=ph.created_by";
                             elseif ($value == 'customer')
                                 $sql_where .= " AND ph.account_id=ph.created_by";
-                        }
-                        else {
+                        } else {
                             $sql_where .= " AND $key  LIKE '%" . $value . "%'";
                         }
                     }
@@ -272,14 +270,13 @@ class Crspayment_mod extends CI_Model {
             if ($limit_to != '')
                 $sql .= " LIMIT $limit_from, $limit_to";
 
-             //  echo $sql;
+            //  echo $sql;
             $query = $this->db->query($sql);
             if (!$query) {
                 $error_array = $this->db->error();
                 throw new Exception($error_array['message']);
             }
             $this->select_sql = "SELECT account_id " . $sql_from . $sql_where;
-
 
             $final_return_array['result'] = $query->result_array();
 
@@ -294,9 +291,8 @@ class Crspayment_mod extends CI_Model {
             return $final_return_array;
         }
     }
-	
-	
-	 function get_data_total_count($sql_exists = false) {
+
+    function get_data_total_count($sql_exists = false) {
         try {
 
             if ($sql_exists && isset($this->total_count_sql) && $this->total_count_sql != '') {
@@ -321,8 +317,8 @@ class Crspayment_mod extends CI_Model {
 
         return 0; //$this->total_count;
     }
-	
-	////////////////////////////not used///////////////
+
+    ////////////////////////////not used///////////////
 
     function check_payment($account_id, $order_id) {
         $final_return_array = array();
@@ -346,8 +342,6 @@ class Crspayment_mod extends CI_Model {
             return $final_return_array;
         }
     }
-
-   
 
     function save_payment($data) {
 
@@ -417,9 +411,7 @@ class Crspayment_mod extends CI_Model {
 
             $notes = 'Current Credit: {CREDIT}, Current Outstanding Balance: {BALANCE}, Updated Credit: {UPDATED CREDIT}, Updated Outstanding Balance: {UPDATED BALANCE}';
 
-
             $this->db->trans_begin();
-
 
             $sql = "SELECT * FROM " . 'balance' . " WHERE account_id='" . $data['account_id'] . "'";
             $query = $this->db->query($sql);
@@ -436,7 +428,6 @@ class Crspayment_mod extends CI_Model {
 
                 $notes = str_replace('{CREDIT}', $credit_limit, $notes);
                 $notes = str_replace('{BALANCE}', $balance, $notes);
-
 
                 $this->db->where('id', $id);
 
@@ -568,9 +559,7 @@ class Crspayment_mod extends CI_Model {
         try {
             $payment_data_array = $balance_data_array = array();
 
-
             $this->db->trans_begin();
-
 
             $sql = "SELECT * FROM  balance WHERE account_id='" . $data['account_id'] . "'";
             $query = $this->db->query($sql);
@@ -582,7 +571,6 @@ class Crspayment_mod extends CI_Model {
             $row = $query->row();
             if (isset($row)) {//edit
                 $id = $row->id;
-
 
                 $this->db->where('id', $id);
                 $this->db->set('maxcredit_limit', $data['maxcredit_limit'], FALSE);
@@ -665,8 +653,6 @@ class Crspayment_mod extends CI_Model {
             return $final_return_array;
         }
     }
-
-  
 
     /* Payment List */
 
@@ -755,9 +741,15 @@ class Crspayment_mod extends CI_Model {
         try {
             $final_return_array = array();
 
+            $usertype = get_logged_user_group();
 
-
-            $sql = "SELECT SQL_CALC_FOUND_ROWS payment_id,order_id,amount,tracking_id,order_status,payment_method,send_string,response_string,order_date ,ua.account_id, ' ' company_name FROM  payment_tracking  pt LEFT JOIN  account  ua ON pt.account_id=ua.account_id  WHERE 1";
+            if ($usertype == 'RESELLER') {
+                $sql = "SELECT SQL_CALC_FOUND_ROWS payment_id,order_id,amount,tracking_id,order_status,payment_method,send_string,response_string,order_date ,ua.account_id, ' ' company_name FROM  payment_tracking  pt LEFT JOIN  account  ua ON pt.account_id=ua.account_id    and  ua.parent_account_id = '" . get_logged_account_id() . "'
+                          
+                        WHERE 1";
+            } else {
+                $sql = "SELECT SQL_CALC_FOUND_ROWS payment_id,order_id,amount,tracking_id,order_status,payment_method,send_string,response_string,order_date ,ua.account_id, ' ' company_name FROM  payment_tracking  pt LEFT JOIN  account  ua ON pt.account_id=ua.account_id  WHERE 1";
+            }
 
             if (count($search_data) > 0) {
                 foreach ($search_data as $key => $value) {
@@ -780,13 +772,12 @@ class Crspayment_mod extends CI_Model {
 
             $orderby = ' ORDER BY payment_id DESC ';
 
-
             $query_str = $sql . $orderby;
 
             $limit_from = intval($limit_from);
             if ($limit_to != '')
                 $query_str .= " LIMIT $limit_from, $limit_to";
-            //echo $query_str;
+            //  echo $query_str;
             $query = $this->db->query($query_str);
             if (!$query) {
                 $error_array = $this->db->error();
@@ -805,17 +796,12 @@ class Crspayment_mod extends CI_Model {
             $final_return_array['status'] = 'success';
             $final_return_array['message'] = 'Record fetched successfully';
 
-
             return $final_return_array;
         } catch (Exception $e) {
             $final_return_array['status'] = 'failed';
             $final_return_array['message'] = $e->getMessage();
         }
     }
-
-    
-
-    
 
     function get_card_details($account_id) {
         try {
@@ -906,7 +892,6 @@ class Crspayment_mod extends CI_Model {
                 $card_data_array['account_id'] = $data['account_id'];
                 $card_data_array['card_name'] = $card_name;
 
-
                 $card_data_en_array = array(
                     'card_number' => $card_number,
                     'expirymonth' => $expirymonth,
@@ -979,5 +964,4 @@ class Crspayment_mod extends CI_Model {
             return $e->getMessage();
         }
     }
-
 }

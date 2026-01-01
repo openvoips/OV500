@@ -1,13 +1,14 @@
 <?php
 
-/* Copyright (C) Openvoips Technologies - All Rights Reserved
+/* 
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
  * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential, Only allow to use 
- * OV500Pro Version 2.1.0
- * Written by Seema Anand <openvoips@gmail.com> , 2021 
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2023 
  * http://www.openvoips.com 
- * License https://www.openvoips.com/license.html
  */
+
 
 function call_cloudpbx_billing_api($data, $method = 'GET') {
 
@@ -57,7 +58,7 @@ function call_cloudpbx_billing_api($data, $method = 'GET') {
     $log_data_insert_array['request_data'] = json_encode($data);
     $log_data_insert_array['response_data'] = $result_raw;
     $log_data_insert_array['function_return'] = $result;
-    $str = $CI->db->insert('activity_api_log', $log_data_insert_array);
+    $str = $CI->db->insert('apisdr_log', $log_data_insert_array);
 
 
     return $result;

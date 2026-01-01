@@ -1,30 +1,12 @@
 <?php
-
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-// OV500 Version 2.0.0
-// Copyright (C) 2019-2021 Openvoips Technologies   
-// http://www.openvoips.com  http://www.openvoips.org
-// 
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
-
+/*
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2026 
+ * http://www.openvoips.com 
+ */
 
 class Utils_model extends CI_Model {
 
@@ -33,21 +15,14 @@ class Utils_model extends CI_Model {
     }
 
     function get_countries() {
-        $sql = "SELECT country_id, country_name, country_prefix, country_abbr, country_iso FROM sys_countries WHERE status_id='1' ORDER BY display_sequence DESC, country_name";
-        $query = $this->db->query($sql);
-        $rows = $query->result();
-        return $rows;
-    }
-
-    function get_languages() {
-        $sql = "SELECT id, language, shortcode FROM languages  ORDER BY language";
+        $sql = "SELECT country_id, country_name, country_prefix, country_abbr FROM sys_countries WHERE status_id='1' ORDER BY display_sequence DESC, country_name";
         $query = $this->db->query($sql);
         $rows = $query->result();
         return $rows;
     }
 
     function get_currencies() {
-        $sql = "SELECT currency_id, name, symbol FROM sys_currencies ORDER BY name";
+        $sql = "SELECT currency_id, symbol,  name FROM sys_currencies where status_id = '1' ORDER BY display_sequence,  name";
         $query = $this->db->query($sql);
         $rows = $query->result_array();
         return $rows;
@@ -67,23 +42,13 @@ class Utils_model extends CI_Model {
         return $final_return_array;
     }
 
-    function get_states($country = '') {
-        $sql = "SELECT state_name, state_code_id, country FROM sys_states";
-        if ($country != '')
-            $sql .= " WHERE country='" . $country . "'";
-        $sql .= " ORDER BY state_name";
-        $query = $this->db->query($sql);
-        $rows = $query->result_array();
-        return $rows;
-    }
+    
 
     function get_tariffs($user_type, $tariff_type = '', $created_by = '') {
         $sql = "SELECT id, tariff_id, tariff_name, tariff_currency_id, tariff_type FROM tariff t WHERE t.tariff_status='1' ";
 
         $logged_account_id = get_logged_account_id();
         $sql .= " AND t.account_id= '$logged_account_id'";
-
-
 
         if ($tariff_type != '')
             $sql .= " AND t.tariff_type='" . $tariff_type . "'";
@@ -172,7 +137,6 @@ class Utils_model extends CI_Model {
         $final_return_array = array();
         $sql = "SELECT t1.* FROM sys_currencies_conversions t1 WHERE t1.id IN (SELECT max(id) FROM sys_currencies_conversions GROUP BY currency_id)  ";
 
-
         if ($currency_id != '')
             $sql .= " AND t1.currency_id='" . $currency_id . "'";
 
@@ -197,33 +161,26 @@ class Utils_model extends CI_Model {
             if (substr($count_sql, 0, 5) == 'error') {
                 throw new Exception($count_sql);
             }
-            //echo $this->select_sql.'<br>'. $count_sql;
+
             $this->total_count_sql = $count_sql;
             if ($db == 'default')
                 $query_count = $this->db->query($count_sql);
             else
                 $query_count = $this->cdrdb->query($count_sql);
             $row_count = $query_count->row();
-            //$this->total_count = $row_count->total;
+
             return $row_count->total;
-            /*
-              $query_count = $this->db->query($sql);
-              $row_count = $query_count->row();
-              $this->total_count = $row_count->total;
-             */
         } catch (Exception $e) {
-            //echo $e->getMessage();
+
             return 0;
         }
 
-        return 0; //$this->total_count;
+        return 0;
     }
-
-    /* generate unique key */
 
     function generate_key($name, $prefix1, $table, $unique_field_name) {
         $prefix2 = '';
-        $key = generate_key($name, ''); //generate unique key
+        $key = generate_key($name, '');
 
         $sql = "SELECT $unique_field_name as table_key FROM " . $table . " ";
         $query = $this->db->query($sql);
@@ -251,9 +208,22 @@ class Utils_model extends CI_Model {
             $new_key = $prefix1 . $prefix2 . $key . rand(100, 999);
             $new_key = sprintf('%-015s', $new_key);
         }
-        //echo $new_key.'--'.strlen($new_key);die;
+
         return $new_key;
     }
+
+    function get_customers($parent_account_id='') 
+    {
+        $sql = "SELECT ua.account_id, ua.name, ua.company_name, u.parent_account_id            
+			FROM customers ua INNER JOIN account u ON u.account_id=ua.account_id  
+			WHERE  u.status_id >'0'";
+   
+        $sql .=" AND parent_account_id='".$parent_account_id."'";
+        $sql .="ORDER BY company_name";
+        $query = $this->db->query($sql);
+        $rows = $query->result_array();
+        return $rows;
+    } 
 
 }
 

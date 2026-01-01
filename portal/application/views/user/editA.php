@@ -1,34 +1,19 @@
-
-<script src="<?php echo base_url() ?>theme/vendors/parsleyjs/dist/parsley.min.js"></script>
-<div class="">
-    <div class="clearfix"></div> 
-    <div class="col-md-12 col-sm-12 col-xs-12 right">      
-        <div class="x_title">
-            <h2>System Users Management</h2>
-            <ul class="nav navbar-right panel_toolbox">     
-                <li><a href="<?php echo base_url('users') ?>"><button class="btn btn-danger" type="button" >Back to System Users Listing Page</button></a> </li>
-            </ul>
-            <div class="clearfix"></div>
-        </div>
-
+<div class="container-fluid">
+    <div class="block-header">
+        <h2>System Users(EDIT) Management</h2>
+        <ul class="nav navbar-right panel_toolbox">
+            <li><a href="<?php echo base_url('users') ?>"><button class="btn btn-primary" type="button" >Back to System Users Listing Page</button></a></li>
+        </ul>
     </div>
-    <div class="row">
-        <div class="col-md-12 col-sm-12 col-xs-12">
-            <div class="x_panel">
-                <div class="x_title">
-                    <h2>System User (EDIT)</h2>
-                    <ul class="nav navbar-right panel_toolbox">
-
-                    </ul>
-                    <div class="clearfix"></div>
-                </div>
-                <div class="x_content">
-                    <br />                
+    <div class="row clearfix">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="card">
+                <div class="header">                   
                     <form action="<?php echo site_url('users/editA/' . param_encrypt($data['user_id'])); ?>" method="post" name="edit_form" id="edit_form" data-parsley-validate class="form-horizontal form-label-left">
                         <input type="hidden" name="button_action" id="button_action" value="">
                         <input type="hidden" name="action" value="OkSaveData"> 
                         <input type="hidden" name="user_id_name" value="<?php echo $data['user_id']; ?>"/>
-                        <input type="hidden" name="existing_user_type" value="<?php echo $data['account_type']; ?>"/>        
+                        <input type="hidden" name="existing_user_type" value=""/>        
 
                         <div class="form-group">
                             <label class="control-label col-md-3 col-sm-3 col-xs-12" >User Code</label>
@@ -127,21 +112,10 @@
                         <div class="form-group">
                             <label for="middle-name" class="control-label col-md-3 col-sm-3 col-xs-12">Status</label>
                             <div class="col-md-9 col-sm-6 col-xs-12">
-                                <div class="radio">	
-                                    <label><input type="radio" name="status_id" id="status1" value="1"  <?php if ($data['status_id'] == 1) { ?> checked="checked" <?php } ?> /> Active</label>
-
-                                    <label> <input type="radio" name="status_id" id="status0" value="0" <?php if ($data['status_id'] == 0) { ?> checked="checked" <?php } ?> /> Inactive</label>
-                                </div>
-
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="middle-name" class="control-label col-md-3 col-sm-3 col-xs-12">Reset Google 2FA Code</label>
-                            <div class="col-md-9 col-sm-6 col-xs-12">
-                                <div class="checkbox">	
-                                    &nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" name="reset_gcode" id="reset_gcode" value="1" />
-                                    <span class="text-info"><small>Checking this option will reset the existing code and user will get option to scan again</small></span>
-                                </div>
+                                <input type="radio" name="status_id" id="status1" value="1" class="with-gap"  <?php if ($data['status_id'] == 1) { ?> checked="checked" <?php } ?> /> 
+                                <label for="status1">Active</label>
+                                <input type="radio" name="status_id" id="status0" value="0" class="with-gap" <?php if ($data['status_id'] == 0) { ?> checked="checked" <?php } ?> /> 
+                                <label for="status0">Inactive</label>
                             </div>
                         </div>
 
@@ -149,29 +123,31 @@
                         <div class="ln_solid"></div>
                         <div class="form-group">
                             <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
-                                <button type="button" id="btnSave" class="btn btn-success">Save</button>
-                                <button type="button" id="btnSaveClose" class="btn btn-info">Save & Go back to Listing Page</button>
+                                <button type="button" id="btnSave" class="btn btn-success btn-lg">Save</button>
+                                <button type="button" id="btnSaveClose" class="btn btn-info btn-lg">Save & Go back to Listing Page</button>
                             </div>
                         </div>
 
 
 
                     </form>
+
+
+
+
+
+
+
                 </div>
             </div>
         </div>
+    </div> 
+    <div class="block-header">
+        <h2>System Users(EDIT) Management</h2>
+        <ul class="nav navbar-right panel_toolbox">
+            <li><a href="<?php echo base_url('users') ?>"><button class="btn btn-primary" type="button" >Back to System Users Listing Page</button></a></li>
+        </ul>
     </div>
-    <div class="col-md-12 col-sm-12 col-xs-12 right">
-        <div class="ln_solid"></div>
-        <div class="x_title">
-            <h2>System Users Management</h2>
-            <ul class="nav navbar-right panel_toolbox">     
-                <li><a href="<?php echo base_url('users') ?>"><button class="btn btn-danger" type="button" >Back to System Users Listing Page</button></a> </li>
-            </ul>
-            <div class="clearfix"></div>
-        </div>
-    </div>
-
-</div>    
+</div>
 <script src="<?php echo base_url() ?>theme/vendors/parsleyjs/dist/parsley.min.js"></script>
 <script src="<?php echo base_url() ?>theme/default/js/parsley-custom.js"></script>

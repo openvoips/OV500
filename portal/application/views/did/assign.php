@@ -1,6 +1,8 @@
 <script src="<?php echo base_url() ?>theme/vendors/parsleyjs/dist/parsley.min.js"></script>
 <style type="text/css">
-    .purchase {cursor:pointer;}
+    .purchase {
+        cursor:pointer;
+    }
 </style>    
 <div class="">
     <div class="clearfix"></div>    
@@ -10,7 +12,7 @@
                 <div class="x_title">
                     <h2>Assign DID</h2>
                     <ul class="nav navbar-right panel_toolbox">
-                        
+
                     </ul>
                     <div class="clearfix"></div>
                 </div>

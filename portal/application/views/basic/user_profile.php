@@ -31,7 +31,7 @@
             <div class="x_title">
                 <h2>Profile</h2>
                 <ul class="nav navbar-right panel_toolbox">
-                    
+
                 </ul>
                 <div class="clearfix"></div>
             </div>
@@ -239,26 +239,26 @@
                     <div class="form-group">
                         <label class="col-md-4 col-sm-3 col-xs-12" for="first-name">DP </label>
                         <div class="col-md-7 col-sm-6 col-xs-12">             
-<?php echo $data['dp']; ?>
+                            <?php echo $data['dp']; ?>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-md-4 col-sm-3 col-xs-12" for="first-name">CC </label>
                         <div class="col-md-7 col-sm-6 col-xs-12">               
-<?php echo $data['user_cc']; ?>
+                            <?php echo $data['user_cc']; ?>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-md-4 col-sm-3 col-xs-12" for="first-name">CPS </label>
                         <div class="col-md-7 col-sm-6 col-xs-12">                
-<?php echo $data['user_cps']; ?>
+                            <?php echo $data['user_cps']; ?>
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label class="col-md-4 col-sm-3 col-xs-12">Codec Checking</label>
                         <div class="col-md-7 col-sm-6 col-xs-12">                  
-<?php echo ($data['codecs_force'] == 1) ? 'Yes' : 'No'; ?>                        
+                            <?php echo ($data['codecs_force'] == 1) ? 'Yes' : 'No'; ?>                        
 
                         </div>                     
                     </div>
@@ -266,7 +266,7 @@
                     <div class="form-group">
                         <label for="middle-name" class="col-md-4 col-sm-3 col-xs-12">Codecs</label>
                         <div class="col-md-7 col-sm-6 col-xs-12">
-<?php echo $data['user_codecs']; ?>  
+                            <?php echo $data['user_codecs']; ?>  
                         </div>
                     </div>
 
@@ -274,14 +274,14 @@
                     <div class="form-group">
                         <label for="middle-name" class="control-label col-md-4 col-sm-3 col-xs-12">With-media</label>
                         <div class="col-md-7 col-sm-6 col-xs-12">                   
-<?php echo ($data['user_media_rtpproxy'] == 1) ? 'Yes' : 'No'; ?>
+                            <?php echo ($data['user_media_rtpproxy'] == 1) ? 'Yes' : 'No'; ?>
                         </div> 
                     </div>
 
                     <div class="form-group">
                         <label for="middle-name" class="col-md-4 col-sm-3 col-xs-12">Transcoding</label>
                         <div class="col-md-8 col-sm-6 col-xs-12">
-<?php echo ($data['user_media_rtpproxy_transcoding'] == 1) ? 'Yes' : 'No'; ?> 
+                            <?php echo ($data['user_media_rtpproxy_transcoding'] == 1) ? 'Yes' : 'No'; ?> 
                         </div>
                     </div>
 
@@ -289,7 +289,7 @@
                     <div class="form-group">
                         <label for="middle-name" class="col-md-6 col-sm-3 col-xs-12">Dont Allow Call With Loss Route</label>
                         <div class="col-md-3 col-sm-6 col-xs-12">
-<?php echo ($data['loss_carrier_check'] == 1) ? 'Yes' : 'No'; ?> 
+                            <?php echo ($data['loss_carrier_check'] == 1) ? 'Yes' : 'No'; ?> 
                         </div>
                     </div>
 
@@ -297,28 +297,28 @@
                     <div class="form-group">
                         <label for="middle-name" class="col-md-6 col-sm-3 col-xs-12">Reduce Channels as Balance Approaches Zero</label>
                         <div class="col-md-3 col-sm-6 col-xs-12">
-<?php echo ($data['nigativebalance_cc_check'] == 1) ? 'Yes' : 'No'; ?> 
+                            <?php echo ($data['nigativebalance_cc_check'] == 1) ? 'Yes' : 'No'; ?> 
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label for="middle-name" class="col-md-6 col-sm-3 col-xs-12">Presentation CLI Audit</label>
                         <div class="col-md-3 col-sm-6 col-xs-12">
-<?php echo ($data['account_presentation_cli_audit'] == 1) ? 'Yes' : 'No'; ?> 
+                            <?php echo ($data['account_presentation_cli_audit'] == 1) ? 'Yes' : 'No'; ?> 
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label for="middle-name" class="col-md-6 col-sm-3 col-xs-12">Change CLI Based On DST Prefix</label>
                         <div class="col-md-5 col-sm-6 col-xs-12">
-<?php echo ($data['force_dst_src_cli_prefix'] == 1) ? 'Yes' : 'No'; ?> 
+                            <?php echo ($data['force_dst_src_cli_prefix'] == 1) ? 'Yes' : 'No'; ?> 
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label for="middle-name" class="col-md-7 col-sm-3 col-xs-12">All Concurrent Calls On Same Number</label>
                         <div class="col-md-5 col-sm-3 col-xs-12">
-<?php echo $data['multicallonsameno_limit']; ?> 
+                            <?php echo $data['multicallonsameno_limit']; ?> 
                         </div>
                     </div> 
 
@@ -335,14 +335,14 @@
                         <div class="form-group">
                             <label class=" col-md-4 col-sm-3 col-xs-12" for="first-name">Name </label>
                             <div class="col-md-7 col-sm-6 col-xs-12">                  
-<?php echo $data['name']; ?>
+                                <?php echo $data['name']; ?>
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label class=" col-md-4 col-sm-3 col-xs-12" for="last-name">Company </label>
                             <div class="col-md-7 col-sm-6 col-xs-12">                
-<?php echo $data['company_name']; ?>
+                                <?php echo $data['company_name']; ?>
 
                             </div>
                         </div>
@@ -350,20 +350,20 @@
                         <div class="form-group">
                             <label class=" col-md-4 col-sm-3 col-xs-12" for="last-name">Email Address</label>
                             <div class="col-md-7 col-sm-6 col-xs-12">               
-<?php echo $data['emailaddress']; ?>
+                                <?php echo $data['emailaddress']; ?>
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label class=" col-md-4 col-sm-3 col-xs-12" for="last-name">Address </label>
                             <div class="col-md-7 col-sm-6 col-xs-12">                
-<?php echo $data['address']; ?>
+                                <?php echo $data['address']; ?>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="col-md-4 col-sm-3 col-xs-12" for="first-name">Phone Number </label>
                             <div class="col-md-7 col-sm-6 col-xs-12">                
-<?php echo $data['phone']; ?>
+                                <?php echo $data['phone']; ?>
                             </div>
                         </div>
                         <div class="form-group">
@@ -382,8 +382,8 @@
 
                             </div>
                         </div>              
-<?php if ($data['country_id'] == '100') {
-    ?>
+                        <?php if ($data['country_id'] == '100') {
+                            ?>
                             <div class="form-group">
                                 <label class="col-md-4 col-sm-3 col-xs-12" for="first-name">State </label>
                                 <div class="col-md-7 col-sm-6 col-xs-12">                                
@@ -400,11 +400,11 @@
 
                                 </div>
                             </div>
-<?php } ?> 
+                        <?php } ?> 
                         <div class="form-group">
                             <label class="col-md-4 col-sm-3 col-xs-12" for="first-name">PIN</label>
                             <div class="col-md-7 col-sm-6 col-xs-12">  
-<?php echo $data['pincode']; ?> 
+                                <?php echo $data['pincode']; ?> 
                             </div>
                         </div>
                     </fieldset>
@@ -418,35 +418,35 @@
                         <div class="form-group">
                             <label class="col-md-4 col-sm-3 col-xs-12" for="first-name">Name </label>
                             <div class="col-md-7 col-sm-6 col-xs-12">                 
-<?php echo $data['billing_name']; ?>
+                                <?php echo $data['billing_name']; ?>
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label class="col-md-4 col-sm-3 col-xs-12" for="last-name">Company </label>
                             <div class="col-md-7 col-sm-6 col-xs-12">              
-<?php echo $data['billing_company_name']; ?>                  
+                                <?php echo $data['billing_company_name']; ?>                  
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label class="col-md-4 col-sm-3 col-xs-12" for="last-name">Email Address </label>
                             <div class="col-md-7 col-sm-6 col-xs-12">
-<?php echo $data['billing_emailaddress']; ?>
+                                <?php echo $data['billing_emailaddress']; ?>
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label class="col-md-4 col-sm-3 col-xs-12" for="last-name">Address </label>
                             <div class="col-md-7 col-sm-6 col-xs-12">                
-<?php echo $data['billing_address']; ?>
+                                <?php echo $data['billing_address']; ?>
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label class="col-md-4 col-sm-3 col-xs-12" for="first-name">Phone Number </label>
                             <div class="col-md-7 col-sm-6 col-xs-12">                              
-<?php echo $data['billing_phone']; ?>
+                                <?php echo $data['billing_phone']; ?>
                             </div>
                         </div>
                         <div class="form-group">
@@ -465,7 +465,7 @@
                             </div>
                         </div>              
 
-<?php if ($data['billing_country_id'] == '100') { ?>
+                        <?php if ($data['billing_country_id'] == '100') { ?>
                             <div class="form-group" id="id_state_div">
                                 <label class="col-md-4 col-sm-3 col-xs-12" for="first-name">State </label>
                                 <div class="col-md-7 col-sm-6 col-xs-12">                                
@@ -482,11 +482,11 @@
 
                                 </div>
                             </div>
-<?php } ?>    
+                        <?php } ?>    
                         <div class="form-group">
                             <label class="col-md-4 col-sm-3 col-xs-12" for="first-name">PIN</label>
                             <div class="col-md-7 col-sm-6 col-xs-12">  
-<?php echo $data['billing_pincode']; ?> 
+                                <?php echo $data['billing_pincode']; ?> 
                             </div>
                         </div>
 
@@ -561,8 +561,7 @@
                                 ?>				
                             </div>
                             <?php
-                        }
-                        else {
+                        } else {
                             if (isset($status_name_array[$user_status])) {
                                 $status_name = $status_name_array[$user_status]['name'];
                                 $tooltip = $status_name_array[$user_status]['tooltip'];
@@ -590,7 +589,7 @@
                 <div class="x_title">
                     <h2>Notification Alert</h2>
                     <ul class="nav navbar-right panel_toolbox">
-                        
+
 
                         </li>
                     </ul>
@@ -653,7 +652,7 @@
                     <div class="x_title">
                         <h2>Change Password</h2>
                         <ul class="nav navbar-right panel_toolbox">
-                            
+
                         </ul>
                         <div class="clearfix"></div>
                     </div>			
@@ -740,7 +739,7 @@
                     <div class="x_title">
                         <h2>IP Users</h2>
                         <ul class="nav navbar-right panel_toolbox">
-                            
+
                         </ul>
                         <div class="clearfix"></div>
                     </div>
@@ -771,8 +770,7 @@
 
                                         <?php
                                     }
-                                }
-                                else {
+                                } else {
                                     ?>
                                     <tr>
                                         <td colspan="3" align="center"><strong>No Record Found</strong></td>
@@ -798,7 +796,7 @@
                     <div class="x_title">
                         <h2>SIP Users</h2>
                         <ul class="nav navbar-right panel_toolbox">
-                            
+
 
                             </li>
                         </ul>
@@ -832,8 +830,7 @@
 
                                         <?php
                                     }
-                                }
-                                else {
+                                } else {
                                     ?>
                                     <tr>
                                         <td colspan="3" align="center"><strong>No Record Found</strong></td>
@@ -858,7 +855,7 @@
                     <div class="x_title">
                         <h2>Caller ID Translation Rules</h2>
                         <ul class="nav navbar-right panel_toolbox">
-                            
+
 
                             </li>
                         </ul>
@@ -928,7 +925,7 @@
                     <div class="x_title">
                         <h2>Incoming Caller ID Translation Rules</h2>
                         <ul class="nav navbar-right panel_toolbox">
-                            
+
 
                             </li>
                         </ul>
@@ -961,8 +958,7 @@
 
                                         <?php
                                     }
-                                }
-                                else {
+                                } else {
                                     ?>
                                     <tr>
                                         <td colspan="2" align="center"><strong>No Record Found</strong></td>
@@ -986,7 +982,7 @@
                     <div class="x_title">
                         <h2>Dialing Plans</h2>
                         <ul class="nav navbar-right panel_toolbox">
-                            
+
 
                             </li>
                         </ul>
@@ -1035,7 +1031,7 @@
                     <div class="x_title">
                         <h2>Number Translation Rules</h2>
                         <ul class="nav navbar-right panel_toolbox">
-                            
+
 
                             </li>
                         </ul>
@@ -1068,8 +1064,7 @@
 
                                         <?php
                                     }
-                                }
-                                else {
+                                } else {
                                     ?>
                                     <tr>
                                         <td colspan="2" align="center"><strong>No Record Found</strong></td>
@@ -1094,7 +1089,7 @@
                     <div class="x_title">
                         <h2>Incoming Number Translation Rules</h2>
                         <ul class="nav navbar-right panel_toolbox">
-                            
+
 
                             </li>
                         </ul>
@@ -1127,8 +1122,7 @@
 
                                         <?php
                                     }
-                                }
-                                else {
+                                } else {
                                     ?>
                                     <tr>
                                         <td colspan="2" align="center"><strong>No Record Found</strong></td>
@@ -1152,7 +1146,7 @@
                     <div class="x_title">
                         <h2>Services</h2>
                         <ul class="nav navbar-right panel_toolbox">
-                            
+
                         </ul>
                         <div class="clearfix"></div>
                     </div>
@@ -1187,8 +1181,7 @@
 
                                         <?php
                                     }
-                                }
-                                else {
+                                } else {
                                     ?>
                                     <tr>
                                         <td colspan="3" align="center"><strong>No Record Found</strong></td>

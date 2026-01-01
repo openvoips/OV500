@@ -16,16 +16,36 @@ function crs_update_menu_func($args) {
             'page_url' => 'crs',
             'menu_name' => 'My Users & Services',
         );
-		  
-		$menu_title = 'System & Services';    
-		$args[$menu_title]['Paypal'] = array(
-				'page_name' => array('paypal_index'),
-				'page_url' => 'crs/payment/trace',
-				'menu_name' => 'Online Payment Log',
-				'icon' => '<i class="fa fa-folder-o"></i>'
-		);
-			
+
+        $menu_title = 'System & Services';
+        $args[$menu_title]['Paypal'] = array(
+            'page_name' => array('trace','crs_paymenthistory','payment_trace'),
+            'page_url' => 'crs/payment/trace',
+            'menu_name' => 'Online Payment Log',
+            'icon' => '<i class="fa fa-folder-o"></i>'
+        );
+        /*
+        $menu_title = 'Rates & Package';
+        $args[$menu_title]['bundle'] = array(
+            'page_name' => array('bundle_index', 'bundle_add', 'bundle_edit'),
+            'page_url' => 'crs/bundle',
+            'menu_name' => 'Package',
+            'icon' => '<i class="fa fa-folder-o"></i>'
+        );
+        */
     }
+
+    if (check_logged_user_group(array('RESELLER', 'CUSTOMER'))) {
+
+        $menu_title = 'Billing & Invoices';
+
+        $args[$menu_title]['customers/statement'] = array(
+            'page_name' => array('report_statement' ),
+            'page_url' => 'crs/customers/rstatement/',
+            'menu_name' => 'Account Statement');
+    }
+
+
 
 
     return $args;

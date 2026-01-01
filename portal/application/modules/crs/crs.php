@@ -1,12 +1,12 @@
 <?php
 
-/**
- * Plugin Name: User Management
- * Plugin URI: http://openvoips.org/
- * Version: 1.0
- * Description: CRS Module is used to manage the customer and Reseller from a single point page. 
- * Author: Seema Anand
- * Author URI: http://openvoips.org/
+/*
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2026 
+ * http://www.openvoips.com 
  */
 ?>
 <?php

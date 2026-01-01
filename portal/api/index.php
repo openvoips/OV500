@@ -2,12 +2,12 @@
 // ##############################################################################
 // OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
 //
-// Copyright (C) 2019-2020 Chinna Technologies   
+// Copyright (C) 2019-2025 Openvoips Technologies   
 // Seema Anand <openvoips@gmail.com>
 // Anand <kanand81@gmail.com>
 // http://www.openvoips.com  http://www.openvoips.org
 //
-//OV500 Version 1.0.3.3
+// OV500 Version 3.0.1
 // License https://www.gnu.org/licenses/agpl-3.0.html
 //
 //
@@ -34,11 +34,11 @@ include_once 'config.php';
 $section = $_REQUEST['section'];
 $fc_ip = $_SERVER['REMOTE_ADDR'];
 if ($section == 'dialplan') {
-    include_once 'lib/OVS.php';   
+    include_once 'lib/OVS.php';
     $dialplan = NEW OVS();
     $result = $dialplan->main($_REQUEST);
     echo $result;
-    $endtime = microtime(true); 
+    $endtime = microtime(true);
     $dialplan->writelog($result);
     $time = number_format(($endtime - $starttime), 16);
     $log = "Call Process time :: $time Sec " . $dialplan->error;

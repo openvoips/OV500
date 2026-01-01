@@ -1,17 +1,24 @@
 <?php
+/* 
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2023 
+ * http://www.openvoips.com 
+ */
 class Paypal_mod extends CI_Model {
 
     public $total_count;
-	public $select_sql;
-   	
-	function __construct()
-	{
-		parent::__construct();
-		$this->load->database();	
-	}
+    public $select_sql;
 
-   	function get_paypal_data($account_id) {
-        $final_return_array=array();
+    function __construct() {
+        parent::__construct();
+        $this->load->database();
+    }
+
+    function get_paypal_data($account_id) {
+        $final_return_array = array();
         try {
             $sql = "SELECT * FROM sys_payment_credentials WHERE account_id='$account_id' AND payment_method='paypal' LIMIT 1";
             $query = $this->db->query($sql);
@@ -27,15 +34,15 @@ class Paypal_mod extends CI_Model {
             return $final_return_array;
         }
     }
-	
-	
-	function set_paypal_data($data) {
+
+    function set_paypal_data($data) {
+         
         try {
-            if(strlen($data['business']) == 0 || strlen($data['account_id']) == 0) {
+            if (strlen($data['business']) == 0 || strlen($data['account_id']) == 0) {
                 throw new Exception('Insufficient Data');
             }
-           
-			$account_id = $data['account_id'];			
+
+            $account_id = $data['account_id'];
             $status = $data['status'];
             $credentials = json_encode(array('business' => $data['business']));
             $sql = "INSERT INTO sys_payment_credentials SET  
@@ -44,18 +51,19 @@ class Paypal_mod extends CI_Model {
 			status='$status' ,
 			payment_method = 'paypal'
 			ON DUPLICATE KEY UPDATE credentials=values(credentials), status=values(status)";
-			
+
             $query = $this->db->query($sql);
-			 if (!$query) {
+            
+         
+           
+            if (!$query) {
                 $error_array = $this->db->error();
                 throw new Exception($error_array['message']);
             }
             return true;
         } catch (Exception $e) {
-           return $e->getMessage();
+            return $e->getMessage();
         }
     }
-	
 
-  
 }

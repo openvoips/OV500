@@ -1,14 +1,12 @@
 <?php
-
-/* Copyright (C) Openvoips Technologies - All Rights Reserved
+/* 
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
  * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential, Only allow to use 
- * OV500Pro Version 2.1.0
- * Written by Seema Anand <openvoips@gmail.com> , 2021 
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2023 
  * http://www.openvoips.com 
- * License https://www.openvoips.com/license.html
  */
-
 class Payment_mod extends CI_Model {
 
     public $account_id;
@@ -19,8 +17,8 @@ class Payment_mod extends CI_Model {
         parent::__construct();
         $this->load->database();
     }
-	
-	function initiate_payment($account_id, $amount, $pay_data_array, $payment_method = '') {
+
+    function initiate_payment($account_id, $amount, $pay_data_array, $payment_method = '') {
         $log_data_array = array();
         try {
             $payment_tracking_array = array();
@@ -62,12 +60,28 @@ class Payment_mod extends CI_Model {
             return $e->getMessage();
         }
     }
-	
-	function get_payment_gateways($account_id) {
+
+    function get_payment_gateways($account_id) {
         $final_return_array = array();
         try {
             $sql = "SELECT * FROM sys_payment_credentials WHERE account_id ='" . $account_id . "'  AND status='Y' ORDER BY `payment_method` ASC ";
             //echo $sql;
+
+
+
+            $sql = " SELECT
+sys_payment_credentials.id,
+sys_payment_credentials.account_id,
+sys_payment_credentials.payment_method,
+sys_payment_credentials.credentials,
+sys_payment_credentials.`status`
+FROM sys_payment_credentials
+WHERE account_id ='" . $account_id . "'  AND status='Y'
+
+and id in (select max(id) from sys_payment_credentials where account_id ='" . $account_id . "' group by payment_method)
+
+ORDER BY `payment_method` ASC";
+
             $query = $this->db->query($sql);
             if (!$query) {
                 $error_array = $this->db->error();
@@ -90,8 +104,8 @@ class Payment_mod extends CI_Model {
             return $final_return_array;
         }
     }
-	
-	function update_payment($account_id, $account_type, $order_id, $data, $payment_method = '') {
+
+    function update_payment($account_id, $account_type, $order_id, $data, $payment_method = '') {
         $log_data_array = array();
         $api_log_data_array = array();
         try {
@@ -108,9 +122,9 @@ class Payment_mod extends CI_Model {
             if (isset($row_data['result']['amount']) && $row_data['result']['amount'] > 0) {
                 if ($row_data['result']['payment_method'] == 'paypal')
                     $amount = $data['response_string']['mc_gross'] - $data['response_string']['mc_fee'];
-                elseif(isset($data['response_string']['amount_to_update']))
-					$amount =$data['response_string']['amount_to_update'];
-				else
+                elseif (isset($data['response_string']['amount_to_update']))
+                    $amount = $data['response_string']['amount_to_update'];
+                else
                     $amount = $row_data['result']['amount'];
             } else
                 throw new Exception('Amount not found');
@@ -137,42 +151,41 @@ class Payment_mod extends CI_Model {
                     } else {
                         $payment_method_display = $payment_method;
                     }
-					/*
-                    $api_request['account_id'] = $account_id;
-                    $api_request['user_type'] = $data['user_type'];
-                    $api_request['service_number'] = 'Bank Transfer Payment';
-                    $api_request['amount'] = $amount;
-                    $api_request['paid_on'] = date('Y-m-d H:i:s');
-                    $api_request['notes'] = $payment_method_display . ' payment. Trans ID: (' . $data['tracking_id'] . ')';
-                    $api_request['created_by'] = get_logged_account_id();
-                    $api_request['request'] = 'ADDBALANCE';
-                    $api_request['making_own_payment'] = 'Y';
-                    if (isset($data['tracking_id'])) {
-                        $api_request['transaction_id'] = $data['tracking_id'];
-                    }
-                    $api_response = callSdrAPI($api_request);
+                    /*
+                      $api_request['account_id'] = $account_id;
+                      $api_request['user_type'] = $data['user_type'];
+                      $api_request['service_number'] = 'Bank Transfer Payment';
+                      $api_request['amount'] = $amount;
+                      $api_request['paid_on'] = date('Y-m-d H:i:s');
+                      $api_request['notes'] = $payment_method_display . ' payment. Trans ID: (' . $data['tracking_id'] . ')';
+                      $api_request['created_by'] = get_logged_account_id();
+                      $api_request['request'] = 'ADDBALANCE';
+                      $api_request['making_own_payment'] = 'Y';
+                      if (isset($data['tracking_id'])) {
+                      $api_request['transaction_id'] = $data['tracking_id'];
+                      }
+                      $api_response = callSdrAPI($api_request);
+                      $api_result = json_decode($api_response, true);
+                     */
+                    $payment_method_display = 'Balance added by stripe';
+                    $api_request['ACCOUNTID'] = $account_id;
+                    $api_request['USERTYPE'] = $account_type;
+                    $api_request['SERVICENUMBER'] = 'Stripe Payment';
+                    $api_request['AMMOUNT'] = $amount;
+                    $api_request['COLLECTIONOPTION'] = '';
+                    $api_request['PAIDON'] = date('Y-m-d H:i:s');
+                    $api_request['NOTES'] = "Balance added by stripe";
+                    $api_request['CREATEDBY'] = $account_id;
+                    $api_request['REQUEST'] = 'ADDBALANCE';
+                    $api_request['MAKEOWNPAYMENT'] = 'Y';
+                    if (isset($data['tracking_id']))
+                        $api_request['TRANSACTIONID'] = $data['tracking_id'];
+                    else
+                        $api_request['TRANSACTIONID'] = '';
+                    $api_request['PAYMENTMETHOD'] = 'STRIPE';
+                    $api_response = call_billing_api($api_request);
                     $api_result = json_decode($api_response, true);
-					*/
-					$payment_method_display = 'Balance added by stripe';
-					$api_request['ACCOUNTID'] = $account_id;
-					$api_request['USERTYPE'] = $account_type;
-					$api_request['SERVICENUMBER'] = 'Stripe Payment';
-					$api_request['AMMOUNT'] = $amount;
-					$api_request['COLLECTIONOPTION'] = '';
-					$api_request['PAIDON'] = date('Y-m-d H:i:s');
-					$api_request['NOTES'] = "Balance added by stripe";
-					$api_request['CREATEDBY'] = $account_id;
-					$api_request['REQUEST'] = 'ADDBALANCE';
-					$api_request['MAKEOWNPAYMENT'] = 'Y';					
-					if (isset($data['tracking_id'])) 
-                        			$api_request['TRANSACTIONID'] = $data['tracking_id'];
-					else
-						$api_request['TRANSACTIONID'] = '';					
-					$api_request['PAYMENTMETHOD'] = 'STRIPE';
-					$api_response = call_billing_api($api_request);
-					$api_result = json_decode($api_response, true);
-				
-				
+
                     //echo '<pre>';print_r($api_request);print_r($api_result);echo '</pre>';die;
                 }
                 set_activity_log($log_data_array);
@@ -184,9 +197,8 @@ class Payment_mod extends CI_Model {
             return $e->getMessage();
         }
     }
-	
-	
-	//////////////////////////////
+
+    //////////////////////////////
 
     function check_payment($account_id, $order_id) {
         $final_return_array = array();
@@ -242,9 +254,7 @@ class Payment_mod extends CI_Model {
 
             $api_result = json_decode($api_response, true);
 
-
             $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['REQUEST'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
-
 
             if (!isset($api_result['error']) || $api_result['error'] == '1') {
                 $this->db->trans_rollback();
@@ -352,9 +362,7 @@ class Payment_mod extends CI_Model {
 
             $notes = 'Current Credit: {CREDIT}, Current Outstanding Balance: {BALANCE}, Updated Credit: {UPDATED CREDIT}, Updated Outstanding Balance: {UPDATED BALANCE}';
 
-
             $this->db->trans_begin();
-
 
             $sql = "SELECT * FROM " . 'balance' . " WHERE account_id='" . $data['account_id'] . "'";
             $query = $this->db->query($sql);
@@ -371,7 +379,6 @@ class Payment_mod extends CI_Model {
 
                 $notes = str_replace('{CREDIT}', $credit_limit, $notes);
                 $notes = str_replace('{BALANCE}', $balance, $notes);
-
 
                 $this->db->where('id', $id);
 
@@ -503,9 +510,7 @@ class Payment_mod extends CI_Model {
         try {
             $payment_data_array = $balance_data_array = array();
 
-
             $this->db->trans_begin();
-
 
             $sql = "SELECT * FROM  balance WHERE account_id='" . $data['account_id'] . "'";
             $query = $this->db->query($sql);
@@ -517,7 +522,6 @@ class Payment_mod extends CI_Model {
             $row = $query->row();
             if (isset($row)) {//edit
                 $id = $row->id;
-
 
                 $this->db->where('id', $id);
                 $this->db->set('maxcredit_limit', $data['maxcredit_limit'], FALSE);
@@ -572,8 +576,6 @@ class Payment_mod extends CI_Model {
             return $e->getMessage();
         }
     }
-
-  
 
     function get_payment_options() {
         $final_return_array = array();
@@ -689,8 +691,6 @@ class Payment_mod extends CI_Model {
         try {
             $final_return_array = array();
 
-
-
             $sql = "SELECT SQL_CALC_FOUND_ROWS payment_id,order_id,amount,tracking_id,order_status,payment_method,send_string,response_string,order_date ,ua.account_id, ' ' company_name FROM  payment_tracking  pt LEFT JOIN  account  ua ON pt.account_id=ua.account_id  WHERE 1";
 
             if (count($search_data) > 0) {
@@ -713,7 +713,6 @@ class Payment_mod extends CI_Model {
 
 
             $orderby = ' ORDER BY payment_id DESC ';
-
 
             $query_str = $sql . $orderby;
 
@@ -738,7 +737,6 @@ class Payment_mod extends CI_Model {
             $final_return_array['result'] = $result;
             $final_return_array['status'] = 'success';
             $final_return_array['message'] = 'Record fetched successfully';
-
 
             return $final_return_array;
         } catch (Exception $e) {
@@ -917,7 +915,6 @@ class Payment_mod extends CI_Model {
             } elseif ($update_or_insert == 'insert') {
                 $card_data_array['account_id'] = $data['account_id'];
                 $card_data_array['card_name'] = $card_name;
-
 
                 $card_data_en_array = array(
                     'card_number' => $card_number,

@@ -1,29 +1,13 @@
 <?php
 
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-// OV500 Version 2.0.0
-// Copyright (C) 2019-2021 Openvoips Technologies   
-// http://www.openvoips.com  http://www.openvoips.org
-// 
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
+/*
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2026 
+ * http://www.openvoips.com 
+ */
 
 class Currency extends MY_Controller {
 
@@ -71,15 +55,15 @@ class Currency extends MY_Controller {
         $this->load->view('basic/footer', $data);
     }
 
-    public function index($arg1 = '', $format = '') {
+    public function Exc($arg1 = '', $format = '') {
 
         $data = array();
-        $page_name = "Currency_index";
+        $page_name = "Currencyexc";
         $file_name = 'Currency_' . date('Ymd');
         $is_file_downloaded = false;
         $searching = true;
 
-        // var_dump($_POST);
+        //var_dump($_POST);
         ///////////////// Deletion /////////////////	
         if (isset($_POST['action']) && $_POST['action'] == 'OkDeleteData') {
             if (!check_account_permission('currency', 'delete')) {
@@ -112,6 +96,7 @@ class Currency extends MY_Controller {
         }
         $search_data = array();
         $_SESSION['search_currency_data'] = Array();
+        $_SESSION['search_currency_data']['s_currency_id']='';
         if (isset($_POST['search_action'])) {
             $this->form_validation->set_rules('currency', 'currency', 'trim');
             if ($this->form_validation->run() == FALSE) {
@@ -119,6 +104,7 @@ class Currency extends MY_Controller {
             } else {
                 $_SESSION['search_currency_data'] = array(
                     's_currency_id' => (isset($_POST['currency']) ? trim($_POST['currency']) : ''),
+                    'no_of_records' => (isset($_POST['no_of_rows']) ? trim($_POST['no_of_rows']) : ''),
                 );
             }
         } else {
@@ -126,11 +112,13 @@ class Currency extends MY_Controller {
             if ($r == '') {
                 $_SESSION['search_currency_data']['s_currency_id'] = isset($_SESSION['search_currency_data']['s_currency_id']) ? $_SESSION['search_currency_data']['s_currency_id'] : '';
             }
+            $_SESSION['search_currency_data']['no_of_records'] = isset($_SESSION[$page_name]['no_of_records']) ? $_SESSION[$page_name]['no_of_records'] : RECORDS_PER_PAGE;
         }
+
+
         $search_data = array(
             'currency_id' => $_SESSION['search_currency_data']['s_currency_id'],
         );
-		//print_r($search_data);
 
         $data['currency_dropdown'] = $this->Currency_mod->get_currency(array('currency_id' => 'ASC'), $search_data);
 
@@ -139,25 +127,30 @@ class Currency extends MY_Controller {
             if ($searching) {
                 $pagination_uri_segment = $this->uri->segment(3, 0);
                 $order_by = array('id' => 'ASC');
-                $search_data = Array();
+
                 $response = $this->Currency_mod->get_exchange_rate($order_by, $search_data, 10, $pagination_uri_segment);
                 $config = array();
-                $config = $this->utils_model->setup_pagination_option($response['total'], 'currency/index', 10, 3);
+                $config = $this->utils_model->setup_pagination_option($response['total'], 'currency/exc', 10, 3);
                 $this->pagination->initialize($config);
                 $data['searching'] = 1;
                 $data['pagination'] = $this->pagination->create_links();
                 $data['listing_data'] = $response['result'];
-                $data['listing_count'] = $response['total'];
+                $data['total_records']=$data['listing_count'] = $response['total'];
             } else {
                 $data['searching'] = 0;
                 $data['listing_data'] = array();
-                $data['listing_count'] = 0;
+                $data['total_records']=$data['listing_count'] = 0;
                 $data['currency_dropdown'] = Array();
             }
+            $data['search_session_key'] = 'search_currency_data';
             $this->load->view('basic/header', $data);
-            $this->load->view('services/currency', $data);
+            $this->load->view('services/exccurrency', $data);
             $this->load->view('basic/footer', $data);
         }
+    }
+
+    public function index($arg1 = '', $format = '') {
+        redirect(base_url() . 'currency/exc', 'location', '301');
     }
 
 }

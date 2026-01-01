@@ -1,8 +1,10 @@
-<script src="<?php echo base_url() ?>theme/vendors/combo-box-typeahead/js/bootstrap-combobox.js"></script>
+<!--
+    <script src="<?php echo base_url() ?>theme/vendors/combo-box-typeahead/js/bootstrap-combobox.js"></script>
 <link href="<?php echo base_url() ?> theme/vendors/combo-box-typeahead/css/bootstrap-combobox.css" rel="stylesheet" type="text/css">
+-->
 <script>
     $(document).ready(function () {
-        $('.combobox').combobox()
+      //  $('.combobox').combobox()
     });
 </script>
 <?php
@@ -98,5 +100,5 @@ $assigned_route_array=array();
             <button type="button" id="<?php echo 'btnSaveClose'.$key;?>" class="btn btn-info" onclick="save_button('<?php echo $key;?>')">Add Dialplan</button>
         </div>
     </div>
-
+<br>
 </form>

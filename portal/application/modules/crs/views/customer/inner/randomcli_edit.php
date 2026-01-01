@@ -1,0 +1,133 @@
+<?php
+$tab_index = 0;
+$randomcli_data = current($data['randomclisingle']);
+?>
+
+
+
+
+<form action="" method="post" name="<?php echo 'tab_form_' . $key; ?>" id="<?php echo 'tab_form_' . $key; ?>" data-parsley-validate class="form-horizontal form-label-left">
+    <input type="hidden" name="button_action" id="button_action2" value="">
+    <input type="hidden" name="tab" value="<?php echo $key; ?>">
+
+        
+          <input type="hidden" name="action" value="OkSaveData">
+          <input type="hidden" name="randomcli_id" value="<?php echo $randomcli_data['id']; ?>" />
+          <input type="hidden" name="account_id" value="<?php echo $data['account_id']; ?>" />
+          <input type="hidden" name="rule_type" value="<?php echo $randomcli_data['rule_type']; ?>" />
+          
+         
+
+
+          <div class="form-group">
+            <label class="control-label col-md-4 col-sm-6 col-xs-12">Account Code <span class="required">*</span> </label>
+            <div class="col-md-7 col-sm-6 col-xs-12">
+              <input type="text" name="carrier_name" id="carrier_name_display"
+                value="<?php echo $data['account_id'] . ' (' . $data['company_name'] . ')'; ?>" disabled="disabled"
+                class="form-control col-md-7 col-xs-12">
+            </div>
+          </div>
+
+
+          <?php if($randomcli_data['rule_type']==1){?>
+          <div class="form-group">
+            <label class="control-label col-md-4 col-sm-6 col-xs-12" >CLI Rule Name<span
+                class="required">*</span> </label>
+            <div class="col-md-7 col-sm-6 col-xs-12">
+              <input type="text" name="clirule_name" id="clirule_name"
+                value="<?php echo $randomcli_data['rule_name']; ?>" data-parsley-required=""
+                data-parsley-minlength="4" class="form-control col-md-7 col-xs-12">
+            </div>
+          </div>
+
+
+
+          <div class="form-group">
+            <label class="control-label col-md-4 col-sm-6 col-xs-12" >Destination Prefix <span
+                class="required">*</span> </label>
+            <div class="col-md-7 col-sm-6 col-xs-12">
+              <input type="text" name="destination_prefix" id="destination_prefix"
+                value="<?php echo $randomcli_data['destination_prefix']; ?>" data-parsley-required=""
+                data-parsley-minlength="1" class="form-control col-md-7 col-xs-12">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-md-4 col-sm-6 col-xs-12" >Random CLI Starting with<span
+                class="required">*</span></label>
+            <div class="col-md-7 col-sm-6 col-xs-12">
+              <input type="text" name="cli_fixprefix" id="cli_fixprefix"
+                value="<?php echo $randomcli_data['cli_fixprefix']; ?>" data-parsley-required=""
+                class="form-control col-md-7 col-xs-12">
+            </div>
+          </div>
+
+          
+          <div class="form-group">
+            <label class="control-label col-md-4 col-sm-6 col-xs-12" >Random CLI Suffix length</label>
+            <div class="col-md-7 col-sm-6 col-xs-12">
+              <input type="text" name="cli_length" id="cli_length" value="<?php echo $randomcli_data['cli_length']; ?>"
+                data-parsley-required="" data-parsley-type="digits" data-parsley-range="[1, 100]"
+                class="form-control col-md-7 col-xs-12">
+
+            </div>
+          </div>
+          <?php } 
+          else { ?>
+          <div class="form-group">
+            <label class="control-label col-md-4 col-sm-6 col-xs-12" >Destination Pattern <span
+                class="required">*</span> </label>
+            <div class="col-md-7 col-sm-6 col-xs-12">
+              <input type="text" name="destination_prefix" id="destination_prefix"
+                value="<?php echo $randomcli_data['destination_prefix']; ?>" data-parsley-required=""
+                data-parsley-minlength="1" class="form-control col-md-7 col-xs-12">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-md-4 col-sm-6 col-xs-12" >Caller ID<span
+                class="required">*</span></label>
+            <div class="col-md-7 col-sm-6 col-xs-12">
+              <input type="text" name="cli_fixprefix" id="cli_fixprefix"
+                value="<?php echo $randomcli_data['cli_fixprefix']; ?>" data-parsley-required=""
+                class="form-control col-md-7 col-xs-12">
+            </div>
+          </div>
+
+
+        <?php } ?>
+
+          
+
+
+          <div class="form-group">
+              <label for="middle-name" class="control-label col-md-4 col-sm-3 col-xs-12">Status</label>
+              <div class="col-md-7 col-sm-6 col-xs-12">
+                  <div class="radio">
+                      <input  class="with-gap"  type="radio" name="cli_status" id="cli_status1" value="1" <?php if ($randomcli_data['cli_status'] == 1) { ?> checked="checked" <?php } ?>  /><label for="cli_status1"> Active</label>
+
+                      <input  class="with-gap"  type="radio" name="cli_status" id="cli_status0" value="0" <?php if ($randomcli_data['cli_status'] == 0) { ?> checked="checked" <?php } ?>  /> <label for="cli_status0">Inactive</label>
+                  </div>
+
+              </div>
+          </div>
+
+
+
+
+
+
+          <div class="ln_solid"></div>
+          <div class="form-group">
+            <div class="col-md-8 col-sm-6 col-xs-12 col-md-offset-4">
+            <button type="button" id="<?php echo 'btnSaveClose' . $key; ?>" class="btn btn-info" onclick="save_button('<?php echo $key; ?>')">Update</button>
+
+            </div>
+          </div>
+
+        </form>
+
+
+
+
+          <?php //echo '<pre>';print_r($data);echo '</pre>';
+          ?>
+

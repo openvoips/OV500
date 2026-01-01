@@ -1,13 +1,12 @@
 <?php
-/* Copyright (C) Openvoips Technologies - All Rights Reserved
+/* 
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
  * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential, Only allow to use 
- * OV500Pro Version 2.1.0
- * Written by Seema Anand <openvoips@gmail.com> , 2021 
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2023 
  * http://www.openvoips.com 
- * License https://www.openvoips.com/license.html
  */
-
 class Activitylog_mod extends CI_Model {
 
     public $total_count;
@@ -60,7 +59,7 @@ class Activitylog_mod extends CI_Model {
 			$group_by='';
 			if(isset($filter_data['group_by']) && count($filter_data['group_by'])>0)
 			{
-				$sql = "SELECT log.*, count(id) group_count FROM " . $this->db->dbprefix('activity_site_log') . " log  WHERE 1";
+				$sql = "SELECT log.*, count(id) group_count FROM " . $this->db->dbprefix('webaccess_log') . " log  WHERE 1";
 				
 				$group_by = implode(', ',$filter_data['group_by']);
 				//$group_by = $filter_data['group_by'];
@@ -68,7 +67,7 @@ class Activitylog_mod extends CI_Model {
 			}
 			else
 			{
-            	$sql = "SELECT log.* FROM " . $this->db->dbprefix('activity_site_log') . " log  WHERE 1";
+            $sql = "SELECT log.* FROM " . $this->db->dbprefix('webaccess_log') . " log  WHERE 1";
 			}
 			
             if (count($filter_data) > 0) {
@@ -76,14 +75,7 @@ class Activitylog_mod extends CI_Model {
                   if ($value != '') {
                         if (in_array($key, array('account_id','id')))
                             $sql .= " AND $key ='" . $value . "' ";
-                        if ($key=='time_range')
-						{
-							$range = explode(' - ', $value);				
-							$start_dt = trim($range[0]);
-							$end_dt = trim($range[1]);
-                            $sql .= " AND created_dt BETWEEN '$start_dt' AND '$end_dt' ";
-						}
-						else
+                        else
                             $sql .= " AND $key LIKE '%" . $value . "%' ";
                     }
                 }
@@ -139,7 +131,7 @@ function get_activity_types()
 {
 	try{
 		$final_return_array = array();
-		$sql = "SELECT DISTINCT event FROM ".$this->db->dbprefix('activity_site_log')." WHERE event!='' ORDER BY event";
+		$sql = "SELECT DISTINCT event FROM ".$this->db->dbprefix('webaccess_log')." WHERE event!='' ORDER BY event";
 		$query = $this->db->query($sql);				
 		$final_return_array['result'] = $query->result_array();
 		$final_return_array['status'] = 'success';

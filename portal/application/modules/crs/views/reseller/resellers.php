@@ -15,7 +15,7 @@ $status_name_array = array(
             </ul>
             <div class="clearfix"></div>
         </div>
-        <div class="x_content"> 
+     
             <form class="block-content form-horizontal " id="search_form" name="search_form"  method="post" action="<?php echo site_url('crs/resellers'); ?>">
                 <input type="hidden" name="search_action" value="search" />
                 <input type="hidden" name="no_of_rows" id="no_of_rows" value="" />
@@ -63,9 +63,7 @@ $status_name_array = array(
 
             </form> 
 
-
-            <div class="clearfix"></div>
-            <div class="ln_solid"></div>
+ 
             <div class="row">  
                 <?php
                 dispay_pagination_row($total_records, $_SESSION[$search_session_key]['no_of_rows'], $pagination);
@@ -190,11 +188,7 @@ $status_name_array = array(
             <div class="row">  
                 <?php dispay_pagination_row_bottom($total_records, $_SESSION[$search_session_key]['no_of_rows'], $pagination); ?>
             </div> 
-
-        </div>
-    </div>
-    <?php //ddd($data);
-    ?>
+        </div>   
 </div>
 
 <script>

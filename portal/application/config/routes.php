@@ -51,15 +51,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
   |		my-controller/my-method	-> my_controller/my_method
  */
 $route['default_controller'] = 'login';
-$route['404_override'] = 'page'; ///custom404';
+//$route['404_override'] = 'page'; ///custom404';
 $route['profile'] = 'users/profile';
 $route['my_balance'] = 'payment/my_balance';
 $route['MyRates'] = 'rates/MyRates';
 $route['MyRates/(:any)'] = 'rates/MyRates/$1';
-$route['MyPlan'] = 'customers/myplan';
-$route['MyPlan/(:any)'] = 'customers/myplan/$1';
+//$route['MyPlan'] = 'customers/myplan';
+//$route['MyPlan/(:any)'] = 'customers/myplan/$1';
 //$route['MyPackage/(:any)'] = 'resellers/myplan/$1';
-$route['MyPackage/(:any)'] = 'resellers/mypackage/$1';
+
 $route['autologin/(:any)'] = 'users/autologin/$1';
 $route['autologin/(:any)/(:any)'] = 'users/autologin/$1/$2';
 $route['reautologin/(:any)'] = 'users/reautologin/$1';
@@ -67,4 +67,5 @@ $route['reautologin/(:any)/(:any)'] = 'users/reautologin/$1/$2';
 $route['cuautologin/(:any)'] = 'users/cuautologin/$1';
 $route['cuautologin/(:any)/(:any)'] = 'users/cuautologin/$1/$2';
 
+$route['404_override'] = 'pages';//'login/error';
 $route['translate_uri_dashes'] = TRUE;

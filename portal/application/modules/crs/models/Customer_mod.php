@@ -1,15 +1,12 @@
 <?php
-
-/* Copyright (C) Openvoips Technologies - All Rights Reserved
+/*
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
  * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential, Only allow to use 
- * OV500Pro Version 2.1.0
- * Written by Seema Anand <openvoips@gmail.com> , 2021 
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2026 
  * http://www.openvoips.com 
- * License https://www.openvoips.com/license.html
  */
-
-
 class Customer_mod extends CI_Model {
 
     public $account_id;
@@ -44,7 +41,7 @@ class Customer_mod extends CI_Model {
                         } elseif ($key == 'ipaddress' and strlen($value) > 0) {
                             $sql .= " AND c.account_id IN( SELECT account_id FROM customer_ips WHERE $key LIKE '%" . $value . "%' )";
                         } elseif ($key == 'sip_username' and strlen($value) > 0) {
-                            $sql .= " AND c.account_id IN( SELECT account_id FROM customer_sip_account WHERE username LIKE '%" . $value . "%' )";
+                            $sql .= " AND c.account_id IN( SELECT account_id FROM customer_devices WHERE username LIKE '%" . $value . "%' )";
                         } else {
                             $sql .= " AND $key LIKE '%" . $value . "%' ";
                         }
@@ -117,6 +114,18 @@ class Customer_mod extends CI_Model {
                 if (isset($option_param['bundle_package']) || isset($option_param['bundle_package_group_by'])) {
                     $row['bundle_package'] = array();
                 }
+                if (isset ($option_param['randomcli']) && $option_param['randomcli'] == true) {//set default value
+                    $row['randomcli'] = array();
+                }
+                if (isset ($option_param['randomcli_type1']) && $option_param['randomcli_type1'] == true) {//set default value
+                    $row['randomcli_type1'] = array();
+                }
+                if (isset ($option_param['randomcli_type2']) && $option_param['randomcli_type2'] == true) {//set default value
+                    $row['randomcli_type2'] = array();
+                }
+                if (isset ($option_param['cli_dst_rules']) && $option_param['cli_dst_rules'] == true) {//set default value
+                    $row['cli_dst_rules'] = array();
+                }
 
                 $final_return_array['result'][$account_id] = $row;
                 $account_id_array[] = $account_id;
@@ -126,10 +135,108 @@ class Customer_mod extends CI_Model {
             }
             //$tariff_id_array = array_unique($tariff_id_array);
 
+            if (isset($option_param['cli_dst_rules']) && $option_param['cli_dst_rules'] == true && count($final_return_array['result']) > 0) {
+                $account_id_str = implode("','", $account_id_array);
+                $account_id_str = "'" . $account_id_str . "'";
+                $sql = "SELECT * 
+                FROM account_cli_dst_rules WHERE account_id IN($account_id_str) ";
+               
+                $query = $this->db->query($sql);
+                if (!$query) {
+                    $error_array = $this->db->error();
+                    throw new Exception($error_array['message']);
+                }                
+                foreach ($query->result_array() as $row) {
+                    $account_id = $row['account_id'];
+                    //$cli_dst_rules = $row['id'];
+                    $final_return_array['result'][$account_id]['cli_dst_rules'] = $row;
+                }
+            }
+            
+            if (isset($option_param['randomcli']) && $option_param['randomcli'] == true && count($final_return_array['result']) > 0) {
+                $account_id_str = implode("','", $account_id_array);
+                $account_id_str = "'" . $account_id_str . "'";
+                $sql = "SELECT id, rule_id, rule_name, account_id, destination_prefix, cli_fixprefix, cli_length, cli_status, rule_type 
+                FROM randomcli_cust WHERE account_id IN($account_id_str) ";
+               
+                $query = $this->db->query($sql);
+                if (!$query) {
+                    $error_array = $this->db->error();
+                    throw new Exception($error_array['message']);
+                }                
+                foreach ($query->result_array() as $row) {
+                    $account_id = $row['account_id'];
+                    $randomcliid = $row['id'];
+                    $final_return_array['result'][$account_id]['randomcli'][$randomcliid] = $row;
+                }
+            }
+            if (isset($option_param['randomclisingle']) && $option_param['randomclisingle'] == true && count($final_return_array['result']) > 0) {
+                $account_id_str = implode("','", $account_id_array);
+                $account_id_str = "'" . $account_id_str . "'";
+                $sql = "SELECT id, rule_id, rule_name, account_id, destination_prefix, cli_fixprefix, cli_length, cli_status, rule_type 
+                FROM randomcli_cust WHERE account_id IN($account_id_str) ";
+                if (isset ($option_param['randomcli_id'])) {
+                    $sql .= " AND id='" . $option_param['randomcli_id'] . "'";
+                }
+                $query = $this->db->query($sql);
+                if (!$query) {
+                    $error_array = $this->db->error();
+                    throw new Exception($error_array['message']);
+                }                
+                foreach ($query->result_array() as $row) {
+                    $account_id = $row['account_id'];
+                    $randomcliid = $row['id'];
+                    $final_return_array['result'][$account_id]['randomclisingle'][$randomcliid] = $row;
+                }
+            }
+
+            /*
+            if (isset($option_param['randomcli_type1']) && $option_param['randomcli_type1'] == true && count($final_return_array['result']) > 0) {
+                $account_id_str = implode("','", $account_id_array);
+                            $account_id_str = "'" . $account_id_str . "'";
+                $sql = "SELECT id, rule_id, rule_name, account_id, destination_prefix, cli_fixprefix, cli_length, cli_status 
+                FROM randomcli_cust WHERE account_id IN($account_id_str) AND rule_type='1'";
+                if (isset ($option_param['randomcli_id'])) {
+                    $sql .= " AND id='" . $option_param['randomcli_id'] . "'";
+                }
+                $query = $this->db->query($sql);
+                if (!$query) {
+                    $error_array = $this->db->error();
+                    throw new Exception($error_array['message']);
+                }
+                
+                foreach ($query->result_array() as $row) {
+                    $account_id = $row['account_id'];
+                    $randomcliid = $row['id'];
+                    $final_return_array['result'][$account_id]['randomcli_type1'][$randomcliid] = $row;
+                }
+            }
+            if (isset($option_param['randomcli_type2']) && $option_param['randomcli_type2'] == true && count($final_return_array['result']) > 0) {
+                $account_id_str = implode("','", $account_id_array);
+                            $account_id_str = "'" . $account_id_str . "'";
+                $sql = "SELECT id, rule_id, rule_name, account_id, destination_prefix, cli_fixprefix, cli_length, cli_status 
+                FROM randomcli_cust WHERE account_id IN($account_id_str) AND rule_type='2'";
+                if (isset ($option_param['randomcli_id'])) {
+                    $sql .= " AND id='" . $option_param['randomcli_id'] . "'";
+                }
+                $query = $this->db->query($sql);
+                if (!$query) {
+                    $error_array = $this->db->error();
+                    throw new Exception($error_array['message']);
+                }
+                
+                foreach ($query->result_array() as $row) {
+                    $account_id = $row['account_id'];
+                    $randomcliid = $row['id'];
+                    $final_return_array['result'][$account_id]['randomcli_type2'][$randomcliid] = $row;
+                }
+            }
+            */
+
             if (count($final_return_array['result']) > 0) {
                 $account_id_str = implode("','", $account_id_array);
                 $account_id_str = "'" . $account_id_str . "'";
-                $sql = "SELECT tariff_id, account_id FROM customer_voipminuts WHERE account_id IN($account_id_str)";
+                $sql = "SELECT tariff_id, account_id FROM customer_voipminuts WHERE account_id IN($account_id_str) order by id desc limit 1";
                 $query = $this->db->query($sql);
                 if (!$query) {
                     $error_array = $this->db->error();
@@ -220,7 +327,7 @@ class Customer_mod extends CI_Model {
             if (isset($option_param['sipuser']) && $option_param['sipuser'] == true && count($final_return_array['result']) > 0) {
                 $account_id_str = implode("','", $account_id_array);
                 $account_id_str = "'" . $account_id_str . "'";
-                $sql = "SELECT * FROM customer_sip_account WHERE account_id IN($account_id_str) ";
+                $sql = "SELECT * FROM customer_devices WHERE account_id IN($account_id_str) ";
                 if (isset($option_param['customer_sip_id'])) {
                     $sql .= " AND id ='" . $option_param['customer_sip_id'] . "'";
                 }
@@ -301,33 +408,7 @@ class Customer_mod extends CI_Model {
             }
 
 
-            if ((isset($option_param['bundle_package']) || isset($option_param['bundle_package_group_by'])) && count($final_return_array['result']) > 0) {
-                $account_id_str = implode("','", $account_id_array);
-                $account_id_str = "'" . $account_id_str . "'";
-
-                $sql = "SELECT *, (select GROUP_CONCAT(prefix) from bundle_package_prefixes where  bundle_package_prefixes.bundle_package_id = bundle_account.bundle_package_id  and prefix <> '' ) prefix, bundle_account.id bundle_account_id, count(bundle_account.bundle_package_id) bundle_count FROM bundle_account INNER JOIN bundle_package ON bundle_account.bundle_package_id = bundle_package.bundle_package_id WHERE bundle_account.account_id IN($account_id_str)";
-                if (isset($option_param['bundle_package_id'])) {
-                    $sql .= " AND id  ='" . $option_param['bundle_package_id'] . "'";
-                }
-
-                if (isset($option_param['bundle_package_group_by'])) {
-                    $sql .= " GROUP BY bundle_account.bundle_package_id";
-                }
-
-                $query = $this->db->query($sql);
-                if (!$query) {
-                    $error_array = $this->db->error();
-                    throw new Exception($error_array['message']);
-                }
-
-                foreach ($query->result_array() as $row) {
-                    $account_id = $row['account_id'];
-                    $id = $row['id'];
-                    $final_return_array['result'][$account_id]['bundle_package'][] = $row;
-                }
-            }
-
-            if (isset($option_param['translation_rules']) && $option_param['translation_rules'] == true && count($final_return_array['result']) > 0) {
+             if (isset($option_param['translation_rules']) && $option_param['translation_rules'] == true && count($final_return_array['result']) > 0) {
                 $account_id_str = implode("','", $account_id_array);
                 $account_id_str = "'" . $account_id_str . "'";
                 $sql = "SELECT * FROM customer_dialpattern WHERE account_id IN($account_id_str)   and route= 'OUTBOUND'";
@@ -439,8 +520,6 @@ class Customer_mod extends CI_Model {
                 $key = $this->generate_key($data['company_name'], CUSTOMERCODEPREFIX, 'customers', 'account_id');
             $user_key = $this->member_mod->generate_key('CUSTOMERADMIN');
 
-
-
             $user_data_array = $account_data_array = $customer_data_array = array();
             $account_data_array['account_id'] = $key;
             $account_data_array['status_id'] = '1';
@@ -515,18 +594,14 @@ class Customer_mod extends CI_Model {
             $user_data_array['secret'] = $data['secret'];
             $user_data_array['emailaddress'] = $data['user_emailaddress'];
             $user_data_array['status_id'] = '1';
-			
-			
-			////////
-			$sdr_data_array=array();
-			$sdr_data_array['ACCOUNTID'] = $key;
+
+            $sdr_data_array = array();
+            $sdr_data_array['ACCOUNTID'] = $key;
             $sdr_data_array['REQUEST'] = 'OPENINGBALANCE';
             $sdr_data_array['SERVICENUMBER'] = '';
             $sdr_data_array['CREATEDBY'] = $key;
             $api_response = call_billing_api($sdr_data_array);
-            $api_result = json_decode($api_response, true);			
-			///////
-
+            $api_result = json_decode($api_response, true);
 
             if (count($account_data_array) > 0) {
                 $account_data_array['create_dt'] = date('Y-m-d');
@@ -537,7 +612,6 @@ class Customer_mod extends CI_Model {
                     throw new Exception($error_array['message']);
                 }
                 $this->account_id = $key;
-                //$log_data_array[] = array('activity_type' => 'add', 'sql_table' => 'account', 'sql_key' => $this->account_id, 'sql_query' => $str);
             }
 
             if (count($customer_data_array) > 0) {
@@ -547,11 +621,7 @@ class Customer_mod extends CI_Model {
                     $error_array = $this->db->error();
                     throw new Exception($error_array['message']);
                 }
-                // $log_data_array[] = array('activity_type' => 'add', 'sql_table' => 'customers', 'sql_key' => '', 'sql_query' => $str);
             }
-
-
-
 
             if (count($user_data_array) > 0) {
                 $str = $this->db->insert_string('users', $user_data_array);
@@ -560,11 +630,25 @@ class Customer_mod extends CI_Model {
                     $error_array = $this->db->error();
                     throw new Exception($error_array['message']);
                 }
-                // $log_data_array[] = array('activity_type' => 'add', 'sql_table' => 'customers', 'sql_key' => '', 'sql_query' => $str);
             }
+/*
+            $tariff_data_array['customer_voipminute_id'] = $key . rand(10000, 99999);
+            $tariff_data_array['account_id'] = $key;
+            $tariff_data_array['account_type'] = 'CUSTOMER';
+            $tariff_data_array['tariff_id'] = $data['tariff_id'];
+            $tariff_data_array['status'] = '1';
+            $tariff_data_array['created_by'] = get_logged_account_id();
+            $tariff_data_array['created_dt'] = date('Y-m-d');
 
-
-
+            if (count($tariff_data_array) > 0) {
+                $str = $this->db->insert_string('customer_voipminuts', $tariff_data_array);
+                $result = $this->db->query($str);
+                if (!$result) {
+                    $error_array = $this->db->error();
+                    throw new Exception($error_array['message']);
+                }
+            }
+*/
 
             if ($this->db->trans_status() === FALSE) {
                 $error_array = $this->db->error();
@@ -573,15 +657,10 @@ class Customer_mod extends CI_Model {
             } else {
                 $this->db->trans_commit();
             }
-
-
-
  $strQSL = "INSERT INTO `bill_customer_priceplan` ( `account_id`, `billing_cycle`, `payment_terms`, `itemised_billing`, `billing_day`) VALUES ( '".$key."', 'MONTHLY', 1, '1', 1);";
 
 
 $this->db->query($strQSL);
-
-
 
             return true;
         } catch (Exception $e) {
@@ -639,18 +718,18 @@ $this->db->query($strQSL);
                 $account_data_array['vat_flag'] = $data['vat_flag'];
             if (isset($data['billing_type']))
                 $account_data_array['billing_type'] = $data['billing_type'];
-				//
-	
-			if (isset($data['force_dst_src_cli_prefix']))
+            //
+
+            if (isset($data['force_dst_src_cli_prefix']))
                 $account_data_array['force_dst_src_cli_prefix'] = $data['force_dst_src_cli_prefix'];
             if (isset($data['codecs_force']))
                 $account_data_array['codecs_force'] = $data['codecs_force'];
             if (isset($data['max_callduration']))
                 $account_data_array['max_callduration'] = $data['max_callduration'];
-			if (isset($data['account_codecs']))
-                $account_data_array['account_codecs'] = $data['account_codecs'];	
-			
-			
+            if (isset($data['account_codecs']))
+                $account_data_array['account_codecs'] = $data['account_codecs'];
+
+
             ////
             if (isset($data['contact_name']))
                 $customer_data_array['contact_name'] = $data['contact_name'];
@@ -682,8 +761,8 @@ $this->db->query($strQSL);
                 $customer_data_array['view_src_did'] = $data['view_src_did'];
             if (isset($data['view_dst_did']))
                 $customer_data_array['view_dst_did'] = $data['view_dst_did'];
-				
-			
+
+
 
             //	ddd($data);die;
 
@@ -880,10 +959,10 @@ $this->db->query($strQSL);
         }
     }
 
-    function carringcard_pin_key($table = 'customer_sip_account') {
+    function carringcard_pin_key($table = 'customer_devices') {
         while (1) {
             $new_key = rand(100000, 999999);
-            $sql = "SELECT callingcard_pin FROM customer_sip_account WHERE  account_id ='" . $new_key . "'";
+            $sql = "SELECT callingcard_pin FROM customer_devices WHERE  account_id ='" . $new_key . "'";
             $query = $this->db->query($sql);
             $num_rows = $query->num_rows();
             if ($num_rows > 0) {
@@ -1037,7 +1116,7 @@ $this->db->query($strQSL);
             $account_type = 'CUSTOMER';
 
             if (isset($data['username'])) {
-                $sql = "SELECT username FROM customer_sip_account  WHERE username='" . $data['username'] . "'";
+                $sql = "SELECT username FROM customer_devices  WHERE username='" . $data['username'] . "'";
                 $query = $this->db->query($sql);
                 $row = $query->row();
                 if ($row == NULL) {
@@ -1047,7 +1126,7 @@ $this->db->query($strQSL);
                 }
             }
             if (isset($data['extension_no'])) {
-                $sql = "SELECT extension_no FROM customer_sip_account  WHERE extension_no='" . $data['extension_no'] . "' AND account_id ='" . $account_id . "'";
+                $sql = "SELECT extension_no FROM customer_devices  WHERE extension_no='" . $data['extension_no'] . "' AND account_id ='" . $account_id . "'";
 
                 $query = $this->db->query($sql);
                 $row = $query->row();
@@ -1071,17 +1150,16 @@ $this->db->query($strQSL);
                 $sip_data_array['voicemail'] = $data['voicemail'];
             if (isset($data['voicemail_email']))
                 $sip_data_array['email_address'] = $data['voicemail_email'];
-            //$carringcard_pin = $this->carringcard_pin_key();
-            //$sip_data_array['callingcard_pin'] = $carringcard_pin;
+
             $this->db->trans_begin();
-            $str = $this->db->insert_string('customer_sip_account', $sip_data_array);
+            $str = $this->db->insert_string('customer_devices', $sip_data_array);
             $result = $this->db->query($str);
             if (!$result) {
                 $error_array = $this->db->error();
                 throw new Exception($error_array['message']);
             }
             $this->last_customer_sip_id = $this->db->insert_id();
-            $log_data_array[] = array('activity_type' => 'insert', 'sql_table' => 'customer_sip_account', 'sql_key' => '', 'sql_query' => $str);
+            $log_data_array[] = array('activity_type' => 'insert', 'sql_table' => 'customer_devices', 'sql_key' => '', 'sql_query' => $str);
 
             if ($this->db->trans_status() === FALSE) {
                 $error_array = $this->db->error();
@@ -1114,7 +1192,7 @@ $this->db->query($strQSL);
             }
             $account_type = 'CUSTOMER';
             if (isset($data['username'])) {
-                $sql = "SELECT username FROM customer_sip_account  WHERE username='" . $data['username'] . "' AND id !='" . $id . "'";
+                $sql = "SELECT username FROM customer_devices  WHERE username='" . $data['username'] . "' AND id !='" . $id . "'";
                 $query = $this->db->query($sql);
 
                 $row = $query->row();
@@ -1125,7 +1203,7 @@ $this->db->query($strQSL);
                 }
             }
             if (isset($data['extension_no'])) {
-                $sql = "SELECT extension_no FROM customer_sip_account  WHERE extension_no='" . $data['extension_no'] . "' AND account_id ='" . $account_id . "' AND id !='" . $id . "'";
+                $sql = "SELECT extension_no FROM customer_devices  WHERE extension_no='" . $data['extension_no'] . "' AND account_id ='" . $account_id . "' AND id !='" . $id . "'";
 
                 $query = $this->db->query($sql);
                 $row = $query->row();
@@ -1164,15 +1242,14 @@ $this->db->query($strQSL);
             $this->db->trans_begin();
             if (count($sip_data_array) > 0) {
                 $where = " id ='" . $id . "' AND account_id='" . $account_id . "' ";
-                $str = $this->db->update_string('customer_sip_account', $sip_data_array, $where);
-
+                $str = $this->db->update_string('customer_devices', $sip_data_array, $where);
 
                 $result = $this->db->query($str);
                 if (!$result) {
                     $error_array = $this->db->error();
                     throw new Exception($error_array['message']);
                 }
-                $log_data_array[] = array('activity_type' => 'update', 'sql_table' => 'customer_sip_account', 'sql_key' => $where, 'sql_query' => $str);
+                $log_data_array[] = array('activity_type' => 'update', 'sql_table' => 'customer_devices', 'sql_key' => $where, 'sql_query' => $str);
             }
 
             if ($this->db->trans_status() === FALSE) {
@@ -1987,12 +2064,12 @@ $this->db->query($strQSL);
             $log_data_array = array();
             $this->db->trans_begin();
             foreach ($id_array['delete_id'] as $id) {
-                $result = $this->db->delete('customer_sip_account', array('account_id' => $account_id, 'id' => $id));
+                $result = $this->db->delete('customer_devices', array('account_id' => $account_id, 'id' => $id));
                 if (!$result) {
                     $error_array = $this->db->error();
                     throw new Exception($error_array['message']);
                 }
-                $log_data_array[] = array('activity_type' => 'delete', 'sql_table' => 'customer_sip_account', 'sql_key' => $id, 'sql_query' => $this->db->last_query());
+                $log_data_array[] = array('activity_type' => 'delete', 'sql_table' => 'customer_devices', 'sql_key' => $id, 'sql_query' => $this->db->last_query());
                 if ($this->db->affected_rows() == 0)
                     throw new Exception('SIP not found');
             }
@@ -2098,93 +2175,7 @@ $this->db->query($strQSL);
         }
     }
 
-    function add_bundle($data) {
-        try {
-            $this->db->trans_begin();
-            $log_data_array = array();
-            if (isset($data['account_id'])) {
-                $account_id = $data['account_id'];
-            } else {
-                throw new Exception('User missing');
-            }
-
-            $bundle_data_array = array();
-            $bundle_data_array['account_id'] = $data['account_id'];
-            $bundle_data_array['bundle_package_id'] = $data['bundle_package_id'];
-            $bundle_data_array['assign_dt'] = date('Y-m-d H:i:s');
-            $bundle_data_array['bundle_package_desc'] = $data['bundle_package_desc'];
-
-            while (1) {
-                $bundle_data_array['account_bundle_key'] = strtoupper('AB' . generateRandom(8));
-                $sql = "SELECT  account_bundle_key FROM bundle_account WHERE account_bundle_key ='" . $bundle_data_array['account_bundle_key'] . "'";
-                $query = $this->db->query($sql);
-                $row = $query->row();
-                if (isset($row)) {
-                    
-                } else {
-                    break;
-                }
-            }
-            $str = $this->db->insert_string('bundle_account', $bundle_data_array);
-            $result = $this->db->query($str);
-            if (!$result) {
-                $error_array = $this->db->error();
-                throw new Exception($error_array['message']);
-            }
-            $api_request['account_id'] = $account_id;
-            $api_request['account_type'] = 'CUSTOMER';
-            $api_request['service_number'] = $bundle_data_array['bundle_package_id'];
-            $api_request['request'] = 'BUNDLECHARGES';
-            $api_response = callSdrAPI($api_request);
-            $api_result = json_decode($api_response, true);
-            $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['request'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
-
-            if (!isset($api_result['error']) || $api_result['error'] == '1') {
-                throw new Exception('SDR Problem:(' . $api_request['account_id'] . ')' . $api_result['message']);
-            }
-            if ($this->db->trans_status() === FALSE) {
-                $error_array = $this->db->error();
-                throw new Exception($error_array['message']);
-            } else {
-                $this->message = $this->data['message'];
-                $this->db->trans_commit();
-                return true;
-            }
-        } catch (Exception $e) {
-            $this->db->trans_rollback();
-            return $e->getMessage();
-        }
-    }
-
-    function delete_bundle($account_id, $id_array) {
-        try {
-            $log_data_array = array();
-            $this->db->trans_begin();
-            foreach ($id_array['delete_id'] as $id) {
-                $result = $this->db->delete('bundle_account', array('account_id' => $account_id, 'id' => $id));
-                if (!$result) {
-                    $error_array = $this->db->error();
-                    throw new Exception($error_array['message']);
-                }
-                $log_data_array[] = array('activity_type' => 'delete', 'sql_table' => 'bundle_account', 'sql_key' => $id, 'sql_query' => $this->db->last_query());
-                if ($this->db->affected_rows() == 0)
-                    throw new Exception('Bundle not found');
-            }
-            if ($this->db->trans_status() === FALSE) {
-                $error_array = $this->db->error();
-                $this->db->trans_rollback();
-                return $error_array['message'];
-            } else {
-                $this->db->trans_commit();
-                set_activity_log($log_data_array);
-                return true;
-            }
-        } catch (Exception $e) {
-            $this->db->trans_rollback();
-            return $e->getMessage();
-        }
-    }
-
+   
     function generate_key_del($table = 'account') {
         $table = 'customers';
         $prefix1 = 'IS';
@@ -2267,78 +2258,15 @@ $this->db->query($strQSL);
     public function get_voip_data($account_id) {
         $sql = "select customer_voipminuts.*,tariff.tariff_name  from customer_voipminuts 
             INNER JOIN tariff ON customer_voipminuts.tariff_id=tariff.tariff_id 
-            where 1 and customer_voipminuts.account_id='" . $account_id . "'";
+            where 1 and  status = '1' and  customer_voipminuts.account_id='" . $account_id . "' order by id desc limit 1";
         $query = $this->db->query($sql);
         $result = $query->result_array();
 
         return $result;
     }
 
-    function get_bundle_data($account_id) {
-        $final_return_array = array();
-        $account_id_str = "'" . $account_id . "'";
-        $sql = "SELECT *, (select GROUP_CONCAT(prefix) from bundle_package_prefixes where  bundle_package_prefixes.bundle_package_id = bundle_account.bundle_package_id  and prefix <> '' ) prefix, bundle_account.id bundle_account_id, count(bundle_account.bundle_package_id) bundle_count FROM bundle_account INNER JOIN bundle_package ON bundle_account.bundle_package_id = bundle_package.bundle_package_id WHERE bundle_account.account_id IN($account_id_str)";
-        if (isset($option_param['bundle_package_id'])) {
-            $sql .= " AND id  ='" . $option_param['bundle_package_id'] . "'";
-        }
-
-        if (isset($option_param['bundle_package_group_by'])) {
-            $sql .= " GROUP BY bundle_account.bundle_package_id";
-        }
-
-        $query = $this->db->query($sql);
-        if (!$query) {
-            $error_array = $this->db->error();
-            throw new Exception($error_array['message']);
-        }
-
-        foreach ($query->result_array() as $row) {
-            $account_id = $row['account_id'];
-            $id = $row['id'];
-            $final_return_array['result'][$account_id]['bundle_package'][] = $row;
-        }
-        return $final_return_array;
-    }
-
-    public function get_plan_data($account_id) {
-        $sql = "SELECT priceplan_id FROM bill_customer_priceplan WHERE 1 AND account_id='" . $account_id . "'";
-        $query = $this->db->query($sql);
-
-        $results = $query->row();
-
-        if (isset($results->priceplan_id)) {
-            $priceplan_id = $results->priceplan_id;
-            $result = $this->get_priceplan_item_data($priceplan_id);
-            //   print_r($result);die;
-            return $result;
-        }
-    }
-
-    public function get_priceplan_item_data($priceplan_id) {
-        $final_return_array = array();
-        try {
-            $logged_account_id = get_logged_account_id();
-            if (isset($priceplan_id)) {
-                $sql = "Select bill_priceplan_item.*,bill_pricelist.description,bill_itemlist.item_name,bill_priceplan.priceplan_name,bill_pricelist.reguler_charges,bill_pricelist.charges,
-bill_pricelist.additional_charges_as,
-bill_pricelist.additional_charges, sys_currencies.symbol
-FROM bill_priceplan_item
-INNER JOIN bill_pricelist on bill_priceplan_item.price_id=bill_pricelist.price_id 
-INNER JOIN bill_itemlist on bill_priceplan_item.item_id=bill_itemlist.item_id 
-INNER JOIN bill_priceplan on bill_priceplan_item.priceplan_id=bill_priceplan.priceplan_id 
-INNER JOIN sys_currencies on bill_pricelist.currency_id=sys_currencies.currency_id 
-where 1  AND bill_priceplan_item.priceplan_id ='" . $priceplan_id . "'";
-                $query = $this->db->query($sql);
-                $final_return_array['result'] = $query->result_array();
-                return $final_return_array;
-            }
-        } catch (Exception $e) {
-
-            $final_return_array['status'] = 'failed';
-            $final_return_array['message'] = $e->getMessage();
-            return $final_return_array;
-        }
-    }
+  
+   
 
     function get_user_by_account_manager() {
         $logged_account_id = get_logged_account_id();
@@ -2372,5 +2300,303 @@ where 1  AND bill_priceplan_item.priceplan_id ='" . $priceplan_id . "'";
             return $final_return_array;
         }
     }
+
+    ///////////////////////////////////
+    function delete_randomcli($account_id, $id_array) {
+        try {
+            $log_data_array = array();
+           // echo $account_id;          print_r($id_array);die;
+          
+            foreach ($id_array['delete_id'] as $id) {
+                $result = $this->db->delete('randomcli_cust', array('id' => $id));
+                if (!$result) {
+                    $error_array = $this->db->error();
+                    throw new Exception($error_array['message']);
+                }
+                $log_data_array[] = array('activity_type' => 'delete', 'sql_table' => 'randomcli', 'sql_key' => $id, 'sql_query' => $this->db->last_query());
+                if ($this->db->affected_rows() == 0)
+                    throw new Exception('RandomCLI not found');
+            }
+
+                //set_activity_log($log_data_array);
+                return true;
+            
+        } catch (Exception $e) {
+            return $e->getMessage();
+        }
+    }
+    
+    function update_randomcli($data) {
+        try {
+            $log_data_array = array();
+
+            if (isset($data['account_id']))
+                $account_id = $data['account_id'];
+            else
+                return 'Account missing';
+            if (isset($data['randomcli_id']))
+                $id = $data['randomcli_id'];
+            else
+                return 'CLI ID missing';
+
+            $ip_data_array = array();
+            if (isset($data['cli_status']))
+                $ip_data_array['cli_status'] = $data['cli_status'];
+            if (isset($data['cli_length']))
+                $ip_data_array['cli_length'] = $data['cli_length'];
+            if (isset($data['cli_fixprefix']))
+                $ip_data_array['cli_fixprefix'] = $data['cli_fixprefix'];
+            if (isset($data['destination_prefix']))
+                $ip_data_array['destination_prefix'] = $data['destination_prefix'];
+            if (isset($data['clirule_name']))
+                $ip_data_array['rule_name'] = $data['clirule_name'];
+
+          
+            if (count($ip_data_array) > 0) {
+                $ip_data_array['updated_by'] = get_logged_account_id();
+                $ip_data_array['update_dt'] = date('Y-m-d h:i:s');
+
+
+                $where = " id='" . $id . "' AND account_id='" . $account_id . "' ";
+               // print_r($ip_data_array);die;
+                $str = $this->db->update_string('randomcli_cust', $ip_data_array, $where);
+                $result = $this->db->query($str);
+
+                if (!$result) {
+                    $error_array = $this->db->error();
+                    throw new Exception($error_array['message']);
+                }
+                $log_data_array[] = array('activity_type' => 'update', 'sql_table' => 'randomcli', 'sql_key' => $where, 'sql_query' => $str);
+            }
+
+            
+               // set_activity_log($log_data_array);
+            
+            return true;
+        } catch (Exception $e) {
+            return $e->getMessage();
+        }
+    }
+
+    function add_randomcli($data) {
+        try {
+            $log_data_array = array();
+            if (isset($data['account_id'])) {
+                $account_id = $data['account_id'];
+            } else {
+                return 'Account missing';
+            }
+            $rule_type = $data['rule_type'];
+            $randomcli_data_array = array();
+            $randomcli_data_array['account_id'] = $data['account_id'];
+            
+            $randomcli_data_array['cli_status'] = $data['cli_status'];
+            if($rule_type==1)
+            {            
+                $randomcli_data_array['destination_prefix'] = $data['destination_prefix'];
+                $randomcli_data_array['cli_fixprefix'] = $data['cli_fixprefix'];
+                $randomcli_data_array['cli_length'] = $data['cli_length'];       
+                $randomcli_data_array['rule_type'] = 1;      
+            }
+            else
+            {                
+                $randomcli_data_array['destination_prefix'] = $data['destination_prefix'];
+                $randomcli_data_array['cli_fixprefix'] = $data['cli_fixprefix'];
+                $randomcli_data_array['cli_length'] = 0;
+                $randomcli_data_array['rule_type'] = 2;
+            }
+            $timestamp = time();
+
+            if(isset($data['clirule_name']))
+            $randomcli_data_array['rule_name'] = $data['clirule_name'];
+            else
+            $randomcli_data_array['rule_name'] =$timestamp;
+
+            $randomcli_data_array['created_by'] = get_logged_account_id();
+            $randomcli_data_array['created_dt'] = date('Y-m-d h:i:s');
+           
+            
+            $randomcli_id = $randomcli_data_array['clirule_name'];
+            $randomcli_id = preg_replace('/[^a-z\d]/i', '', $randomcli_id);
+            $randomcli_id = substr($randomcli_id, 0, 19);
+            $randomcli_id = strtoupper($randomcli_id);
+            $randomcli_id = $randomcli_id . $timestamp;
+            $randomcli_data_array['rule_id'] = $randomcli_id;
+            //print_r($randomcli_data_array);die;
+          
+            $str = $this->db->insert_string('randomcli_cust', $randomcli_data_array);
+            $result = $this->db->query($str);
+            if (!$result) {
+                $error_array = $this->db->error();
+                throw new Exception($error_array['message']);
+            }
+            $insert_id = $this->db->insert_id();
+            $log_data_array[] = array('activity_type' => 'insert', 'sql_table' => 'randomcli', 'sql_key' => '', 'sql_query' => $str);
+            
+                $this->randomcli_id= $insert_id;
+               
+                //set_activity_log($log_data_array);
+            
+
+            return true;
+        } catch (Exception $e) {
+            return $e->getMessage();
+        }
+    }
+
+
+    function add_randomcli_bulk($data, $csv_data)
+    {
+
+        try 
+        {
+
+            $account_id = $data['account_id'];
+            $rule_name = $data['clirule_name'];
+            $cli_status = 1;
+            $rule_type = 2;
+            $timestamp = time();
+            $rule_id = $timestamp;
+            $created_by = get_logged_account_id();
+            $created_dt = date('Y-m-d h:i:s');
+
+         
+            if(isset($data['delete_existing']) && $data['delete_existing']=='1')
+            {
+                $sql ="DELETE FROM randomcli_cust WHERE account_id='$account_id'";
+                //die($sql);
+                $result = $this->db->query($sql);
+            }
+            
+
+
+            $error_msg='';
+            $sql_insert = 'INSERT INTO randomcli_cust (rule_id, rule_name, account_id, destination_prefix, cli_fixprefix, cli_length, cli_status, rule_type, 
+            created_by,created_dt) VALUES ';
+            $sql_values = '';
+
+            for ($i = 1; $i < count($csv_data); $i++) {
+                $inclusive_channel = $csv_data[$i][0];
+                $exclusive_per_channel_rental = $csv_data[$i][1];
+                $rule_id = $timestamp.$i;
+
+                $sql_values .= "('" . $rule_id . "', '" . $rule_name . "', '" . $account_id . "', " . $csv_data[$i][0] . ", " . $csv_data[$i][1] . ", '0', '1', '2', 
+                '" . $created_by . "', '" .$created_dt . "'),";
+
+                if (($i % 400) == 399 || $i == count($csv_data) - 1) {
+                    $sql = $sql_insert . rtrim($sql_values, ',');
+                    //echo $sql;die;
+                    $result = $this->db->query($sql);
+                    
+                    //var_dump($result);die();
+                    $sql_values = '';
+                    if ($result) {
+                        
+                    } else {
+                        $success = false;
+                        $e = $this->db->error();
+                        $error_msg .= $e['message'];
+                    }
+                }
+
+            }
+
+            if ($error_msg=='') {
+                return true;
+            }
+            else
+            {
+                return $error_msg;
+            }
+
+        
+        } catch (Exception $e) {
+            return $e->getMessage();
+        }
+    }
+
+    
+    function save_cli_dst_rule($data) 
+    {
+        try {
+            $log_data_array = array();
+            if (isset($data['account_id'])) {
+                $account_id = $data['account_id'];
+            } else {
+                return 'Account missing';
+            }
+            $account_type = 'CUSTOMER';
+            if (strpos($data['dialprefix'], '%') === false) {
+                $data['dialprefix'] = $data['dialprefix'] . '%';
+            }
+
+            $sql = "SELECT account_id FROM account_cli_dst_rules  WHERE account_id='" . $account_id. "'";
+            $query = $this->db->query($sql);
+            $row = $query->row();
+            if ($row == NULL) {
+            $action='add';                
+            } else {
+                $action='update';
+            }
+
+            $ip_data_array = array();
+            
+            $ip_data_array['pstn_cli_usage_option'] = $data['pstn_cli_usage_option'];
+            $ip_data_array['pstn_max_calls_per_cli_in_aday'] = $data['pstn_max_calls_per_cli_in_aday'];
+            $ip_data_array['pstn_max_call_per_cli_live'] = $data['pstn_max_call_per_cli_live'];
+         
+            $ip_data_array['pstn_max_cli_length'] = $data['pstn_max_cli_length'];
+            $ip_data_array['pstn_min_cli_length'] = $data['pstn_min_cli_length'];
+
+            $ip_data_array['pstn_cli_malfunction'] = $data['pstn_cli_malfunction'];
+            $ip_data_array['pstn_min_dst_number_length_option'] = $data['pstn_min_dst_number_length_option'];
+            $ip_data_array['pstn_min_dst_number_length'] = $data['pstn_min_dst_number_length'];
+            $ip_data_array['pstn_max_dst_number_length'] = $data['pstn_max_dst_number_length'];
+            $ip_data_array['did_cli_usage_option'] = $data['did_cli_usage_option'];
+            $ip_data_array['did_max_calls_per_cli_in_aday'] = $data['did_max_calls_per_cli_in_aday'];
+            $ip_data_array['did_max_call_per_cli_live'] = $data['did_max_call_per_cli_live'];
+           
+            $ip_data_array['did_max_cli_length'] = $data['did_max_cli_length'];
+            $ip_data_array['did_min_cli_length'] = $data['did_min_cli_length'];
+
+
+            if($action=='add')
+            {
+                $ip_data_array['account_id'] = $data['account_id'];
+                $ip_data_array['created_by'] = $data['created_by'];
+                $ip_data_array['created_dt'] = date('Y-m-d h:i:s');
+
+                $str = $this->db->insert_string('account_cli_dst_rules', $ip_data_array);
+                $result = $this->db->query($str);
+                if (!$result) {
+                    $error_array = $this->db->error();
+                    throw new Exception($error_array['message']);
+                }
+                $log_data_array[] = array('activity_type' => 'insert', 'sql_table' => 'account_cli_dst_rules', 'sql_key' => '', 'sql_query' => $str);
+            }
+            else
+            {
+                $where = " account_id='" . $account_id . "' ";
+                $ip_data_array['update_by'] = $data['created_by'];
+                $str = $this->db->update_string('account_cli_dst_rules', $ip_data_array, $where);
+                $result = $this->db->query($str);
+                if (!$result) {
+                    $error_array = $this->db->error();
+                    throw new Exception($error_array['message']);
+                }
+                $log_data_array[] = array('activity_type' => 'update', 'sql_table' => 'account_cli_dst_rules', 'sql_key' => $where, 'sql_query' => $str);
+            }
+        
+
+            set_activity_log($log_data_array);
+            
+
+            return true;
+        } catch (Exception $e) {
+
+            return $e->getMessage();
+        }
+    }
+
 
 }

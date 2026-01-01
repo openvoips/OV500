@@ -1,14 +1,12 @@
 <?php
-
-/* Copyright (C) Openvoips Technologies - All Rights Reserved
+/* 
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
  * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential, Only allow to use 
- * OV500Pro Version 2.1.0
- * Written by Seema Anand <openvoips@gmail.com> , 2021 
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2023 
  * http://www.openvoips.com 
- * License https://www.openvoips.com/license.html
  */
-
 function get_tax($tax, $total) {
     $tax_amount = $total - ( $total / (1 + ($tax / 100)));
     return $tax_amount;

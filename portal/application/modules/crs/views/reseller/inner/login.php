@@ -25,23 +25,29 @@
         </div>                       
     </div>  
     
-    <div class="form-group">
+<!--    <div class="form-group">
         <label for="middle-name" class="control-label col-md-5 col-sm-6 col-xs-12">Reset Google 2FA Code</label>
         <div class="col-md-7 col-sm-6 col-xs-12">
             <div class="checkbox">	
-           &nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" name="reset_gcode" id="reset_gcode" value="1" />
+                
+                  
+           &nbsp;&nbsp;&nbsp;&nbsp; 
+           
+           
+                           <input type="checkbox" name="reset_gcode" id="reset_gcode" value="1"  class="with-gap"/>   <label for="reset_gcode">Yes </label>
+
            <span class="text-info"><small>Checking this option will reset the existing code and user will get option to scan again</small></span>
            </div>
         </div>
-    </div>
+    </div>-->
 
     <div class="ln_solid"></div>
     <div class="form-group">
-        <div class="col-md-12 col-sm-12 col-xs-12 text-right">
+        <div class="col-md-12 col-sm-12 col-xs-12 text-center">
             <?php if (check_account_permission('reseller', 'edit')): ?>	
-                  <button type="button" id="<?php echo 'btnSaveClose'.$key;?>" class="btn btn-info" onclick="save_button('<?php echo $key;?>')">Save</button>                        
+                  <button type="button" id="<?php echo 'btnSaveClose'.$key;?>" class="btn btn-info" onclick="save_button('<?php echo $key;?>')">Save Portal Login</button>                        
             <?php endif; ?>
         </div>
     </div>
-
+    <br>
 </form>

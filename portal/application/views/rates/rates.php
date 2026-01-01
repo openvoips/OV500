@@ -5,164 +5,176 @@
         $('.combobox').combobox()
     });
 </script>
-<div class="col-md-12 col-sm-6 col-xs-12">
-    <div class="x_panel">
-        <div class="x_title">
-            <h2>Rates Management</h2>
-            <ul class="nav navbar-right panel_toolbox">
-                <?php if (check_account_permission('rate', 'add')): ?>
-                    <li><a href="<?php echo base_url() ?>rates/addR"><input type="button" value="Add Rate" name="add_link" class="btn btn-primary"></a></li>
-                <?php endif; ?>
-            </ul>
-            <div class="clearfix"></div>
-        </div>
-        <div class="x_content"> 
-            <form class="block-content form-horizontal " id="search_form" name="search_form"  method="post" action="<?php echo base_url(); ?>rates/index/">
-                <input type="hidden" name="search_action" value="search" />
-                <input type="hidden" name="no_of_rows" id="no_of_rows" value="" />
-                <!--<div style="color: red;">*One item must be select from the Tariff or Ratecard.</div> -->
-                <div class="form-group">
-                    <label class="control-label col-md-2 col-sm-3 col-xs-12">Tariff Name</label>
-                    <div class="col-md-4 col-sm-8 col-xs-12">
-                        <select name="tariff" id="tariff" class="combobox form-control data-search-field">
-                            <option value="">Select Tariff</option>
-                            <?php for ($i = 0; $i < $tariff_data['total']; $i++) { ?>
-                                <option value="<?php echo $tariff_data['result'][$i]['tariff_id']; ?>" <?php if ($_SESSION['search_rate_data']['s_tariff'] == $tariff_data['result'][$i]['tariff_id']) echo 'selected'; ?>><?php echo $tariff_data['result'][$i]['tariff_name'] . ' (' . $tariff_data['result'][$i]['currency_name'] . ')' . ' [' . $tariff_data['result'][$i]['tariff_id'] . ']'; ?></option>
-                            <?php } ?>
-                        </select>
-                    </div>	
-                    <label class="control-label col-md-2 col-sm-3 col-xs-12">Ratecard Name</label>
-                    <div class="col-md-4 col-sm-8 col-xs-12">
-                        <select name="card" id="card" class="combobox form-control data-search-field">
-                            <option value="">Select Rate</option>
-                            <?php
-                            for ($i = 0; $i < $ratecard_data['total']; $i++) {
-                                ?>								
-                                <option value="<?php echo $ratecard_data['result'][$i]['ratecard_id']; ?>" <?php if ($_SESSION['search_rate_data']['s_rate_card'] == $ratecard_data['result'][$i]['ratecard_id']) echo 'selected'; ?>><?php echo $ratecard_data['result'][$i]['ratecard_for'] . "::" . $ratecard_data['result'][$i]['ratecard_name'] . ' (' . $ratecard_data['result'][$i]['currency_name'] . ') [' . $ratecard_data['result'][$i]['ratecard_id'] . '] '; ?></option>
-                            <?php } ?>
-                        </select>
-                    </div>	  
+<div class="container-fluid">
+    <div class="block-header">
+        <h2>Rates Management</h2>
+        <ul class="nav navbar-right panel_toolbox">
+            <?php if (check_account_permission('rate', 'add')): ?> 
+                <li><a href="<?php echo base_url() ?>rates/addR"><input type="button" value="Add Rate" name="add_link" class="btn btn-primary"></a></li>
+            <?php endif; ?>
+        </ul>
+    </div>
 
-                    <div class="form-group">
-                        <label class="control-label col-md-2 col-sm-3 col-xs-12">Rates Prefix</label>
-                        <div class="col-md-4 col-sm-8 col-xs-12">
-                            <input type="text" name="prefix" id="prefix" value="<?php echo $_SESSION['search_rate_data']['s_rate_prefix']; ?>" class="form-control data-search-field" placeholder="Prefix">
-                        </div>
-                        <label class="control-label col-md-2 col-sm-3 col-xs-12">Destination</label>
-                        <div class="col-md-4 col-sm-8 col-xs-12">
-                            <input type="text" name="dest" id="dest" value="<?php echo $_SESSION['search_rate_data']['s_rate_destination']; ?>" class="form-control data-search-field" placeholder="Destination">
-                        </div>
-                    </div>
+    <div class="row clearfix">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="card">
+                <div class="header">                
+                    <form class="block-content form-horizontal " id="search_form" name="search_form"  method="post" action="<?php echo base_url(); ?>rates/index/">
+                        <input type="hidden" name="search_action" value="search" />
+                        <input type="hidden" name="no_of_rows" id="no_of_rows" value="" />
+
+                        <div class="form-group">
 
 
-                    <div class="form-group">
-                        <label class="control-label col-md-2 col-sm-3 col-xs-12">Rate Status</label>
-                        <div class="col-md-4 col-sm-8 col-xs-12">
-                            <select name="status" id="status" class="form-control data-search-field">
-                                <option value="">ALL</option>
-                                <option value="1" <?php if ($_SESSION['search_rate_data']['s_status'] == '1') echo 'selected'; ?>>Active</option>
-                                <option value="0" <?php if ($_SESSION['search_rate_data']['s_status'] == '0') echo 'selected'; ?>>Inactive</option>
-                            </select>
-                        </div>	
-
-                        <div class="searchBar text-right">
-                            <input type="submit" value="Search" name="OkFilter" id="OkFilter" class="btn btn-primary">                          
-                            <input type="button" value="Reset" name="search_reset" id="search_reset" class="btn btn-info">                           
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-dark  dropdown-toggle" data-toggle="dropdown" value="Export" name="search_export" id="search_export">
-                                    Export <span class="caret"></span></button>
-                                <ul class="dropdown-menu" role="menu">
-                                    <li><a href="<?php echo base_url() ?>rates/index/export/<?php echo param_encrypt('csv'); ?>">CSV</a></li>
-                                    <li><a href="<?php echo base_url() ?>rates/index/export/<?php echo param_encrypt('xlsx'); ?>">XLSX</a></li>
-                                    <li><a href="<?php echo base_url() ?>rates/index/export/<?php echo param_encrypt('xls'); ?>">XLS</a></li>
-                                    <li><a href="<?php echo base_url() ?>rates/index/export/<?php echo param_encrypt('txt'); ?>">TXT</a></li>
-                                    <li><a href="<?php echo base_url() ?>rates/index/export/<?php echo param_encrypt('pdf'); ?>">PDF</a></li>
-                                </ul>
+                            <label class="control-label col-md-2 col-sm-3 col-xs-12">Tariff Name</label>
+                            <div class="col-md-3 col-sm-8 col-xs-12">
+                                <select name="tariff" id="tariff" class="combobox form-control data-search-field">
+                                    <option value="">Select Tariff</option>
+                                    <?php for ($i = 0; $i < $tariff_data['total']; $i++) { ?>
+                                        <option value="<?php echo $tariff_data['result'][$i]['tariff_id']; ?>" <?php if ($_SESSION['search_rate_data']['s_tariff'] == $tariff_data['result'][$i]['tariff_id']) echo 'selected'; ?>><?php echo $tariff_data['result'][$i]['tariff_name'] . ' (' . $tariff_data['result'][$i]['currency_name'] . ')' . ' [' . $tariff_data['result'][$i]['tariff_id'] . ']'; ?></option>
+                                    <?php } ?>
+                                </select>
                             </div>
-                        </div>
-                    </div>
 
-            </form> 
 
-            <div class="clearfix"></div>
-            <div class="ln_solid"></div>           
-            <div class="row">  
-                <?php
-                dispay_pagination_row($total_records, $_SESSION['search_rate_data']['s_no_of_records'], $pagination);
-                ?>    
-            </div>
 
-            <div class="table-responsive">
-                <table class="table table-striped jambo_table bulk_action table-bordered" id="table-sort">
-                    <thead>
-                        <tr class="headings thc">                        
-                            <th class="column-title">Ratecard</th>
-                            <th class="column-title">Prefix</th>
-                            <th class="column-title">Destination</th>
-                            <th class="column-title">Rate per Minute</th>
-                            <th class="column-title">Charge per Connection</th>
-                            <th class="column-title">Grace Period</th>
-                            <th class="column-title">Status </th>
-                            <th class="column-title no-link last"><span class="nobr">Actions</span> </th>
-                            <th class="bulk-actions" colspan="8">
-                                <a class="antoo" style="color:#fff; font-weight:500;">Bulk Actions ( <span class="action-cnt"> </span> ) </a>
-                            </th>
-                        </tr>
-                    </thead>		
-                    <tbody>
-                        <?php
-                        if ($listing_count > 0) {
-                            foreach ($listing_data as $listing_row) {
 
-                                if ($listing_row['rates_status'] == '1')
-                                    $status = '<span class="label label-success">Active</span>';
-                                else
-                                    $status = '<span class="label label-danger">Inactive</span>';
-                                ?>
-                                <tr>                                   
-                                    <td><?php echo $listing_row['card_name'] . ' [' . $listing_row['ratecard_id'] . ']'; ?></td>
-                                    <td ><?php echo $listing_row['prefix']; ?></td>
-                                    <td><?php echo $listing_row['destination']; ?></td>
-                                    <td ><?php echo number_format($listing_row['rate'], 6, '.', ''); ?></td>
-                                    <td ><?php echo number_format($listing_row['connection_charge'], 6, '.', ''); ?></td>
-                                    <td ><?php echo number_format($listing_row['grace_period'], 6, '.', ''); ?></td>                                      
-                                    <td ><?php echo $status; ?></td>                                   
-                                    <td class=" last" >
+                            <label class="control-label col-md-2 col-sm-3 col-xs-12">Ratecard Name</label>
+                            <div class="col-md-3 col-sm-8 col-xs-12 ">
+                                <select name="card" id="card" class="combobox form-control data-search-field">
+                                    <option value="">Select Rate</option>
+                                    <?php
+                                    for ($i = 0; $i < $ratecard_data['total']; $i++) {
+                                        ?>								
+                                        <option value="<?php echo $ratecard_data['result'][$i]['ratecard_id']; ?>" <?php if ($_SESSION['search_rate_data']['s_rate_card'] == $ratecard_data['result'][$i]['ratecard_id']) echo 'selected'; ?>><?php echo $ratecard_data['result'][$i]['ratecard_for'] . "::" . $ratecard_data['result'][$i]['ratecard_name'] . ' (' . $ratecard_data['result'][$i]['currency_name'] . ') [' . $ratecard_data['result'][$i]['ratecard_id'] . '] '; ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>	  
 
-                                        <?php if (check_account_permission('rate', 'edit')): ?>
-                                            <a href="<?php echo base_url(); ?>rates/editR/<?php echo param_encrypt($listing_row['rate_id'] . '@' . $listing_row['ratecard_id']); ?>" title="Edit" class="edit"><i class="fa fa-pencil-square-o"></i></a>
-                                        <?php endif; ?>
 
-                                        <?php if (check_account_permission('rate', 'delete')): ?>
-                                            <a href="javascript:doConfirmDelete('<?php echo param_encrypt($listing_row['rate_id'] . '@' . $listing_row['ratecard_id'], 'rates'); ?>');" title="Delete" class="delete"><i class="fa fa-trash"></i></a>		
+                            <div class="form-group">
+                                <label class="control-label col-md-2 col-sm-3 col-xs-12">Rates Prefix</label>
+                                <div class="col-md-4 col-sm-8 col-xs-12">
+                                    <input type="text" name="prefix" id="prefix" value="<?php echo $_SESSION['search_rate_data']['s_rate_prefix']; ?>" class="form-control data-search-field" placeholder="Prefix">
+                                </div>
+                                <label class="control-label col-md-2 col-sm-3 col-xs-12">Destination</label>
+                                <div class="col-md-4 col-sm-8 col-xs-12">
+                                    <input type="text" name="dest" id="dest" value="<?php echo $_SESSION['search_rate_data']['s_rate_destination']; ?>" class="form-control data-search-field" placeholder="Destination">
+                                </div>
+                            </div>
+
+
+                            <div class="form-group">
+                                <label class="control-label col-md-2 col-sm-3 col-xs-12">Rate Status</label>
+                                <div class="col-md-4 col-sm-8 col-xs-12">
+                                    <select name="status" id="status" class="form-control data-search-field">
+                                        <option value="">ALL</option>
+                                        <option value="1" <?php if ($_SESSION['search_rate_data']['s_status'] == '1') echo 'selected'; ?>>Active</option>
+                                        <option value="0" <?php if ($_SESSION['search_rate_data']['s_status'] == '0') echo 'selected'; ?>>Inactive</option>
+                                    </select>
+                                </div>	
+                            </div>
+
+
+                            <div class="form-group">
+                                <div class="searchBar text-center">
+                                    <input type="submit" value="Search" name="OkFilter" id="OkFilter" class="btn btn-primary">                          
+                                    <input type="button" value="Reset" name="search_reset" id="search_reset" class="btn btn-info">                           
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-dark  dropdown-toggle" data-toggle="dropdown" value="Export" name="search_export" id="search_export">
+                                            Export <span class="caret"></span></button>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li><a href="<?php echo base_url() ?>rates/index/export/<?php echo param_encrypt('csv'); ?>">CSV</a></li>
+                                            <li><a href="<?php echo base_url() ?>rates/index/export/<?php echo param_encrypt('xlsx'); ?>">XLSX</a></li>
+                                            <li><a href="<?php echo base_url() ?>rates/index/export/<?php echo param_encrypt('xls'); ?>">XLS</a></li>
+                                            <li><a href="<?php echo base_url() ?>rates/index/export/<?php echo param_encrypt('txt'); ?>">TXT</a></li>
+                                            <li><a href="<?php echo base_url() ?>rates/index/export/<?php echo param_encrypt('pdf'); ?>">PDF</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                    </form> 
+                    <label class="control-label col-md-12 col-sm-12 col-xs-12">  <div style="color: blue;">*Note- One item must be select from the Tariff or Ratecard.</div> </div>
+
+            </div> 
+            <div class="body">
+                <div class="row">  
+                    <?php
+                    dispay_pagination_row_bsd($total_records, $_SESSION['search_rate_data']['s_no_of_records'], $pagination);
+                    ?>    
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-striped jambo_table bulk_action table-bordered" id="table-sort">
+                        <thead>
+                            <tr class="headings thc">                        
+                                <th class="column-title">Ratecard</th>
+                                <th class="column-title">Prefix</th>
+                                <th class="column-title">Destination</th>
+                                <th class="column-title">Rate per Minute</th>
+                                <th class="column-title">Charge per Connection</th>
+                                <th class="column-title">Grace Period</th>
+                                <th class="column-title">Status </th>
+                                <th class="column-title no-link last"><span class="nobr">Actions</span> </th>
+
+                            </tr>
+                        </thead>		
+                        <tbody>
+                            <?php
+                            if ($listing_count > 0) {
+                                foreach ($listing_data as $listing_row) {
+
+                                    if ($listing_row['rates_status'] == '1')
+                                        $status = '<span class="label label-success">Active</span>';
+                                    else
+                                        $status = '<span class="label label-danger">Inactive</span>';
+                                    ?>
+                                    <tr>                                   
+                                        <td><?php echo $listing_row['card_name'] . ' [' . $listing_row['ratecard_id'] . ']'; ?></td>
+                                        <td ><?php echo $listing_row['prefix']; ?></td>
+                                        <td><?php echo $listing_row['destination']; ?></td>
+                                        <td ><?php echo number_format($listing_row['rate'], 6, '.', ''); ?></td>
+                                        <td ><?php echo number_format($listing_row['connection_charge'], 6, '.', ''); ?></td>
+                                        <td ><?php echo number_format($listing_row['grace_period'], 6, '.', ''); ?></td>                                      
+                                        <td ><?php echo $status; ?></td>                                   
+                                        <td class=" last" >
+
+                                            <?php if (check_account_permission('rate', 'edit')): ?>
+                                                <a href="<?php echo base_url(); ?>rates/editR/<?php echo param_encrypt($listing_row['rate_id'] . '@' . $listing_row['ratecard_id']); ?>" title="Edit" class="edit"><i class="fa fa-pencil-square-o"></i></a>
+                                            <?php endif; ?>
+
+                                            <?php if (check_account_permission('rate', 'delete')): ?>
+                                                <a href="javascript:doConfirmDelete('<?php echo param_encrypt($listing_row['rate_id'] . '@' . $listing_row['ratecard_id'], 'rates'); ?>');" title="Delete" class="delete"><i class="fa fa-trash"></i></a>		
                                             <?php endif; ?>				 
-                                    </td>
-                                </tr>
+                                        </td>
+                                    </tr>
 
+                                    <?php
+                                }
+                            } else {
+                                ?>
+                                <tr>
+                                    <td colspan="8" align="center"><strong>No Record Found</strong></td>
+                                </tr>
                                 <?php
                             }
-                        }
-                        else {
                             ?>
-                            <tr>
-                                <td colspan="8" align="center"><strong>No Record Found</strong></td>
-                            </tr>
-                            <?php
-                        }
-                        ?>
-                    </tbody>
-                </table>
-            </div>                    
-            <?php echo '<div class="btn-toolbar" role="toolbar">
-				  <div class="btn-group pull-right navigation-bar col-md-6 col-sm-12 col-xs-12 text-right">
-						   ' . $pagination . '
-				  </div>
-				</div>'; ?>
-            <?php //endif; ?>
+                        </tbody>
+                    </table>
+                </div>                    
+                <div class="row">  
+                    <?php
+                    dispay_pagination_row_bsd($total_records, $_SESSION['search_rate_data']['s_no_of_records'], $pagination);
+                    ?>    
+                </div>
+            </div>
         </div>
     </div>
 </div>
 </div>
+</div>
+
 <script>
 <?php
 $options = '';

@@ -5,18 +5,21 @@
         $('.combobox').combobox()
     });
 </script>
-<div class="col-md-12 col-sm-6 col-xs-12">
-    <div class="x_panel">
-        <div class="x_title">
-            <h2>Billing</h2>            
-            <div class="clearfix"></div>
-        </div>
-        <div class="x_content"> 
-            <h3>No Data</h3>    
-            </div>                    
-           
+
+
+<div class="container-fluid">
+    <div class="block-header">
+        <h2>Billing</h2>   
+        <ul class="nav navbar-right panel_toolbox">
+
+        </ul>
+    </div>
+    <div class="row clearfix">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="card">
+                <div class="header">
+                </div>
+            </div>
         </div>
     </div>
 </div>
-</div>
- 

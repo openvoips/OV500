@@ -1,27 +1,15 @@
-
-<div class="">
-    <div class="clearfix"></div> 
-    <div class="col-md-12 col-sm-12 col-xs-12 right">
-        <div class="ln_solid"></div>
-        <div class="x_title">
-            <h2>System Users Management</h2>
-            <ul class="nav navbar-right panel_toolbox">     
-                <li><a href="<?php echo site_url('users') ?>"><button class="btn btn-danger" type="button" >Back to System Users Listing Page</button></a> </li>
-            </ul>
-            <div class="clearfix"></div>
-        </div>
-
+                 
+<div class="container-fluid">
+    <div class="block-header">
+        <h2>System Users(ADD)</h2>
+        <ul class="nav navbar-right panel_toolbox">
+            <li><a href="<?php echo site_url('users') ?>"><button class="btn btn-primary" type="button" >Back to System Users Listing Page</button></a> </li>
+        </ul>
     </div>
-    <div class="row">
-        <div class="col-md-12 col-sm-12 col-xs-12">
-            <div class="x_panel">
-                <div class="x_title">
-                    <h2>System User (ADD)</h2>
-                    <ul class="nav navbar-right panel_toolbox">                        
-                    </ul>
-                    <div class="clearfix"></div>
-                </div>
-                <div class="x_content">
+    <div class="row clearfix">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="card">
+                <div class="header">
 
                     <form action="<?php echo base_url(); ?>users/addA" method="post" name="add_form" id="add_form" data-parsley-validate class="form-horizontal form-label-left">
                         <input type="hidden" name="button_action" id="button_action" value="">
@@ -34,7 +22,7 @@
                             <div class="col-md-6 col-sm-6 col-xs-12">
 
                                 <select name="user_type" id="user_type" class="form-control" data-parsley-required="">
-                                    <option value="">Select</option>                    
+                                    <option value="">Select User Type</option>                    
                                     <?php
                                     $str = '';
                                     foreach ($user_type_array as $type => $type_name) {
@@ -116,8 +104,11 @@
                             <label for="middle-name" class="control-label col-md-3 col-sm-3 col-xs-12">Status</label>
                             <div class="col-md-9 col-sm-6 col-xs-12">
                                 <div class="radio">
-                                    <label><input type="radio" name="status_id" id="status1" value="1"  <?php echo set_radio('status_id', '1', TRUE); ?> /> Active</label>                               
-                                    <label> <input type="radio" name="status_id" id="status0" value="0" <?php echo set_radio('status_id', '0'); ?> /> Inactive</label>
+                                    <input  class="with-gap" type="radio" name="status_id" id="status1" value="1"  <?php echo set_radio('status_id', '1', TRUE); ?> /> <label for="status1">Active</label>                              
+                                    <input  class="with-gap" type="radio" name="status_id" id="status0" value="0" <?php echo set_radio('status_id', '0'); ?> /><label for="status0">Active</label>  
+
+
+
                                 </div>
 
                             </div>
@@ -138,16 +129,11 @@
             </div>
         </div>
     </div>
-    <div class="col-md-12 col-sm-12 col-xs-12 right">
-        <div class="ln_solid"></div>
-        <div class="x_title">
-            <h2>System Users Management</h2>
-            <ul class="nav navbar-right panel_toolbox">     
-                <li><a href="<?php echo site_url('users') ?>"><button class="btn btn-danger" type="button" >Back to System Users Listing Page</button></a> </li>
-            </ul>
-            <div class="clearfix"></div>
-        </div>
-
+    <div class="block-header">
+        <h2>System Users(ADD)</h2>
+        <ul class="nav navbar-right panel_toolbox">
+            <li><a href="<?php echo site_url('users') ?>"><button class="btn btn-primary" type="button" >Back to System Users Listing Page</button></a> </li>
+        </ul>
     </div>
 </div>    
 <script src="<?php echo base_url() ?>theme/vendors/parsleyjs/dist/parsley.min.js"></script>

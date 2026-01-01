@@ -35,7 +35,7 @@
             <div class="x_title">
                 <h2>Profile</h2>
                 <ul class="nav navbar-right panel_toolbox">
-                    
+
                 </ul>
                 <div class="clearfix"></div>
             </div>
@@ -423,7 +423,7 @@
                 <div class="x_title">
                     <h2>Change Password</h2>
                     <ul class="nav navbar-right panel_toolbox">
-                        
+
                     </ul>
                     <div class="clearfix"></div>
                 </div>			
@@ -513,7 +513,7 @@
                 <div class="x_title">
                     <h2>Caller ID Translation Rules</h2>
                     <ul class="nav navbar-right panel_toolbox">
-                        
+
 
                         </li>
                     </ul>
@@ -586,7 +586,7 @@
                 <div class="x_title">
                     <h2>Number Translation Rules</h2>
                     <ul class="nav navbar-right panel_toolbox">
-                        
+
 
                         </li>
                     </ul>
@@ -619,8 +619,7 @@
 
                                     <?php
                                 }
-                            }
-                            else {
+                            } else {
                                 ?>
                                 <tr>
                                     <td colspan="2" align="center"><strong>No Record Found</strong></td>
@@ -648,7 +647,7 @@
                 <div class="x_title">
                     <h2>Dialing Plans</h2>
                     <ul class="nav navbar-right panel_toolbox">
-                        
+
 
                         </li>
                     </ul>
@@ -699,7 +698,7 @@
                 <div class="x_title">
                     <h2>Incoming Caller ID Translation Rules</h2>
                     <ul class="nav navbar-right panel_toolbox">
-                        
+
 
                         </li>
                     </ul>
@@ -732,8 +731,7 @@
 
                                     <?php
                                 }
-                            }
-                            else {
+                            } else {
                                 ?>
                                 <tr>
                                     <td colspan="2" align="center"><strong>No Record Found</strong></td>
@@ -761,7 +759,7 @@
                 <div class="x_title">
                     <h2>Incoming Number Translation Rules</h2>
                     <ul class="nav navbar-right panel_toolbox">
-                        
+
 
                         </li>
                     </ul>
@@ -794,8 +792,7 @@
 
                                     <?php
                                 }
-                            }
-                            else {
+                            } else {
                                 ?>
                                 <tr>
                                     <td colspan="2" align="center"><strong>No Record Found</strong></td>

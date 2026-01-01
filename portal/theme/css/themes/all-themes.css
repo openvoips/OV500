@@ -1,0 +1,30 @@
+﻿.theme-bg-light-grey .navbar {  background-color: #ffff; }
+
+.theme-bg-light-grey .navbar-brand {  color: #666; }
+.theme-bg-light-grey .navbar-brand:hover {    color: #666; }
+.theme-bg-light-grey .navbar-brand:active {    color: #666; }
+.theme-bg-light-grey .navbar-brand:focus {    color: #666; }
+.theme-bg-light-grey .navbar .navbar-toggle {color: #666;}
+
+.theme-bg-light-grey .sidebar .user-info .user-bg{background-color: rgba(58, 58, 58, .1);}
+
+.theme-bg-light-grey .nav > li > a {  color: #666; }
+.theme-bg-light-grey .nav > li > a span.label-count{color:#fff;background:#00bcd4;}
+.theme-bg-light-grey .nav > li > a:hover {    background-color: transparent; }
+.theme-bg-light-grey .nav > li > a:focus {    background-color: transparent; }
+
+.theme-bg-light-grey .nav .open > a {  background-color: transparent; }
+.theme-bg-light-grey .nav .open > a:hover {    background-color: transparent; }
+.theme-bg-light-grey .nav .open > a:focus {    background-color: transparent; }
+
+.theme-bg-light-grey .bars {  color: #666; }
+
+.theme-bg-light-grey .sidebar .menu .list li.active {  background-color: transparent; }
+.theme-bg-light-grey .sidebar .menu .list li.active > :first-child i, .theme-bg-light-grey .sidebar .menu .list li.active > :first-child span {    color: #00bcd4; }
+
+.theme-bg-light-grey .sidebar .menu .list .toggled {  background-color: transparent; }
+
+.theme-bg-light-grey .sidebar .menu .list .ml-menu {  background-color: transparent; }
+
+.theme-bg-light-grey .sidebar .legal {  background-color: #fff; }
+.theme-bg-light-grey .sidebar .legal .copyright a {    color: #00bcd4 !important; }

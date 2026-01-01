@@ -1,30 +1,12 @@
 <?php
-
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-// OV500 Version 2.0.0
-// Copyright (C) 2019-2021 Openvoips Technologies   
-// http://www.openvoips.com  http://www.openvoips.org
-// 
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
-
+/*
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2026 
+ * http://www.openvoips.com 
+ */
 
 class Currency_mod extends CI_Model {
 
@@ -37,16 +19,15 @@ class Currency_mod extends CI_Model {
 
         $currencies_table = 'sys_currencies';
         try {
-            $this->db->select("SQL_CALC_FOUND_ROWS *, '$currencies_table' as table_name", FALSE);
-            $this->db->order_by('currency_id', 'DESC');
-            $q = $this->db->get($currencies_table);
 
 
 
+            $sql = "SELECT currency_id, symbol,  name FROM sys_currencies where status_id = '1' ORDER BY display_sequence,  name";
+            $q = $this->db->query($sql);
             $final_return_array['result'] = $q->result_array();
+
             $query = $this->db->query('SELECT FOUND_ROWS() AS Count');
             $final_return_array["total"] = $query->row()->Count;
-
 
             $final_return_array['status'] = 'success';
             $final_return_array['message'] = 'Currency List fetched successfully';
@@ -76,24 +57,21 @@ class Currency_mod extends CI_Model {
             $sub->select('detail_name')->from('sys_currencies');
             $sub->where('sys_currencies.currency_id = ' . $table_name . '.currency_id');
             $this->subquery->end_subquery('detail_name');
-            if (count(array_filter($filter_data)) != 0) {
-                foreach ($filter_data as $key => $value) {
-                    if ($value != '') {
-                        if ($key == 'id' || $key == 'currency_id') {
-                            $this->db->where($key, $value);
-                        } else {
-                            $this->db->where($key, $value);
-                        }
+
+            foreach ($filter_data as $key => $value) {
+                if (strlen(trim($value)) > 0) {
+                    if ($key == 'currency' || $key == 'currency_id') {
+                        $this->db->where($key, $value);
                     }
                 }
             }
+
 
             $this->db->order_by('date', 'DESC');
             $this->db->limit(intval($limit_to), intval($limit_from));
 
             $q = $this->db->get($table_name);
-
-            if (!$q) {
+             if (!$q) {
                 $error_array = $this->db->error();
             }
 
@@ -104,7 +82,7 @@ class Currency_mod extends CI_Model {
             $final_return_array['status'] = 'success';
             $final_return_array['message'] = 'Currency exchange Rates List fetched successfully';
 
-            
+            //var_dump($final_return_array);
             return $final_return_array;
         } catch (Exception $e) {
             $final_return_array['status'] = 'failed';
@@ -129,7 +107,6 @@ class Currency_mod extends CI_Model {
             $log_data_array[] = array('activity_type' => 'insert', 'sql_table' => 'sys_currencies_conversions', 'sql_key' => '', 'sql_query' => $str);
             set_activity_log($log_data_array);
             return array('status' => true, 'id' => $currency_id, 'msg' => 'Ratecard Added Successfully in the system.');
-
 
             $str = "update sys_currencies  set symbol = '&#x20b9;'  where name='INR'";
             $this->db->query($str);

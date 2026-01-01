@@ -38,4 +38,5 @@
             <button type="button" id="<?php echo 'btnSaveClose'.$key;?>" class="btn btn-info" onclick="save_button('<?php echo $key;?>')">Add Tariff</button>
         </div>
     </div>
+<br>
 </form>

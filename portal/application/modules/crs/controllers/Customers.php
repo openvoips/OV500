@@ -1,20 +1,21 @@
 <?php
-
-/* Copyright (C) Openvoips Technologies - All Rights Reserved
+/*
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
  * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential, Only allow to use 
- * OV500Pro Version 2.1.0
- * Written by Seema Anand <openvoips@gmail.com> , 2021 
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2026 
  * http://www.openvoips.com 
- * License https://www.openvoips.com/license.html
  */
 
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
-class Customers extends MY_Controller {
+class Customers extends MY_Controller
+{
 
-    function __construct() {
+    function __construct()
+    {
         parent::__construct();
 
         $this->load->library('pagination');
@@ -27,11 +28,12 @@ class Customers extends MY_Controller {
         $this->logged_user_type = get_logged_user_type();
         $this->logged_user_id = get_logged_user_id();
         $this->logged_account_id = get_logged_account_id();
+
+        $this->load->model('notification_mod');
     }
 
-    /* for enduser */
-
-    public function index($arg1 = '', $format = '') {
+    function index($arg1 = '', $format = '')
+    {
 
         redirect(site_url('crs'), 'refresh');
 
@@ -73,7 +75,7 @@ class Customers extends MY_Controller {
 
         $search_parameters = array('company_name', 'account_id', 'status_id', 'no_of_rows');
 
-        if (isset($_POST['search_action'])) {// coming from search button
+        if (isset($_POST['search_action'])) { // coming from search button
             set_post_to_session($search_session_key, $search_parameters);
         } else {
             set_session_to_session($search_session_key, $search_parameters);
@@ -154,7 +156,9 @@ class Customers extends MY_Controller {
         }
     }
 
-    public function add() {
+    function add()
+    {
+
         $page_name = "customer_add";
         $data['page_name'] = $page_name;
         if (!check_account_permission('customer', 'add'))
@@ -195,6 +199,8 @@ class Customers extends MY_Controller {
             $this->form_validation->set_rules('state_code_id', 'State', 'trim');
             $this->form_validation->set_rules('pincode', 'Pin-Code', 'trim');
 
+            $this->form_validation->set_rules('tariff_id', 'Tariff', 'trim');
+
             $this->form_validation->set_rules('username', 'Username', 'trim|required|min_length[6]');
             $this->form_validation->set_rules('secret', 'Password', 'trim|required|min_length[8]');
 
@@ -214,7 +220,7 @@ class Customers extends MY_Controller {
                 }
                 $_POST['created_by'] = get_logged_account_id();
                 $result = $this->customer_mod->add($_POST);
-                //echo '<pre>';print_r($_POST);var_dump($result);die;
+
                 if ($result === true) {
                     $account_id = $this->customer_mod->account_id;
                     $this->session->set_flashdata('suc_msgs', 'Customer Added Successfully.');
@@ -234,7 +240,7 @@ class Customers extends MY_Controller {
 
         $data['country_options'] = $this->utils_model->get_countries();
         $data['currency_options'] = $this->utils_model->get_currencies();
-        $data['state_options'] = $this->utils_model->get_states();
+
 
         if (strpos($_SERVER['HTTP_REFERER'], 'customers/add') === false) {
             if (strpos($_SERVER['HTTP_REFERER'], 'crs') !== false)
@@ -249,7 +255,8 @@ class Customers extends MY_Controller {
         $this->load->view('basic/footer', $data);
     }
 
-    public function edit($id = -1, $active_tab = 1) {
+    function edit($id = -1, $active_tab = 1)
+    {
         $customer_type = 'customer';
         $page_name = "customers_edit";
         $data['page_name'] = $page_name;
@@ -484,7 +491,32 @@ class Customers extends MY_Controller {
                     $data['err_msgs'] = $err_msgs;
                 }
             }
-        } {
+        } 
+        elseif (isset($_POST['action']) && $_POST['action'] == 'OkSaveCliDst') {
+            $data['active_tab'] = $_POST['tab'];
+            $this->form_validation->set_rules('account_id', 'Account ID', 'trim|required');
+            $this->form_validation->set_rules('pstn_cli_usage_option', 'CLI Usage Option', 'trim|required');            
+            $this->form_validation->set_rules('pstn_min_dst_number_length_option', 'MIN Length Option', 'trim|required');            
+            $this->form_validation->set_rules('did_cli_usage_option', 'CLI Usage Option', 'trim|required');
+            if ($this->form_validation->run() == FALSE) {
+                $data['err_msgs'] = validation_errors();
+            } else {
+                $_POST['created_by'] = get_logged_account_id();
+                $result = $this->customer_mod->save_cli_dst_rule($_POST);
+               $result=true;
+                if ($result === true) {
+                    $this->session->set_flashdata('suc_msgs', 'CLI Destination Rule Updated Successfully');
+                    redirect(site_url('crs/customers/edit/' . param_encrypt($account_id) . '/' . $data['active_tab']), 'location', '301');
+                    exit();
+                } else {
+                    $err_msgs = $result;
+                    $data['err_msgs'] = $err_msgs;
+                }
+            }
+        }
+        
+        
+        {
             $search_data = array('account_id' => $account_id);
             if (check_logged_user_group(array('RESELLER'))) {
                 $search_data['parent_account_id'] = $this->logged_account_id;
@@ -492,7 +524,7 @@ class Customers extends MY_Controller {
                 $search_data['parent_account_id'] = '';
             }
 
-            $option_param = array();
+            $option_param = array('randomcli' => true,'cli_dst_rules'=>true);
             /* array('ip' => true, 'callerid' => true, 'sipuser' => true, 'tariff' => true, 'user' => false, 'prefix' => false, 'dialplan' => true, 'translation_rules' => true, 'callerid_incoming' => true, 'translation_rules_incoming' => true, 'bundle_package_group_by' => true); */
             $customers_data_temp = $this->customer_mod->get_data('', 1, 0, $search_data, $option_param);
 
@@ -505,14 +537,12 @@ class Customers extends MY_Controller {
 
         $data['data'] = $customers_data;
 
-
         $data['country_options'] = $this->utils_model->get_countries();
         $data['currency_options'] = $this->utils_model->get_currencies();
-        $data['state_options'] = $this->utils_model->get_states();
+
 
         $data['account_manager_options'] = $this->customer_mod->get_user_by_account_manager();
         $data['account_manager_data'] = $this->customer_mod->get_account_manager($account_id);
-
 
         $user_search_data['account_id'] = $account_id;
         $user_search_data['user_type'] = 'CUSTOMERADMIN';
@@ -523,24 +553,31 @@ class Customers extends MY_Controller {
         else
             $users_data = array();
         $data['user_data'] = $users_data;
-		
-		$data['account_manager_options'] = $this->customer_mod->get_user_by_account_manager();
-		$data['account_manager_data'] = $this->customer_mod->get_account_manager($account_id);
+
+        $data['account_manager_options'] = $this->customer_mod->get_user_by_account_manager();
+        $data['account_manager_data'] = $this->customer_mod->get_account_manager($account_id);
 
         $this->load->view('basic/header', $data);
         $this->load->view('customer/customer_edit', $data);
         $this->load->view('basic/footer', $data);
     }
+    function rstatement($id = -1, $arg1 = '', $format = '', $from = '')
+    {
+        $this->statement($id, $arg1, $format, 'self');
+    }
+    function statement($id = -1, $arg1 = '', $format = '', $from = '')
+    {
 
-    function statement($id = -1, $arg1 = '', $format = '') {
-        $page_name = "statement";
+        if ($from == 'self')
+            $page_name = "report_statement";
+        else
+            $page_name = "statement";
         $search_session_key = 'search_' . $page_name;
         $data['page_name'] = $page_name;
         $this->load->model('report_mod');
         $this->load->model('crspayment_mod');
 
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-
 
         if (isset($_POST['search_action']) && isset($_POST['account_id']) && $_POST['account_id'] != '') {
             $account_id = trim($_POST['account_id']);
@@ -598,7 +635,6 @@ class Customers extends MY_Controller {
                     $downloaded_message = $this->export->download_excel($file_name, $report_data, $sdr_terms, $customer_dp, $month_year, $account_id, $format);
                 }
             } else {
-                
             }
 
             if (gettype($downloaded_message) == 'string')
@@ -611,11 +647,10 @@ class Customers extends MY_Controller {
         if ($is_file_downloaded === false) {
             if (isset($account_id) && $account_id != '') {
 
-              $invoice_data = $this->report_mod->invoice_list($account_id);
+                $invoice_data = $this->report_mod->invoice_list($account_id);
                 $data['invoice_list'] = $invoice_data['result'];
-
                 $report_data = $this->report_mod->sdr_statement($account_id, $search_data);
- 
+
                 $data['customer_data'] = $customer_result;
                 $data['sdr_terms'] = $this->utils_model->get_sdr_terms();
                 $data['searched_account_id'] = $account_id;
@@ -628,8 +663,8 @@ class Customers extends MY_Controller {
         }
     }
 
-   
-    public function balance_check($str) {//die("DDDD");
+    function balance_check($str)
+    {
         $this->load->model('crspayment_mod');
         $payment_result = $this->crspayment_mod->get_balance($_POST['key']);
         if ($payment_result['result']['outstanding_balance'] != 0) {
@@ -640,4 +675,590 @@ class Customers extends MY_Controller {
         }
     }
 
+
+
+    public function randomclis($account_id_temp = -1, $type = 1)
+    {
+        if ($account_id_temp == -1)
+            show_404();
+        $page_name = "customer_edit_randomcli";
+        $data['page_name'] = $page_name;
+
+        $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
+
+        if ($type != 1)
+            $type = 2;
+
+
+        if (isset($_POST['action']) && $_POST['action'] == 'OkDeleteData') {    //echo '<pre>';print_r($_POST);die;
+
+            if (!isset($_POST['delete_parameter_two'])) {
+                $this->session->set_flashdata('err_msgs', 'Insufficient Parameters');
+                redirect(current_url(), 'location', '301');
+            }
+            if (!isset($_POST['delete_id'])) {
+                $err_msgs = 'Select to delete';
+                $this->session->set_flashdata('err_msgs', $err_msgs);
+                redirect(current_url(), 'location', '301');
+            }
+            $account_id = param_decrypt($account_id_temp);
+            // print_r($_POST);die;
+            switch ($_POST['delete_parameter_two']) {
+
+
+                case 'customer_randomcli_delete':
+
+                    $delete_id_array = json_decode($_POST['delete_id']);
+                    //print_r($delete_id_array);
+
+                    $delete_param_array = array('delete_id' => $delete_id_array);
+
+                    $result = $this->customer_mod->delete_randomcli($account_id, $delete_param_array);
+
+                    //echo $account_id; ddd($delete_param_array);die;
+                    if ($result === true) {
+                        $suc_msgs = 'CLI Deleted Successfully';
+                        $this->session->set_flashdata('suc_msgs', $suc_msgs);
+                    } else {
+                        $err_msgs = $result;
+                        $this->session->set_flashdata('err_msgs', $err_msgs);
+                    }
+
+                    redirect(current_url(), 'location', '301');
+                    break;
+                default:
+
+                    $this->session->set_flashdata('err_msgs', 'Parameter mismatch');
+                    redirect(current_url(), 'location', '301');
+            }
+        } {
+            $account_id = param_decrypt($account_id_temp);
+
+            $order_by = '';
+            $per_page = 1;
+            $segment = 0;
+            $search_data = array('account_id' => $account_id);
+            if (check_logged_user_group(array('RESELLER'))) {
+                $search_data['parent_account_id'] = $this->logged_account_id;
+            } else {
+                $search_data['parent_account_id'] = '';
+            }
+            $option_param = array('randomcli' => true); //'randomcli_type'.$type=>true
+            $customers_data_temp = $this->customer_mod->get_data('', 1, 0, $search_data, $option_param);
+
+            if (isset($customers_data_temp['result']))
+                $customers_data = current($customers_data_temp['result']);
+            else
+                show_404();
+        }
+
+        $data['data'] = $customers_data;
+
+        if ($type == 1)
+            $data['active_tab'] = 4;
+        else
+            $data['active_tab'] = 5;
+
+        $this->load->view('basic/header', $data);
+        $this->load->view('customer/randomclis', $data);
+        $this->load->view('basic/footer', $data);
+    }
+
+    public function edit_randomcli($account_id_temp = -1, $id1 = -1)
+    {
+        if ($account_id_temp == -1 || $id1 == -1)
+            show_404();
+        $page_name = "customer_edit_randomcli";
+        $data['page_name'] = $page_name;
+
+        $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
+
+        if (isset($_POST['action']) && $_POST['action'] == 'OkSaveData') {             // print_r($_POST);
+            $account_id = $_POST['account_id'];
+            $customer_ip_id = $_POST['customer_ip_id'];
+            $rule_type = $_POST['rule_type'];
+            $data['account_id'] = $account_id;
+
+
+            if ($rule_type == 1) {
+                $this->form_validation->set_rules('clirule_name', 'CLI Rule Name', 'trim|required');
+                $this->form_validation->set_rules('cli_length', 'Max length Prefix', 'trim');
+            } else {
+            }
+            $this->form_validation->set_rules('cli_fixprefix', 'Fix Prefix', 'trim|required');
+            $this->form_validation->set_rules('destination_prefix', 'DST Prefix', 'trim|required');
+            $this->form_validation->set_rules('account_id', 'customer ID', 'trim|required');
+
+
+
+            $this->form_validation->set_rules('cli_status', 'Status', 'trim|required');
+            $this->form_validation->set_rules('randomcli_id', 'RandomCLI ID', 'trim|required');
+
+            if ($this->form_validation->run() == FALSE) { // error
+
+                $data['err_msgs'] = validation_errors();
+            } else {
+                $result = $this->customer_mod->update_randomcli($_POST);
+                //ddd($_POST); ddd($result);die;
+                if ($result === true) { //success													
+                    $this->session->set_flashdata('suc_msgs', 'CLI Updated Successfully');
+
+                    redirect(base_url() . 'crs/customers/edit_randomcli/' . $account_id_temp . '/' . $id1, 'location', '301');
+                } else {
+                    $err_msgs = $result;
+                    $data['err_msgs'] = $err_msgs;
+                }
+            } //if
+
+        } //if(isset($_POST['OkSaveData']))
+        ///////////////////////////		
+
+        if (!empty($id1)) {
+            $account_id = param_decrypt($account_id_temp);
+            $randomcli_id = param_decrypt($id1);
+
+            $order_by = '';
+            $per_page = 1;
+            $segment = 0;
+            $search_data = array('account_id' => $account_id);
+            $option_param = array('randomcli' => true, 'randomclisingle' => true, 'randomcli_id' => $randomcli_id);
+            $customers_data_temp = $this->customer_mod->get_data($order_by, $per_page, $segment, $search_data, $option_param);
+            //ddd($customers_data_temp);die;
+            if (isset($customers_data_temp['result']))
+                $customers_data = current($customers_data_temp['result']);
+            else {
+                show_404();
+            }
+        } else {
+            show_404();
+        }
+
+        $data['data'] = $customers_data;
+
+
+        $this->load->view('basic/header', $data);
+        $this->load->view('customer/randomcli_edit', $data);
+        $this->load->view('basic/footer', $data);
+    }
+
+
+    public function add_randomcli($id1 = -1, $type = 1)
+    {
+        if ($id1 == -1)
+            show_404();
+        $page_name = "customer_add_randomcli";
+        $data['page_name'] = $page_name;
+        $data['type'] = $type;
+
+        $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
+
+        if (isset($_POST['action']) && $_POST['action'] == 'OkSaveData') {
+            $account_id = $_POST['account_id'];
+            $data['account_id'] = $account_id;
+
+            $this->form_validation->set_rules('account_id', 'customer ID', 'trim|required');
+            $this->form_validation->set_rules('clirule_name', 'CLI Rule Name', 'trim|required');
+            $this->form_validation->set_rules('destination_prefix', 'DST Prefix', 'trim|required');
+            $this->form_validation->set_rules('cli_fixprefix', 'Fix Prefix', 'trim|required');
+            $this->form_validation->set_rules('cli_length', 'Max length Prefix', 'trim');
+            $this->form_validation->set_rules('cli_status', 'Status', 'trim|required');
+
+            if ($this->form_validation->run() == FALSE) { // error
+                $data['err_msgs'] = validation_errors();
+            } else {
+                $result = $this->customer_mod->add_randomcli($_POST);
+                //ddd($_POST); ddd($result);die;
+                if ($result === true) { //success													
+                    $this->session->set_flashdata('suc_msgs', 'Random CLI Added Successfully');
+                    redirect(site_url('crs/customers/add_randomcli/' . param_encrypt($account_id) . '/' . $type), 'location', '301');
+                } else {
+                    $err_msgs = $result;
+                    $data['err_msgs'] = $err_msgs;
+                }
+            } //if
+
+        } //if(isset($_POST['OkSaveData']))
+        elseif (isset($_POST['action']) && $_POST['action'] == 'OkSaveDataType2') {
+            $account_id = $_POST['account_id'];
+            $data['account_id'] = $account_id;
+
+            $this->form_validation->set_rules('account_id', 'customer ID', 'trim|required');
+            //$this->form_validation->set_rules('clirule_name', 'CLI Rule Name', 'trim|required');
+            $this->form_validation->set_rules('destination_prefix', 'DST Prefix', 'trim|required');
+            $this->form_validation->set_rules('cli_fixprefix', 'Fix Prefix', 'trim|required');
+            //$this->form_validation->set_rules('cli_length', 'Max length Prefix', 'trim');
+            $this->form_validation->set_rules('cli_status', 'Status', 'trim|required');
+
+            if ($this->form_validation->run() == FALSE) { // error
+                $data['err_msgs'] = validation_errors();
+            } else {
+                $result = $this->customer_mod->add_randomcli($_POST);
+                //ddd($_POST); ddd($result);die;
+                if ($result === true) { //success													
+                    $this->session->set_flashdata('suc_msgs', 'Random CLI Added Successfully');
+                    redirect(site_url('crs/customers/add_randomcli/' . param_encrypt($account_id) . '/2'), 'location', '301');
+                } else {
+                    $err_msgs = $result;
+                    $data['err_msgs'] = $err_msgs;
+                }
+            } //if
+
+        } elseif (isset($_POST['action']) && $_POST['action'] == 'OkSaveDataFile') {
+            $account_id = $_POST['account_id'];
+            $data['account_id'] = $account_id;
+
+            $this->form_validation->set_rules('account_id', 'customer ID', 'trim|required');
+
+
+            if ($this->form_validation->run() == FALSE) { // error
+                $data['err_msgs'] = validation_errors();
+            } else {
+
+                $config['upload_path']          = './uploads/';
+                $config['allowed_types']        = 'csv'; //xlsx|xls|csv|txt
+                $config['file_name']             = 'CARD_' . date('YmdHis');
+                $config['file_ext_tolower']     = TRUE;
+                $config['max_size']             = 0;
+                $this->load->library('upload', $config);
+                if (!$this->upload->do_upload('file')) {
+                    $data['err_msgs'] = $this->upload->display_errors();
+                } else {
+                    $data = $this->upload->data();
+                    $file_with_path = './uploads/' . $data['file_name'];
+                    $file = fopen($file_with_path, "r");
+                    $cnt = 0;
+                    $error = 0;
+                    $error_msg = '';
+                    $csv_data = array();
+                    while (! feof($file)) {
+                        $d = fgetcsv($file);
+                        $csv_data[] = $d;
+                        if ($cnt > 0 && is_array($d)) {
+
+                            $error_type = '';
+                            $pref = trim($d[0]);
+                            if (!preg_match('/^\d{1,15}$/', $pref)) {
+                                $error++;
+                                $error_type .= 'Prefix (' . $pref . ')';
+                            }
+                            $dest = trim($d[1]);
+                            if (!preg_match('/^[a-z0-9 \/ \-()&\.]+$/i', $dest)) {
+                                $error++;
+                                $error_type .= 'Destination (' . $dest . ')';
+                            }
+
+                            if ($error) {
+                                $lineno = $cnt + 1;
+                                $error_msg = 'Error in Line no. ' . $lineno . ' - column [' . $error_type . ']'; /*echo 'Error in '.$cnt.' ['.$error_type.']';*/
+                                break;
+                            } else {
+                                //echo $pref.'|'.$dest.'|'.$ppm.'|'.$ppc.'|'.$min.'|'.$res.'|'.$grace.'|'.$mul.'|'.$add.'|'.$stat.'<br>';
+                            }
+                        }
+                        ++$cnt;
+                    }
+                    fclose($file);
+                    unlink($file_with_path);
+
+                    //ddd($csv_data);die;
+                    if ($error) {
+                        $this->session->set_flashdata('err_msgs', $error_msg);
+                        redirect(site_url('crs/customers/add_randomcli/' . param_encrypt($account_id) . '/2'), 'location', '301');
+                    } else {
+                        unset($csv_data[0]);
+                        $result = $this->customer_mod->add_randomcli_bulk($_POST, $csv_data);
+                        //ddd($_POST); ddd($result);die;
+                        if ($result === true) { //success													
+                            $this->session->set_flashdata('suc_msgs', 'Random CLI Added Successfully');
+                            redirect(site_url('crs/customers/randomclis/' . param_encrypt($account_id) . '/2'), 'location', '301'); // 301 redirected	
+
+                        } else {
+                            $err_msgs = $result;
+                            $data['err_msgs'] = $err_msgs;
+                        }
+                    }
+                }
+            } //if
+
+        }
+        ///////////////////////////		
+        if (!empty($id1)) {
+            $account_id = param_decrypt($id1);
+            $order_by = '';
+            $per_page = 1;
+            $segment = 0;
+            $search_data = array('account_id' => $account_id);;
+            $option_param = array('randomcli' => true,);
+            $customers_data_temp = $this->customer_mod->get_data($order_by, $per_page, $segment, $search_data, $option_param);
+
+            if (isset($customers_data_temp['result']))
+                $customers_data = current($customers_data_temp['result']);
+            else {
+                show_404();
+            }
+        } else {
+            show_404();
+        }
+
+        $data['data'] = $customers_data;
+        $data['account_id'] = $account_id;
+
+        $this->load->view('basic/header', $data);
+        $this->load->view('customer/randomcli_add', $data);
+        $this->load->view('basic/footer', $data);
+    }
+
+    public function download($file)
+    {
+        if (!check_is_loggedin())
+            redirect(base_url(), 'refresh');
+
+        $file = param_decrypt($file);
+        switch ($file) {
+
+            case 'abcd':
+                $filename = 'abcd.csv';
+
+                $fullPath = 'uploads/sample/' . $filename;
+
+                break;
+
+            default:
+
+                $filename = $file;
+                $fullPath = 'uploads/sample/' . $filename;
+
+                if (file_exists($fullPath)) {
+                } else
+                    show_404();
+        }
+
+        $this->load->helper('download');
+        force_download($fullPath, NULL, true);
+        exit;
+    }
+
+
+    function notification($id = -1, $active_tab = 1)
+    {
+        $customer_type = 'customer';
+        $page_name = "customers_edit";
+        $data['page_name'] = $page_name;
+        $data['active_tab'] = $active_tab;
+        $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
+
+        if (!check_account_permission('customer', 'view') && !check_account_permission('customer', 'edit'))
+            show_404('403');
+
+        $account_id = param_decrypt($id);
+        if (strlen($account_id) == 0)
+            show_404();
+
+
+
+        if (isset($_POST['action']) && $_POST['action'] == 'OkDeleteData') {
+            if (!check_account_permission('customer', 'delete')) {
+                $this->session->set_flashdata('err_msgs', 'Dont have enough permission');
+                redirect(site_url() . 'crs/customers', 'location', '301');
+            }
+            $delete_id_array = json_decode($_POST['delete_id']);
+            if (isset($_POST['delete_id']) && count($delete_id_array) > 0) {
+                $delete_param_array = array('delete_id' => $delete_id_array);
+                $result = $this->notification_mod->delete_notification($account_id, $delete_param_array);
+                if ($result === true) {
+
+                    $suc_msgs = 'Notification Deleted Successfully';
+                    $this->session->set_flashdata('suc_msgs', $suc_msgs);
+                    redirect(current_url(), 'location', '301');
+                } else {
+                    $err_msgs = $result;
+                    $this->session->set_flashdata('err_msgs', $err_msgs);
+                    redirect(current_url(), 'location', '301');
+                }
+            } else {
+                $err_msgs = 'Select data to delete';
+                $this->session->set_flashdata('err_msgs', $err_msgs);
+                redirect(current_url(), 'location', '301');
+            }
+        } {
+            $search_data = array('account_id' => $account_id);
+            if (check_logged_user_group(array('RESELLER'))) {
+                $search_data['parent_account_id'] = $this->logged_account_id;
+            } else {
+                $search_data['parent_account_id'] = '';
+            }
+
+
+
+            $customers_data_temp = $this->customer_mod->get_data('', 1, 0, $search_data);
+
+            if (isset($customers_data_temp['result']))
+                $customers_data = current($customers_data_temp['result']);
+            else {
+                show_404();
+            }
+        }
+
+        $data['data'] = $customers_data;
+        $data['notification_data'] = $this->notification_mod->get_notification_data($account_id);
+
+
+
+        $this->load->view('basic/header', $data);
+        $this->load->view('notification/notification_list', $data);
+        $this->load->view('basic/footer', $data);
+    }
+
+    function notificationAdd($id1 = -1, $active_tab = 1)
+    {
+        $account_id = param_decrypt($id1);
+
+        if (isset($id2))
+            $id = param_decrypt($id2);
+
+        if (strlen($account_id) < 1)
+            show_404();
+        if (!check_account_permission('customer', 'edit'))
+            show_404('403');
+
+        $page_name = "customer_voip_ipadd";
+        $data['page_name'] = $page_name;
+        $data['customer_type'] = $customer_type;
+        $data['active_tab'] = $active_tab;
+        $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
+
+        if (isset($_POST['action']) && $_POST['action'] == 'OkSaveData') {
+            $account_id = $_POST['account_id'];
+            $data['account_id'] = $account_id;
+            $data['active_tab'] = $_POST['tab'];
+            $this->form_validation->set_rules('account_id', 'Account Code', 'trim|required');
+            $this->form_validation->set_rules('notify_name', 'Type', 'trim|required');
+            $this->form_validation->set_rules('notify_amount', 'Amount', 'trim|required');
+            $this->form_validation->set_rules('notify_emails', 'Email Address', 'trim|required');
+            $this->form_validation->set_rules('status', 'Status', 'trim|required');
+
+
+            if ($this->form_validation->run() == FALSE) {
+                $data['err_msgs'] = validation_errors();
+            } else {
+                $result = $this->notification_mod->add_notification($_POST);
+                $id = $this->notification_mod->notification_id;
+
+                if ($result === true) {
+                    $this->session->set_flashdata('suc_msgs', 'Notification Added Successfully');
+                    if (isset($_POST['button_action']) && trim($_POST['button_action']) == 'save')
+                        redirect(base_url('crs') . '/notificationEdit/' . param_encrypt($account_id) . '/' . param_encrypt($id) . '/' . $data['active_tab'], 'location', '301');
+                    else
+                        redirect(base_url('crs') . '/notification/' . param_encrypt($account_id) . '/' . $data['active_tab'], 'location', '301');
+                } else {
+                    $err_msgs = $result;
+                    $data['err_msgs'] = $err_msgs;
+                }
+            }
+        }
+
+        $search_data = array('account_id' => $account_id);
+        if (check_logged_user_group(array('RESELLER'))) {
+            $search_data['parent_account_id'] = $this->logged_account_id;
+        } else {
+            $search_data['parent_account_id'] = '';
+        }
+        $customers_data_temp = $this->customer_mod->get_data('', 1, 0, $search_data);
+
+        if (is_array($customers_data_temp) && count($customers_data_temp['result']) > 0)
+            $customers_data = current($customers_data_temp['result']);
+        else {
+            show_404();
+        }
+
+        $data['data'] = $customers_data;
+
+        $data['account_id'] = $account_id;
+        $this->load->view('basic/header', $data);
+        $this->load->view('notification/notification_add', $data);
+        $this->load->view('basic/footer', $data);
+    }
+
+    function notificationEdit($id1 = -1, $id2 = -1, $active_tab = 1)
+    {
+        $account_id = param_decrypt($id1);
+        $id = param_decrypt($id2);
+        if (strlen($account_id) < 1 and $id < 1)
+            show_404();
+        if (!check_account_permission('customer', 'view') && !check_account_permission('customer', 'edit'))
+            show_404('403');
+
+        $page_name = "customer_voip_ipedit";
+        $data['active_tab'] = $active_tab;
+        $data['page_name'] = $page_name;
+        $data['customer_type'] = $customer_type;
+
+        $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
+
+        if (isset($_POST['action']) && $_POST['action'] == 'OkSaveData') {
+            $account_id = $_POST['account_id'];
+            $id = $_POST['notification_id'];
+            $data['account_id'] = $account_id;
+            $data['active_tab'] = $_POST['tab'];
+
+            $this->form_validation->set_rules('account_id', 'Account Code', 'trim|required');
+            $this->form_validation->set_rules('notification_id', 'ID', 'trim|required');
+            $this->form_validation->set_rules('notify_name', 'Type', 'trim|required');
+            $this->form_validation->set_rules('notify_amount', 'Amount', 'trim|required');
+            $this->form_validation->set_rules('notify_emails', 'Email Address', 'trim|required');
+            $this->form_validation->set_rules('status', 'Status', 'trim|required');
+
+            if ($this->form_validation->run() == FALSE) {
+                $data['err_msgs'] = validation_errors();
+            } else {
+                $result = $this->notification_mod->update_notification($_POST);
+                if ($result === true) {
+                    $this->session->set_flashdata('suc_msgs', 'Notification Updated Successfully');
+                    if (isset($_POST['button_action']) && trim($_POST['button_action']) == 'save')     
+                        redirect(base_url('crs') . '/customers/notificationEdit/' . param_encrypt($account_id) . '/' . param_encrypt($id) . '/' . $data['active_tab'], 'location', '301');
+                    else
+                        redirect(base_url('crs') . '/customers/notification/' . param_encrypt($account_id) . '/' . $data['active_tab'], 'location', '301');
+
+
+                 
+                } else {
+                    $err_msgs = $result;
+                    $data['err_msgs'] = $err_msgs;
+                }
+            }
+        }
+        $customers_data = array();
+
+        $search_data = array('account_id' => $account_id);
+        if (check_logged_user_group(array('RESELLER'))) {
+            $search_data['parent_account_id'] = $this->logged_account_id;
+        } else {
+            $search_data['parent_account_id'] = '';
+        }
+ 
+        $customers_data_temp = $this->customer_mod->get_data('', 1, 0, $search_data);
+        if (is_array($customers_data_temp) && count($customers_data_temp['result']) > 0){
+            $customers_data = $customers_data_temp['result'];
+            $data['data'] =current($customers_data);}
+        else {
+            show_404();
+        }
+
+        
+        $search_data = array('notification_id' =>  $id );
+        $customers_data_temp = $this->notification_mod->get_notification_data($account_id, $search_data);
+        if (is_array($customers_data_temp) && count($customers_data_temp) > 0)
+            $data['notification_data'] = current($customers_data_temp);
+        
+        else {
+            show_404();
+        }
+        
+        
+        
+
+        $this->load->view('basic/header', $data);
+        $this->load->view('notification/notification_edit', $data);
+        $this->load->view('basic/footer', $data);
+    }
 }

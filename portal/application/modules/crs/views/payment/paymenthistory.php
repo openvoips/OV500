@@ -1,132 +1,137 @@
-<div class="col-md-12 col-sm-6 col-xs-12">
-    <div class="x_panel">
-        <div class="x_title">
-            <h2>Payment Report</h2>
-            <ul class="nav navbar-right panel_toolbox">
-                <li><a href="<?php echo site_url('crs/payment/addpayment/'.param_encrypt($account_id)) ?>"><input type="button" value="Add Payment" name="add_link" class="btn btn-primary"></a></li>
-                <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>               
-            </ul>
-            <div class="clearfix"></div>
-        </div>
-        <div class="x_content"> 
-            <form class="block-content form-horizontal " id="search_form" name="search_form" method="get" action="<?php echo site_url('crs/payment/index/'.param_encrypt($account_id)); ?>">
-                <input type="hidden" name="search_action" value="search" />
-                <input type="hidden" name="no_of_rows" id="no_of_rows" value="" />
-                <div class="form-group">
-                    <label class="control-label col-md-2 col-sm-3 col-xs-12" >Payment Date</label>
-                    <div class="col-md-4 col-sm-6 col-xs-12">
-                        <input type="text" name="pay_date" id="pay_date" value="<?php echo $_SESSION[$search_session_key]['pay_date']; ?>"  class="form-control col-md-7 col-xs-12 data-search-field" readonly="readonly" data-parsley-required="">
-                    </div>		
+<div class="container-fluid">
+    <div class="block-header">
+        <h2>Payment Report (<?php echo $account_id ; ?>)</h2> 
+        <ul class="nav navbar-right panel_toolbox">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <li><a href="<?php echo site_url('crs/payment/addpayment/' . param_encrypt($account_id)) ?>"><input type="button" value="Add Payment" name="add_link" class="btn btn-warning"></a> 
+                    <a href="<?php echo site_url('crs') ?>"><input type="button" value="Back to Listing Page" name="add_link" class="btn btn-primary"></a></li >
+            </div>       
+        </ul>
 
-                  
+    </div>
+    <div class="row clearfix">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="card">
 
-                    <label class="control-label col-md-2 col-sm-3 col-xs-12">Payment Type </label>
-                    <div class="col-md-2 col-sm-8 col-xs-12">
-                        <select name="payment_type" id="payment_type" class="form-control data-search-field">                          
-                            <option value="">ALL</option>
-                            <option value="manual" <?php if ($_SESSION[$search_session_key]['payment_type'] == 'manual') echo ' selected="selected" '; ?>>Manual</option>
-                            <option value="customer" <?php if ($_SESSION[$search_session_key]['payment_type'] == 'customer') echo ' selected="selected" '; ?>>Online</option>              
-                        </select>    
-                    </div> 
+                <div class="header">
 
-                    <div class=" pull-right">      
-                        <input type="submit" value="Search" name="OkFilter" id="OkFilter" class="btn btn-primary">                          
-                        <input type="button" value="Reset" name="search_reset" id="search_reset" class="btn btn-info">                     
+                    <form class="block-content form-horizontal " id="search_form" name="search_form" method="get" action="<?php echo site_url('crs/payment/index/' . param_encrypt($account_id)); ?>">
+                        <input type="hidden" name="search_action" value="search" />
+                        <input type="hidden" name="no_of_rows" id="no_of_rows" value="" />
+                        <div class="form-group">
+                            <label class="control-label col-md-2 col-sm-3 col-xs-12" >Payment Date</label>
+                            <div class="col-md-4 col-sm-6 col-xs-12">
+                                <input type="text" name="pay_date" id="pay_date" value="<?php echo $_SESSION[$search_session_key]['pay_date']; ?>"  class="form-control col-md-7 col-xs-12 data-search-field" readonly="readonly" data-parsley-required="">
+                            </div>		
 
-                    </div>
+
+
+                            <label class="control-label col-md-2 col-sm-3 col-xs-12">Payment Type </label>
+                            <div class="col-md-2 col-sm-8 col-xs-12">
+                                <select name="payment_type" id="payment_type" class="form-control data-search-field">                          
+                                    <option value="">ALL</option>
+                                    <option value="manual" <?php if ($_SESSION[$search_session_key]['payment_type'] == 'manual') echo ' selected="selected" '; ?>>Manual</option>
+                                    <option value="customer" <?php if ($_SESSION[$search_session_key]['payment_type'] == 'customer') echo ' selected="selected" '; ?>>Online</option>              
+                                </select>    
+                            </div> 
+
+                            <div class=" pull-right">      
+                                <input type="submit" value="Search" name="OkFilter" id="OkFilter" class="btn btn-primary">                          
+                                <input type="button" value="Reset" name="search_reset" id="search_reset" class="btn btn-info">                     
+
+                            </div>
+
+                        </div>
+                    </form> 
+
 
                 </div>
-            </form> 
-
-
-            <div class="clearfix"></div>
-            <div class="ln_solid"></div>
-            <div class="row">  
-                <?php
-                dispay_pagination_row($total_records, $_SESSION[$search_session_key]['no_of_rows'], $pagination);
-                ?>                    
-            </div> 
-            <div class="table-responsive">
-                <table class="table table-striped jambo_table bulk_action table-bordered " id="table-sort">
-                    <thead>
-                        <tr class="headings thc">
-                            <th class="column-title"><nobr>Account ID</nobr></th>
+                <div class="body"> 
+                    <div class="row">  
+                        <?php
+                        dispay_pagination_row_bsd($total_records, $_SESSION[$search_session_key]['no_of_rows'], $pagination);
+                        ?>                    
+                    </div> 
+                    <div class="table-responsive">
+                        <table class="table table-striped jambo_table bulk_action table-bordered " id="table-sort">
+                            <thead>
+                                <tr class="headings thc">
+                                    <th class="column-title"><nobr>Account ID</nobr></th>
                             <th class="column-title">Amount</th>
                             <th class="column-title">Option</th>
                             <th class="column-title"><nobr>Payment Date</nobr></th>
                             <th class="column-title">Notes</th>
                             <th class="column-title">Payment By</th>
                             <th class="column-title"><nobr>Entry Date</nobr></th>                      
-                    	</tr>
-                    </thead>
-
-                    <tbody>
-                        <?php
-                        $dp = 2;
-                        if ($listing_data['result'] > 0) {
-                            foreach ($listing_data['result'] as $payment_data) {
-                                $paid_on_display = '';
-                                $create_dt_display = '';
-                                if ($payment_data['paid_on'] != '') {
-                                    $paid_on = $payment_data['paid_on'];
-                                    $paid_on_timestamp = strtotime($paid_on);
-                                    $paid_on_display = date('Y-m-d h:i:s A', $paid_on_timestamp);
-                                }
-                                if ($payment_data['create_dt'] != '') {
-                                    $create_dt = $payment_data['create_dt'];
-                                    $create_dt_timestamp = strtotime($create_dt);
-                                    $create_dt_display = date('Y-m-d h:i:s A', $create_dt_timestamp);
-                                }
-                                $amount = number_format($payment_data['amount'], $dp, '.', '');
-
-                                if ($payment_data['account_type'] === 'CUSTOMER')
-                                    $account_type = '<span class="label label-primary">' . $payment_data['account_type'] . '</span>';
-                                else
-                                    $account_type = '<span class="label label-warning">' . $payment_data['account_type'] . '</span>';
-
-                                if ($payment_data['account_id'] == $payment_data['created_by'])
-                                    $payment_by = 'Online';
-                                else
-                                    $payment_by = $payment_data['created_by_name'];
-									
-									
-									$payment_option = $payment_option_id = $payment_data['payment_option_id'];
-									if(isset($payment_options['result'][$payment_option_id]))
-										$payment_option = $payment_options['result'][$payment_option_id]['option_name'];
-                                ?>
-                                <tr> 
-                                    <td><?php echo $payment_data['company_name'] . ' (' . $payment_data['account_id'] . ') ' . $account_type; ?></td>	
-                                    <td class="text-right"><?php echo $amount; ?></td>    
-                                    <td class="text-right"><?php echo $payment_option; ?></td>         
-                                    <td><?php echo $paid_on_display; ?></td>                                   
-                                    <td><?php echo $payment_data['notes']; ?></td>
-                                    <td><?php echo $payment_by; ?></td>
-                                    <td class=" last"><?php echo $create_dt_display; ?></td>  
-                                </tr>
-        <?php
-    }
-}
-else {
-    ?>
-                            <tr>
-                                <td colspan="8" align="center"><strong>No Record Found</strong></td>
                             </tr>
-                            <?php
-                        }
-                        ?>
+                            </thead>
+
+                            <tbody>
+                                <?php
+                                $dp = 2;
+                                if ($listing_data['result'] > 0) {
+                                    foreach ($listing_data['result'] as $payment_data) {
+                                        $paid_on_display = '';
+                                        $create_dt_display = '';
+                                        if ($payment_data['paid_on'] != '') {
+                                            $paid_on = $payment_data['paid_on'];
+                                            $paid_on_timestamp = strtotime($paid_on);
+                                            $paid_on_display = date('Y-m-d h:i:s A', $paid_on_timestamp);
+                                        }
+                                        if ($payment_data['create_dt'] != '') {
+                                            $create_dt = $payment_data['create_dt'];
+                                            $create_dt_timestamp = strtotime($create_dt);
+                                            $create_dt_display = date('Y-m-d h:i:s A', $create_dt_timestamp);
+                                        }
+                                        $amount = number_format($payment_data['amount'], $dp, '.', '');
+
+                                        if ($payment_data['account_type'] === 'CUSTOMER')
+                                            $account_type = '<span class="label label-primary">' . $payment_data['account_type'] . '</span>';
+                                        else
+                                            $account_type = '<span class="label label-warning">' . $payment_data['account_type'] . '</span>';
+
+                                        if ($payment_data['account_id'] == $payment_data['created_by'])
+                                            $payment_by = 'Online';
+                                        else
+                                            $payment_by = $payment_data['created_by_name'];
 
 
-                    </tbody>
-                </table>
-            </div>                    
+                                        $payment_option = $payment_option_id = $payment_data['payment_option_id'];
+                                        if (isset($payment_options['result'][$payment_option_id]))
+                                            $payment_option = $payment_options['result'][$payment_option_id]['option_name'];
+                                        ?>
+                                        <tr> 
+                                            <td><?php echo $payment_data['company_name'] . ' (' . $payment_data['account_id'] . ') ' . $account_type; ?></td>	
+                                            <td class="text-right"><?php echo $amount; ?></td>    
+                                            <td class="text-right"><?php echo $payment_option; ?></td>         
+                                            <td><?php echo $paid_on_display; ?></td>                                   
+                                            <td><?php echo $payment_data['notes']; ?></td>
+                                            <td><?php echo $payment_by; ?></td>
+                                            <td class=" last"><?php echo $create_dt_display; ?></td>  
+                                        </tr>
+                                        <?php
+                                    }
+                                } else {
+                                    ?>
+                                    <tr>
+                                        <td colspan="8" align="center"><strong>No Record Found</strong></td>
+                                    </tr>
+                                    <?php
+                                }
+                                ?>
+
+
+                            </tbody>
+                        </table>
+                    </div>                    
+
+                </div>
+            </div>
 
         </div>
-    </div>
-<?php //echo '--'.$_SESSION['report_payment_history']['s_pay_date'].'--'; 
-//ddd(($listing_data));
-?>
-</div>
 
+    </div>
+</div>
 
 <script>
     /*search form*/

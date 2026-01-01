@@ -121,5 +121,5 @@ foreach ($translation_rule_data as $translation_rule_data_temp) {
             <?php endif; ?>
         </div>
     </div>
-
+<br>
 </form>

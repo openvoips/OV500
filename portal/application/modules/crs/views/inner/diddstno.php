@@ -120,5 +120,5 @@ foreach ($translation_rule_data as $translation_rule_data_temp) {
                             <button type="button" id="<?php echo 'btnSaveClose'.$key;?>" class="btn btn-info" onclick="save_button('<?php echo $key;?>')">Update DID Calls Destination Number Translation Rules</button>
                         </div>
                     </div>
-
+<br>
                 </form>

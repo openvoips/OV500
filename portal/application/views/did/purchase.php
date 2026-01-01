@@ -1,21 +1,25 @@
-
 <script src="<?php echo base_url() ?>theme/vendors/parsleyjs/dist/parsley.min.js"></script>
 <style type="text/css">
-    .purchase {cursor:pointer;}
+    .purchase {
+        cursor:pointer;
+    }
 </style>    
-<div class="">
-    <div class="clearfix"></div>    
-    <div class="row">
-        <div class="col-md-12 col-sm-12 col-xs-12">
-            <div class="x_panel">
-                <div class="x_title">
-                    <h2>Purchase DID</h2>
-                    <ul class="nav navbar-right panel_toolbox">
 
-                    </ul>
-                    <div class="clearfix"></div>
-                </div>
-                <div class="x_content">
+
+<div class="container-fluid">
+    <div class="block-header">
+        <h2>Purchase DID </h2>
+        <ul class="nav navbar-right panel_toolbox">
+
+        </ul>
+    </div>
+    <div class="row clearfix">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="card">
+                <div class="header">                 
+
+
+
 
                     <div class="col-md-12 col-sm-12 col-xs-12">
                         <label class="control-label col-md-2 col-sm-3 col-xs-12" for="first-name">DID Number <span class="required">*</span></label>
@@ -112,7 +116,7 @@
 
                                     <input class="form-control has-feedback-left"  type="hidden" value="" id="add" name="add">
                                     <input class="form-control"  type="hidden" value="" id="mul" name="mul">
-                                   
+
                                     <div class="form-group">
                                         <label class="control-label col-md-6 col-sm-6 col-xs-12">I accepts the terms & conditions </label>
                                         <div class="col-md-2 col-sm-6 col-xs-12"><input class="form-control" type="checkbox" id="terms" value="yes" data-parsley-error-message="Please accepts"/> </div>								
@@ -149,13 +153,12 @@
 <script>
     $(document).ready(function () {
 
-      /*  var table = $('#didlisting').DataTable({
+        var table = $('#didlisting').DataTable({
             searching: false,
             ordering: false,
             paging: false,
             bInfo: false,
-        });*/
-		//showDatatable('didlisting', [], [2, "asc"]);
+        });
 
         $('#didlisting').on('click', 'tr', function () {
             if ($(this).hasClass('selected'))

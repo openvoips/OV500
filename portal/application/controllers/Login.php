@@ -1,49 +1,31 @@
 <?php
 
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-// OV500 Version 2.0.0
-// Copyright (C) 2019-2021 Openvoips Technologies   
-// http://www.openvoips.com  http://www.openvoips.org
-// 
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
-
+/*
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2026 
+ * http://www.openvoips.com 
+ */
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Login extends MY_Controller  {
+class Login extends MY_Controller {
 
     function __construct() {
-       
         parent::__construct();
         $this->load->model('sitesetup_mod');
         $this->load->model('login_mod');
     }
 
     public function index() {
-               
         $page_code = 'login';
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
 
         if (check_is_loggedin()) {
             redirect(base_url('dashboard'), 'location', '301');
         }
+
         if (isset($_POST['action']) && $_POST['action'] == 'login') {
             $this->form_validation->set_rules('login', 'Username', 'trim|required');
             $this->form_validation->set_rules('pass', 'Password', 'trim|required');
@@ -53,7 +35,6 @@ class Login extends MY_Controller  {
                 $username = $this->input->post('login');
                 $password = $this->input->post('pass');
                 $row = $this->login_mod->get_user($username, $password);
-                //ddd($row);die;	
                 if (!$row) {
                     $data['err_msgs'] = '<p>Invalid Username or Password.</p>';
                 } elseif ($row['user_status'] == 0) {
@@ -86,18 +67,26 @@ class Login extends MY_Controller  {
                         'session_account_status' => $row['account_status'],
                         'session_currency_id' => $row['currency_id'],
                         'session_permissions' => $row['permissions'],
+                        'session_timezone' => isset($row['timezone']) ? $row['timezone'] : '',
                     );
-
-
+                    if($row['user_type']=='EXTENSION')
+                    {
+                        $userdata_details['session_extension_id']=$row['extension_id'];
+                    }
+                    //ddd($row);
+                    //ddd($userdata_details);die;
                     $this->session->set_userdata($userdata);
                     $_SESSION['customer'][$user_id] = $userdata_details;
+
                     redirect(base_url() . 'dashboard', 'refresh');
                 }
             }
         }
 
 
-        $this->load->view('login', $data);
+        $view_file = 'login';
+        //$view_file='login1';
+        $this->load->view($view_file, $data);
     }
 
 }

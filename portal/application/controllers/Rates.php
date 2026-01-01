@@ -1,30 +1,13 @@
 <?php
 
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-// OV500 Version 2.0.0
-// Copyright (C) 2019-2021 Openvoips Technologies   
-// http://www.openvoips.com  http://www.openvoips.org
-// 
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
-
+/*
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2026 
+ * http://www.openvoips.com 
+ */
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
@@ -139,7 +122,6 @@ class Rates extends MY_Controller {
             } else {
                 $export_header = array('Prefix', 'Destination', 'PPM', 'PPC', 'Minimal', 'Resolution', 'GracePeriod', 'Multiplier', 'Addition', 'Status');
             }
-			$file_name = $file_name.'_'.$ratecard_for;
 
             $downloaded_message = $this->export->download($file_name, $format, $search_data, $export_header, $export_data);
             if (gettype($downloaded_message) == 'string')
@@ -147,7 +129,11 @@ class Rates extends MY_Controller {
             else
                 $is_file_downloaded = true;
         }
-
+        /* $ratecard_search_data = array(
+          'logged_account_type' => get_logged_account_type(),
+          'logged_current_customer_id' => get_logged_account_id(),
+          'logged_account_level' => get_logged_account_level(),
+          ); */
         $ratecard_search_data['account_id'] = get_logged_account_id();
 
         $data['ratecard_dropdown'] = $this->ratecard_mod->get_data(array('ratecard_name' => 'ASC'), 0, '', $ratecard_search_data, array());
@@ -177,7 +163,6 @@ class Rates extends MY_Controller {
             $data['pagination'] = $this->pagination->create_links();
             $data['listing_data'] = $response['result'];
             $data['total_records'] = $data['listing_count'] = $response['total'];
-
 
             $this->load->view('basic/header', $data);
             $this->load->view('rates/rates', $data);
@@ -242,8 +227,7 @@ class Rates extends MY_Controller {
                             redirect(base_url() . 'rates/editR/' . param_encrypt($result['id'] . '@' . $_POST['frm_card']), 'location', '301');
                         elseif ($action == 'save_close')
                             redirect(base_url() . 'rates', 'location', '301');
-                    }
-                    else {
+                    } else {
                         redirect(base_url() . 'rates', 'location', '301');
                     }
                     redirect(base_url() . 'rates/editR/' . param_encrypt($route_id), 'location', '301');
@@ -282,9 +266,6 @@ class Rates extends MY_Controller {
             $this->form_validation->set_rules('frm_add', 'Rate Addition', 'trim|required|numeric');
             $this->form_validation->set_rules('frm_status', 'Status', 'trim|required');
 
-
-
-
             if (strpos($_POST['frm_rate_table_name'], 'incoming') !== false) {
                 $this->form_validation->set_rules('frm_rental', 'Rental', 'trim|required');
                 $this->form_validation->set_rules('frm_setup_charge', 'Setup Charge', 'trim|required');
@@ -306,8 +287,7 @@ class Rates extends MY_Controller {
                             redirect(base_url() . 'rates/editR/' . param_encrypt($rate_id . '@' . $ratecard_id), 'location', '301');
                         elseif ($action == 'save_close')
                             redirect(base_url() . 'rates/index/', 'location', '301');
-                    }
-                    else {
+                    } else {
                         redirect(base_url() . 'rates', 'location', '301');
                     }
                     redirect(base_url() . 'rates/editR/' . param_encrypt($rate_id . '@' . $ratecard_id), 'location', '301');
@@ -338,60 +318,64 @@ class Rates extends MY_Controller {
     }
 
     public function MyRates() {
-        $page_name = "rate_MyRates";
-        $is_searched = false;
-        $data['searching'] = true;
+        $page_name = "my_rates";
+        $search_session_key = 'search_myrate';
+        $is_searched = true;
+        $data['searching'] = 0;
         if (!check_logged_user_group(array('CUSTOMER', 'RESELLER')))
             show_404('403');
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
         $data['page_name'] = $page_name;
+
+        $search_parameters = array('prefix', 'dest', 'ratecard_for', 'no_of_rows');
+
+        if (isset($_POST['search_action'])) {
+            set_post_to_session($search_session_key, $search_parameters);
+        } else {
+            set_session_to_session($search_session_key, $search_parameters);
+        }
+
         $search_data = array();
         if (isset($_POST['search_action'])) {
-            $_SESSION['search_myrate'] = array('s_myrate_prefix' => $_POST['prefix'], 's_myrate_dest' => $_POST['dest'], 's_myrate_ratecard_for' => $_POST['ratecard_for'], 'no_of_rows' => $_POST['no_of_rows']);
-            if ($_SESSION['search_myrate']['s_myrate_prefix'] != '' || $_SESSION['search_myrate']['s_myrate_dest'] != '' || $_SESSION['search_myrate']['s_myrate_ratecard_for'] != '') {
-                $is_searched = true;
-            }
+            // $_SESSION[$search_session_key] = array('s_myrate_prefix' => $_POST['prefix'], 's_myrate_dest' => $_POST['dest'], 's_myrate_ratecard_for' => $_POST['ratecard_for']);
+            //if ($_SESSION[$search_session_key]['s_myrate_prefix'] != '' || $_SESSION[$search_session_key]['s_myrate_dest'] != '' || $_SESSION[$search_session_key]['s_myrate_ratecard_for'] != '') {
+            //    $is_searched = true;
+            // }
         } else {
-            $_SESSION['search_myrate']['s_myrate_prefix'] = isset($_SESSION['search_myrate']['s_myrate_prefix']) ? $_SESSION['search_myrate']['s_myrate_prefix'] : '';
-            $_SESSION['search_myrate']['s_myrate_dest'] = isset($_SESSION['search_myrate']['s_myrate_dest']) ? $_SESSION['search_myrate']['s_myrate_dest'] : '';
-            $_SESSION['search_myrate']['s_myrate_ratecard_for'] = isset($_SESSION['search_myrate']['s_myrate_ratecard_for']) ? $_SESSION['search_myrate']['s_myrate_ratecard_for'] : '';
-			$_SESSION['search_myrate']['no_of_rows'] = isset($_SESSION['search_myrate']['no_of_rows']) ? $_SESSION['search_myrate']['no_of_rows'] : RECORDS_PER_PAGE;
+            // $_SESSION['search_myrate']['s_myrate_prefix'] = isset($_SESSION['search_myrate']['s_myrate_prefix']) ? $_SESSION['search_myrate']['s_myrate_prefix'] : '';
+            // $_SESSION['search_myrate']['s_myrate_dest'] = isset($_SESSION['search_myrate']['s_myrate_dest']) ? $_SESSION['search_myrate']['s_myrate_dest'] : '';
+            //  $_SESSION['search_myrate']['s_myrate_ratecard_for'] = isset($_SESSION['search_myrate']['s_myrate_ratecard_for']) ? $_SESSION['search_myrate']['s_myrate_ratecard_for'] : '';
         }
-		
-	
-		$pagination_uri_segment = 2;
-        list($per_page, $segment) = get_pagination_param($pagination_uri_segment, 'search_myrate');
-	//	print_r($_POST);echo '--'.$per_page.'--'.$segment;
-       // if ($is_searched) 
-	   {
+        if ($_SESSION[$search_session_key]['prefix'] != '' || $_SESSION[$search_session_key]['dest'] != '' || $_SESSION[$search_session_key]['ratecard_for'] != '') {
+            $is_searched = true;
+        }
+        if ($is_searched) {
             $account_id = get_logged_account_id();
             $option_param = array();
             $user_result = $this->member_mod->get_account_by_key('account_id', $account_id, $option_param);
 
+            //ddd($user_result);
             $tariff_id = $user_result['tariff_id'];
             $search_data = array(
                 'tariff_id' => $tariff_id,
-                'prefix' => $_SESSION['search_myrate']['s_myrate_prefix'],
-                'destination' => $_SESSION['search_myrate']['s_myrate_dest'],
-                'ratecard_for' => $_SESSION['search_myrate']['s_myrate_ratecard_for'],
+                'prefix' => $_SESSION['search_myrate']['prefix'],
+                'destination' => $_SESSION['search_myrate']['dest'],
+                'ratecard_for' => $_SESSION['search_myrate']['ratecard_for'],
             );
+            $pagination_uri_segment = 2;
+            list($per_page, $segment) = get_pagination_param($pagination_uri_segment, $search_session_key);
             $order_by = '';
-            $rate_data = $this->rate_mod->get_MyRates($order_by, $segment, $per_page,  $search_data);
-           
-			
-			
-			
-           
+            $rate_data = $this->rate_mod->get_MyRates($order_by, $segment, $per_page, $search_data);
+            $total_count = $rate_data['total'];
+            $data['pagination'] = setup_pagination_option($total_count, 'MyRates', $per_page, $pagination_uri_segment, $this->pagination);
+            //ddd($_SESSION[$search_session_key]);ddd($rate_data);die;
+            $data['searching'] = 1;
+            //$data['pagination'] = $this->pagination->create_links();
             $data['listing_data'] = $rate_data['result'];
-            $data['total_records'] = $data['listing_count'] = $rate_data['total'];
-			
-			$config = array();
-			$config = $this->utils_model->setup_pagination_option($data['total_records'], 'MyRates', $per_page, $pagination_uri_segment);
-			$this->pagination->initialize($config);
-			 $data['pagination'] = $this->pagination->create_links();
-			
+            $data['total_records'] = $data['listing_count'] = $total_count;
         }
         $data['is_searched'] = $is_searched;
+        $data['search_session_key'] = $search_session_key;
 
         $this->load->view('basic/header', $data);
         $this->load->view('rates/MyRates', $data);
@@ -453,7 +437,23 @@ class Rates extends MY_Controller {
 
             fclose($file);
             exit;
-        } else {
+        } else {//incoming
+//            $search_data = array('tariff_id' => $tariff_id);
+//             $search_data = array(
+//                'tariff_id' => $tariff_id,                
+//                'ratecard_for' => 'OUTGOING',
+//            );
+//            $rate_data = $this->rate_mod->get_MyRates('', 0, '', $search_data);
+//            
+//            $tariff_response = $this->tariff_mod->get_data('', '', '', $search_data, array());
+//
+//            $tariff_data = current($tariff_response['result']);
+//
+//            $ratecard_id = $tariff_data['incoming_ratecard_id'];
+//            if ($ratecard_id_name != '') {
+//                $search_data = array('ratecard_id_name' => $ratecard_id_name);
+//                $rate_data = $this->rate_mod->get_data('', 0, '', $search_data);
+//            }
             $search_data = array(
                 'tariff_id' => $tariff_id,
                 'ratecard_for' => 'INCOMING',

@@ -1,29 +1,13 @@
 <?php
 
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-// OV500 Version 2.0.0
-// Copyright (C) 2019-2021 Openvoips Technologies   
-// http://www.openvoips.com  http://www.openvoips.org
-// 
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
+/*
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2026 
+ * http://www.openvoips.com 
+ */
 
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
@@ -114,22 +98,19 @@ class Ratecard extends MY_Controller {
             'account_id' => get_logged_account_id()
         );
 
+        //ddd($search_data);
 
         $order_by = array('id' => 'DESC');
         if ($arg1 == 'export' && $format != '') {
-			//if outgoing
-			//Prefix	Destination	ppm	ppc	minimal	resolution	grace	multiplier	addition	status
-
             $this->load->library('Export');
             $format = param_decrypt($format);
             $option_param = array('tariff' => true);
             $response_data = $this->ratecard_mod->get_data($order_by, '', '', $search_data, $option_param);
-            $export_header = array('Prefix', 'Destination', 'ppm', 'ppc', 'minimal', 'resolution', '	grace', 'multiplier', 'addition', 'status');
+            $export_header = array('Name', 'Currency');
 
             if ($response_data['total'] > 0) {
-                foreach ($response_data['result'] as $row) {ddd($row);die;
-                    //$export_data[] = array($row['ratecard_name'], $row['currency_abbr']);
-					$export_data[] = array('Prefix', 'Destination', 'ppm', 'ppc', 'minimal', 'resolution', '	grace', 'multiplier', 'addition', 'status');
+                foreach ($response_data['result'] as $row) {
+                    $export_data[] = array($row['ratecard_name'], $row['currency_abbr']);
                 }
             } else {
                 $export_data = array('');
@@ -207,6 +188,8 @@ class Ratecard extends MY_Controller {
     }
 
     public function editRC() {
+//        $data['page_name'] = "ratecard_edit";
+//        $page_name = "ratecard_index";
         $data['page_name'] = "ratecard_index";
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
         if (!check_account_permission('ratecard', 'edit'))
@@ -273,7 +256,6 @@ class Ratecard extends MY_Controller {
                         $error_msg = '';
                         $csv_data = array();
                         while (!feof($file)) {
-							
                             $d = fgetcsv($file);
                             $csv_data[] = $d;
                             if ($cnt > 0 && is_array($d)) {
@@ -323,7 +305,7 @@ class Ratecard extends MY_Controller {
                                 $add = trim($d[8]);
                                 if (!ctype_digit($add)) {
                                     $error++;
-                                    $error_type .= 'Addition '.$add ;
+                                    $error_type .= 'Addition';
                                 }
 
                                 $stat = trim($d[9]);

@@ -18,6 +18,7 @@ window.Parsley
 });	
 	
 /*password validation*/	
+/*
 window.Parsley
   .addValidator('password', { 
     validateString: function(value) {     
@@ -32,6 +33,16 @@ window.Parsley
       en: 'min 8 char, 1 special char, 1 uppercase, 1 lowercase, 1 number'
     }
 });
+*/
+window.Parsley
+	.addValidator('password', {
+	  validateString: function(value) {
+		 return true == (/^([a-zA-Z0-9!@#$%^&*()_+]+)*$/.test(value));
+	  },
+	  messages: {
+		en: 'Allowed Char: A to Z, 0 to 9, !@#$%^&*()_+'
+	  }
+	}); 
   
  window.Parsley
   .addValidator('price', {
@@ -88,13 +99,21 @@ window.Parsley
 		}
 	}); 
 
-window.ParsleyValidator
+window.Parsley
         .addValidator('fileextension', function (value, requirement) {
             var fileExtension = value.split('.').pop();
             
             return fileExtension === requirement;
         }, 32)
         .addMessage('en', 'fileextension', 'The extension does not match the required');
+/*
+window.ParsleyValidator
+        .addValidator('fileextension', function (value, requirement) {
+            var fileExtension = value.split('.').pop();
+            
+            return fileExtension === requirement;
+        }, 32)
+        .addMessage('en', 'fileextension', 'The extension does not match the required');*/
  	
 	
 	$( document ).ready(function() {

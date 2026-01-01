@@ -4,8 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 
 /* determine subdoamin */
-
-define('SITE_SUBDOMAIN', 'OV500');
+ 
 
 
 /*
@@ -100,10 +99,8 @@ define('SCRIPT_DATE_FORMAT_1', 'DD-MM-YYYY HH:mm');
 define('DAY_FROM_WEEK', serialize(array(0 => 'Sunday', 1 => 'Monday', 2 => 'Tuesday', 3 => 'Wednesday', 4 => 'Thursday', 5 => 'Friday', 6 => 'Saturday')));
 
 
-define('RECORDS_PER_PAGE', 10);
 
 define('KEY_PREFIX', 'SW');
-
 define('ENABLE_PROFILE', false);
 
 
@@ -136,32 +133,7 @@ $help_text_array['term_prefix_riles'] = array(
     array('%=>919949800228', 'allowing all dialed number and replacing incoming dialed number with 919949800228.'),
 );
 
-define('SITE_SUBDOMAIN', 'OV500');
-define('SITE_NAME', 'Telecoms Billing Solution');
-define('SITE_FULL_NAME', 'Telecoms Billing Solution');
-define('SDR_API_URL', 'https://localhost/portal/api/sdrapi.php');
-define('LOGO_IMAGE', 'logo.png');
-
-
-
-define('MOMENT_TIMEZONE', 'Asia/Kolkata');
-
-
-define('CUSTOMERCODEPREFIX','STC');
-define('RESELLERCODEPREFIX','STR');
-
-
-define('CUSTOMERCOMPANY','OpenVoips Technologies');
-
-
-
-define('SITE_MAIL_FROM', 'support@suretel.co.za');
-define('SITE_MAIL_TO', 'support@suretel.co.za');
-define('CREDIT_MAIL_TO', 'accounts@suretel.co.za');
-
-
-//define('PAYPAL_LINK', 'https://www.sandbox.paypal.com/cgi-bin/webscr');
-define('PAYPAL_LINK', 'https://www.paypal.com/cgi-bin/webscr');
-
-define('RECORDS_PER_PAGE_ARRAY', serialize(array(1,2,3,10, 20, 30, 50, 100, 200,500,1000)));
+define('RECORDS_PER_PAGE', 10);
+define('RECORDS_PER_PAGE_ARRAY', serialize(array(10,20, 30, 50, 100, 200,500,1000)));
 define('ADMIN_ACCOUNT_ID', 'SYSTEM');
+define('VERSION', 5);

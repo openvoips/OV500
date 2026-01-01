@@ -66,9 +66,9 @@ freeswitch.consoleLog("notice", "vm_user.lua User Query "..my_query .. "\n")
 assert (dbh:query(my_query, function(row_subs) -- there will be only 0 or 1 iteration (limit 1)
 		
 		vmattachfile = '';		
-		if row_subs.vm_email_enabled == 'Y' then		
+		if row_subs.vm_email_enabled == '1' then		
 			vmnotif = 	"<param name=\"vm-email-all-messages\" value=\"true\"/> <param name=\"vm-mailfrom\" value=\"test@openvoips.org\"/>   <param name=\"vm-mailto\" value=\""..row_subs.email.."\"/>";
-			if row_subs.vm_email_attachment == 'Y' then
+			if row_subs.vm_email_attachment == '1' then
 				vmattachfile = "<param name=\"vm-attach-file\" value=\"true\" />"
 			else
 				vmattachfile = "<param name=\"vm-attach-file\" value=\"false\" />"
@@ -133,7 +133,7 @@ if cidrlist == 1 then
 		<param name="http-allowed-api" value="voicemail"/>
 	
 
-	 <param name="vm-storage-dir" value="/usr/share/nginx/html/vm/]]..row_subs.pbx_id..[[/]]..req_user..[["/>
+	 <param name="vm-storage-dir" value="/var/www/html/vm/]]..row_subs.pbx_id..[[/]]..req_user..[["/>
                 ]]..vmattachfile..[[
                 ]]..vmmaillen..[[
 				]]..vmnotif..[[

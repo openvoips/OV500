@@ -1,29 +1,12 @@
 <?php
-
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-// OV500 Version 2.0.0
-// Copyright (C) 2019-2021 Openvoips Technologies   
-// http://www.openvoips.com  http://www.openvoips.org
-// 
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
+/*
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2026 
+ * http://www.openvoips.com 
+ */
 
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
@@ -135,7 +118,7 @@ class Ratecard_mod extends CI_Model {
                 }
 
                 $log_data_array[] = array('activity_type' => 'delete_recovery', 'sql_table' => 'RATECARD', 'sql_key' => param_decrypt($id), 'sql_query' => $str);
-                
+                //  set_activity_log($log_data_array);
             }
 
             if ($this->db->trans_status() === FALSE) {
@@ -224,6 +207,7 @@ class Ratecard_mod extends CI_Model {
                 $error_array = $this->db->error();
                 throw new Exception($error_array['message']);
             }
+            //echo '<br>'.$this->db->last_query();
             $final_return_array['result'] = $q->result_array();
             $query = $this->db->query('SELECT FOUND_ROWS() AS Count');
             $final_return_array["total"] = $query->row()->Count;

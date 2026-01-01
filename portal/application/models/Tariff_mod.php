@@ -1,35 +1,18 @@
 <?php
-
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-// OV500 Version 2.0.0
-// Copyright (C) 2019-2021 Openvoips Technologies   
-// http://www.openvoips.com  http://www.openvoips.org
-// 
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
-
+/*
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2026 
+ * http://www.openvoips.com 
+ */
 
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
 class Tariff_mod extends CI_Model {
+
     public function __construct() {
         parent::__construct();
         $this->load->database();
@@ -37,6 +20,8 @@ class Tariff_mod extends CI_Model {
 
     public function get_data($order_by, $limit_to, $limit_from, $filter_data, $option_param = array()) {
         try {
+            
+            $final_return_array=Array();
             $am_ratecard_id_name_array = array();
             if (isset($filter_data['logged_account_type']) && isset($filter_data['logged_current_customer_id']) && $filter_data['logged_account_type'] == 'agent') {
                 $sub_sql = "SELECT DISTINCT u.tariff_id FROM customers ua, account u WHERE ua.account_id=u.account_id AND  ua.account_manager='" . $filter_data['logged_current_customer_id'] . "' AND u.tariff_id IS NOT NULL";

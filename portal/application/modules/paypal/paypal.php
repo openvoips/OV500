@@ -5,7 +5,6 @@
 * Version: 1.0
 * Description: Paypal Payment Module
 * Author: Seema Anand
-* Author URI: http://openvoips.org/ 
 */
 ?>
 <?php

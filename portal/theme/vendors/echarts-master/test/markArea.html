@@ -1,0 +1,353 @@
+
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <script src="lib/simpleRequire.js"></script>
+        <script src="lib/config.js"></script>
+        <script src="lib/testHelper.js"></script>
+        <link rel="stylesheet" href="lib/reset.css" />
+    </head>
+    <body>
+        <div id="main0"></div>
+        <div id="main1"></div>
+        <div id="main2"></div>
+        <script>
+
+            require([
+                'echarts'
+            ], function (echarts) {
+
+                var xAxisData = [];
+                var data1 = [];
+                var data2 = [];
+
+                for (var i = 0; i < 10; i++) {
+                    xAxisData.push('类目' + i);
+                    data1.push(+Math.random().toFixed(2));
+                    data2.push(+Math.random().toFixed(2));
+                }
+
+                option = {
+                    legend: {
+                        data: ['line', 'line2']
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'line'
+                        }
+                    },
+                    xAxis: {
+                        data: xAxisData
+                    },
+                    yAxis: {
+                        max: 5
+                    },
+                    series: [{
+                        name: 'line',
+                        type: 'line',
+                        stack: 'all',
+                        symbolSize: 6,
+                        data: data1,
+
+                        markArea: {
+                            itemStyle: {
+                                // normal: {
+                                //     color: 'red'
+                                // },
+                                emphasis: {
+                                    color: 'yellow'
+                                }
+                            },
+                            label: {
+                                normal: {
+                                    // position: 'right'
+                                }
+                            },
+                            data: [
+                                [{
+                                    name: 'x 3 - 5',
+                                    xAxis: 3
+                                }, {
+                                    xAxis: 5
+                                }]
+                            ]
+                        }
+                    }, {
+                        name: 'line2',
+                        type: 'line',
+                        stack: 'all',
+                        symbolSize: 6,
+                        data: data2,
+
+                        markArea: {
+                            label: {
+                                normal: {
+                                    position: 'right'
+                                }
+                            },
+                            data: [
+                                [{
+                                    name: 'y 0.5 - 0.7',
+                                    yAxis: 0.5
+                                }, {
+                                    yAxis: 0.7
+                                }],
+                                [{
+                                    name: 'This text should not be displayed\nwhen out of range',
+                                    yAxis: 3
+                                }, {
+                                    yAxis: 3.5
+                                }]
+                            ]
+                        }
+                    }],
+                    dataZoom: {
+                        yAxisIndex: 0,
+                        startValue: 0,
+                        endValue: 2,
+                        right: 250
+                    },
+                    grid: {
+                        right: 300
+                    }
+                };
+
+                var chart = testHelper.create(echarts, 'main0', {
+                    option: option
+                });
+            });
+
+        </script>
+        <script>
+
+            require([
+                'echarts'
+            ], function (echarts) {
+
+                var option = {
+                    title: {
+                        text: 'Distribution of Electricity',
+                        subtext: 'Fake Data'
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                        type: 'cross'
+                        }
+                    },
+                    toolbox: {
+                        show: true,
+                        feature: {
+                        saveAsImage: {}
+                        }
+                    },
+                    dataZoom: [{}], // WITH ZOOMING
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        // prettier-ignore
+                        data: ['00:00', '01:15', '02:30', '03:45', '05:00', '06:15', '07:30', '08:45', '10:00', '11:15', '12:30', '13:45', '15:00', '16:15', '17:30', '18:45', '20:00', '21:15', '22:30', '23:45']
+                    },
+                    yAxis: {
+                        type: 'value',
+                        axisLabel: {
+                        formatter: '{value} W'
+                        },
+                        axisPointer: {
+                        snap: true
+                        },
+                    },
+                    series: [
+                        {
+                        name: 'Electricity',
+                        type: 'line',
+                        smooth: true,
+                        // prettier-ignore
+                        data: [300, 280, 250, 260, 270, 300, 550, 500, 400, 390, 380, 390, 400, 500, 600, 750, 800, 700, 600, 400],
+                        markArea: {
+                            itemStyle: {
+                            color: 'rgba(255, 173, 177, 0.4)'
+                            },
+                            data: [
+                            [
+                                {
+                                name: 'Morning Peak',
+                                xAxis: '07:30',
+                                yAxis: -100
+                                },
+                                {
+                                xAxis: '10:00',
+                                yAxis: 900 // EXACT LIMIT HERE
+                                }
+                            ],
+                            [
+                                {
+                                name: 'Evening Peak',
+                                xAxis: '17:30'
+                                },
+                                {
+                                xAxis: '21:15'
+                                }
+                            ],
+                            [
+                            {yAxis: 200}, {yAxis: 600, xAxis: '22:30'}, // EXACT LIMIT HERE
+                                ]
+                            ]
+                        }
+                        }
+                    ]
+                };
+
+                var chart = testHelper.create(echarts, 'main1', {
+                    option: option
+                });
+
+            });
+
+        </script>
+
+        <script>
+            require([
+                'echarts',
+            ], function (echarts) {
+                var option = {
+                    xAxis: {
+                        type: 'category',
+                        data: ['a', 'b', 'c', 'd', 'e', 'f', 'g']
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: [{
+                        type: 'bar',
+                        data: [10, 52, 200, 334, 390, 330, 220],
+                        itemStyle: {
+                            opacity: .1
+                        },
+                        markArea: {
+                            data: [
+                                [
+                                    {
+                                        name: '所有数据范围区间',
+                                        coord: ['min', 'min'],
+                                        itemStyle: {
+                                            color: 'lightgray',
+                                            borderWidth: 2,
+                                            borderColor: 'gray'
+                                        },
+                                        label: {
+                                            position: 'insideLeft',
+                                        }
+                                    },
+                                    {
+                                        coord: ['max', 'max']
+                                    }
+                                ],
+                                [
+                                    {
+                                        name: '[average, min] to [max, median]',
+                                        coord: ['average', 'min'],
+                                        itemStyle: {
+                                            color: '#14c4ba',
+                                            opacity: .5
+                                        }
+                                    },
+                                    {
+                                        coord: ['max', 'median']
+                                    }
+                                ],
+                                [
+                                    {
+                                        name: '平均值到最大值',
+                                        type: 'average',
+                                        itemStyle: {
+                                            color: 'lightblue',
+                                            borderWidth: 2,
+                                            borderColor: 'lightblue'
+                                        }
+                                    },
+                                    {
+                                        type: 'max'
+                                    }
+                                ],
+                                [
+                                    {
+                                        name: '两个坐标之间的标域',
+                                        coord: [1, 20]
+                                    },
+                                    {
+                                        coord: ['c', 30]
+                                    }
+                                ],
+                                [
+                                    {
+                                        name: 'yAxis 120~130',
+                                        yAxis: 120
+                                    },
+                                    {
+                                        yAxis: 130
+                                    }
+                                ],
+                                [
+                                    {
+                                        name: '两个屏幕坐标之间的标域 px',
+                                        x: 80,
+                                        y: 50,
+                                        itemStyle: {
+                                            color: 'lightgreen'
+                                        }
+                                    },
+                                    {
+                                        x: 100,
+                                        y: 100
+                                    }
+                                ],
+                                [
+                                    {
+                                        name: '两个屏幕坐标之间的标域 px & %',
+                                        x: 100,
+                                        y: '20%'
+                                    },
+                                    {
+                                        x: '90%',
+                                        y: '30%'
+                                    }
+                                ]
+                            ]
+                        }
+                    }]
+                };
+
+                var chart = testHelper.create(echarts, 'main2', {
+                    title: [
+                        '**两个屏幕坐标之间的标域** should be displayed',
+                        '**所有数据范围区间** should be displayed',
+                        'Other mark areas should also be displayed',
+                        'should have no errors in the console'
+                    ],
+                    option: option
+                });
+            });
+            </script>
+    </body>
+</html>

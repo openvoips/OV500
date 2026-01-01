@@ -1,11 +1,11 @@
 <?php
-/* Copyright (C) Openvoips Technologies - All Rights Reserved
+/* 
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
  * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential, Only allow to use 
- * OV500Pro Version 2.1.0
- * Written by Seema Anand <openvoips@gmail.com> , 2021 
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2023 
  * http://www.openvoips.com 
- * License https://www.openvoips.com/license.html
  */
 
 defined('BASEPATH') OR exit('No direct script access allowed');
@@ -30,7 +30,7 @@ class activitylog extends MY_Controller {
         $data['page_name'] = $page_name;
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
 
-        $search_parameters = array('account_id', 'page_url', 'ip_address', 'session_id', 'group_by_ip', 'group_by_session', 'group_by_page', 'group_by_account', 'time_range', 'no_of_rows');
+        $search_parameters = array('account_id', 'page_url', 'ip_address', 'session_id', 'group_by_ip', 'group_by_session', 'group_by_page', 'group_by_account', 'no_of_rows');
 
         //group_by
         if (isset($_POST['search_action'])) {// coming from search button
@@ -44,7 +44,6 @@ class activitylog extends MY_Controller {
             'page_url' => $_SESSION[$search_session_key]['page_url'],
             'ip_address' => $_SESSION[$search_session_key]['ip_address'],
             'session_id' => $_SESSION[$search_session_key]['session_id'],
-			'time_range' => $_SESSION[$search_session_key]['time_range'],
         );
         if ($_SESSION[$search_session_key]['group_by_ip'] == 'Y')
             $search_data['group_by'][] = 'ip_address';
@@ -55,6 +54,7 @@ class activitylog extends MY_Controller {
         if ($_SESSION[$search_session_key]['group_by_account'] == 'Y')
             $search_data['group_by'][] = 'account_id';
 
+            if(isset($search_data['group_by']) && is_array($search_data['group_by']))
         $_SESSION[$search_session_key]['group_by'] = $search_data['group_by'];
 
         $is_file_downloaded = false;

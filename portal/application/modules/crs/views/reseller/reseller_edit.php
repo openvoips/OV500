@@ -9,68 +9,90 @@ $active_tab = (int) $active_tab;
 if ($active_tab == 0)
     $active_tab = 1;
 ?>
+
+<?php
+$voip_section_array = array();
+$voip_section_array['1'] = array('title' => 'Tariff', 'file_name' => 'inner/edit_tariff.php');
+$voip_section_array['2'] = array('title' => 'Bundle', 'file_name' => 'inner/add_bundle.php');
+$voip_section_array['4'] = array('title' => 'Dialplan', 'file_name' => 'inner/add_dialplan_' . strtolower($data['account_type']) . '.php');
+$voip_section_array['5'] = array('title' => 'Bill Config', 'file_name' => 'inner/add_invoice.php');
+if ($data['account_type'] == 'CUSTOMER') {
+    $voip_section_array['6'] = array('title' => 'IP-Trunk', 'file_name' => 'inner/ip.php');
+    $voip_section_array['7'] = array('title' => 'SIP-Truk', 'file_name' => 'inner/sip.php');
+}
+$voip_section_array['8'] = array('title' => 'CLI Rule', 'file_name' => 'inner/srcno.php');
+$voip_section_array['9'] = array('title' => 'DST Rule', 'file_name' => 'inner/dstno.php');
+$voip_section_array['10'] = array('title' => 'DID CLI Rule', 'file_name' => 'inner/didsrcno.php');
+$voip_section_array['11'] = array('title' => 'DID Dial Rule', 'file_name' => 'inner/diddstno.php');
+?>
 <link href="<?php echo base_url(); ?>theme/default/css/tabs.css" rel="stylesheet" type="text/css"/>
-   <div class="clearfix"></div>
-    <div class="col-md-12 col-sm-12 col-xs-12 right">      
-        <div class="x_title">
-            <h2>Reseller Account Configuration Management</h2>
-            <ul class="nav navbar-right panel_toolbox">     
-                <li><a href="<?php echo site_url('crs/resellers'); ?>"><button class="btn btn-danger" type="button" >Back to Reseller Listing Page</button></a> </li>
-            </ul>
-            <div class="clearfix"></div>
-        </div>
 
+
+
+<div class="container-fluid">
+    <div class="block-header">
+        <h2>Reseller Account(EDIT) Configuration Management</h2>
+        <ul class="nav navbar-right panel_toolbox">
+            <li><a href="<?php echo site_url('crs/resellers'); ?>"><button class="btn btn-primary" type="button" >Back to Reseller Listing Page</button></a> </li>
+        </ul>
     </div>
-<div class="col-md-12 col-sm-12 col-xs-12">
-    <div class="x_panel">
-        <div class="x_title">
+    <div class="row clearfix">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="card">
+                <div class="header">
+                    <ul class="nav nav-tabs bar_tabs2" id="myTab" role="tablist">
+                        <?php
+                        $account_id_enc = param_encrypt($data['account_id']);
+                        $k = 1;
+                        foreach ($voip_section_array as $key => $section_single_array) {
+                            $class = '';
+                            $link = site_url('crs/editvoip/' . $account_id_enc . '/' . $key);
+                            echo '<li class="nav-item header_section ' . $class . '" id="id_header_section_' . $key . '">';
+                            echo '<a class="nav-link "  href="' . $link . '"   >' . $section_single_array['title'] . '</a>';
+                            echo '</li>';
+                        }
+                        ?>
 
-            <div class="clearfix"></div>
-            <div class="ln_solid"></div>
+                        <?php
+                        foreach ($section_array as $key => $section_single_array) {
+                            $class = '';
+                            if ($key == $active_tab)
+                                $class = 'active';
+                            echo '<li class="nav-item header_section ' . $class . '" id="id_header_section_' . $key . '">';
+                            echo '<a class="nav-link " id="contact-tab" data-toggle="tab" href="#contact" role="tab"  onclick="show_section(\'' . $key . '\')">' . $section_single_array['title'] . '</a>';
+                            echo '</li>';
+                        }
+                        ?>
+                    </ul>
+                    <div class="clearfix" ></div>
+                </div>
 
-            <ul class="nav nav-tabs bar_tabs2" id="myTab" role="tablist">
                 <?php
                 foreach ($section_array as $key => $section_single_array) {
-                    $class = '';
+
                     if ($key == $active_tab)
-                        $class = 'active';
-                    echo '<li class="nav-item header_section ' . $class . '" id="id_header_section_' . $key . '">';
-                    echo '<a class="nav-link " id="contact-tab" data-toggle="tab" href="#contact" role="tab"  onclick="show_section(\'' . $key . '\')">' . $section_single_array['title'] . '</a>';
-                    echo '</li>';
-                }
-                ?>
-            </ul>
-            <div class="clearfix" ></div>
-        </div>
+                        $class = '';
+                    else
+                        $class = 'hide';
+                    ?>
+                    <div class="x_content content_div <?php echo $class; ?>" id="<?php echo 'id_content_div_' . $key; ?>">
 
-        <?php
-        foreach ($section_array as $key => $section_single_array) {
-
-            if ($key == $active_tab)
-                $class = '';
-            else
-                $class = 'hide';
-            ?>
-            <div class="x_content content_div <?php echo $class; ?>" id="<?php echo 'id_content_div_' . $key; ?>">
-
-                <?php
+                        <?php
 //                echo $section_single_array['file_name'];
-                include($section_single_array['file_name']);
-                ?>    
+                        include($section_single_array['file_name']);
+                        ?>    
+                    </div>
+
+                <?php } ?>     
             </div>
-
-        <?php } ?>     
-    </div>
-     <div class="clearfix"></div>
-    <div class="col-md-12 col-sm-12 col-xs-12 right">      
-        <div class="x_title">
-            <h2>Reseller Account Configuration Management</h2>
-            <ul class="nav navbar-right panel_toolbox">     
-                <li><a href="<?php echo site_url('crs/resellers'); ?>"><button class="btn btn-danger" type="button" >Back to Reseller Listing Page</button></a> </li>
-            </ul>
-            <div class="clearfix"></div>
         </div>
-
+    </div>
+    <div class="clearfix"></div>
+    <div class="block-header">
+        <h2>Reseller Account(EDIT) Configuration Management</h2>
+        <ul class="nav navbar-right panel_toolbox">
+            <li><a href="<?php echo site_url('crs/resellers'); ?>"><button class="btn btn-primary" type="button" >Back to Reseller Listing Page</button></a> </li>
+        </ul>
     </div>
 </div>
 
@@ -85,7 +107,7 @@ if ($active_tab == 0)
 
 <script>
 
-/////////			
+    /////////			
     /* $('#btnLoginSave').click(function () {
      $('#login_form').parsley().reset();
      var is_ok = $("#login_form").parsley().isValid();
@@ -217,7 +239,7 @@ if ($active_tab == 0)
         openModal('', '', modal_body, modal_footer);
         $("#my-modal").modal('show');
         $("#modal-btn-yes-single").on("click", function () {
-//alert("single");
+            //alert("single");
 
             var form = document.createElement("form");
             document.body.appendChild(form);
@@ -252,7 +274,7 @@ if ($active_tab == 0)
 
 
             form.submit();
-//alert("yes");
+            //alert("yes");
             $("#my-modal").modal('hide');
         });
     }
@@ -264,14 +286,14 @@ if ($active_tab == 0)
         currency_changed();
     });
     $("#country_id").change(function () {
-        country_changed();
+        //country_changed();
     });
     $('#vat_flag').change(function () {
         tax_chnaged();
     });
     $(document).ready(function () {
         media_changed();
-        country_changed();
+        //country_changed();
         tax_chnaged();
     });
 </script>

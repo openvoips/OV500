@@ -130,14 +130,13 @@
 
 
     <div class="form-group">
-        <label  class="control-label col-md-4 col-sm-3 col-xs-12">LLR Check</label>
+        <label  class="control-label col-md-4 col-sm-3 col-xs-12">Don't allow Loss Making calls</label>
         <div class="col-md-8 col-sm-6 col-xs-12">
-            <div class="radio">
-                <label><input type="radio" name="llr_check" id="llr_check1" value="1" <?php if ($data['llr_check'] == 1) { ?> checked="checked" <?php } ?>  /> Yes</label>
-
-                <label> <input type="radio" name="llr_check" id="llr_check2" value="0" <?php if ($data['llr_check'] == 0) { ?> checked="checked" <?php } ?>  /> No</label>
-            </div>
-
+                <label><input type="radio" name="llr_check" id="llr_check1" value="1" class="with-gap" <?php if ($data['llr_check'] == 1) { ?> checked="checked" <?php } ?>  /> 
+				<label for="llr_check1">Yes</label>
+                <input type="radio" name="llr_check" id="llr_check2" value="0" class="with-gap" <?php if ($data['llr_check'] == 0) { ?> checked="checked" <?php } ?>  /> 
+				<label for="llr_check2">No</label>
+            
         </div>
     </div>              
 
@@ -145,24 +144,23 @@
     <div class="form-group">
         <label  class="control-label col-md-4 col-sm-3 col-xs-12">With-media</label>
         <div class="col-md-8 col-sm-6 col-xs-12">
-            <div class="radio">
-                <label><input type="radio" name="media_rtpproxy" id="media_rtpproxy1" value="1" <?php if ($data['media_rtpproxy'] == 1) { ?> checked="checked" <?php } ?>  /> Yes</label>
+           
+			<input type="radio" name="media_rtpproxy" id="media_rtpproxy1" value="1" class="with-gap" <?php if ($data['media_rtpproxy'] == 1) { ?> checked="checked" <?php } ?>  /> 
+			<label for="media_rtpproxy1">Yes</label>
 
-                <label> <input type="radio" name="media_rtpproxy" id="media_rtpproxy2" value="0" <?php if ($data['media_rtpproxy'] == 0) { ?> checked="checked" <?php } ?>  /> No</label>
-            </div>
-
+			<input type="radio" name="media_rtpproxy" id="media_rtpproxy2" value="0" class="with-gap" <?php if ($data['media_rtpproxy'] == 0) { ?> checked="checked" <?php } ?>  /> 
+			<label for="media_rtpproxy2">No</label>
         </div>
     </div>
 
     <div class="form-group" id="id_transcoding_div">
         <label  class="control-label col-md-4 col-sm-3 col-xs-12">Codecs Transcoding </label>
         <div class="col-md-8 col-sm-6 col-xs-12">
-            <div class="radio">
-                <label><input type="radio" name="media_transcoding" id="media_transcoding1" value="1" <?php if ($data['media_transcoding'] == 1) { ?> checked="checked" <?php } ?>  /> Yes</label>
+			<input type="radio" name="media_transcoding" id="media_transcoding1" value="1" class="with-gap" <?php if ($data['media_transcoding'] == 1) { ?> checked="checked" <?php } ?>  /> 
+			<label for="media_transcoding1">Yes</label>
 
-                <label> <input type="radio" name="media_transcoding" id="media_transcoding2" value="0" <?php if ($data['media_transcoding'] == 0) { ?> checked="checked" <?php } ?>  /> No</label>
-            </div>
-
+			<input type="radio" name="media_transcoding" id="media_transcoding2" value="0" class="with-gap" <?php if ($data['media_transcoding'] == 0) { ?> checked="checked" <?php } ?>  /> 
+			<label for="media_transcoding2">No</label>
         </div>
     </div>
 
@@ -211,7 +209,8 @@
                     }
                     ?>
                     <div class="col-md-12 col-sm-6 col-xs-12 radio1">
-                        <label><input type="radio" name="status_id" id="status<?php echo $status_value; ?>" value="<?php echo $status_value; ?>" <?php echo $checked; ?>   /> <?php echo $status_name; ?></label>
+                        <input type="radio" name="status_id" id="status<?php echo $status_value; ?>" class="with-gap" value="<?php echo $status_value; ?>" <?php echo $checked; ?>   />
+						<label for="status<?php echo $status_value; ?>"><?php echo $status_name; ?></label>
                         <?php
                         if ($tooltip != '')
                             echo '<a href="#" data-toggle="tooltip" data-placement="top" title="' . $tooltip . '"><i class="fa fa-question-circle"></i></a>';
@@ -230,7 +229,8 @@
                 }
                 ?>
                 <div class="col-md-12 col-sm-6 col-xs-12 radio1">
-                    <label><input type="radio" name="status_id" id="status<?php echo $account_status; ?>" value="<?php echo $account_status; ?>"  checked="checked"   /> <?php echo $status_name; ?></label>
+                    <input type="radio" name="status_id" id="status<?php echo $account_status; ?>" class="with-gap" value="<?php echo $account_status; ?>"  checked="checked"   /> 
+					<label for="status<?php echo $account_status; ?>"><?php echo $status_name; ?></label>
                     <?php
                     if ($tooltip != '')
                         echo '<a href="#" data-toggle="tooltip" data-placement="top" title="' . $tooltip . '"><i class="fa fa-question-circle"></i></a>';
@@ -258,12 +258,11 @@
 
     <div class="ln_solid"></div>
     <div class="form-group">
-        <div class="col-md-12 col-sm-6 col-xs-12 text-right">
+        <div class="col-md-12 col-sm-6 col-xs-12 text-center">
             <?php if (check_account_permission('reseller', 'edit')): ?>	
-                <button type="button" id="<?php echo 'btnSaveClose'.$key;?>" class="btn btn-info" onclick="save_button('<?php echo $key;?>')">Save</button>
-<!--                <button type="button" id="btnSaveClose2" class="btn btn-info"  >Save & Go Back to Listing Page</button>-->
-            <?php endif; ?>
+                <button type="button" id="<?php echo 'btnSaveClose'.$key;?>" class="btn btn-info" onclick="save_button('<?php echo $key;?>')">Save Settings</button>
+           <?php endif; ?>
         </div>
     </div>
-
+    <br>
 </form>

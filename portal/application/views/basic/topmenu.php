@@ -1,25 +1,6 @@
-
 <?php
 $current_timestamp = time() * 1000;
 ?>
-<script>
-    var site_subdomain = "<?php echo SITE_SUBDOMAIN; ?>";
-    var current_timestamp_t = "<?php echo $current_timestamp; ?>";
-    var current_timestamp = parseInt(current_timestamp_t);
-    var interval_time = 40000;
-    function showTime()
-    {
-        current_timestamp = current_timestamp + interval_time;
-        var time = moment().tz("<?php echo MOMENT_TIMEZONE; ?>").format('Y-MM-D hh:mm A');
-        $('#id_clock').html('' + time);
-    }
-
-    $(document).ready(function () {
-        showTime();	
-        setInterval(showTime, interval_time);
-    });
-</script> 
-
 <div class="nav_menu">
     <nav>
         <div class="nav toggle">

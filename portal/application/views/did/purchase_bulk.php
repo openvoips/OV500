@@ -1,57 +1,59 @@
-
 <style type="text/css">
-    .purchase {cursor:pointer;}
+    .purchase {
+        cursor:pointer;
+    }
 </style>    
-<div class="">
-    <div class="clearfix"></div>    
-    <div class="row">
-        <div class="col-md-12 col-sm-12 col-xs-12 row">
-            <div class="x_panel">
-                <div class="x_title">
-                    <h2>Purchase DID</h2>
-                    <ul class="nav navbar-right panel_toolbox">
+<div class="container-fluid">
+    <div class="block-header">
+        <h2>Purchase Number </h2>
+        <ul class="nav navbar-right panel_toolbox">
 
-                    </ul>
-                    <div class="clearfix"></div>
-                </div>
-                <div class="x_content row">
-
-                    <div class="col-md-12 col-sm-12 col-xs-12">
-                        <label class="control-label col-md-2 col-sm-3 col-xs-12">DID Number <span class="required">*</span></label>
-                        <div class="col-md-4 col-sm-6 col-xs-12">
-                            <input type="text" name="frm_prefix" id="frm_prefix" value="" class="form-control col-md-7 col-xs-12" data-parsley-type="digits" data-parsley-minlength="2"/>
-                        </div>
-                        <div class="col-md-6 col-sm-6 col-xs-12">
-                            <input type="button" value="Search" name="frm_search" id="frm_search" class="btn btn-info" />    
-                        </div>
-                    </div>
-
-                    <div class="col-md-12 col-sm-12 col-xs-12">
-                        <label class="control-label col-md-12 col-sm-12 col-xs-12">One DID For Every USA Area Code &nbsp;&nbsp;&nbsp;<input type="checkbox" name="area_specific" id="area_specific" value="Y" /></label>                        
-                    </div>
-
-                    <div class="clearfix"></div> 
-                    <div class="ln_solid"></div>  
-
-
-
-
-                    <div class="col-md-12 col-sm-6 col-xs-12 text-center" id="search_loader" style="margin:0 auto; display:none;">
-                        <img src="<?php echo base_url(); ?>theme/default/images/loading.gif">
-                    </div>
-                    <div class="alert alert-danger alert-dismissible fade in" role="alert" id="search_notfound" style="display:none;">
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <strong></strong>
-                    </div>
-
+        </ul>
+    </div>
+    <div class="row clearfix">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="card">
+                <div class="header">                 
 
                     <div class='row'>                     
-                        <div class="col-md-8 col-sm-6 col-xs-12">
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <!--<div class="col-md-12 col-sm-12 col-xs-12">-->
+                            <label class="control-label col-md-4 col-sm-3 col-xs-12">Number Prefix / Country Prefix<span class="required">*</span></label>
+                            <div class="col-md-4 col-sm-4 col-xs-12">
+                                <input type="text" name="frm_prefix" id="frm_prefix" value="" class="form-control col-md-7 col-xs-12" data-parsley-type="digits" data-parsley-minlength="2"/>
+                            </div>
+                            <!--</div>-->
+                            <!--<div class="col-md-12 col-sm-12 col-xs-12">-->
+                            <div class="col-md-4 col-sm-4 col-xs-12">
+                                <input type="button" value="Search" name="frm_search" id="frm_search" class="btn btn-info" />    
+                            </div>
+                            <!--</div>-->
+
+                            <div class="col-md-12 col-sm-12 col-xs-12">
+                                <!--  <label class="control-label col-md-12 col-sm-12 col-xs-12">One DID For Every USA Area Code &nbsp;&nbsp;&nbsp; --> <input  type="hidden" type="checkbox" name="area_specific" id="area_specific" value="Y" /></label>                        
+                            </div>
+
+                            <div class="clearfix"></div> 
+                            <div class="ln_solid"></div>  
+
+
+
+
+                            <div class="col-md-6 col-sm-6 col-xs-12 text-center" id="search_loader" style="margin:0 auto; display:none;">
+                                <img src="<?php echo base_url(); ?>theme/default/images/loading.gif">
+                            </div>
+                            <div class="alert alert-danger alert-dismissible fade in" role="alert" id="search_notfound" style="display:none;">
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <strong></strong>
+                            </div>
+
+
+
                             <div id="search_result" style="display:none;">							
                                 <table class="table table-bordered table-striped jambo_table" id="didlisting">
                                     <thead>
                                         <tr>
-                                            <th width="15">&nbsp;<input type="checkbox" id="check-all1" class="check-all1" /></th>
+                                            <th width="35"><label for="check-all1"><input type="checkbox" id="check-all1" class="check-all1" /></label></th>
                                             <th>Number</th>
                                             <th>Setup Cost</th>
                                             <th>Rental Cost</th>
@@ -66,51 +68,86 @@
                             </div>
                         </div>
 
-                        <div class="col-md-4 col-sm-6 col-xs-12 " style="margin-top: 6px !important;">
-
+                        <div class="col-md-6 col-sm-6 col-xs-12 p-r-30 p-l-30 align-right">
+                            <div class="col-md-12 col-sm-12 col-xs-12 p-r-30 p-l-30 align-center">
+                                <h4> Selected Items </h4>
+                            </div>
 
                             <!----------Add to cart block------------------->
-                            <div class="x_panel" id="id_add_to_card_div" style="display:none;"> 
-                                <div class="x_content text-left"> 
+                            <div   id="id_add_to_card_div" style="display:none;"> 
+
+
+                                <div class="  text-right"> 
                                     <h4 id="id_add_to_card_message" class="text-center"></h4>
-                                    <button type="button" id="id_add_to_card_button" class="btn btn-info btn-lg btn-block" title="Cancel" onclick="DoAddDidToCart()">Add Selected DID(<small>s</small>) to Cart</button>
+                                    <button type="button" id="id_add_to_card_button" class="btn btn-info btn-lg btn-block" title="Cancel" onclick="DoAddDidToCart()">Add Selected Number(<small>s</small>) to Cart</button>
                                 </div>
                             </div>
 
                             <!----------Cart Count display block------------------->
-                            <div class="x_panel" id="id_card_count_div"> 
-                                <div class="x_content text-left"> 
+                            <div   id="id_card_count_div"> 
+                                <div class="  text-right"> 
                                     <?php
                                     $cart_count = 0;
                                     if (isset($_SESSION['cart']['did']))
                                         $cart_count = count($_SESSION['cart']['did']);
                                     ?>	
-                                    <div class="text-center" >DID(s) In Cart: <span id="id_cart_count"><?php echo $cart_count; ?></span>    </div><br />
-                                    <div class="text-center" >
-                                        <a href="<?php echo site_url('dids/cart'); ?>"><button type="button" class="btn btn-success btn-lg btn-block">Go To Cart</button> </a>
+                                    <div class="text-center" >Number(s) In Cart: <span id="id_cart_count"><?php echo $cart_count; ?></span>    </div><br />
+
+                                    <?php
+                                    if ($cart_count > 0) {
+                                        ?>
+
+                                        <div class="table-responsive">
+                                            <table class="table table-striped jambo_table table-bordered" id="table-sort">
+
+                                                <thead>
+                                                    <tr class="headings ">   
+                                                        <th class="column-title">Selected Numbers(s) list</th>
+                                                    </tr>
+                                                </thead>		
+                                                <tbody>
+
+                                                    <?php
+                                                    $dids = $_SESSION['cart']['did'];
+                                                    foreach ($dids as $did) {
+                                                        ?>
+                                                        <tr>
+                                                            <td>
+                                                                <?php echo "$did"; ?>
+                                                            </td>
+                                                        </tr>
+
+                                                    <?php }
+                                                    ?>
+                                                </tbody>      
+                                            </table>
+                                        <?php } ?>
+
+                                        <div class="text-center" >
+                                            <a href="<?php echo site_url('dids/cart'); ?>"><button type="button" class="btn btn-success btn-lg btn-block">Go To Cart</button> </a>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!----------configure block------------------->
+                                <!----------configure block------------------->
 
 
-                        </div> 
+                            </div> 
 
-                    </div>                             
+                        </div>                             
+
+
+
+                    </div>
+
+
 
 
 
                 </div>
-
-
-
-
-
             </div>
         </div>
     </div>
-</div>
 </div> 
 <script src="<?php echo base_url() ?>theme/vendors/parsleyjs/dist/parsley.min.js"></script>
 <script>
@@ -126,7 +163,7 @@
                                             if (did_count == 0)
                                                 var button_text = 'Select More DID';
                                             else
-                                                var button_text = 'Add ' + did_count + ' Selected DID(<small>s</small>) to Cart';
+                                                var button_text = 'Add ' + did_count + ' Selected Number(<small>s</small>) to Cart';
                                             $('#id_add_to_card_button').html(button_text);
                                         }
                                         function cart_text_update(did_count)
@@ -177,7 +214,7 @@
 
                                                             $('.check-row1').prop("checked", false);
 
-                                                            var message = '<span class="text-success">DID(s) added to cart Successfully</span>';
+                                                            var message = '<span class="text-success">Number(s) added to cart Successfully</span>';
                                                             $('#id_add_to_card_message').html(message);
                                                         } else
                                                         {
@@ -185,6 +222,7 @@
                                                             $('#id_add_to_card_message').html(message);
                                                         }
                                                         purchase_button_text_update(data.total_cart_did);
+                                                        window.location = BASE_URL + 'dids/cart';
                                                     })
                                                     .fail(function () {
                                                         //alert("error");
@@ -209,7 +247,7 @@
          paging: false,
          bInfo: false,
          });*/
-        showDatatable('didlisting', [], [2, "desc"]);
+        // showDatatable('didlisting', [], [2, "desc"]);
 
         $('#didlisting').on('click', 'tr', function () {
             if ($(this).hasClass('selected'))
@@ -246,7 +284,7 @@
             $.each(data, function (key, value) {
                 hash = key + 1;
                 str += '<tr><td>' + hash + ' ' +
-                        '<input type="checkbox" class="check-row1" name="did_number_list" id="lead_id_list_' + hash + '" value="' + value.did + '" onchange="checked_changed()">' +
+                        '<input type="checkbox" class="check-row1" name="did_number_list" id="lead_id_list_' + hash + '" value="' + value.did + '" onchange="checked_changed()"><label for="lead_id_list_' + hash + '">&nbsp;</label>' +
                         '<td>' + value.did + '</td>' +
                         '<td>' + value.setup + '</td>' +
                         '<td>' + value.rental + '</td>' +

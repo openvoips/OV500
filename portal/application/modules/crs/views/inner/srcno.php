@@ -162,13 +162,11 @@ foreach ($dst_src_cli_callerid_data as $callerid_data_temp) {
     <div class="ln_solid"></div>
     <div class="form-group">
         <div class="col-md-8 col-sm-12 col-xs-12 col-md-offset-4">
-            <!--<a href="<?php echo base_url('voip') . '/editvoip/' . param_encrypt($data['account_id']); ?>"><button class="btn btn-primary" type="button">Cancel</button></a>-->	
+  
             <?php if (check_account_permission('customer', 'edit')): ?>	
                <button type="button" id="<?php echo 'btnSaveClose'.$key;?>" class="btn btn-info" onclick="save_button('<?php echo $key;?>')">Update Source Number</button>
-<!--                <button type="button" id="btnSave" class="btn btn-success">Save</button>
-                <button type="button" id="btnSaveClose" class="btn btn-info">Save & Go Back to Customer Edit Page</button>-->
-            <?php endif; ?>
+             <?php endif; ?>
         </div>
     </div>
-
+<br>
 </form>
