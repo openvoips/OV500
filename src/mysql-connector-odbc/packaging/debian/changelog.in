@@ -1,0 +1,6 @@
+mysql-connector-odbc@PRODUCT_SUFFIX@ (@VERSION@@ID_RELEASE@) @CODENAME@; urgency=low
+
+  * New Release. For release notes, please refer to
+    https://dev.mysql.com/doc/relnotes/connector-odbc/en/news-@CONNECTOR_MAJOR@-@CONNECTOR_MINOR@-@CONNECTOR_PATCH@.html
+
+ -- MySQL Release Engineering <mysql-build@oss.oracle.com>  @DEB_CHANGELOG_TIMESTAMP@

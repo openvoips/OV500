@@ -1,0 +1,1 @@
+/usr/bin/c++ -O3 -DNDEBUG  -lodbc -lodbcinst -rdynamic CMakeFiles/my_unicode.dir/my_unicode.c.o -o my_unicode  -Wl,-rpath,"\$ORIGIN" -lodbc -lodbcinst -lodbcinst ../lib/libmyodbc-util.a -lodbcinst 

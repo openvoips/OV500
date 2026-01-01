@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../lib/libmyodbc-util.a CMakeFiles/myodbc-util.dir/stringutil.cc.o CMakeFiles/myodbc-util.dir/unicode_transcode.cc.o CMakeFiles/myodbc-util.dir/installer.cc.o CMakeFiles/myodbc-util.dir/odbcinstw.cc.o
+/usr/bin/ranlib ../lib/libmyodbc-util.a

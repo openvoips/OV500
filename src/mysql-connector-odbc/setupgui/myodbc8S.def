@@ -1,0 +1,5 @@
+LIBRARY MYODBC8S.DLL
+EXPORTS
+ConfigDSNW
+Driver_Prompt
+;

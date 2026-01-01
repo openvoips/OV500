@@ -1,0 +1,1 @@
+/usr/bin/c++ -O3 -DNDEBUG  -lodbc -lodbcinst -rdynamic CMakeFiles/my_curext.dir/my_curext.c.o -o my_curext  -Wl,-rpath,"\$ORIGIN" -lodbc -lodbcinst -lodbcinst ../lib/libmyodbc-util.a -lodbcinst 

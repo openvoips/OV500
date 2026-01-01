@@ -1,0 +1,786 @@
+Performing C++ SOURCE FILE Test HAVE_LLVM_LIBCPP failed with the following compile output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_be408/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_be408.dir/build.make CMakeFiles/cmTC_be408.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_be408.dir/src.cxx.o
+/usr/bin/c++ -DHAVE_LLVM_LIBCPP   -o CMakeFiles/cmTC_be408.dir/src.cxx.o -c /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_be408
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_be408.dir/link.txt --verbose=1
+/usr/bin/c++ -rdynamic CMakeFiles/cmTC_be408.dir/src.cxx.o -o cmTC_be408 
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+
+
+...and run output:
+
+Return value: 1
+Source file was:
+
+#include <ciso646>
+int main()
+{
+#ifdef _LIBCPP_VERSION
+  return 0;
+#else
+  return 1;
+#endif
+}
+Determining if the function floor exists failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_ac74f/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_ac74f.dir/build.make CMakeFiles/cmTC_ac74f.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_ac74f.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=floor -o CMakeFiles/cmTC_ac74f.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.22/Modules/CheckFunctionExists.c
+<command-line>: warning: conflicting types for built-in function ‘floor’; expected ‘double(double)’ [-Wbuiltin-declaration-mismatch]
+/usr/share/cmake-3.22/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro ‘CHECK_FUNCTION_EXISTS’
+    7 |   CHECK_FUNCTION_EXISTS(void);
+      |   ^~~~~~~~~~~~~~~~~~~~~
+/usr/share/cmake-3.22/Modules/CheckFunctionExists.c:1:1: note: ‘floor’ is declared in header ‘<math.h>’
+  +++ |+#include <math.h>
+    1 | #ifdef CHECK_FUNCTION_EXISTS
+Linking C executable cmTC_ac74f
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ac74f.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=floor -rdynamic CMakeFiles/cmTC_ac74f.dir/CheckFunctionExists.c.o -o cmTC_ac74f 
+/usr/bin/ld: CMakeFiles/cmTC_ac74f.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text+0x14): undefined reference to `floor'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_ac74f.dir/build.make:99: cmTC_ac74f] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_ac74f/fast] Error 2
+
+
+
+Determining if the function crypt exists failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_889de/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_889de.dir/build.make CMakeFiles/cmTC_889de.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_889de.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=crypt -o CMakeFiles/cmTC_889de.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.22/Modules/CheckFunctionExists.c
+Linking C executable cmTC_889de
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_889de.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=crypt -rdynamic CMakeFiles/cmTC_889de.dir/CheckFunctionExists.c.o -o cmTC_889de 
+/usr/bin/ld: CMakeFiles/cmTC_889de.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text+0x14): undefined reference to `crypt'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_889de.dir/build.make:99: cmTC_889de] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_889de/fast] Error 2
+
+
+
+Determining if the function atomic_thread_fence exists failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_96f9a/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_96f9a.dir/build.make CMakeFiles/cmTC_96f9a.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_96f9a.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=atomic_thread_fence -o CMakeFiles/cmTC_96f9a.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.22/Modules/CheckFunctionExists.c
+Linking C executable cmTC_96f9a
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_96f9a.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=atomic_thread_fence -rdynamic CMakeFiles/cmTC_96f9a.dir/CheckFunctionExists.c.o -o cmTC_96f9a 
+/usr/bin/ld: CMakeFiles/cmTC_96f9a.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text+0x14): undefined reference to `atomic_thread_fence'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_96f9a.dir/build.make:99: cmTC_96f9a] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_96f9a/fast] Error 2
+
+
+
+Determining if files ieeefp.h exist failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_e8739/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_e8739.dir/build.make CMakeFiles/cmTC_e8739.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_e8739.dir/HAVE_IEEEFP_H.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_e8739.dir/HAVE_IEEEFP_H.c.o -c /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CheckIncludeFiles/HAVE_IEEEFP_H.c
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CheckIncludeFiles/HAVE_IEEEFP_H.c:2:10: fatal error: ieeefp.h: No such file or directory
+    2 | #include <ieeefp.h>
+      |          ^~~~~~~~~~
+compilation terminated.
+gmake[1]: *** [CMakeFiles/cmTC_e8739.dir/build.make:78: CMakeFiles/cmTC_e8739.dir/HAVE_IEEEFP_H.c.o] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_e8739/fast] Error 2
+
+
+Source:
+/* */
+#include <ieeefp.h>
+
+
+int main(void){return 0;}
+
+Determining if files vis.h exist failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_dbff7/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_dbff7.dir/build.make CMakeFiles/cmTC_dbff7.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_dbff7.dir/HAVE_VIS_H.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_dbff7.dir/HAVE_VIS_H.c.o -c /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CheckIncludeFiles/HAVE_VIS_H.c
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CheckIncludeFiles/HAVE_VIS_H.c:2:10: fatal error: vis.h: No such file or directory
+    2 | #include <vis.h>
+      |          ^~~~~~~
+compilation terminated.
+gmake[1]: *** [CMakeFiles/cmTC_dbff7.dir/build.make:78: CMakeFiles/cmTC_dbff7.dir/HAVE_VIS_H.c.o] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_dbff7/fast] Error 2
+
+
+Source:
+/* */
+#include <vis.h>
+
+
+int main(void){return 0;}
+
+Determining if files sasl/sasl.h exist failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_8a96f/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_8a96f.dir/build.make CMakeFiles/cmTC_8a96f.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_8a96f.dir/HAVE_SASL_SASL_H.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_8a96f.dir/HAVE_SASL_SASL_H.c.o -c /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CheckIncludeFiles/HAVE_SASL_SASL_H.c
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CheckIncludeFiles/HAVE_SASL_SASL_H.c:2:10: fatal error: sasl/sasl.h: No such file or directory
+    2 | #include <sasl/sasl.h>
+      |          ^~~~~~~~~~~~~
+compilation terminated.
+gmake[1]: *** [CMakeFiles/cmTC_8a96f.dir/build.make:78: CMakeFiles/cmTC_8a96f.dir/HAVE_SASL_SASL_H.c.o] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_8a96f/fast] Error 2
+
+
+Source:
+/* */
+#include <sasl/sasl.h>
+
+
+int main(void){return 0;}
+
+Determining if files sys/devpoll.h exist failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_26cee/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_26cee.dir/build.make CMakeFiles/cmTC_26cee.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_26cee.dir/HAVE_DEVPOLL.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_26cee.dir/HAVE_DEVPOLL.c.o -c /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CheckIncludeFiles/HAVE_DEVPOLL.c
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CheckIncludeFiles/HAVE_DEVPOLL.c:2:10: fatal error: sys/devpoll.h: No such file or directory
+    2 | #include <sys/devpoll.h>
+      |          ^~~~~~~~~~~~~~~
+compilation terminated.
+gmake[1]: *** [CMakeFiles/cmTC_26cee.dir/build.make:78: CMakeFiles/cmTC_26cee.dir/HAVE_DEVPOLL.c.o] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_26cee/fast] Error 2
+
+
+Source:
+/* */
+#include <sys/devpoll.h>
+
+
+int main(void){return 0;}
+
+Determining if the function _aligned_malloc exists failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_ee9a1/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_ee9a1.dir/build.make CMakeFiles/cmTC_ee9a1.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_ee9a1.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=_aligned_malloc -o CMakeFiles/cmTC_ee9a1.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.22/Modules/CheckFunctionExists.c
+Linking C executable cmTC_ee9a1
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ee9a1.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=_aligned_malloc -rdynamic CMakeFiles/cmTC_ee9a1.dir/CheckFunctionExists.c.o -o cmTC_ee9a1  -lm -lcrypt -latomic 
+/usr/bin/ld: CMakeFiles/cmTC_ee9a1.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text+0x14): undefined reference to `_aligned_malloc'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_ee9a1.dir/build.make:99: cmTC_ee9a1] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_ee9a1/fast] Error 2
+
+
+
+Determining if the function printstack exists failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_48d0d/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_48d0d.dir/build.make CMakeFiles/cmTC_48d0d.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_48d0d.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=printstack -o CMakeFiles/cmTC_48d0d.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.22/Modules/CheckFunctionExists.c
+Linking C executable cmTC_48d0d
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_48d0d.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=printstack -rdynamic CMakeFiles/cmTC_48d0d.dir/CheckFunctionExists.c.o -o cmTC_48d0d  -lm -lcrypt -latomic 
+/usr/bin/ld: CMakeFiles/cmTC_48d0d.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text+0x14): undefined reference to `printstack'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_48d0d.dir/build.make:99: cmTC_48d0d] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_48d0d/fast] Error 2
+
+
+
+Determining if the function directio exists failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_32b3e/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_32b3e.dir/build.make CMakeFiles/cmTC_32b3e.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_32b3e.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=directio -o CMakeFiles/cmTC_32b3e.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.22/Modules/CheckFunctionExists.c
+Linking C executable cmTC_32b3e
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_32b3e.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=directio -rdynamic CMakeFiles/cmTC_32b3e.dir/CheckFunctionExists.c.o -o cmTC_32b3e  -lm -lcrypt -latomic 
+/usr/bin/ld: CMakeFiles/cmTC_32b3e.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text+0x14): undefined reference to `directio'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_32b3e.dir/build.make:99: cmTC_32b3e] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_32b3e/fast] Error 2
+
+
+
+Determining if the function gethrtime exists failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_32df3/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_32df3.dir/build.make CMakeFiles/cmTC_32df3.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_32df3.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=gethrtime -o CMakeFiles/cmTC_32df3.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.22/Modules/CheckFunctionExists.c
+Linking C executable cmTC_32df3
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_32df3.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=gethrtime -rdynamic CMakeFiles/cmTC_32df3.dir/CheckFunctionExists.c.o -o cmTC_32df3  -lm -lcrypt -latomic 
+/usr/bin/ld: CMakeFiles/cmTC_32df3.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text+0x14): undefined reference to `gethrtime'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_32df3.dir/build.make:99: cmTC_32df3] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_32df3/fast] Error 2
+
+
+
+Determining if the function getpassphrase exists failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_6d4ff/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_6d4ff.dir/build.make CMakeFiles/cmTC_6d4ff.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_6d4ff.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=getpassphrase -o CMakeFiles/cmTC_6d4ff.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.22/Modules/CheckFunctionExists.c
+Linking C executable cmTC_6d4ff
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6d4ff.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=getpassphrase -rdynamic CMakeFiles/cmTC_6d4ff.dir/CheckFunctionExists.c.o -o cmTC_6d4ff  -lm -lcrypt -latomic 
+/usr/bin/ld: CMakeFiles/cmTC_6d4ff.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text+0x14): undefined reference to `getpassphrase'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_6d4ff.dir/build.make:99: cmTC_6d4ff] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_6d4ff/fast] Error 2
+
+
+
+Determining if the function issetugid exists failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_12c3f/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_12c3f.dir/build.make CMakeFiles/cmTC_12c3f.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_12c3f.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=issetugid -o CMakeFiles/cmTC_12c3f.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.22/Modules/CheckFunctionExists.c
+Linking C executable cmTC_12c3f
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_12c3f.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=issetugid -rdynamic CMakeFiles/cmTC_12c3f.dir/CheckFunctionExists.c.o -o cmTC_12c3f  -lm -lcrypt -latomic 
+/usr/bin/ld: CMakeFiles/cmTC_12c3f.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text+0x14): undefined reference to `issetugid'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_12c3f.dir/build.make:99: cmTC_12c3f] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_12c3f/fast] Error 2
+
+
+
+Determining if the function setfd exists failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_c78a3/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_c78a3.dir/build.make CMakeFiles/cmTC_c78a3.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_c78a3.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=setfd -o CMakeFiles/cmTC_c78a3.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.22/Modules/CheckFunctionExists.c
+Linking C executable cmTC_c78a3
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c78a3.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=setfd -rdynamic CMakeFiles/cmTC_c78a3.dir/CheckFunctionExists.c.o -o cmTC_c78a3  -lm -lcrypt -latomic 
+/usr/bin/ld: CMakeFiles/cmTC_c78a3.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text+0x14): undefined reference to `setfd'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_c78a3.dir/build.make:99: cmTC_c78a3] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_c78a3/fast] Error 2
+
+
+
+Determining if the function strlcpy exists failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_dec90/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_dec90.dir/build.make CMakeFiles/cmTC_dec90.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_dec90.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=strlcpy -o CMakeFiles/cmTC_dec90.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.22/Modules/CheckFunctionExists.c
+Linking C executable cmTC_dec90
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_dec90.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=strlcpy -rdynamic CMakeFiles/cmTC_dec90.dir/CheckFunctionExists.c.o -o cmTC_dec90  -lm -lcrypt -latomic 
+/usr/bin/ld: CMakeFiles/cmTC_dec90.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text+0x14): undefined reference to `strlcpy'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_dec90.dir/build.make:99: cmTC_dec90] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_dec90/fast] Error 2
+
+
+
+Determining if the function strlcat exists failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_7c422/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_7c422.dir/build.make CMakeFiles/cmTC_7c422.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_7c422.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=strlcat -o CMakeFiles/cmTC_7c422.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.22/Modules/CheckFunctionExists.c
+Linking C executable cmTC_7c422
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7c422.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=strlcat -rdynamic CMakeFiles/cmTC_7c422.dir/CheckFunctionExists.c.o -o cmTC_7c422  -lm -lcrypt -latomic 
+/usr/bin/ld: CMakeFiles/cmTC_7c422.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text+0x14): undefined reference to `strlcat'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_7c422.dir/build.make:99: cmTC_7c422] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_7c422/fast] Error 2
+
+
+
+Determining if the function fgetln exists failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_c6d89/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_c6d89.dir/build.make CMakeFiles/cmTC_c6d89.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_c6d89.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=fgetln -o CMakeFiles/cmTC_c6d89.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.22/Modules/CheckFunctionExists.c
+Linking C executable cmTC_c6d89
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c6d89.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=fgetln -rdynamic CMakeFiles/cmTC_c6d89.dir/CheckFunctionExists.c.o -o cmTC_c6d89  -lm -lcrypt -latomic 
+/usr/bin/ld: CMakeFiles/cmTC_c6d89.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text+0x14): undefined reference to `fgetln'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_c6d89.dir/build.make:99: cmTC_c6d89] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_c6d89/fast] Error 2
+
+
+
+Determining if the function tell exists failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_81988/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_81988.dir/build.make CMakeFiles/cmTC_81988.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_81988.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=tell -o CMakeFiles/cmTC_81988.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.22/Modules/CheckFunctionExists.c
+Linking C executable cmTC_81988
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_81988.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=tell -rdynamic CMakeFiles/cmTC_81988.dir/CheckFunctionExists.c.o -o cmTC_81988  -lm -lcrypt -latomic 
+/usr/bin/ld: CMakeFiles/cmTC_81988.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text+0x14): undefined reference to `tell'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_81988.dir/build.make:99: cmTC_81988] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_81988/fast] Error 2
+
+
+
+Determining if the function ntohll exists failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_654fd/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_654fd.dir/build.make CMakeFiles/cmTC_654fd.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_654fd.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=ntohll -o CMakeFiles/cmTC_654fd.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.22/Modules/CheckFunctionExists.c
+Linking C executable cmTC_654fd
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_654fd.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=ntohll -rdynamic CMakeFiles/cmTC_654fd.dir/CheckFunctionExists.c.o -o cmTC_654fd  -lm -lcrypt -latomic 
+/usr/bin/ld: CMakeFiles/cmTC_654fd.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text+0x14): undefined reference to `ntohll'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_654fd.dir/build.make:99: cmTC_654fd] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_654fd/fast] Error 2
+
+
+
+Determining if the function kqueue exists failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_0072d/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_0072d.dir/build.make CMakeFiles/cmTC_0072d.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_0072d.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=kqueue -o CMakeFiles/cmTC_0072d.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.22/Modules/CheckFunctionExists.c
+Linking C executable cmTC_0072d
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0072d.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=kqueue -rdynamic CMakeFiles/cmTC_0072d.dir/CheckFunctionExists.c.o -o cmTC_0072d  -lm -lcrypt -latomic 
+/usr/bin/ld: CMakeFiles/cmTC_0072d.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text+0x14): undefined reference to `kqueue'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_0072d.dir/build.make:99: cmTC_0072d] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_0072d/fast] Error 2
+
+
+
+Determining if the FIONREAD exist failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_6c156/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_6c156.dir/build.make CMakeFiles/cmTC_6c156.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_6c156.dir/CheckSymbolExists.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_6c156.dir/CheckSymbolExists.c.o -c /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:2:10: fatal error: sys/filio.h: No such file or directory
+    2 | #include <sys/filio.h>
+      |          ^~~~~~~~~~~~~
+compilation terminated.
+gmake[1]: *** [CMakeFiles/cmTC_6c156.dir/build.make:78: CMakeFiles/cmTC_6c156.dir/CheckSymbolExists.c.o] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_6c156/fast] Error 2
+
+
+File /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <sys/filio.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef FIONREAD
+  return ((int*)(&FIONREAD))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the function kqueue exists failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_f8508/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_f8508.dir/build.make CMakeFiles/cmTC_f8508.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_f8508.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=kqueue -o CMakeFiles/cmTC_f8508.dir/CheckFunctionExists.c.o -c /usr/share/cmake-3.22/Modules/CheckFunctionExists.c
+Linking C executable cmTC_f8508
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f8508.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=kqueue -rdynamic CMakeFiles/cmTC_f8508.dir/CheckFunctionExists.c.o -o cmTC_f8508  -lm -lcrypt -latomic 
+/usr/bin/ld: CMakeFiles/cmTC_f8508.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text+0x14): undefined reference to `kqueue'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_f8508.dir/build.make:99: cmTC_f8508] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_f8508/fast] Error 2
+
+
+
+Determining if the EVFILT_TIMER exist failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_54e64/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_54e64.dir/build.make CMakeFiles/cmTC_54e64.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_54e64.dir/CheckSymbolExists.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_54e64.dir/CheckSymbolExists.c.o -c /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:3:10: fatal error: sys/event.h: No such file or directory
+    3 | #include <sys/event.h>
+      |          ^~~~~~~~~~~~~
+compilation terminated.
+gmake[1]: *** [CMakeFiles/cmTC_54e64.dir/build.make:78: CMakeFiles/cmTC_54e64.dir/CheckSymbolExists.c.o] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_54e64/fast] Error 2
+
+
+File /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <sys/types.h>
+#include <sys/event.h>
+#include <sys/time.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef EVFILT_TIMER
+  return ((int*)(&EVFILT_TIMER))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Performing C SOURCE FILE Test HAVE_PTHREAD_GETTHREADID_NP failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_9cf2e/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_9cf2e.dir/build.make CMakeFiles/cmTC_9cf2e.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_9cf2e.dir/src.c.o
+/usr/bin/cc -DHAVE_PTHREAD_GETTHREADID_NP -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS   -o CMakeFiles/cmTC_9cf2e.dir/src.c.o -c /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/src.c
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/src.c:2:14: fatal error: pthread_np.h: No such file or directory
+    2 |     #include <pthread_np.h>
+      |              ^~~~~~~~~~~~~~
+compilation terminated.
+gmake[1]: *** [CMakeFiles/cmTC_9cf2e.dir/build.make:78: CMakeFiles/cmTC_9cf2e.dir/src.c.o] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_9cf2e/fast] Error 2
+
+
+Source file was:
+
+    #include <pthread_np.h>
+    int main(int ac, char **av)
+    {
+      unsigned long long tid = pthread_getthreadid_np();
+      return (tid != 0 ? 0 : 1);
+    }
+Performing C SOURCE FILE Test HAVE_PTHREAD_THREADID_NP failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_2fc9e/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_2fc9e.dir/build.make CMakeFiles/cmTC_2fc9e.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_2fc9e.dir/src.c.o
+/usr/bin/cc -DHAVE_PTHREAD_THREADID_NP -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS   -o CMakeFiles/cmTC_2fc9e.dir/src.c.o -c /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/src.c
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/src.c: In function ‘main’:
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/src.c:6:7: warning: implicit declaration of function ‘pthread_threadid_np’; did you mean ‘pthread_tryjoin_np’? [-Wimplicit-function-declaration]
+    6 |       pthread_threadid_np(NULL, &tid64);
+      |       ^~~~~~~~~~~~~~~~~~~
+      |       pthread_tryjoin_np
+Linking C executable cmTC_2fc9e
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_2fc9e.dir/link.txt --verbose=1
+/usr/bin/cc -rdynamic CMakeFiles/cmTC_2fc9e.dir/src.c.o -o cmTC_2fc9e  -lm -lcrypt -latomic 
+/usr/bin/ld: CMakeFiles/cmTC_2fc9e.dir/src.c.o: in function `main':
+src.c:(.text+0x34): undefined reference to `pthread_threadid_np'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_2fc9e.dir/build.make:99: cmTC_2fc9e] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_2fc9e/fast] Error 2
+
+
+Source file was:
+
+    #include <pthread.h>
+    int main(int ac, char **av)
+    {
+      unsigned long long tid64;
+      pthread_threadid_np(NULL, &tid64);
+      return (tid64 != 0 ? 0 : 1);
+    }
+Performing C++ SOURCE FILE Test HAVE_IMPLICIT_DEPENDENT_NAME_TYPING failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_6df51/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_6df51.dir/build.make CMakeFiles/cmTC_6df51.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_6df51.dir/src.cxx.o
+/usr/bin/c++ -DHAVE_IMPLICIT_DEPENDENT_NAME_TYPING -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS   -o CMakeFiles/cmTC_6df51.dir/src.cxx.o -c /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/src.cxx
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/src.cxx: In member function ‘void ct2<T>::func()’:
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/src.cxx:15:5: error: need ‘typename’ before ‘std::vector<T>::iterator’ because ‘std::vector<T>’ is a dependent scope
+   15 |     std::vector<T>::iterator itr = vec.begin();
+      |     ^~~
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/src.cxx:15:29: error: expected ‘;’ before ‘itr’
+   15 |     std::vector<T>::iterator itr = vec.begin();
+      |                             ^~~~
+      |                             ;
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/src.cxx: In instantiation of ‘void ct2<T>::func() [with T = double]’:
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/src.cxx:21:12:   required from here
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/src.cxx:15:21: error: dependent-name ‘std::vector<T>::iterator’ is parsed as a non-type, but instantiation yields a type
+   15 |     std::vector<T>::iterator itr = vec.begin();
+      |                     ^~~~~~~~
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/src.cxx:15:21: note: say ‘typename std::vector<T>::iterator’ if a type is meant
+gmake[1]: *** [CMakeFiles/cmTC_6df51.dir/build.make:78: CMakeFiles/cmTC_6df51.dir/src.cxx.o] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_6df51/fast] Error 2
+
+
+Source file was:
+
+  #include <vector>
+  template<typename T>
+  class ct2
+  {
+  public:
+    typedef T type;
+    void func();
+  };
+
+  template<typename T>
+  void ct2<T>::func()
+  {
+    std::vector<T> vec;
+    std::vector<T>::iterator itr = vec.begin();
+  }
+
+  int main(int argc, char **argv)
+  {
+    ct2<double> o2;
+    o2.func();
+    return 0;
+  }
+  
+Determining if the include file netinet/in6.h exists failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_92074/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_92074.dir/build.make CMakeFiles/cmTC_92074.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_92074.dir/CheckIncludeFile.c.o
+/usr/bin/cc -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS   -o CMakeFiles/cmTC_92074.dir/CheckIncludeFile.c.o -c /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/CheckIncludeFile.c:1:10: fatal error: netinet/in6.h: No such file or directory
+    1 | #include <netinet/in6.h>
+      |          ^~~~~~~~~~~~~~~
+compilation terminated.
+gmake[1]: *** [CMakeFiles/cmTC_92074.dir/build.make:78: CMakeFiles/cmTC_92074.dir/CheckIncludeFile.c.o] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_92074/fast] Error 2
+
+
+
+Determining size of struct in6_addr failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_03aa8/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_03aa8.dir/build.make CMakeFiles/cmTC_03aa8.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_03aa8.dir/SIZEOF_IN6_ADDR.c.o
+/usr/bin/cc -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS   -o CMakeFiles/cmTC_03aa8.dir/SIZEOF_IN6_ADDR.c.o -c /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CheckTypeSize/SIZEOF_IN6_ADDR.c
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CheckTypeSize/SIZEOF_IN6_ADDR.c:27:22: error: invalid application of ‘sizeof’ to incomplete type ‘struct in6_addr’
+   27 | #define SIZE (sizeof(struct in6_addr))
+      |                      ^~~~~~
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CheckTypeSize/SIZEOF_IN6_ADDR.c:29:12: note: in expansion of macro ‘SIZE’
+   29 |   ('0' + ((SIZE / 10000)%10)),
+      |            ^~~~
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CheckTypeSize/SIZEOF_IN6_ADDR.c:27:22: error: invalid application of ‘sizeof’ to incomplete type ‘struct in6_addr’
+   27 | #define SIZE (sizeof(struct in6_addr))
+      |                      ^~~~~~
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CheckTypeSize/SIZEOF_IN6_ADDR.c:30:12: note: in expansion of macro ‘SIZE’
+   30 |   ('0' + ((SIZE / 1000)%10)),
+      |            ^~~~
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CheckTypeSize/SIZEOF_IN6_ADDR.c:27:22: error: invalid application of ‘sizeof’ to incomplete type ‘struct in6_addr’
+   27 | #define SIZE (sizeof(struct in6_addr))
+      |                      ^~~~~~
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CheckTypeSize/SIZEOF_IN6_ADDR.c:31:12: note: in expansion of macro ‘SIZE’
+   31 |   ('0' + ((SIZE / 100)%10)),
+      |            ^~~~
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CheckTypeSize/SIZEOF_IN6_ADDR.c:27:22: error: invalid application of ‘sizeof’ to incomplete type ‘struct in6_addr’
+   27 | #define SIZE (sizeof(struct in6_addr))
+      |                      ^~~~~~
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CheckTypeSize/SIZEOF_IN6_ADDR.c:32:12: note: in expansion of macro ‘SIZE’
+   32 |   ('0' + ((SIZE / 10)%10)),
+      |            ^~~~
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CheckTypeSize/SIZEOF_IN6_ADDR.c:27:22: error: invalid application of ‘sizeof’ to incomplete type ‘struct in6_addr’
+   27 | #define SIZE (sizeof(struct in6_addr))
+      |                      ^~~~~~
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CheckTypeSize/SIZEOF_IN6_ADDR.c:33:12: note: in expansion of macro ‘SIZE’
+   33 |   ('0' +  (SIZE    % 10)),
+      |            ^~~~
+gmake[1]: *** [CMakeFiles/cmTC_03aa8.dir/build.make:78: CMakeFiles/cmTC_03aa8.dir/SIZEOF_IN6_ADDR.c.o] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_03aa8/fast] Error 2
+
+
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CheckTypeSize/SIZEOF_IN6_ADDR.c:
+#include <sys/types.h>
+#include <stdint.h>
+#include <stddef.h>
+
+
+#undef KEY
+#if defined(__i386)
+# define KEY '_','_','i','3','8','6'
+#elif defined(__x86_64)
+# define KEY '_','_','x','8','6','_','6','4'
+#elif defined(__PPC64__)
+# define KEY '_','_','P','P','C','6','4','_','_'
+#elif defined(__ppc64__)
+# define KEY '_','_','p','p','c','6','4','_','_'
+#elif defined(__PPC__)
+# define KEY '_','_','P','P','C','_','_'
+#elif defined(__ppc__)
+# define KEY '_','_','p','p','c','_','_'
+#elif defined(__aarch64__)
+# define KEY '_','_','a','a','r','c','h','6','4','_','_'
+#elif defined(__ARM_ARCH_7A__)
+# define KEY '_','_','A','R','M','_','A','R','C','H','_','7','A','_','_'
+#elif defined(__ARM_ARCH_7S__)
+# define KEY '_','_','A','R','M','_','A','R','C','H','_','7','S','_','_'
+#endif
+
+#define SIZE (sizeof(struct in6_addr))
+static char info_size[] =  {'I', 'N', 'F', 'O', ':', 's','i','z','e','[',
+  ('0' + ((SIZE / 10000)%10)),
+  ('0' + ((SIZE / 1000)%10)),
+  ('0' + ((SIZE / 100)%10)),
+  ('0' + ((SIZE / 10)%10)),
+  ('0' +  (SIZE    % 10)),
+  ']',
+#ifdef KEY
+  ' ','k','e','y','[', KEY, ']',
+#endif
+  '\0'};
+
+#ifdef __CLASSIC_C__
+int main(argc, argv) int argc; char *argv[];
+#else
+int main(int argc, char *argv[])
+#endif
+{
+  int require = 0;
+  require += info_size[argc];
+  (void)argv;
+  return require;
+}
+
+
+Performing C SOURCE FILE Test HAVE_SOCKADDR_IN_SIN_LEN failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_7205a/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_7205a.dir/build.make CMakeFiles/cmTC_7205a.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_7205a.dir/src.c.o
+/usr/bin/cc -DHAVE_SOCKADDR_IN_SIN_LEN -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS   -o CMakeFiles/cmTC_7205a.dir/src.c.o -c /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/src.c
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/src.c: In function ‘main’:
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/src.c:8:41: error: ‘struct sockaddr_in’ has no member named ‘sin_len’
+    8 |   (void)sizeof(((struct sockaddr_in *)0)->sin_len);
+      |                                         ^~
+gmake[1]: *** [CMakeFiles/cmTC_7205a.dir/build.make:78: CMakeFiles/cmTC_7205a.dir/src.c.o] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_7205a/fast] Error 2
+
+
+Source file was:
+
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+
+int main()
+{
+  (void)sizeof(((struct sockaddr_in *)0)->sin_len);
+  return 0;
+}
+
+Performing C SOURCE FILE Test HAVE_SOCKADDR_IN6_SIN6_LEN failed with the following output:
+Change Dir: /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_1cabc/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_1cabc.dir/build.make CMakeFiles/cmTC_1cabc.dir/build
+gmake[1]: Entering directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_1cabc.dir/src.c.o
+/usr/bin/cc -DHAVE_SOCKADDR_IN6_SIN6_LEN -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS   -o CMakeFiles/cmTC_1cabc.dir/src.c.o -c /var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/src.c
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/src.c: In function ‘main’:
+/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp/src.c:8:42: error: ‘struct sockaddr_in6’ has no member named ‘sin6_len’
+    8 |   (void)sizeof(((struct sockaddr_in6 *)0)->sin6_len);
+      |                                          ^~
+gmake[1]: *** [CMakeFiles/cmTC_1cabc.dir/build.make:78: CMakeFiles/cmTC_1cabc.dir/src.c.o] Error 1
+gmake[1]: Leaving directory '/var/www/html/portal/build/mysql-connector-odbc/build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_1cabc/fast] Error 2
+
+
+Source file was:
+
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+
+int main()
+{
+  (void)sizeof(((struct sockaddr_in6 *)0)->sin6_len);
+  return 0;
+}
+

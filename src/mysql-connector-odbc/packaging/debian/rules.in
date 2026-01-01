@@ -1,0 +1,76 @@
+#!/usr/bin/make -f
+# Copyright (c) 2014, 2024, Oracle and/or its affiliates.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, version 2.0, as
+# published by the Free Software Foundation.
+#
+# This program is designed to work with certain software (including
+# but not limited to OpenSSL) that is licensed under separate terms, as
+# designated in a particular file or component or in included license
+# documentation. The authors of MySQL hereby grant you an additional
+# permission to link the program and your derivative works with the
+# separately licensed software that they have either included with
+# the program or referenced in the documentation.
+#
+# Without limiting anything contained in the foregoing, this file,
+# which is part of Connector/ODBC, is also subject to the
+# Universal FOSS Exception, version 1.0, a copy of which can be found at
+# https://oss.oracle.com/licenses/universal-foss-exception.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License, version 2.0, for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+upstream_version := $(shell dpkg-parsechangelog | sed -n -e'/^Version: / { s/Version: //; s/-[^-]\+$$//; p }')
+base_version = $(shell echo $(upstream_version) | sed -e's/r[0-9]\+$$//')
+
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
+%:
+	#dh $@ --with autoreconf
+	dh  $@
+
+override_dh_auto_configure:
+	#ln -sf /usr/share/misc/config.sub .
+	#ln -sf /usr/share/misc/config.guess .
+	#dh_auto_configure -- --with-unixODBC=/usr \
+	#dh_auto_configure -- --disable-debug --enable-static
+        #--disable-gui --disable-test ?
+	cmake -G 'Unix Makefiles' \
+	    -DCMAKE_INSTALL_PREFIX=/usr \
+	    -DINSTALL_LIBDIR=lib/$(DEB_HOST_MULTIARCH) \
+	    -DCMAKE_VERBOSE_MAKEFILE:BOOL=TRUE \
+	    -DFINDMYSQL_DEBUG:BOOL=TRUE \
+	    -DMYSQLCLIENT_STATIC_LINKING:BOOL=TRUE  \
+	    -DMYSQL_CXX_LINKAGE=1 \
+	    -DEXTRA_MYSQL_DEP='z' \
+	    -DWITH_UNIXODBC=1 \
+	    @ODBC_OPTS@
+	    .
+	DEB_BUILD_HARDENING=1 make VERBOSE=1
+
+# Do nothing; the test suite requires a sql server, so we can't run it
+# as part of the build.
+override_dh_auto_test:
+
+TMP_INSTDIR = $(CURDIR)/debian/tmp
+
+# FIXME the "libdir=.." below is not working, we have no support in
+# the CMake setup to specify a subdirectory of "lib"
+# FIXME and should it be the (lagacy?) "/usr/lib/odbc/" or the more correct
+# "/usr/lib/mysql-connector-odbc"?
+#PRIVATE_BINDIR = /usr/lib/$(DEB_HOST_MULTIARCH)/mysql-connector-odbc
+PRIVATE_BINDIR = /usr/lib/$(DEB_HOST_MULTIARCH)/odbc
+TMP_PRIVATE_BINDIR = $(TMP_INSTDIR)$(PRIVATE_BINDIR)
+
+override_dh_auto_install:
+	dh_auto_install -- libdir=$(PRIVATE_BINDIR) DESTDIR=$(TMP_INSTDIR)
+	mkdir -p $(TMP_INSTDIR)/usr/lib/$(DEB_HOST_MULTIARCH)/odbc
+	mv $(TMP_INSTDIR)/usr/lib/libmyodbc* $(TMP_INSTDIR)/usr/lib/$(DEB_HOST_MULTIARCH)/odbc/
+	chmod a+x $(TMP_INSTDIR)/usr/lib/$(DEB_HOST_MULTIARCH)/odbc/*.so

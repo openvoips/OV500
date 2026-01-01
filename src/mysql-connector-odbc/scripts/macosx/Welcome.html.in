@@ -1,0 +1,41 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <title>Welcome</title>
+</head>
+<body>
+
+<font face="Helvetica">
+
+<table border=0 cellspacing=5 cellpadding=0 width="100%">
+  <tr>
+    <td>
+      <img src="myodbc.png">
+    </td>
+    <td>
+      <b>
+	MySQL Connector/ODBC
+	<br>
+	@VERSION@
+      </b>
+    </td>
+  </tr>
+</table>
+
+<p>
+  This is the installer for MySQL Connector/ODBC, which allows applications
+  to work with MySQL servers by using the cross-platform, database-agnostic
+  ODBC interface.
+</p>
+ 
+<br>
+
+<p>
+  Please visit <a href="http://www.mysql.com/">http://www.mysql.com</a> for more information.
+</p>
+
+</font>
+
+</body>
+</html>

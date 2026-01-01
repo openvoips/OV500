@@ -1,0 +1,9 @@
+MySQL Connector/ODBC Build Information
+
+build-date           :  @INFO_DATE@
+os-info              :  @CMAKE_SYSTEM_NAME@-@CMAKE_SYSTEM_VERSION@
+build-type           :  @INFO_BUILD_TYPE@
+compiler             :  @CMAKE_CXX_COMPILER_ID@ @CMAKE_CXX_COMPILER_VERSION@
+mysql-version        :  @MYSQL_VERSION@
+libmysql-linkage     :  @INFO_LINKING_TYPE@
+@INFO_ODBC_DM@@INFO_SSL@@INFO_MSVCRT@@INFO_GTK@@INFO_MACOS_VERSION@@INFO_MACOS_BUILD@@INFO_MACOS_TARGET@

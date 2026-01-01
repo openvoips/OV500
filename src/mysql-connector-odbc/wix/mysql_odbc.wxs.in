@@ -1,0 +1,301 @@
+<!-- *****************************************************************************************
+ Copyright (c) 2007, 2024, Oracle and/or its affiliates.
+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License, version 2.0, as
+ published by the Free Software Foundation.
+
+ This program is designed to work with certain software (including
+ but not limited to OpenSSL) that is licensed under separate terms, as
+ designated in a particular file or component or in included license
+ documentation. The authors of MySQL hereby grant you an additional
+ permission to link the program and your derivative works with the
+ separately licensed software that they have either included with
+ the program or referenced in the documentation.
+
+ Without limiting anything contained in the foregoing, this file,
+ which is part of Connector/ODBC, is also subject to the
+ Universal FOSS Exception, version 1.0, a copy of which can be found at
+ https://oss.oracle.com/licenses/universal-foss-exception.
+
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ See the GNU General Public License, version 2.0, for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+-->
+
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+
+  <?include myodbc_version.wxs ?>
+  <!-- *****************************************************************************************
+    Product MySQL Server
+  -->
+  <!--
+    SetVersion updates: Name, Id, Version. Do not change them manually.
+  -->
+
+  <?if $(var.odbc_64bit) = 1 ?>
+    <?define odbc_platform="x64" ?>
+    <?define odbc_arch="64-bit" ?>
+    <?define upgrade_code="FF073FBB-32E2-4052-B6B2-830C5ED4A809" ?>
+  <?else?>
+    <?define odbc_platform="x86" ?>
+    <?define odbc_arch="32-bit" ?>
+    <?define upgrade_code="7AEDB3F3-7B9D-4FE2-8D8F-3CE3DE6F5B6B" ?>
+  <?endif?>
+
+  <Package
+    UpgradeCode="$(var.upgrade_code)"
+    Codepage="utf-8"
+    Name="MySQL Connector/ODBC $(var.odbc_ver_short)$(var.odbc_license_suffix) ($(var.odbc_arch))"
+    Version="$(var.odbc_ver_long)"
+    Language="1033"
+    Manufacturer="Oracle Corporation"
+    InstallerVersion="200"
+    Scope="perMachine"
+    ProductCode="@CONNECTOR_PKG_ID1@">
+
+  <!-- *****************************************************************************************
+    Package
+  -->
+  <!--
+    SetVersion updates: Id. Do not change it manually.
+  -->
+
+    <SummaryInformation Keywords="Installer,MSI,Database" Description="MySQL Connector/ODBC" Manufacturer="Oracle Corporation" />
+    <?include mysql-connector-odbc-msi-arpprops.wxs ?>
+
+    <!-- *****************************************************************************************
+      Custom Actions
+    -->
+
+    <CustomAction Id="NewerVersionInstalled" Error="A newer version of this product is already installed." />
+
+    <!-- *****************************************************************************************
+      Upgrade Information
+    -->
+
+    <Upgrade Id="$(var.upgrade_code)">
+      <!-- !!!SetVersion updates: Minimum, Maximum -->
+      <UpgradeVersion Property="PREVIOUSVERSIONINSTALLED" Minimum="5.0.999" Maximum="$(var.odbc_ver_prev)" IncludeMaximum="yes" IncludeMinimum="yes" />
+      <!-- !!!SetVersion updates: Minimum, Maximum -->
+      <UpgradeVersion Property="NEWERPRODUCTFOUND" Minimum="$(var.odbc_ver_long)" Maximum="$(var.odbc_ver_short).999" OnlyDetect="yes" IncludeMinimum="no" />
+    </Upgrade>
+
+    <!-- Visual Studio Redistributable Check -->
+    <?if $(var.odbc_64bit) = 1 ?>
+      <Property Id="VS14REDISTX64_64_MAJOR">
+        <RegistrySearch Id="FindRedistVS14_64_MAJOR" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64" Name="Major" Type="raw" Bitness="always64" />
+      </Property>
+      <Property Id="VS14REDISTX64_64_MINOR">
+        <RegistrySearch Id="FindRedistVS14_64_MINOR" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64" Name="Minor" Type="raw" Bitness="always64" />
+      </Property>
+      <!-- Through testing we did discover that depending on version of Windows
+        VS redist registry keys are available either under 64, or both 32 and 64 bit keys
+        (in most cases under both). Just to be safe we decided to always check under both. -->
+      <Property Id="VS14REDISTX64_32_MAJOR">
+        <RegistrySearch Id="FindRedistVS14_32_MAJOR" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64" Name="Major" Type="raw" Bitness="always32" />
+      </Property>
+      <Property Id="VS14REDISTX64_32_MINOR">
+        <RegistrySearch Id="FindRedistVS14_32_MINOR" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64" Name="Minor" Type="raw" Bitness="always32" />
+      </Property>
+      <!-- For numbers (DWORD type in Windows Registry) WiX RegistrySearch uses a special prefix: '#'.
+        We have to get rid of it before using properties in the condition check,
+        We want to compare numbers, rather than strings. -->
+      <Property Id="TESTPROP" Hidden="yes" Value="#12345"/>
+      <CustomAction Id="DwordToNumber" Script="vbscript" Execute="immediate" ScriptSourceFile="DwordToNumber.vbs" />
+      <Launch Condition="Installed OR (VS14REDISTX64_64_MAJOR = 14 AND VS14REDISTX64_64_MINOR &gt;= 20) OR (VS14REDISTX64_32_MAJOR = 14 AND VS14REDISTX64_32_MINOR &gt;= 20)" Message="This application requires Visual Studio 2019 x64 Redistributable. Please install the Redistributable then run this installer again." />
+    <?else?>
+      <Property Id="VS14REDISTX86_64_MAJOR">
+        <RegistrySearch Id="FindRedistVS14_64_MAJOR" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x86" Name="Major" Type="raw" Bitness="always64" />
+      </Property>
+      <Property Id="VS14REDISTX86_64_MINOR">
+        <RegistrySearch Id="FindRedistVS14_64_MINOR" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x86" Name="Minor" Type="raw" Bitness="always64" />
+      </Property>
+      <Property Id="VS14REDISTX86_32_MAJOR">
+        <RegistrySearch Id="FindRedistVS14_32_MAJOR" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x86" Name="Major" Type="raw" Bitness="always32" />
+      </Property>
+      <Property Id="VS14REDISTX86_32_MINOR">
+        <RegistrySearch Id="FindRedistVS14_32_MINOR" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x86" Name="Minor" Type="raw" Bitness="always32" />
+      </Property>
+      <!-- For numbers (DWORD type in Windows Registry) WiX RegistrySearch uses a special prefix: '#'.
+        We have to get rid of it before using properties in the condition check,
+        We want to compare numbers, rather than strings. -->
+      <CustomAction Id="DwordToNumber" Script="vbscript" ScriptSourceFile="DwordToNumber.vbs" />
+      <Launch Condition="Installed OR (VS14REDISTX86_64_MAJOR = 14 AND VS14REDISTX86_64_MINOR &gt;= 20) OR (VS14REDISTX86_32_MAJOR = 14 AND VS14REDISTX86_32_MINOR &gt;= 20)" Message="This application requires Visual Studio 2019 x86 Redistributable. Please install the Redistributable then run this installer again." />
+    <?endif?>
+    <InstallExecuteSequence>
+      <Custom Action="DwordToNumber" Before="LaunchConditions" />
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="DwordToNumber" Before="LaunchConditions" />
+    </InstallUISequence>
+
+    <!-- *****************************************************************************************
+      CAB file
+    -->
+
+    <Media Id="1" Cabinet="product.cab" EmbedCab="yes" />
+
+    <!-- *****************************************************************************************
+      Registry entries
+    -->
+
+    <?if $(var.odbc_64bit) = 1 ?>
+      <StandardDirectory Id="ProgramFiles64Folder">
+      <Component Id="RegKeys" Guid="92FEC72B-EB44-4E4D-B301-A915C80D067B" DiskId="1" Bitness="always64">
+    <?else?>
+      <StandardDirectory Id="ProgramFilesFolder">
+      <Component Id="RegKeys" Guid="AECCA4A7-9405-466A-8393-4F0876DCD21A" DiskId="1" Bitness="always32">
+    <?endif?>
+        <RegistryKey Id="MysqlKey" Root="HKLM" Key="SOFTWARE\MySQL AB\[ProductName]" ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes" />
+        <RegistryValue Id="Version" Root="HKLM" Key="SOFTWARE\MySQL AB\[ProductName]" Name="Version" Type="string" Value="[ProductVersion]" />
+    <!--Need these to make candle happy -->
+    <?if $(var.odbc_64bit) = 1 ?>
+      </Component>
+      </StandardDirectory>
+    <?else?>
+      </Component>
+      </StandardDirectory>
+    <?endif?>
+
+    <!-- *****************************************************************************************
+      Installation Features
+    -->
+
+    <!-- *****************************************************************************************
+      Product Feature
+    -->
+
+    <?if $(var.odbc_64bit) = 1 ?>
+    <Feature Id="ODBC" Title="MySQL Connector/ODBC $(var.odbc_ver_long) 64-bit drivers" Level="1" Description="Installs the MySQL ODBC $(var.odbc_ver_long) 64-bit Unicode and ANSI drivers." ConfigurableDirectory="INSTALLDIR">
+    <?else?>
+    <Feature Id="ODBC" Title="MySQL Connector/ODBC $(var.odbc_ver_long) 32-bit drivers" Level="1" Description="Installs the MySQL ODBC $(var.odbc_ver_long) 32-bit Unicode and ANSI drivers." ConfigurableDirectory="INSTALLDIR">
+    <?endif?>
+      <ComponentRef Id="RegKeys" />
+      <ComponentRef Id="driver" />
+      <ComponentRef Id="setup" />
+      <ComponentRef Id="installer" />
+      <ComponentRef Id="ssl" />
+      <ComponentRef Id="dependencies" />
+      <ComponentRef Id="plugins" />
+    <?if $(var.odbc_64bit) = 1 ?>
+    </Feature>
+    <?else?>
+    </Feature>
+    <?endif?>
+
+    <!--Feature Id="Help" Title="MySQL Connector/ODBC $(var.odbc_ver_long) Documentation" Level="1" Description="Installs the MySQL ODBC driver help.">
+        <ComponentRef Id="help" />
+    </Feature-->
+
+    <!-- *****************************************************************************************
+      End of Feature
+    -->
+
+    <!-- *****************************************************************************************
+      Include UI
+    -->
+
+    <?include mysql_common_ui.wxs ?>
+
+    <!-- *****************************************************************************************
+      Properties
+    -->
+
+    <Property Id="_IsMaintenance" Value="Change" />
+
+    <Property Id="AgreeToLicense" Value="No" />
+    <Property Id="ApplicationUsers" Value="AllUsers" />
+
+    <Property Id="INSTALLLEVEL" Value="1" />
+
+    <Property Id="ProgressType3" Value="installs" />
+    <Property Id="ProgressType2" Value="installed" />
+    <Property Id="ProgressType1" Value="Installing" />
+    <Property Id="ProgressType0" Value="install" />
+
+    <Property Id="QualifiedProductName" Value="MySQL Connector/ODBC $(var.odbc_ver_long)($(var.odbc_driver_type_suffix))" />
+    <Property Id="InstallationDirectory" Value="MySQL Connector-ODBC" />
+
+    <Property Id="ReinstallFileVersion" Value="o" />
+    <Property Id="RebootYesNo" Value="Yes" />
+    <Property Id="ReinstallModeText" Value="omus" />
+    <Property Id="ReinstallRepair" Value="r" />
+
+    <Property Id="SetupType" Value="Typical" />
+    <Property Id="ConfigureServer" Value="1" />
+
+    <!-- The Guid has to be the same as in the mysql_odbc_fragment.wxs -->
+    <Property Id="SVRCNFWIZINSTALLED"><ComponentSearch Id="SvrCnfWizCompSearch" Guid="782B3E4D-FCB1-42F4-BF45-06C159A49A0D" /></Property>
+
+    <!-- *****************************************************************************************
+      Admin UI Sequence
+    -->
+
+    <AdminUISequence>
+      <Show Dialog="SetupCompleteErrorDialog" OnExit="error" />
+      <Show Dialog="SetupInterruptedDialog" OnExit="cancel" />
+      <Show Dialog="SetupCompleteSuccessDialog" OnExit="success" />
+
+      <Show Dialog="SetupInitializationDialog" Before="CostInitialize" />
+      <Show Dialog="AdminWelcomeDialog" After="CostFinalize" />
+      <Show Dialog="SetupProgressDialog" After="AdminWelcomeDialog" />
+    </AdminUISequence>
+
+    <!-- *****************************************************************************************
+      Install Execute Sequence
+    -->
+
+    <InstallExecuteSequence>
+      <Custom Action="NewerVersionInstalled" After="FindRelatedProducts" Condition="NEWERPRODUCTFOUND" />
+
+      <RemoveExistingProducts After="InstallInitialize" />
+      <SetODBCFolders Suppress="yes" />
+    </InstallExecuteSequence>
+
+    <!-- *****************************************************************************************
+      Install UI Sequence
+    -->
+
+    <InstallUISequence>
+      <Show Dialog="SetupCompleteErrorDialog" OnExit="error" />
+      <Show Dialog="SetupInterruptedDialog" OnExit="cancel" />
+      <Show Dialog="SetupCompleteSuccessDialog" OnExit="success" />
+
+      <Custom Action="NewerVersionInstalled" After="FindRelatedProducts" Condition="NEWERPRODUCTFOUND" />
+      <Show Dialog="InstallWelcomeDialog" After="MigrateFeatureStates" Condition="Not Installed And (Not PATCH Or IS_MAJOR_UPGRADE)" />
+      <Show Dialog="SetupResumeDialog" After="InstallWelcomeDialog" Condition="Installed And (RESUME Or Preselected) And Not PATCH" />
+      <Show Dialog="MaintenanceWelcomeDialog" After="SetupResumeDialog" Condition="Installed And Not RESUME And Not Preselected And Not PATCH" />
+      <Show Dialog="SetupProgressDialog" After="MaintenanceWelcomeDialog" />
+    </InstallUISequence>
+
+    <!-- *****************************************************************************************
+      Binary files
+    -->
+
+    <Binary Id="AdminBackground" SourceFile="$(var.odbc_resource)/ConnBackground.jpg" />
+    <Binary Id="AdminHeader" SourceFile="$(var.odbc_resource)/ConnHeader.jpg" />
+    <Binary Id="SetupTypeComp" SourceFile="$(var.odbc_resource)/setup_type_complete.ico" />
+    <Binary Id="SetupTypeCust" SourceFile="$(var.odbc_resource)/setup_type_custom.ico" />
+    <Binary Id="SetupTypeTyp" SourceFile="$(var.odbc_resource)/setup_type_typical.ico" />
+    <Binary Id="DestDirFolder" SourceFile="$(var.odbc_resource)/dest_dir_folder.ico" />
+
+    <Binary Id="NewBinary2" SourceFile="$(var.odbc_resource)/binary/binary2" />
+    <Binary Id="NewBinary3" SourceFile="$(var.odbc_resource)/binary/binary3" />
+    <Binary Id="NewBinary4" SourceFile="$(var.odbc_resource)/binary/binary4" />
+    <Binary Id="NewBinary6" SourceFile="$(var.odbc_resource)/binary/binary6" />
+    <Binary Id="NewBinary7" SourceFile="$(var.odbc_resource)/binary/binary7" />
+    <Binary Id="NewBinary8" SourceFile="$(var.odbc_resource)/binary/binary8" />
+    <Binary Id="NewBinary9" SourceFile="$(var.odbc_resource)/binary/binary9" />
+    <Binary Id="NewBinary13" SourceFile="$(var.odbc_resource)/binary/binary13" />
+    <Binary Id="NewBinary14" SourceFile="$(var.odbc_resource)/binary/binary14" />
+    <Binary Id="NewBinary16" SourceFile="$(var.odbc_resource)/binary/binary16" />
+    <Binary Id="NewBinary17" SourceFile="$(var.odbc_resource)/binary/binary17" />
+    <Binary Id="NewBinary18" SourceFile="$(var.odbc_resource)/binary/binary18" />
+  </Package>
+</Wix>

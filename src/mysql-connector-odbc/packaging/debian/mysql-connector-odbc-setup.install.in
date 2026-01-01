@@ -1,0 +1,6 @@
+usr/lib/*/odbc/libmyodbc8S.so
+usr/lib/*/odbc/libmyodbc8S-gtk*.so
+usr/LICENSE.txt        usr/share/doc/mysql-connector-odbc@PRODUCT_SUFFIX@-setup
+usr/README.txt         usr/share/doc/mysql-connector-odbc@PRODUCT_SUFFIX@-setup
+usr/INFO_BIN           usr/share/doc/mysql-connector-odbc@PRODUCT_SUFFIX@-setup
+usr/INFO_SRC           usr/share/doc/mysql-connector-odbc@PRODUCT_SUFFIX@-setup

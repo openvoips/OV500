@@ -1,0 +1,1 @@
+/usr/bin/cc -O3 -DNDEBUG -rdynamic CMakeFiles/dltest.dir/dltest.c.o -o ../bin/dltest 

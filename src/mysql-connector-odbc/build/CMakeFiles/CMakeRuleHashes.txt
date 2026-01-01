@@ -1,0 +1,4 @@
+# Hashes of file build rules.
+ca26999e287b1858ebf78524f581f413 mysql_strings/uca900_zh_tbls.cc
+ee2a4a8345175e9284380a46305a12c6 test/CMakeFiles/generate_test_config_files
+811025661aee79587fdd3c94c7cd4e1e test/odbcinst.ini

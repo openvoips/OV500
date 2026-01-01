@@ -1,0 +1,25 @@
+[ODBC Drivers]
+MyODBC@CONNECTOR_DRIVER_TYPE_SHORT1@ = Installed
+MyODBC@CONNECTOR_DRIVER_TYPE_SHORT2@ = Installed
+@TEST_DRIVER1@ = Installed
+@TEST_DRIVER2@ = Installed
+
+[MyODBC@CONNECTOR_DRIVER_TYPE_SHORT1@]
+Driver = @TEST_DRIVER1@
+Description = @CONNECTOR_DRIVER_TYPE1@ Driver for connecting to MySQL database server
+Threading = 0
+
+[@TEST_DRIVER1@]
+Driver = @TEST_DRIVER1@
+Description = @CONNECTOR_DRIVER_TYPE1@ Driver for connecting to MySQL database server
+Threading = 0
+
+[MyODBC@CONNECTOR_DRIVER_TYPE_SHORT2@]
+Driver = @TEST_DRIVER2@
+Description = @CONNECTOR_DRIVER_TYPE2@ Driver for connecting to MySQL database server
+Threading = 0
+
+[@TEST_DRIVER2@]
+Driver = @TEST_DRIVER2@
+Description = @CONNECTOR_DRIVER_TYPE2@ Driver for connecting to MySQL database server
+Threading = 0

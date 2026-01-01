@@ -1,0 +1,11 @@
+﻿driver/drivera.def
+driver/drivera.rc
+driver/driverw.def
+driver/driverw.rc
+include/mysql-8.0/my_config.h
+scripts/macosx/postflight
+INFO_BIN
+INFO_SRC
+Install.bat
+myodbc3.spec
+Uninstall.bat
