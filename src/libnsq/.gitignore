@@ -1,0 +1,5 @@
+libnsq.a
+test-*
+*.o
+*.dSYM
+.DS_Store
