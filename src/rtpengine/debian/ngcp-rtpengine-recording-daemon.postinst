@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -e
+
+if [ "$1" = configure ]; then
+	rtpdir='/var/lib/rtpengine-recording'
+	if ! dpkg-statoverride --list "$rtpdir" > /dev/null 2>&1; then
+		chown rtpengine:rtpengine "$rtpdir"
+		chmod 0770 "$rtpdir"
+	fi
+fi
+
+#DEBHELPER#
+
+exit 0

@@ -1,0 +1,23 @@
+[Unit]
+Description=NGCP RTP/media Proxy Daemon
+After=network-online.target
+
+[Service]
+Type=notify
+Environment=CFG_FILE=/etc/rtpengine/rtpengine.conf
+EnvironmentFile=/etc/sysconfig/rtpengine
+User=ngcp-rtpengine
+Group=ngcp-rtpengine
+AmbientCapabilities=CAP_NET_ADMIN CAP_SYS_NICE
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_SYS_NICE
+LimitNOFILE=150000
+RuntimeDirectory=rtpengine
+PIDFile=/run/rtpengine/rtpengine.pid
+ExecStart=/usr/bin/rtpengine --config-file=${CFG_FILE} --pidfile=${PID_FILE} -f
+RestartSec=3s
+TimeoutSec=15s
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+Alias=ngcp-rtpengine.service

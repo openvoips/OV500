@@ -1,0 +1,288 @@
+#include "rtplib.h"
+#include <arpa/inet.h>
+#include "str.h"
+#include "log.h"
+#include "codeclib.h"
+
+
+
+struct rtp_exthdr {
+	uint16_t undefined;
+	uint16_t length;
+} __attribute__ ((packed));
+
+struct rtp_rfc8285_hdr {
+	uint8_t be;
+	uint8_t de;
+	uint16_t length;
+} __attribute__ ((packed));
+
+struct rtp_rfc8285_item {
+	uint8_t id;
+	uint8_t length;
+} __attribute__ ((packed));
+
+
+
+
+#define RFC_TYPE_FULL(type, name, c_rate, chans, pt)			\
+	[type] = {							\
+		.payload_type		= type,				\
+		.encoding		= STR_CONST(#name),	\
+		.encoding_with_params	= STR_CONST(#name "/" #c_rate),	\
+		.clock_rate		= c_rate,			\
+		.channels		= chans,			\
+		.ptime			= pt,				\
+	}
+#define RFC_TYPE(type, name, c_rate) RFC_TYPE_FULL(type, name, c_rate, 1, 20)
+
+const struct rtp_payload_type rfc_rtp_payload_types[] =
+{
+	RFC_TYPE(0, PCMU, 8000),
+	RFC_TYPE(3, GSM, 8000),
+	RFC_TYPE_FULL(4, G723, 8000, 1, 30),
+	RFC_TYPE(5, DVI4, 8000),
+	RFC_TYPE(6, DVI4, 16000),
+	RFC_TYPE(7, LPC, 8000),
+	RFC_TYPE(8, PCMA, 8000),
+	RFC_TYPE(9, G722, 8000),
+	RFC_TYPE(10, L16, 44100),
+	RFC_TYPE_FULL(11, L16, 44100, 2, 20),
+	RFC_TYPE(12, QCELP, 8000),
+	RFC_TYPE(13, CN, 8000),
+	RFC_TYPE(14, MPA, 90000),
+	RFC_TYPE(15, G728, 8000),
+	RFC_TYPE(16, DVI4, 11025),
+	RFC_TYPE(17, DVI4, 22050),
+	RFC_TYPE(18, G729, 8000),
+	RFC_TYPE(25, CelB, 90000),
+	RFC_TYPE(26, JPEG, 90000),
+	RFC_TYPE(28, nv, 90000),
+	RFC_TYPE(31, H261, 90000),
+	RFC_TYPE(32, MPV, 90000),
+	RFC_TYPE(33, MP2T, 90000),
+	RFC_TYPE(34, H263, 90000),
+};
+const int num_rfc_rtp_payload_types = G_N_ELEMENTS(rfc_rtp_payload_types);
+
+
+static void rtp_rfc8285_iterate_short(str s, const struct rtp_rfc8285_hdr *hdr,
+		rtp_rfc8285_handler cb, struct packet_handler_ctx *arg)
+{
+	str_shift(&s, sizeof(*hdr));
+
+	while (s.len) {
+		uint8_t id_len = s.s[0];
+		if (id_len == '\0') {
+			// padding
+			str_shift(&s, 1);
+			continue;
+		}
+		uint8_t id = id_len >> 4;
+		uint8_t len = (id_len & 0xf) + 1;
+		str_shift(&s, 1);
+
+		if (s.len < len)
+			return;
+
+		cb(arg, id, &STR_LEN(s.s, len));
+
+		str_shift(&s, len);
+	}
+}
+
+static void rtp_rfc8285_iterate_long(str s, const struct rtp_rfc8285_hdr *hdr,
+		rtp_rfc8285_handler cb, struct packet_handler_ctx *arg)
+{
+	str_shift(&s, sizeof(*hdr));
+
+	struct rtp_rfc8285_item *item;
+
+	while (s.len >= sizeof(*item)) {
+		if (s.s[0] == '\0') {
+			// padding
+			str_shift(&s, 1);
+			continue;
+		}
+
+		item = (struct rtp_rfc8285_item *) s.s;
+
+		str_shift(&s, sizeof(*item));
+
+		if (s.len < item->length)
+			return;
+
+		cb(arg, item->id, &STR_LEN(s.s, item->length));
+
+		str_shift(&s, item->length);
+	}
+}
+
+void rtp_rfc8285_iterate(const str *extensions, rtp_rfc8285_handler cb, struct packet_handler_ctx *arg) {
+	const struct rtp_rfc8285_hdr *hdr;
+
+	if (extensions->len < sizeof(*hdr))
+		return;
+
+	hdr = (struct rtp_rfc8285_hdr *) extensions->s;
+
+	if (hdr->be == 0xbe && hdr->de == 0xde)
+		rtp_rfc8285_iterate_short(*extensions, hdr, cb, arg);
+	else if (hdr->be == 0x10 && (hdr->de & 0xf0) == 0x00)
+		rtp_rfc8285_iterate_long(*extensions, hdr, cb, arg);
+}
+
+
+struct rtp_header *rtp_payload(str *p, const str *s, str *exts) {
+	struct rtp_header *rtp;
+	const char *err;
+
+	err = "short packet (header)";
+	if (s->len < sizeof(*rtp))
+		goto error;
+
+	rtp = (void *) s->s;
+	err = "invalid header version";
+	if ((rtp->v_p_x_cc & 0xc0) != 0x80) /* version 2 */
+		goto error;
+
+	if (!p)
+		return rtp;
+
+	*p = *s;
+	/* fixed header */
+	str_shift(p, sizeof(*rtp));
+	/* csrc list */
+	err = "short packet (CSRC list)";
+	if (str_shift(p, (rtp->v_p_x_cc & 0xf) * 4))
+		goto error;
+
+	if ((rtp->v_p_x_cc & 0x10)) {
+		/* extension */
+		struct rtp_exthdr *ext;
+		err = "short packet (extension header)";
+		if (p->len < sizeof(*ext))
+			goto error;
+		ext = (void *) p->s;
+		size_t ext_len = sizeof(*ext) + ntohs(ext->length) * 4;
+		if (exts)
+			*exts = STR_LEN(p->s, ext_len);
+		err = "short packet (header extensions)";
+		if (str_shift(p, ext_len))
+			goto error;
+	}
+
+	return rtp;
+
+error:
+	ilog(LOG_DEBUG | LOG_FLAG_LIMIT, "Error parsing RTP header: %s", err);
+	return NULL;
+}
+
+
+bool rtp_padding(const struct rtp_header *header, str *payload) {
+	if (!header || !payload->s)
+		return true;
+	if (!(header->v_p_x_cc & 0x20))
+		return true; // no padding
+	if (payload->len == 0)
+		return false;
+	unsigned int padding = (unsigned char) payload->s[payload->len - 1];
+	if (payload->len < padding)
+		return false;
+	payload->len -= padding;
+	return true;
+}
+
+
+const struct rtp_payload_type *rtp_get_rfc_payload_type(unsigned int type) {
+	const struct rtp_payload_type *rtp_pt;
+
+	if (type >= num_rfc_rtp_payload_types)
+		return NULL;
+	rtp_pt = &rfc_rtp_payload_types[type];
+	if (!rtp_pt->encoding.s)
+		return NULL;
+	return rtp_pt;
+}
+
+// for one-time init only - better use rtp_get_rfc_payload_type(codec_def->rfc_payload_type)
+const struct rtp_payload_type *rtp_get_rfc_codec(const str *codec) {
+	for (int i = 0; i < num_rfc_rtp_payload_types; i++) {
+		if (!rfc_rtp_payload_types[i].encoding.s)
+			continue;
+		if (str_cmp_str(codec, &rfc_rtp_payload_types[i].encoding))
+			continue;
+		return &rfc_rtp_payload_types[i];
+	}
+	return NULL;
+}
+
+// helper function: matches only basic params, without matching payload type number
+bool rtp_payload_type_fmt_eq_nf(const struct rtp_payload_type *a, const struct rtp_payload_type *b) {
+	if (a->clock_rate != b->clock_rate)
+		return false;
+	if (a->channels != b->channels)
+		return false;
+	if (str_casecmp_str(&a->encoding, &b->encoding)) {
+#ifdef WITH_TRANSCODING
+		// last ditch effort: see if it's a botched alias name (AKA G729a)
+		if (!a->codec_def || !b->codec_def)
+			return false;
+		if (a->codec_def->rfc_payload_type == -1 || b->codec_def->rfc_payload_type == -1)
+			return false;
+		if (a->codec_def->rfc_payload_type != b->codec_def->rfc_payload_type)
+			return false;
+		if (a->codec_def->codec_type != b->codec_def->codec_type)
+			return false;
+		if (a->codec_def->avcodec_id != b->codec_def->avcodec_id)
+			return false;
+		// consider them the same
+		return true;
+#else
+		return false;
+#endif
+	}
+	return true;
+}
+
+// matches basic params and format params, but not payload type number
+// returns matching val as per format_cmp_f
+int rtp_payload_type_fmt_cmp(const struct rtp_payload_type *a, const struct rtp_payload_type *b) {
+	if (!rtp_payload_type_fmt_eq_nf(a, b))
+		return -1;
+	if (a->codec_def && b->codec_def
+			&& a->codec_def->format_cmp
+			&& a->codec_def->format_cmp == b->codec_def->format_cmp) {
+		return a->codec_def->format_cmp(a, b);
+	}
+	if (!a->codec_def) // ignore format of codecs we don't know
+		return 0;
+	if (str_cmp_str(&a->format_parameters, &b->format_parameters))
+		return -1;
+	return 0;
+}
+bool rtp_payload_type_fmt_eq_exact(const struct rtp_payload_type *a, const struct rtp_payload_type *b) {
+	return rtp_payload_type_fmt_cmp(a, b) == 0;
+}
+bool rtp_payload_type_fmt_eq_compat(const struct rtp_payload_type *a, const struct rtp_payload_type *b) {
+	return rtp_payload_type_fmt_cmp(a, b) >= 0;
+}
+
+bool rtp_payload_type_eq_exact(const struct rtp_payload_type *a, const struct rtp_payload_type *b) {
+	if (a->payload_type != b->payload_type)
+		return false;
+	return rtp_payload_type_fmt_cmp(a, b) == 0;
+}
+bool rtp_payload_type_eq_compat(const struct rtp_payload_type *a, const struct rtp_payload_type *b) {
+	if (a->payload_type != b->payload_type)
+		return false;
+	return rtp_payload_type_fmt_cmp(a, b) >= 0;
+}
+
+// same as rtp_payload_type_fmt_eq_nf plus matching payload type number
+bool rtp_payload_type_eq_nf(const struct rtp_payload_type *a, const struct rtp_payload_type *b) {
+	if (a->payload_type != b->payload_type)
+		return false;
+	return rtp_payload_type_fmt_eq_nf(a, b);
+}

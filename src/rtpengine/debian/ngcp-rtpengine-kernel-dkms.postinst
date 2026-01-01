@@ -1,0 +1,24 @@
+#!/bin/sh
+
+set -e
+
+if [ -x "$(which ngcp-virt-identify)" ]; then
+	if ngcp-virt-identify --type container; then
+		VIRT="yes"
+	fi
+fi
+
+#DEBHELPER#
+
+if [ "$VIRT" = "yes" ]; then
+	echo "Container environment detected. Skip daemon"
+else
+	if [ "$1" = 'configure' ] ; then
+		# try to start the daemon
+		if [ -x /etc/init.d/ngcp-rtpengine-daemon ] ; then
+			invoke-rc.d ngcp-rtpengine-daemon restart || true
+		fi
+	fi
+fi
+
+exit 0

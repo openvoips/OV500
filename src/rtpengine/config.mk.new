@@ -1,0 +1,35 @@
+RELEASE_DATE = 2025-11-24
+RTPENGINE_VERSION :=  14.1.0.0+0~mr14.1.0.0 git-master-88020c42
+export CFLAGS_DEFAULT := -g -O2 -ffile-prefix-map=/var/www/html/portal/build/rtpengine=. -flto=auto -ffat-lto-objects -flto=auto -ffat-lto-objects -fstack-protector-strong -Wformat -Werror=format-security -O3 -flto=auto -ffat-lto-objects
+export CPPFLAGS_DEFAULT := -Wdate-time -D_FORTIFY_SOURCE=2
+export LDFLAGS_DEFAULT := -Wl,-Bsymbolic-functions -flto=auto -ffat-lto-objects -flto=auto -Wl,-z,relro -flto=auto
+export CFLAGS_GLIB LDLIBS_GLIB
+CFLAGS_GLIB := -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+LDLIBS_GLIB := -lglib-2.0
+export CFLAGS_GTHREAD LDLIBS_GTHREAD
+CFLAGS_GTHREAD := -pthread -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+LDLIBS_GTHREAD := -lgthread-2.0 -pthread -lglib-2.0
+export CFLAGS_JSON_GLIB LDLIBS_JSON_GLIB
+CFLAGS_JSON_GLIB := -pthread -I/usr/include/json-glib-1.0 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+LDLIBS_JSON_GLIB := -ljson-glib-1.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0
+export CFLAGS_LIBAVCODEC LDLIBS_LIBAVCODEC
+CFLAGS_LIBAVCODEC := -I/usr/include/x86_64-linux-gnu
+LDLIBS_LIBAVCODEC := -lavcodec
+export CFLAGS_LIBAVFILTER LDLIBS_LIBAVFILTER
+CFLAGS_LIBAVFILTER := -I/usr/include/x86_64-linux-gnu
+LDLIBS_LIBAVFILTER := -lavfilter
+export CFLAGS_LIBAVFORMAT LDLIBS_LIBAVFORMAT
+CFLAGS_LIBAVFORMAT := -I/usr/include/x86_64-linux-gnu
+LDLIBS_LIBAVFORMAT := -lavformat
+export CFLAGS_LIBAVUTIL LDLIBS_LIBAVUTIL
+CFLAGS_LIBAVUTIL := -I/usr/include/x86_64-linux-gnu
+LDLIBS_LIBAVUTIL := -lavutil
+export CFLAGS_LIBCURL LDLIBS_LIBCURL
+CFLAGS_LIBCURL := -I/usr/include/x86_64-linux-gnu
+LDLIBS_LIBCURL := -lcurl
+export CFLAGS_LIBCRYPTO LDLIBS_LIBCRYPTO
+CFLAGS_LIBCRYPTO := 
+LDLIBS_LIBCRYPTO := -lcrypto
+export CFLAGS_LIBEVENT LDLIBS_LIBEVENT
+CFLAGS_LIBEVENT := 
+LDLIBS_LIBEVENT := -levent_pthreads -levent

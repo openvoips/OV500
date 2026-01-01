@@ -1,0 +1,17 @@
+#!/bin/sh
+
+set -e
+
+if [ "$1" = purge ]; then
+	deluser --quiet --system rtpengine > /dev/null || true
+	delgroup --quiet --system rtpengine > /dev/null || true
+
+	if [ -f /etc/modprobe.d/rtpengine.conf ] && grep -q DPKG-GENERATED /etc/modprobe.d/rtpengine.conf; then
+		rm -f /etc/modprobe.d/rtpengine.conf
+	fi
+fi
+
+#DEBHELPER#
+
+exit 0
+

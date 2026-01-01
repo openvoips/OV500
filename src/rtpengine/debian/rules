@@ -1,0 +1,41 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE = 1
+
+include /usr/share/dpkg/pkg-info.mk
+
+export DEB_VERSION_UPSTREAM
+export DEB_SOURCE
+
+ifneq (,$(filter $(DEB_BUILD_PROFILES),pkg.ngcp-rtpengine.no-transcoding))
+export with_transcoding = no
+endif
+ifneq (,$(filter $(DEB_BUILD_PROFILES),pkg.ngcp-rtpengine.asan))
+export DO_ASAN_FLAGS = 1
+# this prevents dh from setting default (including -O2) which we don't want
+export DEB_CFLAGS_MAINT_SET =
+export DEB_LDFLAGS_MAINT_SET =
+endif
+
+export FIXTURES_PATH = /usr/share/rtpengine-perftest
+
+export deb_systemdsystemunitdir := $(shell pkg-config --variable=systemdsystemunitdir systemd)
+
+%:
+	dh $@
+
+execute_before_dh_auto_configure:
+	(cd debian && sh generate-systemd-templates.sh)
+
+execute_before_dh_auto_install-indep:
+	# markdown README
+	markdown README.md | gzip -9 > debian/README.html.gz
+	gzip -9 < README.md > debian/README.md.gz
+
+execute_after_dh_installsystemd:
+	dh_installsystemd -pngcp-rtpengine-recording-daemon --name=ngcp-rtpengine-recording-nfs-mount
+
+override_dh_dkms:
+	dh_dkms -p$(DEB_SOURCE)-kernel-dkms -V $(DEB_VERSION_UPSTREAM)
