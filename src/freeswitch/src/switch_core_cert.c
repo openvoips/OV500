@@ -1,0 +1,532 @@
+/*
+ * FreeSWITCH Modular Media Switching Software Library / Soft-Switch Application
+ * Copyright (C) 2005-2014, Anthony Minessale II <anthm@freeswitch.org>
+ *
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is FreeSWITCH Modular Media Switching Software Library / Soft-Switch Application
+ *
+ * The Initial Developer of the Original Code is
+ * Anthony Minessale II <anthm@freeswitch.org>
+ * Portions created by the Initial Developer are Copyright (C)
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ * Anthony Minessale II <anthm@freeswitch.org>
+ *
+ * switch_cert.c -- Cert Functions
+ *
+ */
+
+#include <switch.h>
+#include <switch_ssl.h>
+
+static switch_mutex_t **ssl_mutexes;
+static switch_memory_pool_t *ssl_pool = NULL;
+static int ssl_count = 0;
+
+#if OPENSSL_VERSION_NUMBER <= 0x10100000
+
+static inline void switch_ssl_ssl_lock_callback(int mode, int type, char *file, int line)
+{
+	if (mode & CRYPTO_LOCK) {
+		switch_mutex_lock(ssl_mutexes[type]);
+	}
+	else {
+		switch_mutex_unlock(ssl_mutexes[type]);
+	}
+}
+
+static inline void switch_ssl_ssl_thread_id(CRYPTO_THREADID *id)
+{
+	CRYPTO_THREADID_set_numeric(id, (unsigned long)switch_thread_self());
+}
+
+#endif
+
+SWITCH_DECLARE(void) switch_ssl_init_ssl_locks(void)
+{
+
+	int i, num;
+
+	if (ssl_count == 0) {
+		num = CRYPTO_num_locks();
+
+		ssl_mutexes = OPENSSL_malloc(CRYPTO_num_locks() * sizeof(switch_mutex_t*));
+		switch_assert(ssl_mutexes != NULL);
+
+		switch_core_new_memory_pool(&ssl_pool);
+
+		for (i = 0; i < num; i++) {
+			switch_mutex_init(&(ssl_mutexes[i]), SWITCH_MUTEX_NESTED, ssl_pool);
+			switch_assert(ssl_mutexes[i] != NULL);
+		}
+
+#if OPENSSL_VERSION_NUMBER <= 0x10100000
+		CRYPTO_THREADID_set_callback(switch_ssl_ssl_thread_id);
+		CRYPTO_set_locking_callback((void (*)(int, int, const char*, int))switch_ssl_ssl_lock_callback);
+#endif
+	}
+
+	ssl_count++;
+}
+
+SWITCH_DECLARE(void) switch_ssl_destroy_ssl_locks(void)
+{
+	int i;
+
+	if (ssl_count == 1) {
+		CRYPTO_set_locking_callback(NULL);
+		for (i = 0; i < CRYPTO_num_locks(); i++) {
+			if (ssl_mutexes[i]) {
+				switch_mutex_destroy(ssl_mutexes[i]);
+			}
+		}
+
+		OPENSSL_free(ssl_mutexes);
+		ssl_count--;
+	}
+
+	if (ssl_pool) {
+		switch_core_destroy_memory_pool(&ssl_pool);
+	}
+}
+
+static const EVP_MD *get_evp_by_name(const char *name)
+{
+	if (!strcasecmp(name, "md5")) return EVP_md5();
+	if (!strcasecmp(name, "sha1")) return EVP_sha1();
+	if (!strcasecmp(name, "sha-1")) return EVP_sha1();
+	if (!strcasecmp(name, "sha-256")) return EVP_sha256();
+	if (!strcasecmp(name, "sha-512")) return EVP_sha512();
+
+	return NULL;
+}
+#if defined(_MSC_VER) || (defined(__SunOS_5_10) && defined(__SUNPRO_C))
+/*
+ * Visual C do not have strsep?
+ *
+ * Solaris 10 with the Sun Studio compilers doesn't have strsep in the
+ * C library either.
+ */
+char *strsep(char **stringp, const char *delim)
+{
+	char *res;
+
+	if (!stringp || !*stringp || !**stringp)
+		return (char *) 0;
+
+	res = *stringp;
+	while (**stringp && !strchr(delim, **stringp))
+		++(*stringp);
+
+	if (**stringp) {
+		**stringp = '\0';
+		++(*stringp);
+	}
+
+	return res;
+}
+#endif
+
+SWITCH_DECLARE(int) switch_core_cert_verify(dtls_fingerprint_t *fp)
+{
+	unsigned char fdata[MAX_FPLEN] = { 0 };
+	char *tmp = strdup(fp->str);
+	char *p = tmp;
+	int i = 0;
+	char *v;
+
+	while ((v = strsep(&p, ":")) && (i != (MAX_FPLEN - 1))) {
+		sscanf(v, "%02x", (uint32_t *) &fdata[i++]);
+	}
+
+	free(tmp);
+
+	i = !memcmp(fdata, fp->data, i);
+
+	return i;
+}
+
+SWITCH_DECLARE(int) switch_core_cert_expand_fingerprint(dtls_fingerprint_t *fp, const char *str)
+{
+	char *tmp = strdup(str);
+	char *p = tmp;
+	int i = 0;
+	char *v;
+
+	while ((v = strsep(&p, ":")) && (i != (MAX_FPLEN - 1))) {
+		sscanf(v, "%02x", (uint32_t *) &fp->data[i++]);
+	}
+
+	free(tmp);
+
+	return i;
+}
+
+SWITCH_DECLARE(int) switch_core_cert_extract_fingerprint(X509* x509, dtls_fingerprint_t *fp)
+{
+	const EVP_MD *evp;
+	unsigned int i, j;
+
+	evp = get_evp_by_name(fp->type);
+
+	if (X509_digest(x509, evp, fp->data, &fp->len) != 1 ||  fp->len <= 0) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "FP DIGEST ERR!\n");
+		return -1;
+	}
+
+	for (i = 0, j = 0; i < fp->len; ++i, j += 3){
+		sprintf((char*)&fp->str[j], (i == (fp->len - 1)) ? "%.2X" : "%.2X:", fp->data[i]);
+	}
+	*(&fp->str[fp->len * 3]) = '\0';
+
+	return 0;
+
+}
+
+SWITCH_DECLARE(int) switch_core_cert_gen_fingerprint(const char *prefix, dtls_fingerprint_t *fp)
+{
+	X509* x509 = NULL;
+	BIO* bio = NULL;
+	int ret = 0;
+	char *rsa;
+
+	rsa = switch_mprintf("%s%s%s.pem", SWITCH_GLOBAL_dirs.certs_dir, SWITCH_PATH_SEPARATOR, prefix);
+
+	if (switch_file_exists(rsa, NULL) != SWITCH_STATUS_SUCCESS) {
+		free(rsa);
+		rsa = switch_mprintf("%s%s%s.crt", SWITCH_GLOBAL_dirs.certs_dir, SWITCH_PATH_SEPARATOR, prefix);
+	}
+
+	if (!(bio = BIO_new(BIO_s_file()))) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "FP BIO ERR!\n");
+		goto end;
+	}
+
+	if (BIO_read_filename(bio, rsa) != 1) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "FP FILE ERR!\n");
+		goto end;
+	}
+
+	if (!(x509 = PEM_read_bio_X509(bio, NULL, 0, NULL))) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "FP READ ERR!\n");
+		goto end;
+	}
+
+	switch_core_cert_extract_fingerprint(x509, fp);
+
+	ret = 1;
+
+ end:
+
+	if (bio) {
+		BIO_free_all(bio);
+	}
+
+	if (x509) {
+		X509_free(x509);
+	}
+
+	free(rsa);
+
+	return ret;
+}
+
+
+static int mkcert(X509 **x509p, EVP_PKEY **pkeyp, int bits, int serial, int days);
+
+SWITCH_DECLARE(int) switch_core_gen_certs(const char *prefix)
+{
+	//BIO *bio_err;
+	X509 *x509 = NULL;
+	EVP_PKEY *pkey = NULL;
+	char *rsa = NULL, *pvt = NULL;
+	FILE *fp;
+	char *pem = NULL;
+
+	if (switch_stristr(".pem", prefix)) {
+
+		if (switch_is_file_path(prefix)) {
+			pem = strdup(prefix);
+		} else {
+			pem = switch_mprintf("%s%s%s", SWITCH_GLOBAL_dirs.certs_dir, SWITCH_PATH_SEPARATOR, prefix);
+		}
+
+		if (switch_file_exists(pem, NULL) == SWITCH_STATUS_SUCCESS) {
+			goto end;
+		}
+	} else {
+		if (switch_is_file_path(prefix)) {
+			pvt = switch_mprintf("%s.key", prefix);
+			rsa = switch_mprintf("%s.crt", prefix);
+		} else {
+			pvt = switch_mprintf("%s%s%s.key", SWITCH_GLOBAL_dirs.certs_dir, SWITCH_PATH_SEPARATOR, prefix);
+			rsa = switch_mprintf("%s%s%s.crt", SWITCH_GLOBAL_dirs.certs_dir, SWITCH_PATH_SEPARATOR, prefix);
+		}
+
+		if (switch_file_exists(pvt, NULL) == SWITCH_STATUS_SUCCESS || switch_file_exists(rsa, NULL) == SWITCH_STATUS_SUCCESS) {
+			goto end;
+		}
+	}
+
+#ifdef CRYPTO_MEM_CHECK_ON
+	CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ON);
+#endif
+
+	//bio_err=BIO_new_fp(stderr, BIO_NOCLOSE);
+
+	if (!mkcert(&x509, &pkey, 4096, 0, 36500)) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Certificate generation failed\n");
+		goto end;
+	}
+
+	//RSA_print_fp(stdout, pkey->pkey.rsa, 0);
+	//X509_print_fp(stdout, x509);
+
+	if (pem) {
+		if ((fp = fopen(pem, "w"))) {
+			PEM_write_PrivateKey(fp, pkey, NULL, NULL, 0, NULL, NULL);
+			PEM_write_X509(fp, x509);
+			fclose(fp);
+		}
+
+	} else {
+		if (pvt && (fp = fopen(pvt, "w"))) {
+			PEM_write_PrivateKey(fp, pkey, NULL, NULL, 0, NULL, NULL);
+			fclose(fp);
+		}
+
+		if (rsa && (fp = fopen(rsa, "w"))) {
+			PEM_write_X509(fp, x509);
+			fclose(fp);
+		}
+	}
+
+	X509_free(x509);
+	EVP_PKEY_free(pkey);
+
+#ifndef OPENSSL_NO_ENGINE
+	ENGINE_cleanup();
+#endif
+	CRYPTO_cleanup_all_ex_data();
+
+	//CRYPTO_mem_leaks(bio_err);
+	//BIO_free(bio_err);
+
+
+ end:
+
+	switch_safe_free(pvt);
+	switch_safe_free(rsa);
+	switch_safe_free(pem);
+
+	return(0);
+}
+
+SWITCH_DECLARE(switch_bool_t) switch_core_check_dtls_pem(const char *file)
+{
+	char *pem = NULL, *old_pem = NULL;
+	FILE *fp = NULL;
+	EVP_PKEY *pkey = NULL;
+	int bits = 0;
+
+	if (switch_is_file_path(file)) {
+		pem = strdup(file);
+	} else {
+		pem = switch_mprintf("%s%s%s", SWITCH_GLOBAL_dirs.certs_dir, SWITCH_PATH_SEPARATOR, file);
+	}
+
+	if (switch_file_exists(pem, NULL) != SWITCH_STATUS_SUCCESS) {
+		switch_safe_free(pem);
+
+		return SWITCH_FALSE;
+	}
+
+	fp = fopen(pem, "r");
+	if (!fp) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Cannot open %s: %s\n", pem, strerror(errno));
+		goto rename_pem;
+	}
+
+	pkey = PEM_read_PrivateKey(fp, NULL, NULL, NULL);
+	fclose(fp);
+
+	if (!pkey) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Cannot read key %s: %s\n", pem, ERR_error_string(ERR_get_error(), NULL));
+		goto rename_pem;
+	}
+
+	bits = EVP_PKEY_bits(pkey);
+	EVP_PKEY_free(pkey);
+
+	if (bits < 4096) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_WARNING, "%s cryptographic length is too short (%d), it will be regenerated\n", pem, bits);
+		goto rename_pem;
+	}
+
+	switch_safe_free(pem);
+
+	return SWITCH_TRUE;
+
+rename_pem:
+
+	old_pem = switch_mprintf("%s.old", pem);
+
+	if (rename(pem, old_pem) != -1) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Renamed %s to %s\n", pem, old_pem);
+	} else {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Could not rename %s: %s\n", pem, strerror(errno));
+	}
+
+	switch_safe_free(old_pem);
+	switch_safe_free(pem);
+
+	return SWITCH_FALSE;
+}
+
+#if 0
+static void callback(int p, int n, void *arg)
+{
+	char c='B';
+
+	if (p == 0) c='.';
+	if (p == 1) c='+';
+	if (p == 2) c='*';
+	if (p == 3) c='\n';
+	fputc(c, stderr);
+}
+#endif
+
+static int mkcert(X509 **x509p, EVP_PKEY **pkeyp, int bits, int serial, int days)
+{
+	X509 *x;
+	EVP_PKEY *pk;
+#if OPENSSL_VERSION_NUMBER < 0x30000000
+	RSA *rsa;
+#endif
+	X509_NAME *name=NULL;
+
+	switch_assert(pkeyp);
+	switch_assert(x509p);
+
+	if (*pkeyp == NULL) {
+		if ((pk = EVP_PKEY_new()) == NULL) {
+			abort();
+		}
+	} else {
+		pk = *pkeyp;
+	}
+
+	if (*x509p == NULL) {
+		if ((x = X509_new()) == NULL) {
+			goto err;
+		}
+	} else {
+		x = *x509p;
+	}
+
+#if OPENSSL_VERSION_NUMBER >= 0x30000000
+	{
+		EVP_PKEY_CTX *ctx;
+
+		ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, NULL);
+		/* Setup the key context */
+		if ((!ctx) || (EVP_PKEY_keygen_init(ctx) <= 0) || (EVP_PKEY_CTX_set_rsa_keygen_bits(ctx, bits) <= 0)) {
+			abort();
+			goto err;
+		}
+
+		/* Generate key */
+		if (EVP_PKEY_generate(ctx, &pk) <= 0) {
+			abort();
+			goto err;
+		}
+
+		EVP_PKEY_CTX_free(ctx);
+	}
+#elif OPENSSL_VERSION_NUMBER >= 0x10100000
+	rsa = RSA_new();
+	{
+		static const BN_ULONG ULONG_RSA_F4 = RSA_F4;
+		BIGNUM* BN_value_RSA_F4 = BN_new();
+		if (!BN_value_RSA_F4) {
+			abort();
+			goto err;
+		}
+		BN_set_word(BN_value_RSA_F4,ULONG_RSA_F4);
+		RSA_generate_key_ex(rsa, bits, BN_value_RSA_F4, NULL);
+		BN_free(BN_value_RSA_F4);
+	}
+#else
+	rsa = RSA_generate_key(bits, RSA_F4, NULL, NULL);
+#endif
+
+#if OPENSSL_VERSION_NUMBER < 0x30000000
+	if (!EVP_PKEY_assign_RSA(pk, rsa)) {
+		abort();
+	}
+
+	rsa = NULL;
+#endif
+
+	X509_set_version(x, 2);
+	ASN1_INTEGER_set(X509_get_serialNumber(x), serial);
+	X509_gmtime_adj(X509_get_notBefore(x), -(long)60*60*24*7);
+	X509_gmtime_adj(X509_get_notAfter(x), (long)60*60*24*days);
+	X509_set_pubkey(x, pk);
+
+	name = X509_get_subject_name(x);
+
+	/* This function creates and adds the entry, working out the
+	 * correct string type and performing checks on its length.
+	 * Normally we'd check the return value for errors...
+	 */
+	X509_NAME_add_entry_by_txt(name, "C", MBSTRING_ASC, (unsigned char *)"US", -1, -1, 0);
+	X509_NAME_add_entry_by_txt(name, "CN", MBSTRING_ASC, (unsigned char *)"FreeSWITCH", -1, -1, 0);
+
+
+	/* Its self signed so set the issuer name to be the same as the
+ 	 * subject.
+	 */
+	X509_set_issuer_name(x, name);
+
+#if OPENSSL_VERSION_NUMBER >= 0x30000000
+	if (!X509_sign(x, pk, EVP_sha256())) {
+#else
+	if (!X509_sign(x, pk, EVP_sha1())) {
+#endif
+		goto err;
+	}
+
+	*x509p = x;
+	*pkeyp = pk;
+
+	return(1);
+err:
+	ERR_print_errors_fp(stdout);
+
+	return(0);
+}
+
+/* For Emacs:
+ * Local Variables:
+ * mode:c
+ * indent-tabs-mode:t
+ * tab-width:4
+ * c-basic-offset:4
+ * End:
+ * For VIM:
+ * vim:set softtabstop=4 shiftwidth=4 tabstop=4 noet:
+ */

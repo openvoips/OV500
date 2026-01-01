@@ -1,0 +1,15 @@
+eslmake.rules
+testserver_fork
+Makefile
+Makefile.in
+/src/include/esl_config_auto.h
+/src/include/stamp-h2
+!java/Makefile
+!lua/Makefile
+!managed/Makefile
+!python3/Makefile
+!ruby/Makefile
+!tcl/Makefile
+java/classes/org/
+java/esl.jar
+		

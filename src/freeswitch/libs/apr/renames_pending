@@ -1,0 +1,39 @@
+Pending symbol renames for APR [for some discussion yet]
+
+fspr_file_info_t                  from fspr_finfo_t 
+fspr_file_attrs_t                 from fspr_fileattrs_t
+fspr_file_seek_where_t            from fspr_seek_where_t
+
+#fspr_filepath_name_get           from fspr_filename_of_pathname
+ 
+fspr_lock_mech_e                  from fspr_lockmech_e
+
+#fspr_gid_get                     from fspr_get_groupid
+#fspr_gid_name_get                from fspr_get_groupname
+#fspr_gid_name_get                from fspr_group_name_get
+#fspr_gid_compare                 from fspr_compare_groups
+
+#fspr_socket_shutdown              from fspr_shutdown
+#fspr_socket_bind                  from fspr_bind
+#fspr_socket_listen                from fspr_listen
+#fspr_socket_accept                from fspr_accept
+#fspr_socket_connect               from fspr_connect
+#fspr_socket_send                  from fspr_send
+#fspr_socket_sendv                 from fspr_sendv
+#fspr_socket_sendto                from fspr_sendto
+#fspr_socket_recvfrom              from fspr_recvfrom
+#fspr_socket_sendfile              from fspr_sendfile
+#fspr_socket_recv                  from fspr_recv
+#fspr_socket_inherit_set           from fspr_socket_set_inherit
+#fspr_socket_inherit_unset         from fspr_socket_unset_inherit
+
+
+#fspr_time_exp_gmt_get            from fspr_implode_gmt
+fspr_time_interval_t              from fspr_interval_time_t
+fspr_time_interval_short_t        from fspr_short_interval_time_t
+
+#fspr_uid_homepath_get            from fspr_get_home_directory
+#fspr_uid_get                     from fspr_get_userid
+#fspr_uid_current                 from fspr_current_userid
+#fspr_uid_compare                 from fspr_compare_users
+#fspr_uid_name_get                from fspr_get_username

@@ -1,0 +1,99 @@
+#
+# FreeSWITCH auto-build Makefile (CentOS 5.10 Wingardium Leviosa Edition)
+# http://www.freeswitch.org
+# put this file anywhere and type make to
+# create a fully-built freeswitch.git from scratch
+# in that same directory.
+#
+# Brian West <brian@freeswitch.org>
+#
+FSPREFIX=/usr/local/freeswitch
+PREFIX=/usr/local/freeswitch
+DOWNLOAD=http://files.freeswitch.org/downloads/libs
+JPEG=v8d
+OPENSSL=1.0.1l
+SQLITE=autoconf-3080403
+PCRE2=10.42
+CURL=7.40.0
+SPEEX=1.2rc1
+LIBEDIT=20140618-3.1
+LDNS=1.6.17
+
+freeswitch: deps has-git freeswitch.git/Makefile
+	cd freeswitch.git && make
+
+freeswitch.git/Makefile: freeswitch.git/configure
+	cd freeswitch.git && PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig ./configure LDFLAGS='-L$(PREFIX)/lib -Wl,-rpath=$(PREFIX)/lib' CFLAGS='-I$(PREFIX)/include' --prefix=$(FSPREFIX)
+
+freeswitch.git/configure: freeswitch.git/bootstrap.sh
+	cd freeswitch.git && sh bootstrap.sh
+
+freeswitch.git/bootstrap.sh: has-git
+	test -d freeswitch.git || git clone https://github.com/signalwire/freeswitch.git freeswitch.git
+
+install: freeswitch
+	cd freeswitch.git && make install cd-sounds-install cd-moh-install
+
+install-git: .done
+.done:
+	rpm -i http://apt.sw.be/redhat/el5/en/x86_64/rpmforge/RPMS/rpmforge-release-0.3.6-1.el5.rf.x86_64.rpm || true
+	yum update -y
+	yum install -y git gcc-c++ wget ncurses-devel zlib-devel e2fsprogs-devel libtool automake autoconf
+	touch .done
+
+has-git:
+	@git --version || (echo "please install git by running 'make install-git'" && false)
+
+clean:
+	@rm -rf openssl* ldns* jpeg* pcre2* perl* pkg-config* speex* sqlite* libedit* curl* *~
+	(cd freeswitch.git && git clean -fdx && git reset --hard HEAD && git pull)
+
+libjpeg: jpeg-8d/.done
+
+jpeg-8d/.done:
+	(test -d jpeg-8d) || (wget -4 -O jpegsrc.$(JPEG).tar.gz $(DOWNLOAD)/jpegsrc.$(JPEG).tar.gz && tar zxfv jpegsrc.$(JPEG).tar.gz)
+	(cd jpeg-8d && ./configure --prefix=$(PREFIX) && make && sudo make install && touch .done)
+
+openssl: openssl-$(OPENSSL)/.done
+openssl-$(OPENSSL)/.done: openssl-$(OPENSSL)
+openssl-$(OPENSSL):
+	(test -d $@) || (wget -4 -O $@.tar.gz $(DOWNLOAD)/$@.tar.gz && tar zxfv $@.tar.gz)
+	(cd $@ && ./Configure --prefix=$(PREFIX) linux-x86_64 shared && make && sudo make install && touch .done)
+
+sqlite: sqlite-$(SQLITE)/.done
+sqlite-$(SQLITE)/.done: sqlite-$(SQLITE)
+sqlite-$(SQLITE):
+	(test -d $@) || (wget -4 -O $@.tar.gz $(DOWNLOAD)/$@.tar.gz && tar zxfv $@.tar.gz)
+	(cd $@ && ./configure --prefix=$(PREFIX) && make && sudo make install && touch .done_sqlite && touch .done)
+
+pcre2: pcre2-$(PCRE2)/.done
+pcre2-$(PCRE2)/.done: pcre2-$(PCRE2)
+pcre2-$(PCRE2):
+	(test -d $@) || (wget -4 -O $@.tar.gz $(DOWNLOAD)/$@.tar.gz && tar zxfv $@.tar.gz)
+	(cd $@ && ./configure --prefix=$(PREFIX) && make && sudo make install && touch .done)
+
+curl: curl-$(CURL)/.done
+curl-$(CURL)/.done: curl-$(CURL)
+curl-$(CURL):
+	(test -d $@) || (wget -4 -O $@.tar.gz $(DOWNLOAD)/$@.tar.gz && tar zxfv $@.tar.gz)
+	(cd $@ && ./configure LDFLAGS='-L$(PREFIX)/lib -Wl,-rpath=$(PREFIX)/lib' CFLAGS='-I$(PREFIX)/include' --prefix=$(PREFIX) && make && sudo make install && touch .done)
+
+speex: speex-$(SPEEX)/.done
+speex-$(SPEEX)/.done: speex-$(SPEEX)
+speex-$(SPEEX):
+	(test -d $@) || (wget -4 -O $@.tar.gz $(DOWNLOAD)/$@.tar.gz && tar zxfv $@.tar.gz)
+	(cd $@ && ./configure --prefix=$(PREFIX) && make && sudo make install && touch .done)
+
+libedit: libedit-$(LIBEDIT)/.done
+libedit-$(LIBEDIT)/.done: libedit-$(LIBEDIT)
+libedit-$(LIBEDIT):
+	(test -d $@) || (wget -4 -O $@.tar.gz $(DOWNLOAD)/$@.tar.gz && tar zxfv $@.tar.gz)
+	(cd $@ && ./configure --prefix=$(PREFIX) && make && sudo make install && touch .done)
+
+ldns: ldns-$(LDNS)/.done
+ldns-$(LDNS)/.done: ldns-$(LDNS)
+ldns-$(LDNS):
+	(test -d $@) || (wget -4 -O $@.tar.gz $(DOWNLOAD)/$@.tar.gz && tar zxfv $@.tar.gz)
+	(cd $@ && ./configure --with-ssl=$(PREFIX) --prefix=$(PREFIX) && make && sudo make install && touch .done)
+
+deps: libjpeg openssl sqlite pcre2 curl speex libedit ldns
