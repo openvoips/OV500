@@ -17,7 +17,7 @@ Changelog and New Features
 You can find a list of all changes for each release in the `user
 guide change log <https://github.com/openvoips/OV500/edit/master/changelog.rst>`_.
 
--- version-1.0.1--
+-- version-3.0.0--
 
 Bundle & bundle billing
 
@@ -27,13 +27,13 @@ Cron Services
 Server Requirements
 *******************
 
-PHP version 5.6 & MariaDB-10.4 or newer is recommended.  
+PHP version 7.4 & MariaDB-10.4 or Mysql-8.x newer is recommended.  
 
 ************
 Installation
 ************
 
-Please see the `installation section <https://ov500.openvoips.org/documentation/installation/>`_
+Please see the `installation section <https://ov500.openvoips.org/documentation/installation_ubuntu24/>`_
 of the OV500 Billing.
 
 *******
