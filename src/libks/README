@@ -1,0 +1,44 @@
+To build use cmake (Minimum version 3.7.2):
+cmake .
+make
+
+To install:
+make install
+
+To un-install:
+make uninstall
+
+To build debug (no optimizations, symbols - this is the default):
+cmake . -DCMAKE_BUILD_TYPE=Debug
+make
+
+To build release (optimizations, symbols):
+cmake . -DCMAKE_BUILD_TYPE=Release
+make
+
+To build to a custom installation prefix (default is /usr):
+cmake . -DCMAKE_INSTALL_PREFIX:PATH=/usr
+make
+
+To build with openssl on non-standard location (e.g. on Mac):
+OPENSSL_ROOT_DIR=/usr/local/opt/openssl cmake . -DCMAKE_INSTALL_PREFIX:PATH=/usr/local
+
+To run tests:
+ctest .
+
+To build release package with build number 42:
+PACKAGE_RELEASE="42" cmake . -DCMAKE_BUILD_TYPE=Release && make package
+
+To buld CMAKE from source
+wget https://cmake.org/files/v3.7/cmake-3.7.2.tar.gz
+tar -zxvf cmake-3.7.2.tar.gz
+cd cmake-3.7.2
+./bootstrap --prefix=/usr/local
+make
+make install
+/usr/local/bin/cmake --version
+
+Centos dependencies:
+- yum groupinstall "Development Tools"
+- yum install libuuid-devel libatomic openssl-devel
+

@@ -1,0 +1,10 @@
+.vs/*
+libks.2017.VC.db
+Win32/*
+x64/*
+out/*
+7za*.exe
+openssl-*.zip
+openssl-*/
+Debug/
+Release/
