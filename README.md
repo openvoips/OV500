@@ -28,6 +28,11 @@ Features list are as below...
 
 and many more
 ## Release Notes
+#### 3.0.0 (04/01/2026)
+ - Removed Debian 11 Support 
+ - Ubuntu Server-24.04.3 LTS   release of OV500-3.0.0
+ - <a href="https://github.com/openvoips/OV500-installer/blob/master/README.md">OV500 Ubuntu Server-24.04.3 LTS Installation documentation </a>
+
 #### 2.0.1 (11/03/2023)
  - Debian 11 release of OV500
  - <a href="https://github.com/openvoips/OV500/blob/2.0.1/Installation_Debian.md">OV500 Debian 11 Installation documentation </a>
