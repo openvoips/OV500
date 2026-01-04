@@ -23,11 +23,7 @@ $cust_section_array = array();
 $cust_section_array['1'] = array('title' => 'Login', 'file_name' => 'inner/login.php');
 $cust_section_array['2'] = array('title' => 'Contact Detail', 'file_name' => 'inner/registration.php');
 $cust_section_array['3'] = array('title' => 'Settings', 'file_name' => 'inner/settings.php');
-if ($accountinfo['account_type'] == 'CUSTOMER') {
-    $cust_section_array['4'] = array('title' => 'Random ANI Rule', 'file_name' => 'inner/randomclis_1.php');
-    $cust_section_array['5'] = array('title' => 'Random ANI List', 'file_name' => 'inner/randomclis_2.php');
-    $cust_section_array['6'] = array('title' => 'CLI Dst Rule', 'file_name' => 'inner/cli_dst_rules.php');
-}
+ 
 
 ?>
 <link href="<?php echo base_url(); ?>theme/default/css/tabs.css" rel="stylesheet" type="text/css"/>
