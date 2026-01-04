@@ -3,10 +3,10 @@
 	$active_group = 'default';
 	$query_builder = TRUE;
 	$db['default'] = array( 
-	'dsn' => 'mysql:host=127.0.0.1;dbname=switch',
+	'dsn' => 'mysql:host=127.0.0.1;dbname=ov500',
 	'hostname' => '', 
 	'username' => 'ovuser', 
-        'password' => 'OV500123SA',
+        'password' => 'OV500DBPASSWORD',
 	'database' => '', 
 	'dbdriver' => 'pdo', 
 	'dbprefix' => '', 
@@ -26,7 +26,7 @@
 	'dsn' => 'mysql:host=127.0.0.1;dbname=cdrlog',
 	'hostname' => '',
 	'username' => 'ovuser', 
-        'password' => 'OV500123SA',
+        'password' => 'OV500DBPASSWORD',
 	'database' => '',
 	'dbdriver' => 'pdo',
 	'dbprefix' => '',

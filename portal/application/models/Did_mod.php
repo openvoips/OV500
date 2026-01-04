@@ -1,10 +1,10 @@
 <?php
-/*
+/* 
  * Copyright (C) Openvoips Technologies - All Rights Reserved
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential, Only allow to use with license certificate
  * OV500Pro Version 3.0.0
- * Written by Seema Anand <openvoips@gmail.com> , Jan 2026 
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2023 
  * http://www.openvoips.com 
  */
 class Did_mod extends CI_Model {

@@ -5280,8 +5280,8 @@ CREATE TABLE `users` (
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
 INSERT INTO `users` VALUES
-(1,'UA000003333','SYSTEM','ADMIN','24ithub','24ithub@123','24ithub','openvoips,help@gmail.com','','',195,1,NULL,'2025-08-09 07:22:25','ADMIN',NULL,''),
-(2,'UA000345178','SYSTEM','ADMIN','openvoips','kanand81','Openvoips Support','openvoips@gmail.com','','',100,1,NULL,'2025-08-09 07:24:41','UA000003333',NULL,''),
+(1,'UA000003333','SYSTEM','ADMIN','admin','123456','admin','openvoips,help@gmail.com','','',195,1,NULL,'2025-08-09 07:22:25','ADMIN',NULL,''),
+(2,'UA000345178','SYSTEM','ADMIN','openvoips','123456','Openvoips Support','openvoips@gmail.com','','',100,1,NULL,'2025-08-09 07:24:41','UA000003333',NULL,''),
 (3,'UC000003333','OV500','CUSTOMERADMIN','ovcustomer','Ov@500demo','Openvoips Technologies','openvoips.help@gmail.com','','',0,1,NULL,'2025-10-02 13:49:07','',NULL,''),
 (4,'Ue000004114','OV500','EXTENSION','Hu219R2h','#pt$FK12A@','OV Help','','','',0,1,NULL,'2025-10-03 14:26:10','UC000003333',NULL,'');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
