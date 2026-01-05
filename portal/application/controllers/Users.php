@@ -1,31 +1,13 @@
 <?php
 
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-// OV500 Version 2.0.0
-// Copyright (C) 2019-2021 Openvoips Technologies   
-// http://www.openvoips.com  http://www.openvoips.org
-// 
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
-
-
+/*
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2026 
+ * http://www.openvoips.com 
+ */
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
@@ -83,7 +65,7 @@ class Users extends MY_Controller {
 
         $search_parameters = array('name', 'username', 'status', 'user_type', 'user_id', 'no_of_rows');
 
-        if (isset($_POST['search_action'])) {// coming from search button
+        if (isset($_POST['search_action'])) {
             set_post_to_session($search_session_key, $search_parameters);
         } else {
             set_session_to_session($search_session_key, $search_parameters);
@@ -97,7 +79,6 @@ class Users extends MY_Controller {
             'user_id' => $_SESSION[$search_session_key]['user_id'],
         );
 
-
         $data['user_type_array'] = get_user_types($this->logged_user_type);
         $search_data['user_type_group'] = array_keys($data['user_type_array']);
 
@@ -105,7 +86,6 @@ class Users extends MY_Controller {
             $search_data['account_id'] = $this->logged_account_id;
         }
 
-        //$this->search_serialize = serialize($search_data);
         $order_by = '';
 
         $is_file_downloaded = false;
@@ -147,7 +127,6 @@ class Users extends MY_Controller {
             $this->load->library('Export');
             $downloaded_message = $this->export->download($file_name, $format, $search_array, $export_header, $export_data);
 
-
             if (gettype($downloaded_message) == 'string')
                 $data['err_msgs'] = $downloaded_message;
             else
@@ -162,8 +141,6 @@ class Users extends MY_Controller {
             $account_data = $this->member_mod->get_data($order_by, $per_page, $segment, $search_data);
             $total_count = $this->utils_model->get_data_total_count($this->member_mod->select_sql);
             $data['pagination'] = setup_pagination_option($total_count, 'users/index', $per_page, $pagination_uri_segment, $this->pagination);
-            //echo $this->utils_model->total_count_sql;
-            /////////////
 
             $data['data'] = $account_data;
             $data['total_records'] = $total_count;
@@ -190,7 +167,6 @@ class Users extends MY_Controller {
             $this->form_validation->set_rules('status_id', 'Status', 'trim|required');
             $this->form_validation->set_rules('user_address', 'address', 'trim');
             $this->form_validation->set_rules('user_phone', 'phone', 'trim');
-
 
             if ($this->form_validation->run() == FALSE) {
                 $data['err_msgs'] = validation_errors();
@@ -228,7 +204,7 @@ class Users extends MY_Controller {
         if ($id == -1)
             show_404('403');
         $users_id_p = $id;
-        if (isset($_POST['action']) && $_POST['action'] == 'OkSaveData') {//die;
+        if (isset($_POST['action']) && $_POST['action'] == 'OkSaveData') {
             $account_id = $_POST['account_id'];
             $this->form_validation->set_rules('user_fullname', 'Name', 'trim|required');
             $this->form_validation->set_rules('user_emailaddress', 'Email Address', 'trim|required');
@@ -285,12 +261,12 @@ class Users extends MY_Controller {
         $this->load->view('basic/footer', $data);
     }
 
-    //ov500_multi_user
     public function profile() {
         $page_name = "account_profile";
         $data['page_name'] = $page_name;
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-        $user_id_name = get_logged_user_id(); {
+        $user_id_name = get_logged_user_id();
+        {
             if (isset($_POST['action']) && $_POST['action'] == 'OkSaveData') {
                 $this->form_validation->set_rules('user_fullname', 'Name', 'trim|required');
                 $this->form_validation->set_rules('user_emailaddress', 'Email Address', 'trim|required');
@@ -303,15 +279,16 @@ class Users extends MY_Controller {
                     $this->form_validation->set_rules('secret', 'Password', 'trim|required|min_length[8]');
                 }
 
-                if ($this->form_validation->run() == FALSE) {// error
+                if ($this->form_validation->run() == FALSE) {
                     $data['err_msgs'] = validation_errors();
                 } else {
                     $_POST['user_id_name'] = $user_id_name;
                     $result = $this->member_mod->update($_POST);
                     if ($result === true) {
 
-                        $session_current_customer_id = $this->session->userdata('session_current_customer_id');
-                        $_SESSION['users'][$session_current_customer_id]['session_fullname'] = $_POST['name'];
+                        //   $session_current_customer_id = $this->session->userdata('session_current_customer_id');
+                        $session_current_customer_id = $this->session->userdata('session_current_user_id');
+                        $_SESSION['customer'][$session_current_customer_id]['session_fullname'] = $_POST['name'];
 
                         $this->session->set_flashdata('suc_msgs', 'Profile Updated Successfully');
                         redirect(base_url() . 'profile', 'location', '301');
@@ -319,28 +296,37 @@ class Users extends MY_Controller {
                         $err_msgs = $result;
                         $data['err_msgs'] = $err_msgs;
                     }
-                }//if
+                }
             }
         }
 
         $search_data = array('user_id' => $user_id_name);
         $result = $this->member_mod->get_data('', '', '', $search_data);
 
-
-        /**         * *** pagination code ends  here ********* */
         $data['data'] = current($result['result']);
-
 
         $data['currency_options'] = $this->utils_model->get_currencies();
         $data['country_options'] = $this->utils_model->get_countries();
-        $data['state_options'] = $this->utils_model->get_states();
+        
+
+        if (check_logged_user_group(array('CUSTOMER'))) {
+            $this->load->model('customer_mod');
+            $logged_account_id = get_logged_account_id();
+            $search_data = array('account_id' => $logged_account_id);
+            $customers_data_temp = $this->customer_mod->get_data('', 1, 0, $search_data, []);
+            $data['customers_data'] = current($customers_data_temp['result']);
+            //print_r($data['customers_data'] );
+        }
+
+
+        /////
 
         $this->load->view('basic/header', $data);
         $this->load->view('basic/profile', $data);
         $this->load->view('basic/footer', $data);
     }
 
-    public function switch_user($id) /**/ {
+    public function switch_user($id) {
         $account_id = param_decrypt($id);
         $userdata = array('session_current_user_id' => $account_id);
         $this->session->set_userdata($userdata);
@@ -348,7 +334,7 @@ class Users extends MY_Controller {
         redirect('dashboard', 'refresh');
     }
 
-    public function unswitch_user($id) /**/ {
+    public function unswitch_user($id) {
         $account_id = param_decrypt($id);
         $userdata = array('session_current_user_id' => $account_id);
         $this->session->set_flashdata('suc_msgs', 'User logged out successfully');
@@ -364,14 +350,9 @@ class Users extends MY_Controller {
         $page_name = "account_autologin";
         $data['page_name'] = $page_name;
 
-        /* 	if( !check_account_permission('user', 'login')){
-          show_404('403');
-          } */
-
         $account_id = param_decrypt($id);
         $result = $this->member_mod->get_user_by_key('user_id', $account_id);
-        //ddd($result);
-        //	echo   '--'.$account_id.'--';die;
+
         $child_account_type = $result['user_type'];
         if ($result === false)
             show_404();
@@ -396,7 +377,6 @@ class Users extends MY_Controller {
             $password = $parent_result['secret'];
             $row = $this->login_mod->get_user($username, $password);
 
-
             $child_account_type = $result['account_type'];
         }
 
@@ -410,7 +390,7 @@ class Users extends MY_Controller {
 
             redirect($refer_url, 'refresh');
         } else {
-            // Add the users id to the session.
+
             $userdata = array();
             $userdata = array('session_current_user_id' => $row['user_id']);
 
@@ -433,22 +413,20 @@ class Users extends MY_Controller {
             $_SESSION['customer'][$user_id] = $userdata_details;
 
             $this->session->set_flashdata('suc_msgs', 'You are switched to ' . get_logged_user_name());
-//            echo $child_account_type;
+
             if (isset($child_account_type)) {
                 if (in_array($child_account_type, array('CUSTOMER'))) {
                     $redirect_to = 'dashboard';
                     unset($_SESSION['search_customers_data']);
-                    //  $_SESSION['search_customers_data']['s_account_id'] = $result['account_id'];
                 } elseif (in_array($child_account_type, array('RESELLER'))) {
-                    // $redirect_to = 'resellers';
+
                     $redirect_to = 'dashboard';
                     unset($_SESSION['search_resellers_data']);
-                    //$_SESSION['search_resellers_data']['s_account_id'] = $result['account_id'];
                 }
             }
         }
 
-        redirect($redirect_to, 'refresh'); //redirected	
+        redirect($redirect_to, 'refresh');
     }
 
     public function reautologin($id, $login_as = 'self') {
@@ -461,7 +439,6 @@ class Users extends MY_Controller {
             show_404('403');
         }
         $account_id = param_decrypt($id);
-
 
         $user_search_data['account_id'] = $account_id;
         $user_search_data['user_type'] = 'RESELLERADMIN';
@@ -477,10 +454,6 @@ class Users extends MY_Controller {
         }
 
         $this->autologin(param_encrypt($users_data['user_id']));
-        //ddd($users_data_temp);	echo $account_id ;die;
-        //$result = $this->member_mod->get_user_by_key('user_id_name', $account_id);
-        //ddd($result);
-        //echo   '--'.$account_id.'--';die;
     }
 
     public function cuautologin($id, $login_as = 'self') {
@@ -493,7 +466,6 @@ class Users extends MY_Controller {
             show_404('403');
         }
         $account_id = param_decrypt($id);
-
 
         $user_search_data['account_id'] = $account_id;
         $user_search_data['user_type'] = 'CUSTOMERADMIN';
@@ -509,27 +481,13 @@ class Users extends MY_Controller {
         }
 
         $this->autologin(param_encrypt($users_data['user_id']));
-        //ddd($users_data_temp);	echo $account_id ;die;
-        //$result = $this->member_mod->get_user_by_key('user_id_name', $account_id);
-        //ddd($result);
-        //echo   '--'.$account_id.'--';die;
     }
 
     public function users_email_check($email) {
         return true;
-        /* $users_data = $this->member_mod->get_data_single('email_id', $email);		
-          if($users_data==NULL)
-          {
-          return true;
-          }
-          else
-          {
-          $this->form_validation->set_message('users_email_check', 'The {field} already exists');
-          return false;
-          } */
     }
 
-    function usersearch($id = '') {//edit permission for user
+    function usersearch($id = '') {
         $page_name = "users_usersearch";
         $data['page_name'] = $page_name;
 
@@ -545,24 +503,21 @@ class Users extends MY_Controller {
             }
         }
 
-        ///////////////////////////		
         $is_id_exists = false;
         $is_account_data_exists = $is_account_parent_data_exists = false;
         if (!empty($id)) {
             $is_id_exists = true;
             $account_id = param_decrypt($id);
 
-            /* fetch user details and permissions */
             $option_param = array('user' => true);
             $account_result = $this->member_mod->get_account_by_key('account_id', $account_id, $option_param);
-            //echo '<pre>';print_r( $account_result);echo '</pre>';
+
             if ($account_result === false) {
                 $data['err_msgs'] = 'User Not Found';
             } else {
                 $data['account_result'] = $account_result;
                 $is_account_data_exists = true;
                 $_SESSION['search_account_search']['s_account_id'] = $account_id;
-
 
                 if ($account_result['parent_account_id'] != '') {
                     $parent_result = $this->member_mod->get_account_by_key('account_id', $account_result['parent_account_id']);
@@ -581,6 +536,20 @@ class Users extends MY_Controller {
         $this->load->view('basic/header', $data);
         $this->load->view('user/account_search', $data);
         $this->load->view('basic/footer', $data);
+    }
+
+    function paypal_client_pay_confirm($account_id) {
+        $this->load->model('payment_mod', 'payment_mod');
+        $post_payment_data = trim($_POST['data']);
+        $post_payment_data_array = json_decode($post_payment_data, true);
+
+        if ($post_payment_data_array['state'] == 'approved')
+            $this->session->set_flashdata('suc_msgs', 'Payment is successfully processed');
+        else
+            $this->session->set_flashdata('err_msgs', 'Payment is not successfull');
+
+        $account_type = get_logged_account_type();
+        $this->payment_mod->payment_confirm($account_id, $account_type, 'paypal', $post_payment_data);
     }
 
 }

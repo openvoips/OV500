@@ -1,4 +1,3 @@
-
 <script src="<?php echo base_url() ?>theme/vendors/combo-box-typeahead/js/bootstrap-combobox.js"></script>
 <link href="<?php echo base_url() ?>theme/vendors/combo-box-typeahead/css/bootstrap-combobox.css" rel="stylesheet" type="text/css">
 <script>
@@ -8,30 +7,18 @@
 </script>
 <!-- Parsley -->
 <script src="<?php echo base_url() ?>theme/vendors/parsleyjs/dist/parsley.min.js"></script>
-<div class="">
-    <div class="clearfix"></div> 
-    <div class="col-md-12 col-sm-12 col-xs-12 right">
-        <div class="x_title">
-            <h2>Rate Configuration Management</h2>
-            <ul class="nav navbar-right panel_toolbox">     
-                <li><a href="<?php echo base_url('rates'); ?>"><button class="btn btn-danger" type="button">Back to Rate Listing Page</button></a> </li>
-            </ul>
-            <div class="clearfix"></div>
-        </div>
-
+<div class="container-fluid">
+    <div class="block-header">
+        <h2>Rate Configuration Management</h2>
+        <ul class="nav navbar-right panel_toolbox">
+            <li><a href="<?php echo base_url('rates'); ?>"><button class="btn btn-primary" type="button">Back to Rate Listing Page</button></a> </li>
+        </ul>
     </div>
-    <div class="row">
-        <div class="col-md-12 col-sm-12 col-xs-12">
-            <div class="x_panel">
-                <div class="x_title">
-                    <h2>Rate (ADD)</h2>
-                    <ul class="nav navbar-right panel_toolbox">
+    <div class="row clearfix">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="card">
+                <div class="header">
 
-                    </ul>
-                    <div class="clearfix"></div>
-                </div>
-                <div class="x_content">
-                    <br />         
                     <form action="<?php echo base_url(); ?>rates/addR" method="post" name="add_form" id="add_form" data-parsley-validate class="form-horizontal form-label-left">
                         <input type="hidden" name="button_action" id="button_action" value="">
                         <input type="hidden" name="action" value="OkSaveData">    
@@ -156,8 +143,8 @@
                                     <label for="middle-name" class="control-label col-md-4 col-sm-3 col-xs-12">Status</label>
                                     <div class="col-md-8 col-sm-6 col-xs-12">
                                         <div class="radio">
-                                            <label><input type="radio" name="frm_status" id="status1" value="1" <?php echo set_radio('frm_status', '1', TRUE); ?> /> Active</label>
-                                            <label><input type="radio" name="frm_status" id="status0" value="0" <?php echo set_radio('frm_status', '0'); ?> /> Inactive</label>
+                                            <input type="radio"  class="with-gap" name="frm_status" id="status1" value="1" <?php echo set_radio('frm_status', '1', TRUE); ?> /><label for="status1"> Active</label>
+                                            <input type="radio"  class="with-gap" name="frm_status" id="status0" value="0" <?php echo set_radio('frm_status', '0'); ?> /><label for="status0"> Inactive</label>
                                         </div>                    
                                     </div>
                                 </div>		 
@@ -171,27 +158,30 @@
                         <div class="ln_solid"></div>
                         <div class="form-group">
                             <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
-                                <!--<a href="<?php echo base_url('rates') ?>"><button class="btn btn-primary" type="button">Cancel</button></a>-->				
+
                                 <button type="button" id="btnSave" class="btn btn-success">Save</button>
                                 <button type="button" id="btnSaveClose" class="btn btn-info">Save & Go Back to Listing Page</button>
                             </div>
                         </div>
                     </form>
+                </div>    
+                <div class="block-header">
+                    <h2>Rate Configuration Management</h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li><a href="<?php echo base_url('rates'); ?>"><button class="btn btn-primary" type="button">Back to Rate Listing Page</button></a> </li>
+                    </ul>
                 </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-12 col-sm-12 col-xs-12 right">
-        <div class="x_title">
-            <h2>Rate Configuration Management</h2>
-            <ul class="nav navbar-right panel_toolbox">     
-                <li><a href="<?php echo base_url('rates'); ?>"><button class="btn btn-danger" type="button">Back to Rate Listing Page</button></a> </li>
-            </ul>
-            <div class="clearfix"></div>
-        </div>
 
+            </div>    
+
+
+
+        </div>
     </div>
-</div>    
+</div>
+
+<script src="<?php echo base_url() ?>theme/vendors/parsleyjs/dist/parsley.min.js"></script>
+<script src="<?php echo base_url() ?>theme/default/js/parsley-custom.js"></script> 
 <script>
     window.Parsley
             .addValidator('alphanumspace', {

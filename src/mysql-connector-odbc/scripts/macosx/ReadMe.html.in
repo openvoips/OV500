@@ -1,0 +1,82 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <title>Read Me</title>
+</head>
+<body>
+
+<font face="Helvetica">
+
+<table border=0 cellspacing=5 cellpadding=0 width="100%">
+  <tr>
+    <td>
+      <img src="myodbc.png">
+    </td>
+    <td>
+      <b>
+	MySQL Connctor/ODBC
+	<br>
+	@VERSION@
+      </b>
+    </td>
+  </tr>
+</table>
+
+<p>
+  This package contains a binary release of MySQL Connector/ODBC for Mac OS X.
+</p>
+
+<p>
+  This package does not require anything special to be installed
+  on your machine - not even other MySQL software. Mac OS X 10.4
+  and later include the iODBC driver manager.
+</p>
+
+<p>
+  When the installation is complete you can use the following program
+  to help manage your ODBC connections:
+</p>
+
+<pre>
+  /Applications/Utilities/ODBC Administrator.app
+</pre>
+
+<p>
+  This installer will:
+  <ol>
+    <li>Copy the ODBC driver and setup libraries to <code>/usr/local/lib/</code>.</li>
+    <li>Copy command-line utilities to <code>/usr/local/bin/</code>.</li>
+    <li>Register the driver and setup libraries with the iODBC driver manager.</li>
+  </ol>
+</p>
+
+<p>
+  The library files are;
+  <ul>
+    <li><code>/usr/local/lib/libmyodbc8w.*</code> (Unicode version)</li>
+    <li><code>/usr/local/lib/libmyodbc8a.*</code> (ANSI version)</li>
+    <li><code>/usr/local/lib/libmyodbc8S.*</code></li>
+  </ul>
+</p>
+
+<p>
+The command-line utility file are;
+<ul>
+  <li><code>/usr/local/bin/myodbc-installer</code></li>
+</ul>
+
+<p>
+  This package can be manually removed from your
+  system by removing all of the files installed
+  (see above) and by doing the following;
+</p>
+
+<pre>
+  $ sudo rm -r /Library/Receipts/MyODBC*
+</pre>
+
+</font>
+
+</body>
+</html>

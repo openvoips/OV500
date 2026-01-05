@@ -1,0 +1,539 @@
+---
+title: rtpengine-recording
+section: 8
+header: NGCP rtpengine-recording
+---
+
+# rtpengine-recording(8) manual page
+
+## NAME
+
+rtpengine-recording - media recording daemon for Sipwise rtpengine
+
+## SYNOPSIS
+
+__rtpengine-recording__ \[*option*...\]
+
+## DESCRIPTION
+
+The Sipwise rtpengine media proxy has support for exporting media (RTP) packets
+that it forwards. The rtpengine-recording daemon collects these exported
+packets and decodes them into an audio format that can be listened to.
+
+## OPTIONS
+
+All options can (and should) be provided in a config file instead of
+at the command line. See the __\-\-config-file__ option below for details.
+
+If no options are given, then default values are assumed, which should be
+sufficient for a standard installation of rtpengine.
+
+- __\-\-help__
+
+    Print the usage information.
+
+- __-v__, __\-\-version__
+
+    If called with this option, the __rtpengine-recording__ daemon will simply print
+    its version number and exit.
+
+- __\-\-config-file=__*FILE*
+
+    Specifies the location of a config file to be used. The config file is an
+    *.ini* style config file, with all command-line options listed here also
+    being valid options in the config file.
+    For all command-line options, the long name version instead of the
+    single-character version (e.g. __table__ instead of just __t__) must be
+    used in the config file.
+    For boolean options that are either present or not (e.g. __output-mixed__), a
+    boolean value (either __true__ or __false__) must be used in the config file.
+    If an option is given in both the config file and at the command line,
+    the command-line value overrides the value from the config file.
+
+    As a special value, __none__ can be passed here to suppress loading of the
+    default config file.
+
+- __\-\-config-section=__*STRING*
+
+    Specifies the *.ini* style section to be used in the config file.
+    Multiple sections can be present in the config file, but only one can be
+    used at a time.
+    The default value is __rtpengine-recording__.
+    A config file section is started in the config file using square brackets
+    (e.g. __\[rtpengine-recording\]__).
+
+- __-L__, __\-\-log-level=__*INT*
+
+    Takes an integer as argument and controls the highest log level which
+    will be sent to syslog.
+    The log levels correspond to the ones found in the [syslog(3)](http://man.he.net/man3/syslog) man page.
+    The default value is __6__, equivalent to LOG\_INFO.
+    The highest possible value is __7__ (LOG\_DEBUG) which will log everything.
+
+- __\-\-log-facilty=daemon__\|__local0__\|...\|__local7__\|...
+
+    The syslog facilty to use when sending log messages to the syslog daemon.
+    Defaults to __daemon__.
+
+- __-E__, __\-\-log-stderr__
+
+    Log to stderr instead of syslog.
+    Only useful in combination with __\-\-foreground__.
+
+- __\-\-split-logs__
+
+    Split multi-line log messages into individual log messages so that each
+    line receives its own log line prefix.
+
+- __\-\-no-log-timestamps__
+
+    Don't add timestamps to log lines written to stderr.
+    Only useful in combination with __\-\-log-stderr__.
+
+- __\-\-log-mark-prefix=__*STRING*
+
+    Prefix to be added to particular data fields in log files that are deemed
+    sensitive and/or private information. Defaults to an empty string.
+
+- __\-\-log-mark-suffix=__*STRING*
+
+    Suffix to be added to particular data fields in log files that are deemed
+    sensitive and/or private information. Defaults to an empty string.
+
+- __-p__, __\-\-pidfile=__*FILE*
+
+    Specifies a path and file name to write the daemon's PID number to.
+
+- __-f__, __\-\-foreground__
+
+    If given, prevents the daemon from daemonizing, meaning it will stay in
+    the foreground.
+    Useful for debugging.
+
+- __-t__, __\-\-table=__*INT*
+
+    Takes an integer argument. The value must match the __table__ option given to
+    the __rtpengine__ media proxy to use for in-kernel packet forwarding.
+    Defaults to __0__ if not specified.
+
+- __\-\-spool-dir=__*PATH*
+
+    The path given here must match the __recording-dir__ path given to the
+    __rtpengine__ media proxy. Defaults to `/var/spool/rtpengine`. The path must
+    reside on a file system that supports the __inotify__ mechanism.
+
+- __\-\-num-threads=__*INT*
+
+    How many worker threads to launch. Defaults to the number of CPU cores
+    available, or __8__ if there are fewer than that or if the number is not
+    known.
+
+- __\-\-thread-stack=__*INT*
+
+    Set the stack size of each thread to the value given in kB. Defaults to 2048
+    kB. Can be set to -1 to leave the default provided by the OS unchanged.
+
+- __\-\-evs-lib-path=__*FILE*
+
+    Points to the shared object file (__.so__) containing the reference
+    implementation for the EVS codec. See the `README` for more details.
+
+- __\-\-output-storage=file__\|__db__\|__memory__\|__notify__\|__s3__\|__gcs__\|__none__
+
+    Where to store media files. This option can be given multiple times (or, in
+    the config file, using a comma-separated list) to enable multiple storage
+    modes. By default only the __file__ storage is enabled.
+
+    The __file__ storage writes media files directly to the file system (see
+    __output-dir__).
+
+    Setting __none__ overrides file storage as being the default and allows
+    forwarding-only operation.
+
+    The __db__ storage writes media files as a __BLOB__ in a MySQL database.
+
+    The string __both__ is recognised as legacy alternative to enabling both
+    __file__ and __db__ storage.
+
+    The __notify__ output attaches the recording to the HTTP notification
+    request. If enabled, notification requests behave as HTTP POST (implicitly
+    enabling __notify-post__).
+
+    The string __memory__ acts as a modifier and can be used if __file__
+    storage is not enabled. Without the __memory__ modifier, media is first written
+    to a temporary file before being placed into its destination storage when
+    recording is finished. With __memory__ set, use of temporary files is disabled
+    and media is kept in memory only until recording is complete.
+
+    __db-mem__ can be used as a shortcut to setting both __db__ and __memory__.
+
+    The __s3__ storage option enables upload to an S3-compatible service via
+    HTTPS, for example to AWS or MiniO. See the related option below for
+    configuration.
+
+    Use the __gcs__ storage option to enable uploads to Google Cloud Storage or
+    a compatible service. See the related options below.
+
+- __\-\-output-dir=__*PATH*
+
+    Path for media files to be written to if file output is enabled. Defaults to
+    `/var/lib/rtpengine-recording`. The path must not be the same as used for the
+    __spool-dir__.
+
+- __\-\-output-pattern=__*STRING*
+
+    File name pattern to be used for recording files. The pattern can reference
+    sub-directories. Parent directories will be created on demand. The default
+    setting is __%c-%r-%t__.
+
+    The pattern must include __printf__-style format sequences. Supported format
+    sequences are:
+
+    - __%%__
+
+        A literal percent sign.
+
+    - __%c__
+
+        The call ID. It is mandatory for the output pattern to include this format
+        sequence.
+
+    - __%r__
+
+        A random tag generated by __rtpengine__ to distinguish possibly
+        repeated or duplicated call IDs.
+
+    - __%t__
+
+        The stream type. For __single__ streams this is the SSRC written as hexadecimal;
+        for __mix__ stream this is the string __mix__. It is mandatory for the output
+        pattern to include this format sequence.
+
+    - __%l__
+
+        The label for the participating party as communicated from the controlling
+        daemon.
+
+    - __%Y__
+    - __%m__
+    - __%d__
+    - __%H__
+    - __%M__
+    - __%S__
+
+        These format sequence reference the current system time (when the output file
+        was created) and are the same as the format sequences supported by [date(1)](http://man.he.net/man1/date)
+        or [strftime(3)](http://man.he.net/man3/strftime) (year, month, day, hours, minutes, and seconds,
+        respectively).
+
+    - __%u__
+
+        Microseconds, expanded to 6 digits (__000000__ through __999999__).
+
+    - __%__*INT*
+
+        References a prefix from the call ID of the given length. If this format
+        sequence is present more than once, then the prefixes are cumulative. For
+        example, if the call ID is __abcdefgh__ and the output pattern is configured as
+        __%2/%3/%c__, then the resulting output file name would be __ab/cde/abcdefgh__.
+
+    - __%{__
+
+        Take the string between the enclosing opening and closing brace
+        (between this __{__ and the next __}__) and use it as a key to look up
+        a corresponding value in the metadata string provided by *rtpengine*.
+        The metadata string must be given as a pipe (__|__) separated list of
+        `key:value` pairs, as described in the *rtpengine* documentation.
+
+        Example: If the metadata string is given as __foo:bar|blah:baz__ and
+        the pattern includes the format __%{foo}__ then __bar__ will be
+        inserted into the file name at that position.
+
+- __\-\-output-format=wav__\|__mp3__\|__none__
+
+    File format to be used for media files that are produced. Defaults to PCM WAV
+    (RIFF) files. Applicable for both files stored on the file system and in a
+    database.
+
+    __none__ is a legacy alias for __output-storage=none__.
+
+- __\-\-resample-to=__*INT*
+
+    Resample all audio to the given sample rate (e.g. __48000__). Resampling is
+    disabled by default, meaning that files will be written with the same sample
+    rate as the source media.
+
+- __\-\-mp3-bitrate=__*INT*
+
+    If MP3 output is selected, use the given bitrate for the MP3 encoder (e.g.
+    __64000__). There is no default value, so this option must be given if MP3
+    output is selected. Note that not all bitrates are valid in combinations with
+    all sample rates. For MP3 output it's therefore recommended to also set
+    __resample-to__.
+
+- __\-\-output-mixed__
+- __\-\-output-single__
+
+    Whether to produce __mixed__ audio files, or __single__ audio files, or both. If
+    neither option is given, then by default both are enabled. If no file output is
+    desired, set __output-format__ to __none__.
+
+    A __single__ audio file contains the audio for a single RTP SSRC, which usually
+    means an unidirectional audio stream. These are decoded directly from an RTP
+    stream and do not take timestamping into account, meaning that gaps or pauses
+    in the RTP stream are not reflected in the output audio file.
+
+    A __mixed__ audio file consists of the first four RTP SSRC seen, mixed together
+    into a single output file, which usually means that a bidirectional audio
+    stream is produced. Audio mixing takes RTP timestamping into account, so gaps
+    and pauses in the RTP media are reflected in the output audio to keep the
+    multiple audio sources in sync.
+
+- __\-\-mix-method=direct__\|__channels__
+
+    Selects a method to mix multiple audio inputs into a single output file for
+    __mixed__ output. The default is __direct__ which directly mixes all audio inputs
+    together, producing a mixed output file with the same format as an audio file
+    from a single input (__output-single__) would be.
+
+    The __channels__ mixing method puts each audio input into its own audio channel
+    in the output file, therefore producing a multi-channel output file. Up to four
+    separate RTP SSRCs are supported for a mixed output, which means that if each
+    input is mono audio, then the mixed output file would contain 4 audio channels.
+    This mixing method requires an output file format which supports these kinds of
+    multi-channel audio formats (e.g. __wav__).
+
+- __\-\-mix-num-inputs=__*INT*
+
+    Change the number of recording channel in the output file. The value is between 1 to 4 (e.g. __4__, which is also the default value).
+
+- __\-\-output-chmod=__*INT*
+
+    Change the file permissions of recording files to the given mode. Must be given
+    as an octal integer, for example __0660__.
+
+- __\-\-output-chmod-dir=__*INT*
+
+    Change the file permissions of recording files to the given mode. Must be given
+    as an octal integer, for example __0700__ (which is also the default value).
+
+- __\-\-output-chown=__*USER*\|*UID*
+- __\-\-output-chgrp=__*GROUP*\|*GID*
+
+    Change the ownership of recording files. Either user/group names or numeric IDs
+    are supported. If the value is blank or given as __-1__ then the user/group is
+    left unchanged.
+
+- __\-\-output-buffer=__*INT*
+
+    Set the size of the I/O buffer used for writing files. The default is 2^18
+    bytes (256 kB). Can be set to zero to effect unbuffered I/O.
+
+- __\-\-mysql-host=__*HOST*\|*IP*
+- __\-\-mysql-port=__*INT*
+- __\-\-mysql-user=__*USERNAME*
+- __\-\-mysql-pass=__*PASSWORD*
+- __\-\-mysql-db=__*STRING*
+
+    Configuration for a MySQL storage backend. Details about calls and media files
+    that are produced are stored into the database. Optionally the media files
+    themselves can be stored as well (see __output-storage__).
+    
+    For MySQL database schema, see [Database schema](#database-schema)
+
+- __\-\-forward-to=__*PATH*
+
+    Forward raw RTP packets to a Unix socket. Disabled by default.
+
+- __\-\-tcp-send-to=__*IP*:*PORT*
+- __\-\-tcp-resample=__*INT*
+- __\-\-tcp-mixed
+- __\-\-tls-send-to=__*IP*:*PORT*
+- __\-\-tls-resample=__*INT*
+- __\-\-tls-mixed
+
+    Send decoded audio over a TCP or TLS connection to the specified destination.
+    Audio is sent as raw 16-bit PCM in the given sample rate.
+
+    By default one connection with one mono audio stream will be established
+    for each SSRC. If mixed mode is enabled, then similar to the mixed file
+    output one connection per call will be established instead, containing
+    audio mixed together from all captured SSRCs. The __mix-method__ setting is
+    honoured in the same way, so the audio will be either mono or mulit-channel
+    depending on the setting.
+
+    Only one of these option combinations (TCP or TLS) can be active at the
+    same time.
+
+- __\-\-notify-uri=__*URI*
+
+    Enable HTTP notification about finished recordings to the specified URI, which
+    must be an HTTP or HTTPS URI. Information about the finished recording is
+    provided via custom HTTP headers, all of which use a prefix of __X-Recording-__.
+
+- __\-\-notify-post__
+
+    Use HTTP POST instead of GET for the HTTP notification requests. The request
+    body is empty even if POST is used.
+
+- __\-\-notify-no-verify__
+
+    Disable TLS peer certificate verification for HTTPS requests.
+
+- __\-\-notify-command=__*PATH*
+
+    External command to launch to send a notification about a new recording.
+    The command will receive two command line arguments: The full path and file
+    name of the recording, and the ID number from the database entry.
+
+- __\-\-notify-concurrency=__*INT*
+
+    The maximum number of HTTP requests to perform simultaneously.
+
+- __\-\-notify-retries=__*INT*
+
+    How many times to retry a failed HTTP notification before giving up. An
+    exponential falloff time is used for each subsequent attempt, starting with 5
+    seconds.
+
+- __\-\-notify-record__
+
+    Legacy alias for __output-storage=notify__. If no other output storage is
+    enabled, then the default __file__ storage remains enabled (unless the
+    following option is also set).
+
+- __\-\-notify-purge__
+
+    Legacy option to disable the default file storage when notification output
+    is enabled.
+
+- __\-\-output-mixed-per-media__
+
+    Forces one channel per media instead of SSRC. Note that this
+    option is only useful if __\-\-output-mixed__ is also enabled.
+
+- __\-\-flush-packets__
+
+    Forces that the output buffer will be flushed after every packet, ensuring
+    that the recording file grows steadily and becomes available for processing
+    without delays.
+
+- __\-\-s3-host=__*HOST*
+- __\-\-s3-port=__*INT*
+- __\-\-s3-path=__*STR*
+- __\-\-s3-access-key=__*STR*
+- __\-\-s3-secret-key=__*STR*
+- __\-\-s3-region=__*STR*
+- __\-\-s3-no-verify__
+
+    These options must be configured if S3 storage upload is enabled. The port
+    is optional and defaults to 443 (HTTPS) if not configured.
+
+    The host name may or may not need to include the bucket name. For example
+    `minio.example.com` or `examplebucket.s3.amazonaws.com`.
+
+    The path can be blank if the host name includes the bucket name. Otherwise
+    the bucket name becomes part of the path (such as `/examplebucket`). This
+    option must still be set even if the path is blank.
+
+    Access key and secret key are the credentials provided by the service (e.g.
+    `AKIAIOSFODNN7EXAMPLE` and `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY`).
+
+    The region code is part of the credentials (e.g. `us-east-1`). If the
+    service doesn't use a region code, then this must be set to a blank string.
+
+    TLS certificates are verified by default, unless the `no-verify` option is
+    set.
+
+- __\-\-gcs-uri=__*URI*
+- __\-\-gcs-key=__*STR*
+- __\-\-gcs-service-account=__*FILE*
+- __\-\-gcs-scope=__*STR*
+- __\-\-gcs-no-verify__
+
+    Configure these settings to use GCS storage. At least the URI and an
+    authentication method must be set.
+
+    The __gcs-uri__ must point to the full URI to post uploads to. Typically it
+    would contain the name of the storage bucket. The URI must not contain a
+    query string (i.e. no `?`). For example:
+    `https://storage.googleapis.com/upload/storage/v1/b/examplebucket/o`
+
+    For authentication, either an API key must be provided via __gcs-key__, or
+    OAuth2 authentication via a service account file must be configured.
+
+    To use OAuth2/JWT authentication, the __gcs-service-account__ setting must
+    point to a service account file in JSON format. This file should at least
+    contain a `client_email`, a `private_key` in RSA/PEM format, and a
+    `token_uri`. The authentication scope defaults to
+    `https://www.googleapis.com/auth/cloud-platform` but can be changed via
+    __gcs-scope__.
+
+    Set __gcs-no-verify__ to disable TLS certificate verification. Note that
+    this only applies to uploads themselves, not to OAuth2 requests.
+
+## EXIT STATUS
+
+- __0__
+
+    Successful termination.
+
+- __1__
+
+    An error occurred.
+
+## FILES
+
+- `/etc/rtpengine/rtpengine-recording.conf`
+
+    Configuration file.
+
+## DATABASE SCHEMA
+
+Saving recording into MySQL database requires correct database schema:
+```
+CREATE TABLE `recording_calls` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `call_id` varchar(250) NOT NULL,
+  `start_timestamp` decimal(13,3) DEFAULT NULL,
+  `end_timestamp` decimal(13,3) DEFAULT NULL,
+  `status` enum('recording','completed','confirmed') DEFAULT 'recording',
+  PRIMARY KEY (`id`),
+  KEY `call_id` (`call_id`)
+);
+
+CREATE TABLE `recording_streams` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `call` int(10) unsigned NOT NULL,
+  `local_filename` varchar(250) NOT NULL,
+  `full_filename` varchar(250) NOT NULL,
+  `file_format` varchar(10) NOT NULL,
+  `stream` mediumblob,
+  `output_type` enum('mixed','single') NOT NULL,
+  `stream_id` int(10) unsigned NOT NULL,
+  `sample_rate` int(10) unsigned NOT NULL DEFAULT '0',
+  `channels` int(10) unsigned NOT NULL DEFAULT '0',
+  `ssrc` int(10) unsigned NOT NULL,
+  `start_timestamp` decimal(13,3) DEFAULT NULL,
+  `end_timestamp` decimal(13,3) DEFAULT NULL,
+  `tag_label` varchar(255) NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`),
+  KEY `call` (`call`),
+  CONSTRAINT `fk_call_id` FOREIGN KEY (`call`) REFERENCES `recording_calls` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE `recording_metakeys` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `call` int(10) unsigned NOT NULL,
+  `key` char(255) NOT NULL,
+  `value` char(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `prim_lookup` (`value`,`key`),
+  KEY `fk_call_idx` (`call`),
+  CONSTRAINT `fk_call_idx` FOREIGN KEY (`call`) REFERENCES `recording_calls` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+```
+
+## SEE ALSO
+
+[rtpengine(8)](http://man.he.net/man8/rtpengine).

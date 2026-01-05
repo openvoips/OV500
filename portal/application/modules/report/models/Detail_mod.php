@@ -1,5 +1,12 @@
 <?php
-
+/* 
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2023 
+ * http://www.openvoips.com 
+ */
 class Detail_mod extends CI_Model {
 
     public $total_count;
@@ -169,7 +176,7 @@ WHERE 1 ";
                 foreach ($filter_data as $key => $value) {
 
                     if ($value != '') {
-                        if ($key == 'providertime') {
+                        if ($key == 'vendortime') {
                             $range = explode(' - ', $value);
                             $range_from = explode(' ', $range[0]);
                             $range_to = explode(' ', $range[1]);
@@ -211,29 +218,29 @@ WHERE 1 ";
     }
     
 
-    function get_provider_profitloss_data($order_by = '', $limit_to = '', $limit_from = '', $filter_data = array(), $option_param = array()) {
+    function get_vendor_profitloss_data($order_by = '', $limit_to = '', $limit_from = '', $filter_data = array(), $option_param = array()) {
         $final_return_array = array();
         try {
             $sql = "SELECT carrier.carrier_currency_id as  currency_id,  sum(c_total_cost) as total, carrier.carrier_id, carrier.carrier_name ,
 sys_currencies.name as cname,
 sys_currencies.symbol
-FROM bill_sdrdata 
-INNER JOIN carrier ON bill_sdrdata.c_carrier_id= carrier.carrier_id 
+FROM bill_carrier_sdr 
+INNER JOIN carrier ON bill_carrier_sdr.carrier_id= carrier.carrier_id 
 INNER JOIN sys_currencies on sys_currencies.currency_id = carrier.carrier_currency_id
 WHERE 1 ";
 
-            $sql .= " and  bill_sdrdata.rule_type in (SELECT term FROM `sys_sdr_terms` where cost_calculation_formula = '-' and term_group = 'usage') ";
+            $sql .= " and  bill_carrier_sdr.rule_type in (SELECT term FROM `sys_sdr_terms` where cost_calculation_formula = '-' and term_group = 'usage') ";
             if (count($filter_data) > 0) {
                 foreach ($filter_data as $key => $value) {
 
                     if ($value != '') {
-                        if ($key == 'providertime') {
+                        if ($key == 'vendortime') {
                             $range = explode(' - ', $value);
                             $range_from = explode(' ', $range[0]);
                             $range_to = explode(' ', $range[1]);
                             $start_dt = $range_from[0] . " 00:00:00";
                             $end_dt = $range_to[0] . " 23:59:59";
-                            $sql .= "  and bill_sdrdata.action_date BETWEEN '$start_dt' AND '$end_dt' ";
+                            $sql .= "  and bill_carrier_sdr.action_date BETWEEN '$start_dt' AND '$end_dt' ";
                         } elseif ($key == 'carrier_id')
                             $sql .= "  and  carrier.$key='$value' ";
                         elseif ($key == 'carrier_name')
@@ -254,6 +261,9 @@ WHERE 1 ";
                 throw new Exception($error_array['message']);
             }
             $this->select_sql = $sql;
+            
+            
+          
             $final_return_array['result'] = $query->result_array();
 
 
@@ -268,69 +278,7 @@ WHERE 1 ";
         }
     }
 
-    function get_service_data($order_by = '', $limit_to = '', $limit_from = '', $filter_data = array()) {
-        $final_return_array = array();
-        try {//ddd($filter_data);
-            $sql = "SELECT account.account_type,
-		IF(CONCAT(( SELECT company_name FROM customers WHERE customers.account_id =bill_billing_event.account_id ), ' (',bill_billing_event.account_id,')') IS NOT NULL, 
-		CONCAT(( SELECT company_name FROM customers WHERE customers.account_id =bill_billing_event.account_id ), ' (',bill_billing_event.account_id,')'),    CONCAT(( SELECT company_name FROM resellers WHERE resellers.account_id =bill_billing_event.account_id ), ' (',bill_billing_event.account_id,')')  )  account_id,
-		CONCAT(bill_pricelist.description , ' (', bill_billing_event.item_id,')') item,
-		bill_itemlist.item_name,
-		bill_billing_event.item_id,
-		SUM(bill_billing_event.quantity  ) AS quantity
-		FROM bill_billing_event  
-		INNER JOIN bill_itemlist  ON bill_billing_event.item_id=bill_itemlist.item_id  
-		INNER JOIN bill_pricelist on bill_pricelist.price_id = bill_billing_event.price_id 
-		INNER JOIN account on account.account_id = bill_billing_event.account_id
-		WHERE bill_billing_event.status_id='1' ";
-
-
-
-
-            if (count($filter_data) > 0) {
-                foreach ($filter_data as $key => $value) {
-
-                    if ($value != '') {
-                        if (in_array($key, array('logged_customer_account_id', 'logged_customer_level'))) {
-                            continue;
-                        } elseif ($key == 'logged_customer_type') {
-                            if ($value == 'RESELLER') {
-                                $sql .= " AND account.parent_account_id ='" . $filter_data['logged_customer_account_id'] . "' ";
-                            } else {
-                                $sql .= " AND account.parent_account_id ='' ";
-                            }
-                        } elseif ($key == 'account_id')
-                            $sql .= "  and  account.account_id='$value' ";
-                        elseif ($key == 'service_name')
-                            $sql .= "  AND (bill_pricelist.description  LIKE '%" . $value . "%' OR bill_billing_event.item_id  LIKE '%" . $value . "%') ";
-                    }
-                }
-            }
-            $sql .= " GROUP BY bill_billing_event.account_id, bill_billing_event.item_id";
-
-            $limit_from = intval($limit_from);
-            if ($limit_to != '')
-                $sql .= " LIMIT $limit_from, $limit_to";
-
-            $query = $this->db->query($sql);
-            if (!$query) {
-                $error_array = $this->db->error();
-                throw new Exception($error_array['message']);
-            }
-            $this->select_sql = $sql;
-            $final_return_array['result'] = $query->result_array();
-
-
-            $final_return_array['status'] = 'success';
-            $final_return_array['message'] = 'Services fetched successfully';
-
-            return $final_return_array;
-        } catch (Exception $e) {
-            $final_return_array['status'] = 'failed';
-            $final_return_array['message'] = $e->getMessage();
-            return $final_return_array;
-        }
-    }
+   
 
     function get_data_total_count($sql_exists = false) {
         try {
@@ -372,7 +320,7 @@ WHERE 1 ";
             $start_dt = $range[0];
             $end_dt = $range[1];
 
-            $sql_select = " SELECT   			
+            $sql_select = " SELECT (SELECT display_text FROM `sys_sdr_terms` where term = payment_option_id limit 1) as payment_option , payment_option_id,  			
 			ph.payment_id, ph.account_id, ph.amount, ph.paid_on, ph.notes, ph.transaction_id, ph.created_by, ph.create_dt,	
 			account.account_type,					
 			(SELECT name FROM users WHERE user_id=ph.created_by)  created_by_name,
@@ -452,6 +400,7 @@ WHERE 1 ";
     ////////////
     function get_sales_summary_data($order_by = '', $limit_to = '', $limit_from = '', $filter_data = array(), $option_param = array()) {
         $final_return_array = array();
+        $where_sql = $group_sql='';
         try {///ddd($filter_data);
             $select_sql = "SELECT account.account_id, account.account_type, account.currency_id, 
 		sys_currencies.`name` as cname, sys_currencies.symbol, (SUM(bill_account_sdr.totalcost) /  ((100 + account.tax1 + account.tax2 + account.tax3)/ 100) ) total_cost,
@@ -554,6 +503,7 @@ WHERE 1 ";
 
     function get_sales_details_data($order_by = '', $limit_to = '', $limit_from = '', $filter_data = array(), $option_param = array()) {
         $final_return_array = array();
+        $where_sql = $group_sql='';
         try {///ddd($filter_data);
             $select_sql = "SELECT sys_sdr_terms.term, sys_sdr_terms.display_text, 
 			account.account_id, account.account_type, account.currency_id, 

@@ -1,0 +1,1 @@
+/usr/bin/c++ -O3 -DNDEBUG  -lodbc -lodbcinst -rdynamic CMakeFiles/myodbc-installer.dir/myodbc-installer.cc.o -o ../bin/myodbc-installer  -Wl,-rpath,"\$ORIGIN/../lib/:\$ORIGIN/../lib/private" ../lib/libmyodbc-util.a -lodbc -lodbcinst ../lib/libmysql_sys.a ../lib/libmysql_strings.a -lmysqlclient -lzstd -lssl -lcrypto -lresolv -lm -lm -lodbcinst 

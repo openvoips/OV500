@@ -1,0 +1,19 @@
+#!/bin/sh
+
+set -e
+
+action=$1
+version=$2
+
+# Source debconf library.
+. /usr/share/debconf/confmodule
+db_version 2.0
+
+if [ -e /usr/bin/odbcinst ]
+then
+    db_title "ODBC Setup"
+
+    db_input medium libmyodbc/addtoodbc || true
+    db_go
+fi
+exit 0

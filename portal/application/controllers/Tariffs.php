@@ -1,30 +1,13 @@
 <?php
 
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-// OV500 Version 2.0.0
-// Copyright (C) 2019-2021 Openvoips Technologies   
-// http://www.openvoips.com  http://www.openvoips.org
-// 
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
-
+/*
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2026 
+ * http://www.openvoips.com 
+ */
 
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
@@ -69,8 +52,7 @@ class Tariffs extends MY_Controller {
                         $suc_msgs .= ' Deleted Successfully';
                         $this->session->set_flashdata('suc_msgs', $suc_msgs);
                         redirect(current_url(), 'location', '301');
-                    }
-                    else {
+                    } else {
                         $err_msgs = $result;
                         $this->session->set_flashdata('err_msgs', $err_msgs);
                         redirect(current_url(), 'location', '301');
@@ -92,8 +74,7 @@ class Tariffs extends MY_Controller {
                         $suc_msgs .= ' Deleted Successfully';
                         $this->session->set_flashdata('suc_msgs', $suc_msgs);
                         redirect($_SERVER['HTTP_REFERER'], 'location', '301');
-                    }
-                    else {
+                    } else {
                         $err_msgs = $result;
                         $this->session->set_flashdata('err_msgs', $err_msgs);
                         redirect($_SERVER['HTTP_REFERER'], 'location', '301');
@@ -131,9 +112,6 @@ class Tariffs extends MY_Controller {
             'tariff_type' => $_SESSION['search_tariff_data']['s_tariff_type']
         );
 
-
-
-
         $search_data['account_id'] = get_logged_account_id();
 
         $order_by = '';
@@ -166,6 +144,7 @@ class Tariffs extends MY_Controller {
                 $per_page = $_SESSION['search_tariff_data']['s_no_of_records'];
             else
                 $per_page = RECORDS_PER_PAGE;
+            ///	ddd($search_data);
 
             $response = $this->tariff_mod->get_data($order_by, $pagination_uri_segment, $per_page, $search_data);
             $config = array();
@@ -213,8 +192,7 @@ class Tariffs extends MY_Controller {
                             redirect(base_url() . 'tariffs/editTP/' . param_encrypt($result['id']), 'location', '301');
                         elseif ($action == 'save_close')
                             redirect(base_url() . 'tariffs', 'location', '301');
-                    }
-                    else {
+                    } else {
                         redirect(base_url() . 'tariffs', 'location', '301');
                     }
                     redirect(base_url() . 'tariffs/editTP/' . param_encrypt($route_id), 'location', '301');
@@ -254,8 +232,7 @@ class Tariffs extends MY_Controller {
                             redirect(base_url() . 'tariffs/editTP/' . param_encrypt($tariff_id), 'location', '301');
                         elseif ($action == 'save_close')
                             redirect(base_url() . 'tariffs', 'location', '301');
-                    }
-                    else {
+                    } else {
                         redirect(base_url() . 'tariffs', 'location', '301');
                     }
                     redirect(base_url() . 'tariffs/editTP/' . param_encrypt($tariff_id), 'location', '301');
@@ -284,6 +261,21 @@ class Tariffs extends MY_Controller {
                     $data['data_carrier'] = $carrier_response_data['result'];
                 else
                     $data['data_carrier'] = array();
+
+//                $this->load->model('customer_mod');
+//                $user_response_data = $this->customer_mod->get_data('', 0, RECORDS_PER_PAGE, array('tariff_id' => $response_data['result'][0]['tariff_id']), array());
+//                if (isset($user_response_data['result'])) {
+//                    $data['data_user'] = $user_response_data['result'];
+//                } else {
+//                    $data['data_user'] = array();
+//                }
+//                $this->load->model('reseller_mod');
+//                $user_response_data = $this->reseller_mod->get_data('', 0, RECORDS_PER_PAGE, array('tariff_id' => $response_data['result'][0]['tariff_id']), array());
+//                if (isset($user_response_data['result'])) {
+//                    $data['data_reseller'] = $user_response_data['result'];
+//                } else {
+//                    $data['data_reseller'] = array();
+//                }
             } else {
                 $show_404 = true;
             }
@@ -301,8 +293,8 @@ class Tariffs extends MY_Controller {
 
     public function editTMP() {
         $data['page_name'] = "mapping_edit";
-
-
+        // Need to check. It is stoped checkining during the migration from 1.3.0 to 2.0.0
+        //$this->member_mod->check_permission('');
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
         $mapping_id = param_decrypt($this->uri->segment(3));
         if (isset($_POST['action']) && $_POST['action'] == 'OkSaveData') {
@@ -324,8 +316,7 @@ class Tariffs extends MY_Controller {
                             redirect(base_url() . 'tariffs/editTMP/' . param_encrypt($mapping_id), 'location', '301');
                         elseif ($action == 'save_close')
                             redirect(base_url() . 'tariffs/editTP/' . $result['id'], 'location', '301');
-                    }
-                    else {
+                    } else {
                         redirect(base_url() . 'tariffs', 'location', '301');
                     }
                     redirect(base_url() . 'tariffs/editTP/' . $result['id'], 'location', '301');
@@ -362,7 +353,8 @@ class Tariffs extends MY_Controller {
 
     public function addTMP() {
         $data['page_name'] = "mapping_add";
-        //$this->member_mod->check_permission('');		
+        // Need to check. It is stoped checkining during the migration from 1.3.0 to 2.0.0
+        //$this->member_mod->check_permission('');
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
         $tariff_data = param_decrypt($this->uri->segment(3));
         $tariff_data = explode('@', $tariff_data);

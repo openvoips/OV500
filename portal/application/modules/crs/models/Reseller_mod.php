@@ -1,14 +1,13 @@
 <?php
 
-/* Copyright (C) Openvoips Technologies - All Rights Reserved
+/*
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
  * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential, Only allow to use 
- * OV500Pro Version 2.1.0
- * Written by Seema Anand <openvoips@gmail.com> , 2021 
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2026 
  * http://www.openvoips.com 
- * License https://www.openvoips.com/license.html
  */
-
 
 class Reseller_mod extends CI_Model {
 
@@ -55,7 +54,7 @@ class Reseller_mod extends CI_Model {
             if ($limit_to != '')
                 $sql .= " LIMIT $limit_from, $limit_to";
 
-            
+
             $query = $this->db->query($sql);
             if (!$query) {
                 $error_array = $this->db->error();
@@ -130,34 +129,6 @@ class Reseller_mod extends CI_Model {
                 }
             }
             $tariff_id_array = array_unique($tariff_id_array);
-
-
-            if ((isset($option_param['bundle_package']) || isset($option_param['bundle_package_group_by'])) && count($final_return_array['result']) > 0) {
-                $account_id_str = implode("','", $account_id_array);
-                $account_id_str = "'" . $account_id_str . "'";
-
-
-                $sql = "SELECT *, (select GROUP_CONCAT(prefix) from bundle_package_prefixes where  bundle_package_prefixes.bundle_package_id = bundle_account.bundle_package_id   and prefix <> '') prefix, bundle_account.id bundle_account_id, count(bundle_account.bundle_package_id) bundle_count FROM bundle_account INNER JOIN bundle_package ON bundle_account.bundle_package_id = bundle_package.bundle_package_id WHERE bundle_account.account_id IN($account_id_str)";
-                if (isset($option_param['bundle_package_id'])) {
-                    $sql .= " AND id  ='" . $option_param['bundle_package_id'] . "'";
-                }//echo $sql;
-
-                if (isset($option_param['bundle_package_group_by'])) {
-                    $sql .= " GROUP BY bundle_account.bundle_package_id";
-                }
-
-                $query = $this->db->query($sql);
-                if (!$query) {
-                    $error_array = $this->db->error();
-                    throw new Exception($error_array['message']);
-                }
-
-                foreach ($query->result_array() as $row) {
-                    $account_id = $row['account_id'];
-                    $id = $row['id'];
-                    $final_return_array['result'][$account_id]['bundle_package'][] = $row;
-                }
-            }
 
             if (isset($option_param['currency']) && $option_param['currency'] == true && count($final_return_array['result']) > 0) {
                 $sql = "SELECT * FROM sys_currencies WHERE 1";
@@ -366,7 +337,6 @@ class Reseller_mod extends CI_Model {
             $key = $this->generate_key($data['company_name'], RESELLERCODEPREFIX, 'resellers', 'account_id');
             $user_key = $this->member_mod->generate_key('RESELLERADMIN');
 
-
             $user_data_array = $account_data_array = $reseller_data_array = array();
             $account_data_array['account_id'] = $key;
             $account_data_array['status_id'] = '1';
@@ -429,7 +399,6 @@ class Reseller_mod extends CI_Model {
             $user_data_array['emailaddress'] = $data['user_emailaddress'];
             $user_data_array['status_id'] = '1';
 
-
             if (count($account_data_array) > 0) {
                 $str = $this->db->insert_string('account', $account_data_array);
                 $result = $this->db->query($str);
@@ -466,27 +435,25 @@ class Reseller_mod extends CI_Model {
                 return $error_array['message'];
             } else {
                 $this->db->trans_commit();
-				
-				////////
-				$sdr_data_array=array();
-				$sdr_data_array['ACCOUNTID'] = $key;
-				$sdr_data_array['REQUEST'] = 'OPENINGBALANCE';
-				$sdr_data_array['SERVICENUMBER'] = '';
-				$sdr_data_array['CREATEDBY'] = $key;
-				$api_response = call_billing_api($sdr_data_array);
-				$api_result = json_decode($api_response, true);			
-				///////
-				
-				
+
+                ////////
+                $sdr_data_array = array();
+                $sdr_data_array['ACCOUNTID'] = $key;
+                $sdr_data_array['REQUEST'] = 'OPENINGBALANCE';
+                $sdr_data_array['SERVICENUMBER'] = '';
+                $sdr_data_array['CREATEDBY'] = $key;
+                $api_response = call_billing_api($sdr_data_array);
+                $api_result = json_decode($api_response, true);
+                ///////
+
+
                 set_activity_log($log_data_array);
             }
 
 
- $strQSL = "INSERT INTO `bill_customer_priceplan` ( `account_id`, `billing_cycle`, `payment_terms`, `itemised_billing`, `billing_day`) VALUES ( '".$key."', 'MONTHLY', 1, '1', 1);";
+            $strQSL = "INSERT INTO `bill_customer_priceplan` ( `account_id`, `billing_cycle`, `payment_terms`, `itemised_billing`, `billing_day`) VALUES ( '" . $key . "', 'MONTHLY', 1, '1', 1);";
 
-
-$this->db->query($strQSL);
-
+            $this->db->query($strQSL);
 
             return true;
         } catch (Exception $e) {
@@ -575,14 +542,14 @@ $this->db->query($strQSL);
             if (!isset($existing_account_row)) {
                 throw new Exception('Account Not Found-' . $sql);
             }
-  $logged_account_id = get_logged_account_id();
+            $logged_account_id = get_logged_account_id();
             if (isset($data['account_manager']) && $data['account_manager'] != '')
                 $account_manager_data_array['account_manager'] = $data['account_manager'];
             $account_manager_data_array['customer_account_id'] = $account_id;
             $account_manager_data_array['account_id'] = $logged_account_id;
             $account_manager_data_array['created_dt'] = date('Y-m-d H:i:s');
             if (count($account_manager_data_array) > 0) {
-                $str1 = $this->db->insert_string('account_am', $account_manager_data_array). ' ON DUPLICATE KEY UPDATE account_manager=values(account_manager)';
+                $str1 = $this->db->insert_string('account_am', $account_manager_data_array) . ' ON DUPLICATE KEY UPDATE account_manager=values(account_manager)';
                 $result1 = $this->db->query($str1);
                 if (!$result1) {
                     $error_array = $this->db->error();
@@ -1400,105 +1367,8 @@ $this->db->query($strQSL);
         }
     }
 
-    function add_bundle($data) {
-        try {
-            $this->db->trans_begin();
-            $log_data_array = array();
-            if (isset($data['account_id'])) {
-                $account_id = $data['account_id'];
-            } else {
-                throw new Exception('User missing');
-            }
-
-            $sip_data_array = array();
-            $sip_data_array['account_id'] = $data['account_id'];
-            $sip_data_array['bundle_package_id'] = $data['bundle_package_id'];
-            $sip_data_array['assign_dt'] = date('Y-m-d H:i:s');
-            $sip_data_array['bundle_package_desc'] = $data['bundle_package_desc'];
-
-            while (1) {
-                $sip_data_array['account_bundle_key'] = strtoupper('RB' . generateRandom(8));
-                $sql = "SELECT  account_bundle_key FROM bundle_account WHERE account_bundle_key ='" . $sip_data_array['account_bundle_key'] . "'";
-                $query = $this->db->query($sql);
-                $row = $query->row();
-                if (isset($row)) {
-                    
-                } else {
-                    break;
-                }
-            }
-
-
-
-            $str = $this->db->insert_string('bundle_account', $sip_data_array);
-            $result = $this->db->query($str);
-            if (!$result) {
-                $error_array = $this->db->error();
-                throw new Exception($error_array['message']);
-            }
-
-            ////////////////////
-            $api_request['account_id'] = $account_id;
-            $api_request['account_type'] = 'RESELLER';
-            $api_request['service_number'] = $sip_data_array['bundle_package_id'];
-            $api_request['request'] = 'BUNDLECHARGES';
-
-            $api_response = callSdrAPI($api_request);
-            $api_result = json_decode($api_response, true);
-
-            $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['request'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
-
-            if (!isset($api_result['error']) || $api_result['error'] == '1') {
-                throw new Exception('SDR Problem:(' . $api_request['account_id'] . ')' . $api_result['message']);
-            }
-
-            // $this->last_customer_sip_id = $this->db->insert_id();
-            // $log_data_array[] = array('activity_type' => 'insert', 'sql_table' => 'customer_sip_account', 'sql_key' => '', 'sql_query' => $str);
-
-            if ($this->db->trans_status() === FALSE) {
-                $error_array = $this->db->error();
-                throw new Exception($error_array['message']);
-            } else {
-                $this->db->trans_commit();
-                //set_activity_log($log_data_array);
-                return true;
-            }
-        } catch (Exception $e) {
-            $this->db->trans_rollback();
-            return $e->getMessage();
-        }
-    }
-
-    function delete_bundle($account_id, $id_array) {
-        try {
-            $log_data_array = array();
-            $this->db->trans_begin();
-            foreach ($id_array['delete_id'] as $id) {
-                $result = $this->db->delete('bundle_account', array('account_id' => $account_id, 'id' => $id));
-                if (!$result) {
-                    $error_array = $this->db->error();
-                    throw new Exception($error_array['message']);
-                }
-                $log_data_array[] = array('activity_type' => 'delete', 'sql_table' => 'bundle_account', 'sql_key' => $id, 'sql_query' => $this->db->last_query());
-                if ($this->db->affected_rows() == 0)
-                    throw new Exception('Bundle not found');
-            }
-            if ($this->db->trans_status() === FALSE) {
-                $error_array = $this->db->error();
-                $this->db->trans_rollback();
-                return $error_array['message'];
-            } else {
-                $this->db->trans_commit();
-                set_activity_log($log_data_array);
-                return true;
-            }
-        } catch (Exception $e) {
-            $this->db->trans_rollback();
-            return $e->getMessage();
-        }
-    }
- function get_user_by_account_manager() {
-      $logged_account_id = get_logged_account_id();
+    function get_user_by_account_manager() {
+        $logged_account_id = get_logged_account_id();
         $final_return_array = array();
         try {
             $sql = "SELECT user_id,name,account_id FROM users WHERE user_type='ACCOUNTMANAGER' and account_id='$logged_account_id'";
@@ -1512,6 +1382,7 @@ $this->db->query($strQSL);
             return $final_return_array;
         }
     }
+
     function get_account_manager($customer_account_id) {
         $logged_account_id = get_logged_account_id();
         $final_return_array = array();
@@ -1528,5 +1399,4 @@ $this->db->query($strQSL);
             return $final_return_array;
         }
     }
-
 }

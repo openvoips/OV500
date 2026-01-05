@@ -1,0 +1,273 @@
+Files: *
+Copyright: 2018-2023 SignalWire, Inc
+License: MIT
+ Copyright (c) 2018-2023 SignalWire, Inc
+ .
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ .
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+ .
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+
+Files: src/simclist.c
+ src/include/libks/simclist.h
+Copyright: 2007,2008,2009,2010,2011 Mij <mij@bitchx.it>
+License: MIT
+ Copyright (c) 2007,2008,2009,2010,2011 Mij <mij@bitchx.it>
+ .
+ Permission to use, copy, modify, and distribute this software for any
+ purpose with or without fee is hereby granted, provided that the above
+ copyright notice and this permission notice appear in all copies.
+ .
+ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+Files: src/ks_utf8.c
+ src/include/libks/ks_utf8.h
+Copyright: 2005 Jeff Bezanson
+License: Public Domain
+ Basic UTF-8 manipulation routines
+ by Jeff Bezanson
+ placed in the public domain Fall 2005
+ . 
+ This code is designed to provide the utilities you need to manipulate
+ UTF-8 as an internal string encoding. These functions do not perform the
+ error checking normally needed when handling UTF-8 data, so if you happen
+ to be from the Unicode Consortium you will want to flay me alive.
+ I do this because error checking can be performed at the boundaries (I/O),
+ with these routines reserved for higher performance on data known to be
+ valid.
+
+Files: src/ks_resp.c
+ src/include/libks/ks_resp.h
+Copyright: 2015 José Carlos Nieto, https://menteslibres.net/xiam
+License: BSD-1 clause
+ Copyright (c) 2015 José Carlos Nieto, https://menteslibres.net/xiam
+ .
+ Permission is hereby granted, free of charge, to any person obtaining
+ a copy of this software and associated documentation files (the
+ "Software"), to deal in the Software without restriction, including
+ without limitation the rights to use, copy, modify, merge, publish,
+ distribute, sublicense, and/or sell copies of the Software, and to
+ permit persons to whom the Software is furnished to do so, subject to
+ the following conditions:
+ .
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
+ .
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Files: src/ks_printf.c
+  src/include/libks/ks_printf.h
+Copyright:
+License: Public Domain
+ The "printf" code that follows dates from the 1980's.  It is in
+ the public domain.  The original comments are included here for
+ completeness.  They are very out-of-date but might be useful as
+ an historical reference.  Most of the "enhancements" have been backed
+ out so that the functionality is now the same as standard printf().
+
+Files: src/ks_pool.c
+ src/include/libks/ks_pool.h
+ src/include/libks/internal/ks_pool.h
+Copyright: 1996 Gray Watson
+License: MIT-like
+ Memory pool routines.
+ .
+ Copyright 1996 by Gray Watson.
+ .
+ This file is part of the ks_pool package.
+ .
+ Permission to use, copy, modify, and distribute this software for
+ any purpose and without fee is hereby granted, provided that the
+ above copyright notice and this permission notice appear in all
+ copies, and that the name of Gray Watson not be used in advertising
+ or publicity pertaining to distribution of the document or software
+ without specific, written prior permission.
+ .
+ Gray Watson makes no representations about the suitability of the
+ software described herein for any purpose.  It is provided "as is"
+ without express or implied warranty.
+ .
+ The author may be reached via http://256.com/gray/
+
+Files: src/ks_hash.c
+ src/include/libks/ks_hash.h
+Copyright: 2002, Christopher Clark
+License: BSD-3-Clause
+ Copyright (c) 2002, Christopher Clark
+ All rights reserved.
+ .
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ .
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ .
+ * Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+ .
+ * Neither the name of the original author; nor the names of any contributors
+ may be used to endorse or promote products derived from this software
+ without specific prior written permission.
+ .
+ .
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER
+ OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Files: src/include/crypt/twofish.c
+ src/include/crypt/twofish.h
+ src/include/crypt/twofish_cfb.c
+Copyright: 2002 by Niels Ferguson
+License: twofish
+ Fast, portable, and easy-to-use Twofish implementation,  
+ Version 0.3. 
+ Copyright (c) 2002 by Niels Ferguson.  
+ The author hereby grants a perpetual license to everybody to 
+ use this code for any purpose as long as the copyright message is included 
+ in the source code of this or any derived work. 
+ .  
+ Yes, this means that you, your company, your club, and anyone else 
+ can use this code anywhere you want. You can change it and distribute it 
+ under the GPL, include it in your commercial product without releasing 
+ the source code, put it on the web, etc.  
+ The only thing you cannot do is remove my copyright message,  
+ or distribute any source code based on this implementation that does not  
+ include my copyright message.  
+ .  
+ I appreciate a mention in the documentation or credits,  
+ but I understand if that is difficult to do. 
+ I also appreciate it if you tell me where and why you used my code. 
+ . 
+ Please send any questions or comments to niels@ferguson.net 
+ . 
+ Have Fun! 
+ . 
+ Niels 
+ .
+ . 
+ DISCLAIMER: As I'm giving away my work for free, I'm of course not going 
+ to accept any liability of any form. This code, or the Twofish cipher, 
+ might very well be flawed; you have been warned. 
+ This software is provided as-is, without any kind of warrenty or 
+ guarantee. And that is really all you can expect when you download  
+ code for free from the Internet.  
+ . 
+ I think it is really sad that disclaimers like this seem to be necessary. 
+ If people only had a little bit more common sense, and didn't come 
+ whining like little children every time something happens.... 
+ 
+Files: src/include/crypt/sha2.c
+ src/include/crypt/sha2.h
+Copyright: 2002, Dr Brian Gladman, Worcester, UK.
+License: BSD-3-Clause
+ Copyright (c) 2002, Dr Brian Gladman, Worcester, UK.   All rights reserved.
+ .
+ LICENSE TERMS
+ .
+ The free distribution and use of this software in both source and binary
+ form is allowed (with or without changes) provided that:
+ .
+   1. distributions of this source code include the above copyright
+      notice, this list of conditions and the following disclaimer;
+ .
+   2. distributions in binary form include the above copyright
+      notice, this list of conditions and the following disclaimer
+      in the documentation and/or other associated materials;
+ .
+   3. the copyright holder's name is not used to endorse products
+      built using this software without specific written permission.
+ .
+ ALTERNATIVELY, provided that this notice is retained in full, this product
+ may be distributed under the terms of the GNU General Public License (GPL),
+ in which case the provisions of the GPL apply INSTEAD OF those given above.
+ .
+ DISCLAIMER
+ .
+ This software is provided 'as is' with no explicit or implied warranties
+ in respect of its properties, including, but not limited to, correctness
+ and/or fitness for purpose.
+
+Files: src/include/crypt/aes.h
+ src/include/crypt/aes_modes.c
+ src/include/crypt/aescpp.h
+ src/include/crypt/aescrypt.c
+ src/include/crypt/aeskey.c
+ src/include/crypt/aesopt.h
+ src/include/crypt/aestab.c
+ src/include/crypt/aestab.h
+ src/include/crypt/brg_endian.h
+ src/include/crypt/brg_types.h
+Copyright:
+License:
+ Copyright (c) 1998-2010, Brian Gladman, Worcester, UK. All rights reserved.
+ .
+ The redistribution and use of this software (with or without changes)
+ is allowed without the payment of fees or royalties provided that:
+ .
+   source code distributions include the above copyright notice, this
+   list of conditions and the following disclaimer;
+ .
+   binary distributions include the above copyright notice, this list
+   of conditions and the following disclaimer in their documentation.
+ .
+ This software is provided 'as is' with no explicit or implied warranties
+ in respect of its operation, including, but not limited to, correctness
+ and fitness for purpose.
+
+Files: src/include/cJSON/*
+Copyright: 2009-2017 Dave Gamble and cJSON contributors
+License: MIT
+ Copyright (c) 2009-2017 Dave Gamble and cJSON contributors
+ .
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ .
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ .
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.

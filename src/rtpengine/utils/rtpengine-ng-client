@@ -1,0 +1,321 @@
+#!/usr/bin/perl
+
+# sample usage:
+# ./ng-client offer --trust-address --from-tag=sgadhdagf --call-id=sfghjfsh --sdp=$'v=0\no=moo 1 2 IN IP4 192.168.1.90\ns=-\nc=IN IP4 192.168.1.90\nt=0 0\nm=audio 3456 RTP/AVP 0\n'
+
+use warnings;
+use strict;
+use Getopt::Long;
+use Data::Dumper;
+use NGCP::Rtpengine;
+
+my %options = ('proxy-address' => 'localhost', 'proxy-port' => 2223);
+
+my @flags = qw(
+	trust-address
+	symmetric
+	asymmetric
+	unidirectional
+	force
+	strict-source
+	media-handover
+	reset
+	port-latching
+	no-rtcp-attribute
+	full-rtcp-attribute
+	loop-protect
+	record-call
+	always-transcode
+	SIPREC
+	pad-crypto
+	generate-mid
+	fragment
+	original-sendrecv
+	symmetric-codecs
+	asymmetric-codecs
+	inject-DTMF
+	detect-DTMF
+	generate-RTCP
+	single-codec
+	no-codec-renegotiation
+	pierce-NAT
+	SIP-source-address
+	allow-transcoding
+	force-transcoding
+	trickle-ICE
+	reject-ICE
+	egress
+	no-jitter-buffer
+	passthrough
+	no-passthrough
+	pause
+	early-media
+	block-short
+	recording-vsc
+	block-egress
+	directional
+	allow-no-codec-media
+);
+
+my @string_opts = qw(
+	from-tag
+	to-tag
+	call-id
+	to-call-id
+	transport-protocol
+	media-address
+	ICE
+	address-family
+	DTLS
+	via-branch
+	media-address
+	xmlrpc-callback
+	metadata
+	address
+	file
+	code
+	DTLS-fingerprint
+	ICE-lite
+	media-echo
+	label
+	set-label
+	from-label
+	to-label
+	DTMF-security
+	digit
+	DTMF-security-trigger
+	DTMF-security-trigger-end
+	trigger
+	trigger-end
+	all
+	frequency
+	blob
+	sdp
+	audio-player
+	dtmf-log-dest
+	output-destination
+	vsc-start-rec
+	vsc-stop-rec
+	vsc-pause-rec
+	vsc-start-stop-rec
+	vsc-pause-resume-rec
+	vsc-start-pause-resume-rec
+	rtpp-flags
+	body
+);
+
+my @int_opts = qw(
+	TOS
+	delete-delay
+	delay-buffer
+	volume
+	trigger-end-time
+	trigger-end-digits
+	DTMF-delay
+	ptime
+	db-id
+	duration
+);
+
+my @string_arr_opts = qw(
+	flags
+	rtcp-mux
+	SDES
+	supports
+	T38
+	OSRTP
+	received-from
+	from-tags
+	frequencies
+);
+
+my @codec_opts = qw(
+	strip
+	offer
+	transcode
+	mask
+	set
+	consume
+	accept
+	except
+);
+
+my @replace_opts = qw(
+	origin
+	session-connection
+	sdp-version
+	username
+	session-name
+	zero-address
+	force-increment-sdp-version
+);
+
+my @sdp_attr_sections = qw(
+	global
+	audio
+	video
+);
+my @sdp_attr_commands = qw(
+	add
+	remove
+);
+
+my %getopt = (
+	'json'				=> \$options{'json'},
+	'proxy-address=s'		=> \$options{'proxy-address'},
+	'proxy-port=s'			=> \$options{'proxy-port'},
+	'client-address=s'		=> \$options{'client-address'},
+	'sdp-file=s'			=> \$options{'sdp-file'},
+	'direction=s'			=> \$options{'direction'},
+	'v|verbose'			=> \$options{'verbose'},
+	'codec-options-flat'		=> \$options{'codec options flat'},
+	'blob-file=s'			=> \$options{'blob-file'},
+);
+
+for my $flag (@flags) {
+	$getopt{$flag} = \$options{$flag};
+}
+for my $flag (@string_opts) {
+	$getopt{"$flag=s"} = \$options{$flag};
+}
+for my $flag (@int_opts) {
+	$getopt{"$flag=i"} = \$options{$flag};
+}
+for my $flag (@string_arr_opts) {
+	$getopt{"$flag=s@"} = \$options{$flag};
+}
+for my $flag (@codec_opts) {
+	$getopt{"codec-$flag=s@"} = \$options{"codec-$flag"};
+}
+for my $flag (@replace_opts) {
+	$getopt{"replace-$flag"} = \$options{"replace-$flag"};
+}
+for my $sect (@sdp_attr_sections) {
+	for my $cmd (@sdp_attr_commands) {
+		$getopt{"sdp-attr-$sect-$cmd=s@"} = \$options{"sdp-attr-$sect-$cmd"};
+	}
+}
+
+GetOptions(%getopt) or die;
+
+my $cmd = shift(@ARGV) or die;
+
+my %packet = (command => $cmd);
+
+for my $x (@string_opts) {
+	if (defined($options{$x})) {
+		if (!$options{json}) {
+			$packet{$x} = \$options{$x};
+		}
+		else {
+			$packet{$x} = $options{$x};
+		}
+	}
+}
+for my $x (@int_opts) {
+	defined($options{$x}) and $packet{$x} = $options{$x};
+}
+# process this first to get manually specified --flags=... in first
+for my $x (@string_arr_opts) {
+	$packet{$x} = $options{$x}
+		if defined($options{$x}) && ref($options{$x}) eq 'ARRAY';
+}
+for my $x (@flags) {
+	defined($options{$x}) and push(@{$packet{flags}}, $x);
+}
+for my $x (@replace_opts) {
+	defined($options{'replace-' . $x}) and push(@{$packet{replace}}, $x);
+}
+if (defined($options{direction})) {
+	$options{direction} =~ /(.*),(.*)/ or die;
+	$packet{direction} = [$1,$2];
+}
+for my $x (@codec_opts) {
+	if ($options{'codec-'.$x} && @{$options{'codec-'.$x}}) {
+		if (!$options{'codec options flat'}) {
+			$packet{codec}{$x} = $options{'codec-'.$x};
+		}
+		else {
+			push(@{$packet{flags}}, map {'codec-'.$x.'-'.$_} @{$options{'codec-'.$x}});
+		}
+	}
+}
+for my $sect (@sdp_attr_sections) {
+	for my $cmd (@sdp_attr_commands) {
+		if ($options{"sdp-attr-$sect-$cmd"} && @{$options{"sdp-attr-$sect-$cmd"}}) {
+			$packet{'sdp-attr'}{$sect}{$cmd} = $options{"sdp-attr-$sect-$cmd"};
+		}
+	}
+}
+
+sub slurp_file {
+	local $/ = undef;
+	open(my $fh, '<', $_[0]) or die $!;
+	my $ret = <$fh>;
+	die $! unless defined $ret;
+	close($fh);
+	return $ret;
+}
+
+if (defined($options{'sdp-file'})) {
+	$packet{sdp} = slurp_file($options{'sdp-file'});
+}
+#elsif (@ARGV && $ARGV[0] eq 'sdp') {
+#	shift(@ARGV);
+#	$options{'client-address'} or die;
+#	my ($ca, $cp);
+#	if ($ca = inet_pton(AF_INET, $options{'client-address'})) {
+#		$ca = inet_ntop(AF_INET, $ca);
+#		$cp = "IP4";
+#	}
+#	elsif ($ca = inet_pton(AF_INET6, $options{'client-address'})) {
+#		$ca = inet_ntop(AF_INET6, $ca);
+#		$cp = "IP6";
+#	}
+#	$ca or die;
+#	my $sdp = "v=0\r\no=- 12345 67890 IN $cp $ca\r\ns=session\r\nc=IN $cp $ca\r\nt=0 0\r\n";
+#
+#	$packet{sdp} = $sdp;
+#}
+
+if (defined($options{'blob-file'})) {
+	$packet{blob} = slurp_file($options{'blob-file'});
+}
+
+$options{verbose} and print Dumper \%packet;
+
+if (defined($packet{sdp})) {
+	print("Old SDP:\n-----8<-----8<-----8<-----8<-----8<-----\n$packet{sdp}\n".
+		"----->8----->8----->8----->8----->8-----\n");
+}
+
+my $engine = NGCP::Rtpengine->new($options{'proxy-address'}, $options{'proxy-port'});
+$engine->{json} = $options{json};
+my $resp = $engine->req(\%packet);
+
+#print Dumper $resp;
+#exit;
+
+if (exists($$resp{result}) && $$resp{result} eq 'ok') {
+	delete $$resp{result};
+}
+
+if (defined($$resp{sdp})) {
+	print("New SDP:\n-----8<-----8<-----8<-----8<-----8<-----\n$$resp{sdp}\n".
+		"----->8----->8----->8----->8----->8-----\n");
+	delete $$resp{sdp};
+	if (%$resp) {
+		print("Result dictionary:\n-----8<-----8<-----8<-----8<-----8<-----\n"
+			. Dumper($resp)
+			. "----->8----->8----->8----->8----->8-----\n");
+	}
+}
+else {
+	local $Data::Dumper::Indent = 1;
+	local $Data::Dumper::Terse = 1;
+	local $Data::Dumper::Quotekeys = 0;
+	local $Data::Dumper::Sortkeys = 1;
+	print("Result dictionary:\n-----8<-----8<-----8<-----8<-----8<-----\n"
+		. Dumper($resp)
+		. "----->8----->8----->8----->8----->8-----\n");
+}

@@ -1,15 +1,14 @@
 <?php
-
-/* Copyright (C) Openvoips Technologies - All Rights Reserved
+/*
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
  * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential, Only allow to use 
- * OV500Pro Version 2.1.0
- * Written by Seema Anand <openvoips@gmail.com> , 2021 
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2026 
  * http://www.openvoips.com 
- * License https://www.openvoips.com/license.html
  */
 
-class Crsvoip_mod extends CI_Model {
+ class Crsvoip_mod extends CI_Model {
 
     public $customer_voipminute_id;
     public $total_count;
@@ -25,17 +24,30 @@ class Crsvoip_mod extends CI_Model {
         $logged_account_id = get_logged_account_id();
         $final_return_array = array();
         try {
-            $sql = "SELECT * FROM (SELECT account.account_id, account.parent_account_id, account.account_type , (select tariff_id from customer_voipminuts  where customer_voipminuts.account_id = account.account_id limit 1) tariff_id, (select  tariff_name from tariff where tariff_id = (select tariff_id from customer_voipminuts  where customer_voipminuts.account_id = account.account_id limit 1)) as tariff_name , account.status_id as status,
+            $sql = "SELECT * FROM (SELECT account.account_id, account.parent_account_id, account.account_type , (select tariff_id from customer_voipminuts  where customer_voipminuts.account_id = account.account_id and status = '1' order by id desc limit 1) tariff_id, (select  tariff_name from tariff where tariff_id = (select tariff_id from customer_voipminuts  where customer_voipminuts.account_id = account.account_id limit 1)) as tariff_name , account.status_id as status,
  if( account.account_type = 'CUSTOMER',( select company_name from customers where customers.account_id =  account.account_id ), 
 (select company_name from resellers where resellers.account_id =  account.account_id ) ) 
  as company_name , customer_balance.balance, customer_balance.credit_limit,
-sys_currencies.symbol, sys_currencies.name currency_name, account.dp  , users.username as web_username ,
+sys_currencies.symbol, sys_currencies.name currency_name, account.dp  ,
 
-(select username  from customer_sip_account where customer_sip_account.account_id =  account.account_id limit 1) as  sip_user
+
+ (select GROUP_CONCAT(CONCAT(user_type_permissions.label , ' => ',users.username  ,' / ', users.secret ))  from users
+
+INNER JOIN  user_type_permissions on users.user_type = user_type_permissions.user_type
+
+where users.account_id = account.account_id  and users.user_type <> 'EXTENSION') as web_username,
+ 
+
+
+
+
+ (select GROUP_CONCAT(CONCAT(customer_devices.user_type,' => ', customer_devices.username  ,' / ', customer_devices.secret ))  from customer_devices
+where customer_devices.account_id = account.account_id ) as sip_user
+ 
 
 FROM account 
 INNER JOIN sys_currencies on sys_currencies.currency_id = account.currency_id
-left JOIN users on users.account_id = account.account_id 
+ 
 left JOIN customer_balance on customer_balance.account_id = account.account_id
  ) abcd WHERE 1";
             if (check_logged_user_type(array('RESELLERADMIN', 'RESELLER'))) {
@@ -72,13 +84,14 @@ left JOIN customer_balance on customer_balance.account_id = account.account_id
             $limit_from = intval($limit_from);
             if ($limit_to != '')
                 $sql .= " LIMIT $limit_from, $limit_to";
-
+ 
             $query = $this->db->query($sql);
             if (!$query) {
                 $error_array = $this->db->error();
                 throw new Exception($error_array['message']);
             }
             $this->select_sql = $sql;
+            //echo $sql;
             $final_return_array['result'] = $query->result_array();
             $final_return_array['status'] = 'success';
             $final_return_array['message'] = 'Voip Minuts fetched successfully';
@@ -1113,67 +1126,7 @@ if( account_type = 'CUSTOMER',( select company_name from customers where custome
         }
     }
 
-    function add_bundle($data) {
-        try {
-            $this->db->trans_begin();
-            $log_data_array = array();
-            if (isset($data['account_id'])) {
-                $account_id = $data['account_id'];
-            } else {
-                throw new Exception('User missing');
-            }
-
-            $bundle_data_array = array();
-            $bundle_data_array['account_id'] = $data['account_id'];
-            $bundle_data_array['bundle_package_id'] = $data['bundle_package_id'];
-            $bundle_data_array['assign_dt'] = date('Y-m-d H:i:s');
-            $bundle_data_array['bundle_package_desc'] = $data['bundle_package_desc'];
-
-            while (1) {
-                $bundle_data_array['account_bundle_key'] = strtoupper('AB' . generateRandom(8));
-                $sql = "SELECT  account_bundle_key FROM bundle_account WHERE account_bundle_key ='" . $bundle_data_array['account_bundle_key'] . "'";
-                $query = $this->db->query($sql);
-                $row = $query->row();
-                if (isset($row)) {
-                    
-                } else {
-                    break;
-                }
-            }
-            $str = $this->db->insert_string('bundle_account', $bundle_data_array);
-            $result = $this->db->query($str);
-            if (!$result) {
-                $error_array = $this->db->error();
-                throw new Exception($error_array['message']);
-            }
-            $api_data['RULETYPE'] = 'BUNDLECHARGES';
-            $api_data['ACCOUNTID'] = $account_id;
-            $api_data['QUANTITY'] = 1;
-            $api_data['SERVICENUMBER'] = $bundle_data_array['bundle_package_id'];
-            $api_data['SERVICEKEY'] = $bundle_data_array['account_bundle_key'];
-            $api_data['REQUEST'] = 'BUNDLECHARGES';
-            $api_response = '';
-            $api_response = call_billing_api($api_data);
-
-            $api_result = json_decode($api_response, true);
-            $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_data['REQUEST'], 'sql_key' => $api_data['ACCOUNTID'], 'sql_query' => print_r($api_result, true));
-
-            if (!isset($api_result['error']) || $api_result['error'] == '1') {
-                throw new Exception('SDR Problem:(' . $api_data['ACCOUNTID'] . ')' . $api_result['message']);
-            }
-            if ($this->db->trans_status() === FALSE) {
-                $error_array = $this->db->error();
-                throw new Exception($error_array['message']);
-            } else {
-                $this->message = $this->data['message'];
-                $this->db->trans_commit();
-                return true;
-            }
-        } catch (Exception $e) {
-            $this->db->trans_rollback();
-            return $e->getMessage();
-        }
-    }
+    
 
   function priceplan_update($data) {
         try {
@@ -1322,30 +1275,7 @@ if( account_type = 'CUSTOMER',( select company_name from customers where custome
             }
             $final_array['voipminuts'] = $query->row_array();
         }
-        if ((isset($option_param['bundle_package']) || isset($option_param['bundle_package_group_by'])) && count($final_array) > 0) {
-
-            $sql = "SELECT bundle_package.bundle_package_name, bundle_account.*, (select GROUP_CONCAT(prefix) from bundle_package_prefixes where  bundle_package_prefixes.bundle_package_id = bundle_account.bundle_package_id  and prefix <> '' ) prefix, bundle_account.id bundle_account_id, count(bundle_account.bundle_package_id) bundle_count FROM bundle_account INNER JOIN bundle_package ON bundle_account.bundle_package_id = bundle_package.bundle_package_id WHERE bundle_account.account_id='$account_id' ";
-            if (isset($option_param['bundle_package_id'])) {
-                $sql .= " AND id  ='" . $option_param['bundle_package_id'] . "'";
-            }
-
-            if (isset($option_param['bundle_package_group_by'])) {
-                $sql .= " GROUP BY bundle_account.bundle_package_id";
-            }
-            $query = $this->db->query($sql);
-            if (!$query) {
-                $error_array = $this->db->error();
-                throw new Exception($error_array['message']);
-            }
-
-            foreach ($query->result_array() as $row) {
-                $account_id = $row['account_id'];
-                $id = $row['id'];
-                $final_array['bundle_package'][] = $row;
-            }
-        }     
-
-     if (isset($option_param['customer_priceplan']) && $option_param['customer_priceplan'] == true) {
+      if (isset($option_param['customer_priceplan']) && $option_param['customer_priceplan'] == true) {
             $sql = "SELECT * FROM bill_customer_priceplan WHERE account_id='$account_id' LIMIT 1";
             $query = $this->db->query($sql);
             if (!$query) {
@@ -1553,31 +1483,7 @@ if( account_type = 'CUSTOMER',( select company_name from customers where custome
         }
     }
 
-    function delete_bundle($account_id, $id_array) {
-        try {
-            $this->db->trans_begin();
-            foreach ($id_array['delete_id'] as $id) {
-                $result = $this->db->delete('bundle_account', array('account_id' => $account_id, 'id' => $id));
-                if (!$result) {
-                    $error_array = $this->db->error();
-                    throw new Exception($error_array['message']);
-                }
-                if ($this->db->affected_rows() == 0)
-                    throw new Exception('Bundle not found');
-            }
-            if ($this->db->trans_status() === FALSE) {
-                $error_array = $this->db->error();
-                $this->db->trans_rollback();
-                return $error_array['message'];
-            } else {
-                $this->db->trans_commit();
-                return true;
-            }
-        } catch (Exception $e) {
-            $this->db->trans_rollback();
-            return $e->getMessage();
-        }
-    }
+   
     function add_ip($data) {
         try {
             $log_data_array = array();
@@ -1752,7 +1658,7 @@ if( account_type = 'CUSTOMER',( select company_name from customers where custome
             $account_type = 'CUSTOMER';
 
             if (isset($data['username'])) {
-                $sql = "SELECT username FROM customer_sip_account  WHERE username='" . $data['username'] . "'";
+                $sql = "SELECT username FROM customer_devices  WHERE username='" . $data['username'] . "'";
                 $query = $this->db->query($sql);
                 $row = $query->row();
                 if ($row == NULL) {
@@ -1762,7 +1668,7 @@ if( account_type = 'CUSTOMER',( select company_name from customers where custome
                 }
             }
             if (isset($data['extension_no'])) {
-                $sql = "SELECT extension_no FROM customer_sip_account  WHERE extension_no='" . $data['extension_no'] . "' ";
+                $sql = "SELECT extension_no FROM customer_devices  WHERE extension_no='" . $data['extension_no'] . "' ";
                 $query = $this->db->query($sql);
                 $row = $query->row();
                 if ($row == NULL) {
@@ -1779,6 +1685,7 @@ if( account_type = 'CUSTOMER',( select company_name from customers where custome
             $sip_data_array['sip_cc'] = $data['sip_cc'];
             $sip_data_array['sip_cps'] = $data['sip_cps'];
             $sip_data_array['status'] = $data['status'];
+              $sip_data_array['user_type'] = 'SWITCH'; 
             $sip_data_array['extension_id'] = $this->generate_ext_key();
 
             if (isset($data['extension_no']))
@@ -1787,14 +1694,14 @@ if( account_type = 'CUSTOMER',( select company_name from customers where custome
                 $sip_data_array['voicemail_enabled'] = $data['voicemail_enabled'];
             $sip_data_array['voicemail'] = $sip_data_array['extension_id'];
             $this->db->trans_begin();
-            $str = $this->db->insert_string('customer_sip_account', $sip_data_array);
+            $str = $this->db->insert_string('customer_devices', $sip_data_array);
             $result = $this->db->query($str);
             $insert_id = $this->db->insert_id();
             if (!$result) {
                 $error_array = $this->db->error();
                 throw new Exception($error_array['message']);
             }
-            $log_data_array[] = array('activity_type' => 'insert', 'sql_table' => 'customer_sip_account', 'sql_key' => $extension_id, 'sql_query' => $str);
+            $log_data_array[] = array('activity_type' => 'insert', 'sql_table' => 'customer_devices', 'sql_key' => $extension_id, 'sql_query' => $str);
 
             if ($this->db->trans_status() === FALSE) {
                 $error_array = $this->db->error();
@@ -1826,7 +1733,7 @@ if( account_type = 'CUSTOMER',( select company_name from customers where custome
             }
             $account_type = 'CUSTOMER';
             if (isset($data['username'])) {
-                $sql = "SELECT username FROM customer_sip_account  WHERE username='" . $data['username'] . "' AND id !='" . $id . "'";
+                $sql = "SELECT username FROM customer_devices  WHERE username='" . $data['username'] . "' AND id !='" . $id . "'";
                 $query = $this->db->query($sql);
                 $row = $query->row();
                 if ($row == NULL) {
@@ -1836,7 +1743,7 @@ if( account_type = 'CUSTOMER',( select company_name from customers where custome
                 }
             }
             if (isset($data['extension_no'])) {
-                $sql = "SELECT extension_no FROM customer_sip_account  WHERE extension_no='" . $data['extension_no'] . "' AND account_id ='" . $account_id . "' AND id !='" . $id . "'";
+                $sql = "SELECT extension_no FROM customer_devices  WHERE extension_no='" . $data['extension_no'] . "' AND account_id ='" . $account_id . "' AND id !='" . $id . "'";
                 $query = $this->db->query($sql);
                 $row = $query->row();
                 if ($row == NULL) {
@@ -1874,7 +1781,7 @@ if( account_type = 'CUSTOMER',( select company_name from customers where custome
             $this->db->trans_begin();
             if (count($sip_data_array) > 0) {
                 $where = " id ='" . $id . "' AND account_id='" . $account_id . "' ";
-                $str = $this->db->update_string('customer_sip_account', $sip_data_array, $where);
+                $str = $this->db->update_string('customer_devices', $sip_data_array, $where);
 
                 echo $this->db->last_query();
                 $result = $this->db->query($str);
@@ -1882,7 +1789,7 @@ if( account_type = 'CUSTOMER',( select company_name from customers where custome
                     $error_array = $this->db->error();
                     throw new Exception($error_array['message']);
                 }
-                $log_data_array[] = array('activity_type' => 'update', 'sql_table' => 'customer_sip_account', 'sql_key' => $where, 'sql_query' => $str);
+                $log_data_array[] = array('activity_type' => 'update', 'sql_table' => 'customer_devices', 'sql_key' => $where, 'sql_query' => $str);
             }
 
             if ($this->db->trans_status() === FALSE) {
@@ -1906,12 +1813,12 @@ if( account_type = 'CUSTOMER',( select company_name from customers where custome
             $log_data_array = array();
             $this->db->trans_begin();
             foreach ($id_array['delete_id'] as $id) {
-                $result = $this->db->delete('customer_sip_account', array('account_id' => $account_id, 'id' => $id));
+                $result = $this->db->delete('customer_devices', array('account_id' => $account_id, 'id' => $id));
                 if (!$result) {
                     $error_array = $this->db->error();
                     throw new Exception($error_array['message']);
                 }
-                $log_data_array[] = array('activity_type' => 'delete', 'sql_table' => 'customer_sip_account', 'sql_key' => $id, 'sql_query' => $this->db->last_query());
+                $log_data_array[] = array('activity_type' => 'delete', 'sql_table' => 'customer_devices', 'sql_key' => $id, 'sql_query' => $this->db->last_query());
                 if ($this->db->affected_rows() == 0)
                     throw new Exception('SIP not found');
             }
@@ -1932,7 +1839,7 @@ if( account_type = 'CUSTOMER',( select company_name from customers where custome
     }
 
     function generate_ext_key() {
-        $table = 'customer_sip_account';
+        $table = 'customer_devices';
         $prefix1 = 'EXT';
         $prefix2 = '';
         $sql = "SELECT MAX(id) as table_key FROM " . $table . ";";
@@ -2021,7 +1928,7 @@ if( account_type = 'CUSTOMER',( select company_name from customers where custome
                     throw new Exception($error_array['message']);
                 }
 
-                $result = $this->db->delete('customer_sip_account', array('account_id' => $id));
+                $result = $this->db->delete('customer_devices', array('account_id' => $id));
                 if (!$result) {
                     $error_array = $this->db->error();
                     throw new Exception($error_array['message']);

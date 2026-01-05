@@ -1,0 +1,51 @@
+# Generic ignores for libtool project
+Makefile.in
+Makefile
+/INSTALL
+/autom4te.cache
+/aclocal.m4
+/compile
+/configure
+/configure~
+/depcomp
+/install-sh
+/missing
+/stamp-h1
+/m4/*.m4
+/config.guess
+/config.sub
+/config.log
+/config.status
+/ltmain.sh
+/libtool
+*/.deps/*
+*.la
+*.lo
+*.o
+*/.libs/*
+*/config.h
+*/config.h.in
+*/config.h.in~
+*/stamp-h1
+/test-driver
+/coverage.info
+/coveragereport/*
+*.gcno
+/.vscode/*
+
+# Generic ignores for cmake project
+/out/*
+
+# Explicit stuff
+!/m4/ax_check_openssl.m4
+!/m4/doxygen.m4
+!/m4/ax_code_coverage.m4
+!/m4/ax_valgrind_check.m4
+!/m4/jwt_weak_alias.m4
+/doxygen-doc/*
+/libjwt/libjwt.pc
+/dist/libjwt.spec
+/rpmbuild
+
+# Cmake
+/build

@@ -1,0 +1,6 @@
+usr/test/CTestTestfile.cmake    usr/lib/mysql-connector-odbc/test
+usr/test/my_*                   usr/lib/mysql-connector-odbc/test
+usr/test/odbc.ini               usr/lib/mysql-connector-odbc/test
+usr/test/odbcinst.ini           usr/lib/mysql-connector-odbc/test
+usr/LICENSE.txt                 usr/share/doc/mysql-connector-odbc-test
+usr/README.txt                  usr/share/doc/mysql-connector-odbc-test

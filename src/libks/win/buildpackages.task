@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets">
+    <Import Project="basedir.props" Condition=" '$(BaseDirImported)' == ''"/>
+  </ImportGroup>
+
+  <UsingTask TaskName="BuildPackagesTask" 
+             TaskFactory="CodeTaskFactory"  
+             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll" >  
+             <Task>  
+                <Reference Include="Microsoft.Build" />
+                <Reference Include="Microsoft.Build.Framework" />
+                <Reference Include="Microsoft.Build.Utilities.Core" />
+                <Reference Include="System.IO.Compression.FileSystem" />
+                <Code Type="Class" Language="cs">
+<![CDATA[  
+using System;
+using System.IO;
+using System.IO.Compression;
+using Microsoft.Build.Framework;
+using System.Reflection;
+using Microsoft.Build.Execution;
+using System.Net;
+using System.ComponentModel;
+using System.Diagnostics;
+
+    public class BuildPackagesTask : Microsoft.Build.Utilities.Task
+    {
+        private string basedir;
+
+        internal static bool FileOrDirectoryExists(string name)
+        {
+            return (Directory.Exists(name) || File.Exists(name));
+        }
+
+        internal static void CopyFilesRecursively(DirectoryInfo source, DirectoryInfo target) {
+            foreach (DirectoryInfo dir in source.GetDirectories())
+                CopyFilesRecursively(dir, target.CreateSubdirectory(dir.Name));
+            foreach (FileInfo file in source.GetFiles())
+                file.CopyTo(Path.Combine(target.FullName, file.Name));
+        }
+
+        public override bool Execute()
+        {
+            basedir = Path.GetFullPath(@"$(BaseDir)");
+
+
+            Log.LogMessage(MessageImportance.High,
+                 "Building packages.");
+            
+            string package = "libks-$(libksVersion)";
+            string package_root = @"$(BaseDir)out\packages\" + package + @"-headers\" + package + @"\libks";
+            
+            if (!FileOrDirectoryExists(package_root))
+            {
+                Directory.CreateDirectory(package_root + @"\cmake");
+                Directory.CreateDirectory(package_root + @"\src");
+                Directory.CreateDirectory(package_root + @"\src\include");
+
+                CopyFilesRecursively(new DirectoryInfo(@"..\src\include\"), new DirectoryInfo(package_root + @"\src\include"));
+                string[] files = {"CMakeLists.txt", @"cmake\ksutil.cmake"};
+                foreach (string f in files) {        
+                    File.Copy(@"..\" + f, package_root + @"\" + f);
+                }
+                ZipFile.CreateFromDirectory(@"$(BaseDir)out\packages\" + package + @"-headers\", @"$(BaseDir)out\" + package + @"_$(libksBuildNumber)" + @"-headers.zip".ToLower(), CompressionLevel.Optimal, false);
+            }
+
+            package_root = @"$(BaseDir)out\packages\libks-$(libksVersion)-binaries-$(Platform)-$(Configuration)\" + package;
+            if (!FileOrDirectoryExists(package_root))
+            {
+                Directory.CreateDirectory(package_root + @"\binaries\$(Platform)\$(Configuration)");
+                string[] files = {"ks2.lib", @"ks2.dll"};
+                foreach (string f in files) {        
+                    File.Copy(@"..\Build-$(Platform)\$(Configuration)\" + f, package_root + @"\binaries\$(Platform)\$(Configuration)\" + f);
+                }
+
+                if ("$(Configuration.ToLower())" == "debug" ) {
+                    string[] debug_files = {"ks2.pdb"};
+                    foreach (string f in debug_files) {        
+                            File.Copy(@"..\Build-$(Platform)\$(Configuration)\" + f, package_root + @"\binaries\$(Platform)\$(Configuration)\" + f);
+                    }
+                }
+
+                ZipFile.CreateFromDirectory(@"$(BaseDir)out\packages\" + package + @"-binaries-$(Platform)-$(Configuration)\", @"$(BaseDir)out\"+ package + @"_$(libksBuildNumber)" + @"-binaries-$(Platform)-$(Configuration).zip".ToLower(), CompressionLevel.Optimal, false);
+            }
+
+            return true;
+        }
+
+    }
+]]>  
+                </Code>  
+             </Task>  
+  </UsingTask>  
+
+  <PropertyGroup>
+    <buildpackagestask_Imported>true</buildpackagestask_Imported>
+  </PropertyGroup>
+
+  <Target Name="BuildPackagesTarget" AfterTargets="Build">  
+      <BuildPackagesTask />
+  </Target> 
+
+</Project>

@@ -1,14 +1,14 @@
 /* iframe script helper for jquery.nicescroll
--- version 0.9.0
--- copyright 2017-06-18 InuYaksa*2017
--- licensed under the MIT
---
--- https://nicescroll.areaaperta.com/
--- https://github.com/inuyaksa/jquery.nicescroll
---
-*/
+ -- version 0.9.0
+ -- copyright 2017-06-18 InuYaksa*2017
+ -- licensed under the MIT
+ --
+ -- https://nicescroll.areaaperta.com/
+ -- https://github.com/inuyaksa/jquery.nicescroll
+ --
+ */
 
-(function (document,window) {
+(function (document, window) {
 
     var body = document.body;
     var parent = window.parent;
@@ -63,7 +63,8 @@
 
         function findNiceParent(t) {
             do {
-                if ($.data(t, '__nicescroll') !== undefined) return t;
+                if ($.data(t, '__nicescroll') !== undefined)
+                    return t;
                 t = t.parentNode || false;
             } while (t);
             return false;
@@ -76,11 +77,13 @@
             $.nicescroll.each(function () {
                 var nice = this;
                 nice.scrollstart(function () {
-                    if (!hasstyle) sheet.insertRule("iframe { pointer-events: none !important; }", 0);
+                    if (!hasstyle)
+                        sheet.insertRule("iframe { pointer-events: none !important; }", 0);
                     hasstyle = true;
                 });
                 nice.scrollend(function () {
-                    if (hasstyle) sheet.deleteRule(0);
+                    if (hasstyle)
+                        sheet.deleteRule(0);
                     hasstyle = false;
                 });
             });
@@ -102,4 +105,4 @@
 
     }
 
-})(document,window);
+})(document, window);

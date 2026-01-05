@@ -1,12 +1,11 @@
 <?php
-
-/* Copyright (C) Openvoips Technologies - All Rights Reserved
+/*
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
  * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential, Only allow to use 
- * OV500Pro Version 2.1.0
- * Written by Seema Anand <openvoips@gmail.com> , 2021 
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2026 
  * http://www.openvoips.com 
- * License https://www.openvoips.com/license.html
  */
 
 defined('BASEPATH') OR exit('No direct script access allowed');
@@ -18,16 +17,23 @@ class Crs extends MY_Controller {
         $this->load->library('pagination');
         $this->form_validation->set_error_delimiters('', '');
         $this->load->model('crsvoip_mod');
-        $this->load->model('bundle_mod');
+                
         $this->load->model('route_mod');
         $this->load->helper('crs_helper');
 
+        $this->load->model('Utils_model');
 
         if (!check_is_loggedin())
             redirect(base_url(), 'refresh');
     }
 
-    public function index() {
+
+
+                
+
+                
+
+    function index() {
         if (!check_logged_user_group(array('SYSTEM', 'RESELLER'))) {
             show_404('403');
         }
@@ -37,7 +43,6 @@ class Crs extends MY_Controller {
         $search_session_key = 'search_' . $page_name;
         $data['page_name'] = $page_name;
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-
 
         if (isset($_POST['action']) && $_POST['action'] == 'OkDeleteData') {
             if (!check_account_permission('customer', 'delete')) {
@@ -75,7 +80,7 @@ class Crs extends MY_Controller {
         }
 
         $search_data = array(
-            'customer_voipminute_id' => $_SESSION[$search_session_key]['customer_voipminute_id'],
+                
             'account_id' => $_SESSION[$search_session_key]['account_id'],
             'company_name' => $_SESSION[$search_session_key]['company_name'],
             'account_type' => $_SESSION[$search_session_key]['account_type'],
@@ -162,9 +167,11 @@ class Crs extends MY_Controller {
         }
     }
 
-    public function assignvoip() {}
+    function assignvoip() {
+        
+    }
 
-    public function addvoip($id = '-1') {
+    function addvoip($id = '-1') {
         $page_name = "crs_addvoip";
         $data['page_name'] = $page_name;
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
@@ -226,7 +233,7 @@ class Crs extends MY_Controller {
         $logged_user_group = get_logged_user_type();
 
         $account_id = param_decrypt($id);
-        $data['active_tab'] = $active_tab;   
+        $data['active_tab'] = $active_tab;
         if (isset($_POST['action']) && $_POST['action'] == 'OkSaveTariff') {
             $data['active_tab'] = $_POST['tab'];
             $this->form_validation->set_rules('tariff_id', 'Tarrif', 'trim|required');
@@ -437,7 +444,6 @@ class Crs extends MY_Controller {
                 $_POST['created_by'] = get_logged_user_id();
                 $result = $this->crsvoip_mod->priceplan_update($_POST);
 
-
                 if ($result === true) {
                     $this->session->set_flashdata('suc_msgs', 'Invoice Congiguration Updated Successfully.');
                     redirect(site_url('crs/editvoip/' . $id . '/' . $data['active_tab']), 'location', '301');
@@ -447,7 +453,7 @@ class Crs extends MY_Controller {
                     $data['err_msgs'] = $err_msgs;
                 }
             }
-        }  elseif (isset($_POST['action']) && $_POST['action'] == 'OkDeleteData') {
+        } elseif (isset($_POST['action']) && $_POST['action'] == 'OkDeleteData') {
             if (!isset($_POST['delete_parameter_two'])) {
                 $this->session->set_flashdata('err_msgs', 'Insufficient Parameters');
                 redirect(current_url(), 'location', '301');
@@ -501,7 +507,6 @@ class Crs extends MY_Controller {
                     redirect(current_url(), 'location', '301');
                     break;
 
-                
                 case 'account_ips_delete':
                     $delete_id_array = json_decode($_POST['delete_id']);
                     $delete_param_array = array('delete_id' => $delete_id_array);
@@ -550,8 +555,7 @@ class Crs extends MY_Controller {
         /* $option_param = array('ip' => true, 'callerid' => true, 'sipuser' => true, 'tariff' => true, 'user' => false, 'prefix' => false, 'dialplan' => true, 'translation_rules' => true, 'callerid_incoming' => true, 'translation_rules_incoming' => true, 'bundle_package_group_by' => true); */
         $option_param = array('voipminuts' => true, 'bundle_package_group_by' => true, 'customer_priceplan' => true, 'dialplan' => true, 'customer_pricelist' => true, 'callerid' => TRUE, 'translation_rules' => true, 'callerid_incoming' => true, 'translation_rules_incoming' => true, 'ip' => true, 'sipuser' => true);
         $customers_data_temp = $this->crsvoip_mod->get_account_details($account_id, $search_data, $option_param);
- 
- 
+
         if (is_array($customers_data_temp) && count($customers_data_temp) > 0)
             $customers_data = $customers_data_temp;
         else {
@@ -575,9 +579,8 @@ class Crs extends MY_Controller {
         } else {
             $created_by = 'ADMIN';
         }
-        $response = $this->bundle_mod->get_unassigned_data($account_id, $created_by, $search_data);
-        $data['bundle_data'] = $response;
-      
+                
+
         if (check_logged_user_group(array('RESELLER'))) {
             $option_param = array('dialplan' => true);
             $logged_account_result = $this->member_mod->get_account_by_key('account_id', $logged_account_id, $option_param);
@@ -585,8 +588,7 @@ class Crs extends MY_Controller {
                 $data['route_data'] = $logged_account_result['dialplan'];
             } else
                 $data['route_data'] = array();
-        }
-        else {
+        } else {
             $route_data = $this->route_mod->get_data('dialplan_name', '', '', array());
             $data['route_data'] = $route_data['result'];
         }
@@ -599,9 +601,9 @@ class Crs extends MY_Controller {
         $this->load->view('basic/footer', $data);
     }
 
-    public function ipAdd($id1 = -1, $active_tab = 1) {
+    function ipAdd($id1 = -1, $active_tab = 1) {
         $account_id = param_decrypt($id1);
-//        echo $account_id;die;
+
         if (isset($id2))
             $id = param_decrypt($id2);
 
@@ -669,7 +671,7 @@ class Crs extends MY_Controller {
         $this->load->view('basic/footer', $data);
     }
 
-    public function ipEdit($id1 = -1, $id2 = -1, $active_tab = 1) {
+    function ipEdit($id1 = -1, $id2 = -1, $active_tab = 1) {
         $account_id = param_decrypt($id1);
         $id = param_decrypt($id2);
         if (strlen($account_id) < 1 and $id < 1)
@@ -681,7 +683,6 @@ class Crs extends MY_Controller {
         $data['active_tab'] = $active_tab;
         $data['page_name'] = $page_name;
         $data['customer_type'] = $customer_type;
-
 
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
 
@@ -739,7 +740,7 @@ class Crs extends MY_Controller {
         $this->load->view('basic/footer', $data);
     }
 
-    public function sipAdd($id1 = -1, $active_tab = 1) {
+    function sipAdd($id1 = -1, $active_tab = 1) {
         $account_id = param_decrypt($id1);
         if (isset($id2)) {
             $id = param_decrypt($id2);
@@ -769,12 +770,12 @@ class Crs extends MY_Controller {
             $this->form_validation->set_rules('status', 'Status', 'trim|required');
             $this->form_validation->set_rules('voicemail_enabled', 'Voicemail Option', 'trim|required');
             //     $this->form_validation->set_rules('voicemail_email', 'Voicemail EmailList', 'trim');
-            $this->form_validation->set_rules('extension_no', 'Extension', 'trim|required');
+            $this->form_validation->set_rules('extension_no', 'Extension', 'trim');
             if ($this->form_validation->run() == FALSE) {
                 $data['err_msgs'] = validation_errors();
             } else {
                 $result = $this->crsvoip_mod->add_sip($_POST);
-                // echo '<pre>';    print_r($result);die;
+
                 if ($result['status'] === true) {
                     $this->session->set_flashdata('suc_msgs', 'User SIP Added Successfully');
                     $action = trim($_POST['button_action']);
@@ -807,7 +808,7 @@ class Crs extends MY_Controller {
         $this->load->view('basic/footer', $data);
     }
 
-    public function sipEdit($id1 = -1, $id2 = -1, $active_tab = 1) {
+    function sipEdit($id1 = -1, $id2 = -1, $active_tab = 1) {
         $account_id = param_decrypt($id1);
         $id = param_decrypt($id2);
         if (strlen($account_id) < 1 and $id < 1)
@@ -830,11 +831,10 @@ class Crs extends MY_Controller {
             $this->form_validation->set_rules('ipaddress', 'IP', 'trim');
             $this->form_validation->set_rules('voicemail_enabled', 'Voicemail Option', 'trim|required');
             // $this->form_validation->set_rules('voicemail_email', 'Voicemail', 'trim');
-            $this->form_validation->set_rules('extension_no', 'Extension', 'trim|required');
+            $this->form_validation->set_rules('extension_no', 'Extension', 'trim');
             $this->form_validation->set_rules('sip_cc', 'CC', 'trim|required');
             $this->form_validation->set_rules('sip_cps', 'CPS', 'trim|required');
             $this->form_validation->set_rules('status', 'Status', 'trim|required');
-
 
             if ($this->form_validation->run() == FALSE) {
                 $data['err_msgs'] = validation_errors();

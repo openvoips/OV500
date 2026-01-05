@@ -1,12 +1,13 @@
 <?php
-/* Copyright (C) Openvoips Technologies - All Rights Reserved
+/*
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
  * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential, Only allow to use 
- * OV500Pro Version 2.1.0
- * Written by Seema Anand <openvoips@gmail.com> , 2021 
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2026 
  * http://www.openvoips.com 
- * License https://www.openvoips.com/license.html
  */
+
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
@@ -20,12 +21,12 @@ class Payment extends MY_Controller {
             redirect(base_url(), 'refresh');
     }
 
-   public function index($id ) {
-		
-		 if ($id == -1)
+    public function index($id) {
+
+        if ($id == -1)
             show_404('403');
-		$account_id = param_decrypt($id);
-      //  $this->load->model('detail_mod');
+        $account_id = param_decrypt($id);
+        //  $this->load->model('detail_mod');
         $page_name = "crs_paymenthistory";
         $search_session_key = 'search_' . $page_name;
 
@@ -42,7 +43,7 @@ class Payment extends MY_Controller {
         $search_parameters = array('pay_date', 'payment_type', 'no_of_rows');
 
         if (isset($_GET['search_action'])) {
-			$_POST = $_GET;
+            $_POST = $_GET;
             set_post_to_session($search_session_key, $search_parameters);
         } else {
             set_session_to_session($search_session_key, $search_parameters);
@@ -69,31 +70,29 @@ class Payment extends MY_Controller {
             $search_data['sales_manager'] = $logged_account_id;
         elseif (check_logged_user_type(array('RESELLER'))) {
             // $report_search_data['parent_account_id'] = $logged_account_id;    
-        } 
-		{
+        } {
             $pagination_uri_segment = 4;
             list($per_page, $segment) = get_pagination_param($pagination_uri_segment, $search_session_key);
 
             $response = $this->crspayment_mod->paymenthistory('', $per_page, $segment, $search_data);
 
             $total_count = $this->crspayment_mod->get_data_total_count();
-            $data['pagination'] = setup_pagination_option($total_count, 'crs/payment/index/'.$id, $per_page, $pagination_uri_segment, $this->pagination);
+            $data['pagination'] = setup_pagination_option($total_count, 'crs/payment/index/' . $id, $per_page, $pagination_uri_segment, $this->pagination);
 
             $data['listing_data'] = $response;
             $data['total_records'] = $total_count;
             $data['search_session_key'] = $search_session_key;
-			$data['account_id']=$account_id;
-			
-			$data['payment_options'] = $this->crspayment_mod->get_payment_options();
+            $data['account_id'] = $account_id;
+
+            $data['payment_options'] = $this->crspayment_mod->get_payment_options();
 
             $this->load->view('basic/header', $data);
             $this->load->view('payment/paymenthistory', $data);
             $this->load->view('basic/footer', $data);
         }
-    
-		
-	}
-	function addpayment($id = -1) {
+    }
+
+    function addpayment($id = -1) {
         $page_name = "crs_balance_edit";
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
         if ($id == -1)
@@ -152,11 +151,10 @@ class Payment extends MY_Controller {
                         }
                     }
 
-                    if (isset($_POST['button_action']) && trim($_POST['button_action']) == 'save') 
-                            redirect(base_url() . 'crs/payment/addpayment/' . param_encrypt($account_id), 'location', '301');
-                        else
-                            redirect(base_url() . 'crs/payment/index/' . param_encrypt($account_id), 'location', '301');
-                       
+                    if (isset($_POST['button_action']) && trim($_POST['button_action']) == 'save')
+                        redirect(base_url() . 'crs/payment/addpayment/' . param_encrypt($account_id), 'location', '301');
+                    else
+                        redirect(base_url() . 'crs/payment/index/' . param_encrypt($account_id), 'location', '301');
                 } else {
                     $err_msgs = $result;
                     $data['err_msgs'] = $err_msgs;
@@ -194,7 +192,7 @@ class Payment extends MY_Controller {
                 if (isset($account_result['account_id']) && $account_result['account_id'] == get_logged_account_id()) {
                     $data['page_name'] = 'my_balance';
                 } else {
-					$data['page_name'] = $page_name;
+                    $data['page_name'] = $page_name;
                     //$data['page_name'] = strtolower($account_result['account_type']) . '_payment_history';
                 }
             }
@@ -207,16 +205,16 @@ class Payment extends MY_Controller {
         $this->load->view('basic/footer', $data);
     }
 
-  
     function trace() {
         $data['page_name'] = "payment_trace";
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-		 
-		if (check_logged_user_group(array(ADMIN_ACCOUNT_ID))) {
-		}else if (!check_logged_user_type(array('ADMIN', 'SUBADMIN'))) {
+
+        if (check_logged_user_group(array(ADMIN_ACCOUNT_ID,'RESELLER'))) {
+            
+        } else if (!check_logged_user_type(array('ADMIN', 'SUBADMIN'))) {
             show_404('403');
         }
-		
+
         $this->load->library('pagination');
 
         if (isset($_POST['search_action'])) {// coming from search button
@@ -229,7 +227,7 @@ class Payment extends MY_Controller {
                 's_order_date' => $_POST['order_date'],
                 's_company_name' => $_POST['company_name'],
                 's_card_number' => $_POST['card_number'],
-				'no_of_rows' => $_POST['no_of_records'],
+                'no_of_rows' => $_POST['no_of_records'],
             );
         } else {
             $_SESSION['search_tracing_data']['s_account_id'] = isset($_SESSION['search_tracing_data']['s_account_id']) ? $_SESSION['search_tracing_data']['s_account_id'] : '';
@@ -240,7 +238,7 @@ class Payment extends MY_Controller {
             $_SESSION['search_tracing_data']['s_order_date'] = isset($_SESSION['search_tracing_data']['s_order_date']) ? $_SESSION['search_tracing_data']['s_order_date'] : '';
             $_SESSION['search_tracing_data']['s_company_name'] = isset($_SESSION['search_tracing_data']['s_company_name']) ? $_SESSION['search_tracing_data']['s_company_name'] : '';
             $_SESSION['search_tracing_data']['s_card_number'] = isset($_SESSION['search_tracing_data']['s_card_number']) ? $_SESSION['search_tracing_data']['s_card_number'] : '';
-			$_SESSION['search_tracing_data']['no_of_rows'] = isset($_SESSION['search_tracing_data']['no_of_rows']) ? $_SESSION['search_tracing_data']['no_of_rows'] : RECORDS_PER_PAGE;
+            $_SESSION['search_tracing_data']['no_of_rows'] = isset($_SESSION['search_tracing_data']['no_of_rows']) ? $_SESSION['search_tracing_data']['no_of_rows'] : RECORDS_PER_PAGE;
         }
 
         if ($_SESSION['search_tracing_data']['s_order_date'] == '') {
@@ -260,17 +258,14 @@ class Payment extends MY_Controller {
             'card_number' => $_SESSION['search_tracing_data']['s_card_number'],
         );
 
-		$pagination_uri_segment = 4;
+        $pagination_uri_segment = 4;
         list($per_page, $segment) = get_pagination_param($pagination_uri_segment, 'search_tracing_data');
-			
-		
-       
+
         $order_by = '';
 
         $data['trace_data'] = $this->crspayment_mod->trace_payment_search($order_by, $per_page, $segment, $search_data);
 
         $total_row = $data['trace_data']['total_row'];
-
 
         $config = array();
         $config = $this->utils_model->setup_pagination_option($total_row, 'crs/payment/trace', $per_page, $pagination_uri_segment);
@@ -278,7 +273,7 @@ class Payment extends MY_Controller {
 
         /*         * **** pagination code ends  here ********* */
         $data['pagination'] = $this->pagination->create_links();
-		$data['total_records'] = $total_row;
+        $data['total_records'] = $total_row;
 
         $this->load->view('basic/header', $data);
         $this->load->view('payment/trace_listing', $data);
@@ -288,7 +283,7 @@ class Payment extends MY_Controller {
     function trace_details($key = -1) {
         if ($key == -1)
             show_404();
-        if (!check_logged_user_type(array('ADMIN', 'SUBADMIN'))) {
+        if (!check_logged_user_type(array('ADMIN', 'SUBADMIN' ,'RESELLER'))) {
             show_404('403');
         }
         $data['page_name'] = "payment_trace";
@@ -311,7 +306,6 @@ class Payment extends MY_Controller {
         $this->load->view('basic/footer', $data);
     }
 
-
     function delete_scheduler() {
         if (isset($_POST['action']) && $_POST['action'] == 'OkDeleteData') {
             $delete_id_array = json_decode($_POST['delete_id']);
@@ -325,7 +319,7 @@ class Payment extends MY_Controller {
                         $suc_msgs .= 's';
                     $suc_msgs .= ' Cancelled Successfully';
                     $this->session->set_flashdata('suc_msgs', $suc_msgs);
-                }else {
+                } else {
                     $err_msgs = $result;
                     $this->session->set_flashdata('err_msgs', $err_msgs);
                     redirect(current_url(), 'location', '301');

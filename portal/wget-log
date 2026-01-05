@@ -1,0 +1,6 @@
+--2025-12-17 19:15:53--  https://www.sourceguardian.com/loaders/download.php?php_v=7.2.34-56%2Bubuntu22.04.1%2Bdeb.sury.org%2B2
+Resolving www.sourceguardian.com (www.sourceguardian.com)... 78.46.39.118
+Connecting to www.sourceguardian.com (www.sourceguardian.com)|78.46.39.118|:443... connected.
+HTTP request sent, awaiting response... 403 Forbidden
+2025-12-17 19:15:53 ERROR 403: Forbidden.
+

@@ -1,0 +1,4 @@
+${env:deb_systemdsystemunitdir}/ngcp-rtpengine-recording-daemon.service	${env:deb_systemdsystemunitdir}/rtpengine-recording-daemon.service
+${env:deb_systemdsystemunitdir}/ngcp-rtpengine-recording-daemon.service	${env:deb_systemdsystemunitdir}/rtpengine-recording.service
+${env:deb_systemdsystemunitdir}/ngcp-rtpengine-recording-daemon@.service	${env:deb_systemdsystemunitdir}/rtpengine-recording-daemon@.service
+${env:deb_systemdsystemunitdir}/ngcp-rtpengine-recording-daemon@.service	${env:deb_systemdsystemunitdir}/rtpengine-recording@.service

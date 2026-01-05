@@ -1,0 +1,131 @@
+<!-- *****************************************************************************************
+ Copyright (c) 2007, 2024, Oracle and/or its affiliates.
+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License, version 2.0, as
+ published by the Free Software Foundation.
+
+ This program is designed to work with certain software (including
+ but not limited to OpenSSL) that is licensed under separate terms, as
+ designated in a particular file or component or in included license
+ documentation. The authors of MySQL hereby grant you an additional
+ permission to link the program and your derivative works with the
+ separately licensed software that they have either included with
+ the program or referenced in the documentation.
+
+ Without limiting anything contained in the foregoing, this file,
+ which is part of Connector/ODBC, is also subject to the
+ Universal FOSS Exception, version 1.0, a copy of which can be found at
+ https://oss.oracle.com/licenses/universal-foss-exception.
+
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ See the GNU General Public License, version 2.0, for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Fragment><!-- *****************************************************************************************
+      Icons
+    -->
+    <?include myodbc_version.wxs ?>
+
+    <!-- *****************************************************************************************
+      Directories / Files
+    -->
+
+
+
+      <?if $(var.odbc_64bit) = 1 ?>
+      <StandardDirectory Id="ProgramFiles64Folder">
+      <?else?>
+      <StandardDirectory Id="ProgramFilesFolder">
+      <?endif?>
+        <Directory Id="MySQL" Name="MySQL">
+          <Directory Id="Connector_ODBC" Name="Connector ODBC $(var.odbc_ver_short)">
+            <Directory Id="INSTALLDIR" Name=".">
+
+          <?if $(var.odbc_64bit) = 1 ?>
+
+            <Component Id="driver" Guid="C1960400-BFC6-4E6E-AF30-4C19EF5A3F07" SharedDllRefCount="yes" Bitness="always64">
+              <File Id="myodbc8a.dll" Name="myodbc8a.dll" Checksum="yes" KeyPath="yes" DiskId="1" Source="x64\myodbc8a.dll">
+                <ODBCDriver Id="MySQL_ODBC_8.0a_Driver" Name="MySQL ODBC 8.0 ANSI Driver" SetupFile="myodbc8S.dll" />
+              </File>
+              <File Id="myodbc8w.dll" Name="myodbc8w.dll" Checksum="yes" DiskId="1" Source="x64\myodbc8w.dll">
+                <ODBCDriver Id="MySQL_ODBC_8.0w_Driver" Name="MySQL ODBC 8.0 Unicode Driver" SetupFile="myodbc8S.dll" />
+              </File>
+              <File Id="readme" Name="README.txt" DiskId="1" Source="doc\README.txt" />
+              <File Id="changelog" Name="ChangeLog.txt" DiskId="1" Source="doc\ChangeLog.txt" />
+              <File Id="license" Name="LICENSE.txt" DiskId="1" Source="doc\LICENSE.txt" />
+              <File Id="info_bin" Name="INFO_BIN" DiskId="1" Source="doc\INFO_BIN" />
+              <File Id="info_src" Name="INFO_SRC" DiskId="1" Source="doc\INFO_SRC" />
+            </Component>
+            <Component Id="setup" Guid="3A92E95A-AF9C-4A4F-A36D-E0052405C278" SharedDllRefCount="yes" Bitness="always64">
+              <File Id="myodbc8S.dll" Name="myodbc8S.dll" KeyPath="yes" DiskId="1" Source="x64\myodbc8S.dll" />
+            </Component>
+            <Component Id="installer" Guid="EB5E7FB3-F6DD-4424-A54A-DD07213E67ED" SharedDllRefCount="yes" Bitness="always64">
+              <File Id="installer" Name="myodbc-installer.exe" KeyPath="yes" DiskId="1" Source="x64\myodbc-installer.exe" />
+            </Component>
+            <Component Id="ssl" Guid="39342019-EE47-4414-A69D-D442C2FA0241" SharedDllRefCount="yes" Bitness="always64">
+              <?if $(var.odbc_ver_num) < 80018 ?>
+                <File Id="libeay32.dll" Name="libeay32.dll" KeyPath="yes" DiskId="1" Source="x64\libeay32.dll" />
+                <File Id="ssleay32.dll" Name="ssleay32.dll" DiskId="1" Source="x64\ssleay32.dll" />
+              <?elseif $(var.odbc_ver_num) < 80100 ?>
+                <File Id="libcrypto_1_1_x64.dll" Name="libcrypto-1_1-x64.dll" KeyPath="yes" DiskId="1" Source="x64\libcrypto-1_1-x64.dll" />
+                <File Id="libssl_1_1_x64.dll" Name="libssl-1_1-x64.dll" DiskId="1" Source="x64\libssl-1_1-x64.dll" />
+              <?else?>
+                <File Id="libcrypto_3_x64.dll" Name="libcrypto-3-x64.dll" KeyPath="yes" DiskId="1" Source="x64\libcrypto-3-x64.dll" />
+                <File Id="libssl_3_x64.dll" Name="libssl-3-x64.dll" DiskId="1" Source="x64\libssl-3-x64.dll" />
+              <?endif?>
+            </Component>
+          <?else?>
+            <Component Id="driver" Guid="83B6877B-3220-4C5F-A1B5-84787E9798DD" SharedDllRefCount="yes">
+              <File Id="myodbc8a.dll" Name="myodbc8a.dll" Checksum="yes" KeyPath="yes" DiskId="1" Source="x86\myodbc8a.dll">
+                <ODBCDriver Id="MySQL_ODBC_8.0a_Driver" Name="MySQL ODBC 8.0 ANSI Driver" SetupFile="myodbc8S.dll" />
+              </File>
+              <File Id="myodbc8w.dll" Name="myodbc8w.dll" Checksum="yes" DiskId="1" Source="x86\myodbc8w.dll">
+                <ODBCDriver Id="MySQL_ODBC_8.0w_Driver" Name="MySQL ODBC 8.0 Unicode Driver" SetupFile="myodbc8S.dll" />
+              </File>
+              <File Id="readme" Name="README.txt" DiskId="1" Source="doc\README.txt" />
+              <File Id="changelog" Name="ChangeLog.txt" DiskId="1" Source="doc\ChangeLog.txt" />
+              <File Id="license" Name="LICENSE.txt" DiskId="1" Source="doc\LICENSE.txt" />
+              <File Id="info_bin" Name="INFO_BIN" DiskId="1" Source="doc\INFO_BIN" />
+              <File Id="info_src" Name="INFO_SRC" DiskId="1" Source="doc\INFO_SRC" />
+            </Component>
+            <Component Id="setup" Guid="428232BA-9D94-4DB5-87CD-C939D1347664" SharedDllRefCount="yes">
+              <File Id="myodbc8S.dll" Name="myodbc8S.dll" KeyPath="yes" DiskId="1" Source="x86\myodbc8S.dll" />
+            </Component>
+            <Component Id="installer" Guid="75754F93-A6F5-4575-A6AA-C64CA053386F" SharedDllRefCount="yes">
+              <File Id="installer" Name="myodbc-installer.exe" KeyPath="yes" DiskId="1" Source="x86\myodbc-installer.exe" />
+            </Component>
+            <Component Id="ssl" Guid="80FD9287-2DF7-4609-B1A2-863ED313FB21" SharedDllRefCount="yes">
+              <?if $(var.odbc_ver_num) < 80018 ?>
+                <File Id="libeay32.dll" Name="libeay32.dll" KeyPath="yes" DiskId="1" Source="x86\libeay32.dll" />
+                <File Id="ssleay32.dll" Name="ssleay32.dll" DiskId="1" Source="x86\ssleay32.dll" />
+              <?elseif $(var.odbc_ver_num) < 80034 ?>
+                <File Id="libcrypto_1_1.dll" Name="libcrypto-1_1.dll" KeyPath="yes" DiskId="1" Source="x86\libcrypto-1_1.dll" />
+                <File Id="libssl_1_1.dll" Name="libssl-1_1.dll" DiskId="1" Source="x86\libssl-1_1.dll" />
+              <?else ?>
+                <File Id="libcrypto_3.dll" Name="libcrypto-3.dll" KeyPath="yes" DiskId="1" Source="x86\libcrypto-3.dll" />
+                <File Id="libssl_3.dll" Name="libssl-3.dll" DiskId="1" Source="x86\libssl-3.dll" />
+              <?endif?>
+            </Component>
+          <?endif?>
+          <?include mysql_odbc_dependencies.wxs ?>
+          <Directory Id="Plugindir" Name="plugin"><?include mysql_odbc_plugins.wxs ?></Directory>
+        </Directory>  <!--INSTALLDIR-->
+      </Directory>
+      <!-- needed to make candle happy -->
+      <?if $(var.odbc_64bit) = 1 ?>
+        </Directory>
+      <?else?>
+        </StandardDirectory>
+      <?endif?>
+      </StandardDirectory>
+
+
+    </Fragment>
+</Wix>

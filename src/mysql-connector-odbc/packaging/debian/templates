@@ -1,0 +1,10 @@
+Template: libmyodbc/addtoodbc
+Type: boolean
+Default: false
+Description: Do you want MyODBC to be registered as an ODBC driver?
+ You appear to have an ODBC manager (unixodbc or iODBC) installed on your
+ system.
+ .
+ If you wish, MyODBC will be automatically added as an ODBC driver now and
+ will be automatically deleted from the list when you remove the libmyodbc
+ package, using the /usr/bin/odbcinst utility from unixodbc.

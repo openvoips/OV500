@@ -26,7 +26,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 
 $config['base_url'] =  "http://".$_SERVER['HTTP_HOST'].'/portal/';
-date_default_timezone_set('Asia/Kolkata');
+date_default_timezone_set('Africa/Johannesburg');
 /*
   |--------------------------------------------------------------------------
   | Index File
@@ -404,7 +404,7 @@ $config['sess_regenerate_destroy'] = FALSE;
  */
 $config['cookie_prefix'] = '';
 $config['cookie_domain'] = '';
-$config['cookie_path'] = '/';
+$config['cookie_path'] =  '/';
 $config['cookie_secure'] = FALSE;
 $config['cookie_httponly'] = FALSE;
 

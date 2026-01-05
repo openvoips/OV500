@@ -1,5 +1,12 @@
 <?php
-
+/* 
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2023 
+ * http://www.openvoips.com 
+ */
 class Reports_mod extends CI_Model {
 
     function __construct() {
@@ -94,9 +101,9 @@ AND (billing_date BETWEEN '$start_dt' AND '$end_dt')";
     }
 
 
-    function get_provider_profitloss_data($search_data) {
+    function get_vendor_profitloss_data($search_data) {
         try {
-            $range = explode(' - ', $search_data['providertime']);
+            $range = explode(' - ', $search_data['vendortime']);
             $range_from = explode(' ', $range[0]);
             $range_to = explode(' ', $range[1]);
             $start_dt = $range_from[0]." 00:00:00";
@@ -111,7 +118,7 @@ AND (billing_date BETWEEN '$start_dt' AND '$end_dt')";
 			AND  bill_carrier_sdr.rule_type in (SELECT term FROM `sys_sdr_terms` where cost_calculation_formula = '-' and term_group = 'usage')
 			GROUP BY currency_id";
 			
-			$this->provider_sql=$sql;
+			$this->vendor_sql=$sql;
 			$query = $this->db->query($sql);
 			$final_return_array['result'] = $query->result_array();
 		
@@ -123,49 +130,96 @@ AND (billing_date BETWEEN '$start_dt' AND '$end_dt')";
         }
     }
 
-    function get_active_services_data($filter_data) {
-        try {
-           
-		   $sql = "SELECT SUM(bill_billing_event.quantity) total_item  
-		   
-		   FROM bill_billing_event  
-		INNER JOIN bill_itemlist  ON bill_billing_event.item_id=bill_itemlist.item_id  
-		INNER JOIN bill_pricelist on bill_pricelist.price_id = bill_billing_event.price_id 
-		INNER JOIN account on account.account_id = bill_billing_event.account_id
-		 WHERE bill_billing_event.status_id='1' ";	
+
+	//new
+	function get_causesummaryreport($order_by = '', $limit_to = '', $limit_from = '', $filter_data = array(), $group_data = array()) {
+        $final_return_array = array();
+        try {///ddd($filter_data);
+
+			 $DB1 = $this->load->database('cdrdb', true);
+            $range = explode(' - ', $filter_data['daterange']);
+            $range_from = explode(' ', $range[0]);
+            $range_to = explode(' ', $range[1]);
+
+            $start_dt = $range[0];
+            $end_dt = $range[1];
+
+            $table_from = date('Ym', strtotime($start_dt)) . "_ratedcdr";
+            $table_to = date('Ym', strtotime($end_dt)) . "_ratedcdr";
+			if ($table_from != $table_to) 
+				throw new Exception('Date range should be within a month');
+
+            $sql = "SELECT carrier_id, carrier_name, cdr_type, SIPCODE, Q850CODE,  disposition_cause , fscause , DATE_FORMAT(end_time, '%Y/%m/%d') end_date, 
+			count(SIPCODE) calls, sum(carrier_callcost_total) cost, sum(carrier_duration) as duration
+
+			FROM $table_from 
+			WHERE end_time BETWEEN '$start_dt' AND '$end_dt' AND SIPCODE <> 0 ";
 
             if (count($filter_data) > 0) {
                 foreach ($filter_data as $key => $value) {
 
                     if ($value != '') {
-                        if(in_array($key,array('logged_customer_account_id','logged_customer_level')))
-					   {
-							continue;   
-					   } 
-						elseif ($key == 'logged_customer_type') 
+                       	if ($key == 'daterange') 
+					   	{
+                    	} 
+						elseif (in_array($key, ['cdr_type','sipcode','carrier_id'])) 
 						{
-                            if ($value == 'RESELLER') {					
-								$sql .= " AND account.parent_account_id ='" . $filter_data['logged_customer_account_id'] . "' ";
-							} else {
-								$sql .= " AND account.parent_account_id ='' ";
-							}
-                        } 
-						
+							$sql .= "  and $key = '$value' ";
+						}
+						else
+                            $sql .= "  and $key LIKE '%$value%' ";
+                       
                     }
                 }
             }
-            //$sql .=" ";
-			$this->service_sql=$sql;
-            $query = $this->db->query($sql);
-            $serices_count = $query->row_array();
-           
-            $final_array['serices_count'] = $serices_count['total_item'];
-            return $final_array;
+			
+			$group_by = "";
+
+			if ($group_data['group_by_sip'] == 'Y')
+                $group_by .= " SIPCODE ,";         
+            if ($group_data['group_by_carrier'] == 'Y')
+                $group_by .= " carrier_id ,";
+            if ($group_data['group_by_cdr_type'] == 'Y')
+                $group_by .= " cdr_type ,";
+            if ($group_data['group_by_disposition_cause'] == 'Y')
+                $group_by .= " disposition_cause ,";            
+            if ($group_data['group_by_q850'] == 'Y')
+                $group_by .= " Q850CODE ,";
+			if ($group_data['group_by_date'] == 'Y')
+                $group_by .= " end_date ,";
+
+			
+
+			   if ($group_by != '')
+                $sql .= " group by " . rtrim($group_by, ',');
+          
+          
+            $sql .= "";//" ORDER BY company_name  ";
+            
+       		$final_return_array['sql'] = $sql;
+
+			//ddd($filter_data);			echo $sql;die;
+			$result = $DB1->query($sql);
+            if (!$result) {
+                $error_array = $this->db->error();
+                throw new Exception($error_array['message']);
+            }
+			
+            $final_return_array['total'] = $result->num_rows();
+            $final_return_array['result'] = $result->result_array();
+
+
+            $final_return_array['status'] = 'success';
+            $final_return_array['message'] = 'Data fetched successfully';
+
+            return $final_return_array;
         } catch (Exception $e) {
-            $return['status'] = 'failed';
-            $return['message'] = $e->getMessage();
-            return $return;
+            $final_return_array['status'] = 'failed';
+            $final_return_array['message'] = $e->getMessage();
+            return $final_return_array;
         }
     }
+
+    
 
 }

@@ -1,0 +1,5 @@
+.*.sw?
+*.strhash.c
+docs/_*
+bencode.c
+config.mk

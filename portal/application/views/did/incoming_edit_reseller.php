@@ -1,4 +1,4 @@
-
+ 
 <?php
 $currency_array = array();
 foreach ($currency_options as $currency_options_temp) {
@@ -31,7 +31,6 @@ unset($updatable_field_array['minimal_time']);
 unset($updatable_field_array['resolution_time']);
 unset($updatable_field_array['channels']);
 
-
 /* manage which fields is not editable */
 $is_updatable = true;
 $page_heading = 'Edit Incoming Number';
@@ -43,9 +42,9 @@ switch ($did_status) {
 
         unset($updatable_field_array['did_number']);
 
-        $updatable_field_array['did_status'] = array('DEAD', 'BLOCKED');
+        $updatable_field_array['did_status'] = array('SEIZE', 'BLOCKED');
         break;
-    case 'DEAD':
+    case 'SEIZE':
 
         unset($updatable_field_array);
         $is_updatable = false;
@@ -84,225 +83,216 @@ $did_rates_data = $did_rates_data['dids'];
 <?php
 $tab_index = 1;
 ?>    
-<div class="">
-    <div class="clearfix"></div>    
-    <div class="col-md-12 col-sm-12 col-xs-12 right">
-        <div class="x_title">
-            <h2>DIDs Configuration Management</h2>
-            <ul class="nav navbar-right panel_toolbox">     
-                <li><a href="<?php echo base_url('dids') ?>"><button class="btn btn-danger" type="button" tabindex="<?php echo $tab_index++; ?>">Back to DIDs Listing Page</button></a> </li>
-            </ul>
-            <div class="clearfix"></div>
-        </div>
-
+<div class="container-fluid">
+    <div class="block-header">
+        <h2>DIDs(EDIT) Configuration Management</h2>
+        <ul class="nav navbar-right panel_toolbox">
+            <li><a href="<?php echo base_url('dids') ?>"><input type="button" value="Back to DIDs Listing Page" name="add_link" class="btn btn-primary"></a></li>
+        </ul>
     </div>
-    <div class="col-md-12 col-sm-12 col-xs-12">
-        <div class="x_panel">
-            <div class="x_title">
-                <h2><?php echo $page_heading; ?></h2>
-                <ul class="nav navbar-right panel_toolbox">
+    <div class="row clearfix">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="card">
+                <div class="header">
+                    <h2> <?php echo $page_heading; ?></h2>
 
-                </ul>
-                <div class="clearfix"></div>
-            </div>
-            <div class="x_content">
-                <br />
-                <form action="<?php echo base_url(); ?>dids/edit/<?php echo param_encrypt($did_data['did_id']); ?>" method="post" name="did_form" id="did_form" data-parsley-validate class="form-horizontal form-label-left">
-                    <input type="hidden" name="button_action" id="button_action" value="">
-                    <input type="hidden" name="action" value="OkSaveData"> 
-                    <input type="hidden" name="did_id" value="<?php echo $did_data['did_id']; ?>"/>
-                    <input type="hidden" name="rate_id" value="<?php echo $carrier_rates['rate_id']; ?>"/>
 
-                    <?php if (isset($display_field_array['carrier_id'])): ?>
-                        <div class="form-group">
-                            <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Carrier <span class="required">*</span></label>
-                            <div class="col-md-7 col-sm-6 col-xs-12">
-                                <input type="text" name="carrier_id_display" id="carrier_id_display" value="<?php echo $did_data['carrier_id']; ?>" disabled="disabled" class="form-control col-md-7 col-xs-12" tabindex="<?php echo $tab_index++; ?>">
+
+
+                    <form action="<?php echo base_url(); ?>dids/edit/<?php echo param_encrypt($did_data['did_id']); ?>" method="post" name="did_form" id="did_form" data-parsley-validate class="form-horizontal form-label-left">
+                        <input type="hidden" name="button_action" id="button_action" value="">
+                        <input type="hidden" name="action" value="OkSaveData"> 
+                        <input type="hidden" name="did_id" value="<?php echo $did_data['did_id']; ?>"/>
+                        <input type="hidden" name="rate_id" value="<?php echo $carrier_rates['rate_id']; ?>"/>
+
+                        <?php if (isset($display_field_array['carrier_id'])): ?>
+                            <div class="form-group">
+                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Carrier <span class="required">*</span></label>
+                                <div class="col-md-7 col-sm-6 col-xs-12">
+                                    <input type="text" name="carrier_id_display" id="carrier_id_display" value="<?php echo $did_data['carrier_id']; ?>" disabled="disabled" class="form-control col-md-7 col-xs-12" tabindex="<?php echo $tab_index++; ?>">
+                                </div>
                             </div>
-                        </div>
-                    <?php endif; ?>
+                        <?php endif; ?>
 
-                    <?php
-                    if (isset($display_field_array['carrier_id'])):
-                        $currency = '';
-                        if (isset($did_data['carrier']['carrier_currency_id'])) {
-                            $carrier_currency_id = $did_data['carrier']['carrier_currency_id'];
-                            $currency = $currency_array[$carrier_currency_id];
-                        }
-                        ?>
-                        <div class="form-group" id="id_currency_div">
-                            <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Currency </label>
-                            <div class="col-md-7 col-sm-6 col-xs-12">
-                                <input type="text" name="currency_display" id="currency_display" value="<?php echo $currency; ?>" class="form-control col-md-7 col-xs-12" disabled="disabled">
-                            </div>
-                        </div>
-                    <?php endif; ?>
-
-                    <?php
-                    if (isset($display_field_array['did_number'])):
-                        $is_disabled = '';
-                        if (!isset($updatable_field_array['did_number']))
-                            $is_disabled = ' disabled="disabled"';
-                        ?>          
-                        <div class="form-group">
-                            <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">DID <span class="required">*</span>   </label>
-                            <div class="col-md-7 col-sm-6 col-xs-12">
-                                <input type="text" name="did_number" id="did_number" value="<?php echo $did_data['did_number']; ?>"  data-parsley-required="" data-parsley-minlength="3"  data-parsley-maxlength="15" data-parsley-type="digits" class="form-control col-md-7 col-xs-12" tabindex="<?php echo $tab_index++; ?>" <?php echo $is_disabled; ?> >
-                            </div>
-                        </div>
-                    <?php endif; ?>
-                    <?php
-                    if (isset($display_field_array['destination'])):
-                        $is_disabled = '';
-                        if (!isset($updatable_field_array['destination']))
-                            $is_disabled = ' disabled="disabled"';
-                        ?>    
-                        <div class="form-group">
-                            <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">DID Name <span class="required">*</span></label>
-                            <div class="col-md-7 col-sm-6 col-xs-12">
-                                <input type="text" name="destination" id="destination" value="<?php echo $carrier_rates['destination']; ?>" data-parsley-required="" data-parsley-pattern="/^[\w ]+$/" data-parsley-minlength="2" class="form-control col-md-7 col-xs-12" tabindex="<?php echo $tab_index++; ?>" <?php echo $is_disabled; ?>>
-                            </div>
-                        </div>
-                    <?php endif; ?>
-                    <?php
-                    if (isset($display_field_array['setup_charge'])):
-                        $is_disabled = '';
-                        if (!isset($updatable_field_array['setup_charge']))
-                            $is_disabled = ' disabled="disabled"';
-                        ?>
-                        <div class="form-group">
-                            <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Setup Charge <span class="required">*</span></label>
-                            <div class="col-md-7 col-sm-6 col-xs-12">
-                                <input type="text" name="setup_charge" id="setup_charge" value="<?php echo $did_rates_data['setup']; ?>" data-parsley-required="" data-parsley-price="" class="form-control col-md-7 col-xs-12" tabindex="<?php echo $tab_index++; ?>" <?php echo $is_disabled; ?>>
-                            </div>
-                        </div>
-                    <?php endif; ?>
-                    <?php
-                    if (isset($display_field_array['rental'])):
-                        $is_disabled = '';
-                        if (!isset($updatable_field_array['rental']))
-                            $is_disabled = ' disabled="disabled"';
-                        ?>
-                        <div class="form-group">
-                            <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Rental <span class="required">*</span></label>
-                            <div class="col-md-7 col-sm-6 col-xs-12">
-                                <input type="text" name="rental" id="rental" value="<?php echo $did_rates_data['rental']; ?>" data-parsley-required="" data-parsley-price="" class="form-control col-md-7 col-xs-12" tabindex="<?php echo $tab_index++; ?>" <?php echo $is_disabled; ?>>
-                            </div>
-                        </div>
-                    <?php endif; ?>
-                    <?php
-                    if (isset($display_field_array['rate'])):
-                        $is_disabled = '';
-                        if (!isset($updatable_field_array['rate']))
-                            $is_disabled = ' disabled="disabled"';
-                        ?>
-                        <div class="form-group">
-                            <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Call Rate <span class="required">*</span></label>
-                            <div class="col-md-7 col-sm-6 col-xs-12">
-                                <input type="text" name="rate" id="rate" value="<?php echo $did_rates_data['ppm']; ?>" data-parsley-required="" data-parsley-price="" class="form-control col-md-7 col-xs-12" tabindex="<?php echo $tab_index++; ?>" <?php echo $is_disabled; ?>>
-                            </div>
-                        </div>
-                    <?php endif; ?> 
-                    <?php
-                    if (isset($display_field_array['connection_charge'])):
-                        $is_disabled = '';
-                        if (!isset($updatable_field_array['connection_charge']))
-                            $is_disabled = ' disabled="disabled"';
-                        ?>
-                        <div class="form-group">
-                            <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Connection Charge <span class="required">*</span></label>
-                            <div class="col-md-7 col-sm-6 col-xs-12">
-                                <input type="text" name="connection_charge" id="connection_charge" value="<?php echo $did_rates_data['ppc']; ?>" data-parsley-required="" data-parsley-price="" class="form-control col-md-7 col-xs-12" tabindex="<?php echo $tab_index++; ?>" <?php echo $is_disabled; ?>>
-                            </div>
-                        </div>
-                    <?php endif; ?>
-                    <?php
-                    if (isset($display_field_array['minimal_time'])):
-                        $is_disabled = '';
-                        if (!isset($updatable_field_array['minimal_time']))
-                            $is_disabled = ' disabled="disabled"';
-                        ?>
-                        <div class="form-group">
-                            <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Minimum Time <span class="required">*</span></label>
-                            <div class="col-md-7 col-sm-6 col-xs-12">
-                                <input type="text" name="minimal_time" id="minimal_time" value="<?php echo $did_rates_data['min']; ?>" data-parsley-required="" data-parsley-type="digits" data-parsley-min="1" class="form-control col-md-7 col-xs-12" tabindex="<?php echo $tab_index++; ?>" <?php echo $is_disabled; ?>>
-                            </div>
-                        </div>
-                    <?php endif; ?>
-                    <?php
-                    if (isset($display_field_array['resolution_time'])):
-                        $is_disabled = '';
-                        if (!isset($updatable_field_array['resolution_time']))
-                            $is_disabled = ' disabled="disabled"';
-                        ?>
-                        <div class="form-group">
-                            <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Resolution Time <span class="required">*</span></label>
-                            <div class="col-md-7 col-sm-6 col-xs-12">
-                                <input type="text" name="resolution_time" id="resolution_time" value="<?php echo $did_rates_data['res']; ?>" data-parsley-required="" data-parsley-type="digits" data-parsley-min="1" class="form-control col-md-7 col-xs-12" tabindex="<?php echo $tab_index++; ?>" <?php echo $is_disabled; ?>>
-                            </div>
-                        </div>
-                    <?php endif; ?> 
-
-
-                    <?php
-                    if (isset($display_field_array['channels'])):
-                        $is_disabled = '';
-                        if (!isset($updatable_field_array['channels']))
-                            $is_disabled = ' disabled="disabled"';
-                        ?>
-                        <div class="form-group">
-                            <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Channels <span class="required">*</span></label>
-                            <div class="col-md-7 col-sm-6 col-xs-12">
-                                <input type="text" name="channels" id="channels" value="<?php echo $did_data['channels']; ?>" data-parsley-required="" data-parsley-type="digits" data-parsley-min="1" class="form-control col-md-7 col-xs-12" tabindex="<?php echo $tab_index++; ?>" <?php echo $is_disabled; ?>>
-                            </div>
-                        </div>
-                    <?php endif; ?> 
-
-
-
-                    <div class="form-group" id="id_currency_div">
-                        <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Status </label>
-                        <div class="col-md-7 col-sm-6 col-xs-12">
-
-
-
-                            <?php
-                            $str = '';
-                            if (count($updatable_field_array['did_status']) > 0) {
-                                echo '<select name="did_status" id="did_status" data-parsley-required="" class="form-control" tabindex="' . $tab_index . '">';
-
-                                $str .= '<option value="' . $did_status . '" selected="selected" >' . ucfirst(strtolower($did_status)) . '</option>';
-                                foreach ($updatable_field_array['did_status'] as $status_name) {
-                                    $str .= '<option value="' . $status_name . '" >' . ucfirst(strtolower($status_name)) . '</option>';
-                                }
-                                echo $str;
-                                echo '</select>';
-                            } else {
-                                echo ucfirst(strtolower($did_status));
+                        <?php
+                        if (isset($display_field_array['carrier_id'])):
+                            $currency = '';
+                            if (isset($did_data['carrier']['carrier_currency_id'])) {
+                                $carrier_currency_id = $did_data['carrier']['carrier_currency_id'];
+                                $currency = $currency_array[$carrier_currency_id];
                             }
                             ?>
+                            <div class="form-group" id="id_currency_div">
+                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Currency </label>
+                                <div class="col-md-7 col-sm-6 col-xs-12">
+                                    <input type="text" name="currency_display" id="currency_display" value="<?php echo $currency; ?>" class="form-control col-md-7 col-xs-12" disabled="disabled">
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php
+                        if (isset($display_field_array['did_number'])):
+                            $is_disabled = '';
+                            if (!isset($updatable_field_array['did_number']))
+                                $is_disabled = ' disabled="disabled"';
+                            ?>          
+                            <div class="form-group">
+                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">DID <span class="required">*</span>   </label>
+                                <div class="col-md-7 col-sm-6 col-xs-12">
+                                    <input type="text" name="did_number" id="did_number" value="<?php echo $did_data['did_number']; ?>"  data-parsley-required="" data-parsley-minlength="3"  data-parsley-maxlength="15" data-parsley-type="digits" class="form-control col-md-7 col-xs-12" tabindex="<?php echo $tab_index++; ?>" <?php echo $is_disabled; ?> >
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                        <?php
+                        if (isset($display_field_array['destination'])):
+                            $is_disabled = '';
+                            if (!isset($updatable_field_array['destination']))
+                                $is_disabled = ' disabled="disabled"';
+                            ?>    
+                            <div class="form-group">
+                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">DID Name <span class="required">*</span></label>
+                                <div class="col-md-7 col-sm-6 col-xs-12">
+                                    <input type="text" name="destination" id="destination" value="<?php echo $carrier_rates['destination']; ?>" data-parsley-required="" data-parsley-pattern="/^[\w ]+$/" data-parsley-minlength="2" class="form-control col-md-7 col-xs-12" tabindex="<?php echo $tab_index++; ?>" <?php echo $is_disabled; ?>>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                        <?php
+                        if (isset($display_field_array['setup_charge'])):
+                            $is_disabled = '';
+                            if (!isset($updatable_field_array['setup_charge']))
+                                $is_disabled = ' disabled="disabled"';
+                            ?>
+                            <div class="form-group">
+                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Setup Charge <span class="required">*</span></label>
+                                <div class="col-md-7 col-sm-6 col-xs-12">
+                                    <input type="text" name="setup_charge" id="setup_charge" value="<?php echo $did_rates_data['setup']; ?>" data-parsley-required="" data-parsley-price="" class="form-control col-md-7 col-xs-12" tabindex="<?php echo $tab_index++; ?>" <?php echo $is_disabled; ?>>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                        <?php
+                        if (isset($display_field_array['rental'])):
+                            $is_disabled = '';
+                            if (!isset($updatable_field_array['rental']))
+                                $is_disabled = ' disabled="disabled"';
+                            ?>
+                            <div class="form-group">
+                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Rental <span class="required">*</span></label>
+                                <div class="col-md-7 col-sm-6 col-xs-12">
+                                    <input type="text" name="rental" id="rental" value="<?php echo $did_rates_data['rental']; ?>" data-parsley-required="" data-parsley-price="" class="form-control col-md-7 col-xs-12" tabindex="<?php echo $tab_index++; ?>" <?php echo $is_disabled; ?>>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                        <?php
+                        if (isset($display_field_array['rate'])):
+                            $is_disabled = '';
+                            if (!isset($updatable_field_array['rate']))
+                                $is_disabled = ' disabled="disabled"';
+                            ?>
+                            <div class="form-group">
+                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Call Rate <span class="required">*</span></label>
+                                <div class="col-md-7 col-sm-6 col-xs-12">
+                                    <input type="text" name="rate" id="rate" value="<?php echo $did_rates_data['ppm']; ?>" data-parsley-required="" data-parsley-price="" class="form-control col-md-7 col-xs-12" tabindex="<?php echo $tab_index++; ?>" <?php echo $is_disabled; ?>>
+                                </div>
+                            </div>
+                        <?php endif; ?> 
+                        <?php
+                        if (isset($display_field_array['connection_charge'])):
+                            $is_disabled = '';
+                            if (!isset($updatable_field_array['connection_charge']))
+                                $is_disabled = ' disabled="disabled"';
+                            ?>
+                            <div class="form-group">
+                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Connection Charge <span class="required">*</span></label>
+                                <div class="col-md-7 col-sm-6 col-xs-12">
+                                    <input type="text" name="connection_charge" id="connection_charge" value="<?php echo $did_rates_data['ppc']; ?>" data-parsley-required="" data-parsley-price="" class="form-control col-md-7 col-xs-12" tabindex="<?php echo $tab_index++; ?>" <?php echo $is_disabled; ?>>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                        <?php
+                        if (isset($display_field_array['minimal_time'])):
+                            $is_disabled = '';
+                            if (!isset($updatable_field_array['minimal_time']))
+                                $is_disabled = ' disabled="disabled"';
+                            ?>
+                            <div class="form-group">
+                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Minimum Time <span class="required">*</span></label>
+                                <div class="col-md-7 col-sm-6 col-xs-12">
+                                    <input type="text" name="minimal_time" id="minimal_time" value="<?php echo $did_rates_data['min']; ?>" data-parsley-required="" data-parsley-type="digits" data-parsley-min="1" class="form-control col-md-7 col-xs-12" tabindex="<?php echo $tab_index++; ?>" <?php echo $is_disabled; ?>>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                        <?php
+                        if (isset($display_field_array['resolution_time'])):
+                            $is_disabled = '';
+                            if (!isset($updatable_field_array['resolution_time']))
+                                $is_disabled = ' disabled="disabled"';
+                            ?>
+                            <div class="form-group">
+                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Resolution Time <span class="required">*</span></label>
+                                <div class="col-md-7 col-sm-6 col-xs-12">
+                                    <input type="text" name="resolution_time" id="resolution_time" value="<?php echo $did_rates_data['res']; ?>" data-parsley-required="" data-parsley-type="digits" data-parsley-min="1" class="form-control col-md-7 col-xs-12" tabindex="<?php echo $tab_index++; ?>" <?php echo $is_disabled; ?>>
+                                </div>
+                            </div>
+                        <?php endif; ?> 
 
 
-                        </div>
-                    </div>
+                        <?php
+                        if (isset($display_field_array['channels'])):
+                            $is_disabled = '';
+                            if (!isset($updatable_field_array['channels']))
+                                $is_disabled = ' disabled="disabled"';
+                            ?>
+                            <div class="form-group">
+                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Channels <span class="required">*</span></label>
+                                <div class="col-md-7 col-sm-6 col-xs-12">
+                                    <input type="text" name="channels" id="channels" value="<?php echo $did_data['channels']; ?>" data-parsley-required="" data-parsley-type="digits" data-parsley-min="1" class="form-control col-md-7 col-xs-12" tabindex="<?php echo $tab_index++; ?>" <?php echo $is_disabled; ?>>
+                                </div>
+                            </div>
+                        <?php endif; ?> 
 
-                    <?php if (!check_logged_user_group('CUSTOMER')) { ?>
-                        <div class="ln_solid"></div>
-                        <div class="form-group">
-                            <div class="col-md-8 col-sm-6 col-xs-12 col-md-offset-4">
-                                <a href="<?php echo base_url() ?>dids"><button class="btn btn-primary" type="button" tabindex="<?php echo $tab_index++; ?>">Cancel</button></a>		
-                                <?php if ($is_updatable): ?>		
-                                    <button type="button" id="btnSave" class="btn btn-success" tabindex="<?php echo $tab_index++; ?>">Save</button>
-                                    <button type="button" id="btnSaveClose" class="btn btn-info" tabindex="<?php echo $tab_index++; ?>">Save & Close</button>
-                                <?php endif; ?>
+
+
+                        <div class="form-group" id="id_currency_div">
+                            <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Status </label>
+                            <div class="col-md-7 col-sm-6 col-xs-12">
+
+                                <?php
+                                $str = '';
+                                if (isset($updatable_field_array['did_status']) && count($updatable_field_array['did_status']) > 0) {
+                                    echo '<select name="did_status" id="did_status" data-parsley-required="" class="form-control" tabindex="' . $tab_index . '">';
+
+                                    $str .= '<option value="' . $did_status . '" selected="selected" >' . ucfirst(strtolower($did_status)) . '</option>';
+                                    foreach ($updatable_field_array['did_status'] as $status_name) {
+                                        $str .= '<option value="' . $status_name . '" >' . ucfirst(strtolower($status_name)) . '</option>';
+                                    }
+                                    echo $str;
+                                    echo '</select>';
+                                } else {
+                                    echo ucfirst(strtolower($did_status));
+                                }
+                                ?>
+
+
                             </div>
                         </div>
-                    <?php } ?>
-                </form>
+
+                        <?php if (!check_logged_user_group('CUSTOMER')) { ?>
+                            <div class="ln_solid"></div>
+                            <div class="form-group">
+                                <div class="col-md-8 col-sm-6 col-xs-12 col-md-offset-4">
+                                    <a href="<?php echo base_url() ?>dids"><button class="btn btn-primary" type="button" tabindex="<?php echo $tab_index++; ?>">Cancel</button></a>		
+                                    <?php if ($is_updatable): ?>		
+                                        <button type="button" id="btnSave" class="btn btn-success" tabindex="<?php echo $tab_index++; ?>">Save</button>
+                                        <button type="button" id="btnSaveClose" class="btn btn-info" tabindex="<?php echo $tab_index++; ?>">Save & Close</button>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        <?php } ?>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-
     <div class="col-md-12 col-sm-12 col-xs-12 right">
         <div class="ln_solid"></div>
         <div class="x_title">

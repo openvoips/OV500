@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>libks</ProjectName>
+    <RootNamespace>libks</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{EFFC9BFD-DE46-47E7-9EF1-564DC87E89A8}</ProjectGuid>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
+    <OpenSSLPlatform>x86</OpenSSLPlatform>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
+    <OpenSSLPlatform>x64</OpenSSLPlatform>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
+    <OpenSSLPlatform>x86</OpenSSLPlatform>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
+    <OpenSSLPlatform>x64</OpenSSLPlatform>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <Import Project="buildpackages.task" />
+  <Import Project="libks-version.props" />
+  <Import Project="openssl-version.props" />
+  <PropertyGroup Label="UserMacros" />
+  <Target Name="Build">
+    <MakeDir Directories="../build-$(Platform)" />
+    <Exec Command="cmake .. -DCMAKE_GENERATOR_PLATFORM=$(Platform) -DOPENSSL_INCLUDE_DIR=$(BaseDir)openssl-$(OpenSSLVersion)/include_$(OpenSSLPlatform)/;$(BaseDir)openssl-$(OpenSSLVersion)/include/ -DOPENSSL_LIBRARIES=$(BaseDir)openssl-$(OpenSSLVersion)/binaries/$(Platform)/$(Configuration)/lib -DOPENSSL_ROOT=$(BaseDir)openssl-$(OpenSSLVersion)/binaries/$(Platform)/$(Configuration)/ -T $(DefaultPlatformToolset)" WorkingDirectory="../build-$(Platform)" />
+    <MsBuild Projects="$(libksLibDir)\build-$(Platform)\ks2.vcxproj" Properties="Configuration=$(Configuration);Platform=$(Platform)" />
+  </Target>
+</Project>

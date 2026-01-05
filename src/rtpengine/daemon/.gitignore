@@ -1,0 +1,7 @@
+.depend
+*.8
+*.o
+rtpengine
+core
+core.*
+.ycm_extra_conf.pyc

@@ -11,6 +11,7 @@ if (isset($accountinfo['voipminuts']['tariff_id'])) {
     $submit_url = site_url('crs/addvoip/' . param_encrypt($accountinfo['account_id']));
 }
 ?>
+
 <form action="<?php echo $submit_url; ?>" method="post" name="<?php echo 'tab_form_' . $key; ?>" id="<?php echo 'tab_form_' . $key; ?>" data-parsley-validate class="form-horizontal form-label-left">
     <input type="hidden" name="button_action" id="button_action" value="">
     <input type="hidden" name="action" value="OkSaveTariff">
@@ -23,27 +24,13 @@ if (isset($accountinfo['voipminuts']['tariff_id'])) {
         <div class="col-md-7 col-sm-6 col-xs-10">
             <select name="tariff_id" id="tariff_id" data-parsley-required="" class="form-control" >
                 <option value="">Select Tariff</option>                    
-<?php
-$str = '';
-foreach ($tariff_options as $tariff_row) {
 
-    $selected = '';
-    if ($voip_minute_data['tariff_id'] == $tariff_row['tariff_id'])
-        $selected = 'selected';
-    $str .= '<option value="' . $tariff_row['tariff_id'] . '" ' . $selected . '>' . $tariff_row['tariff_name'] . '</option>';
-}
-echo $str;
-?>
             </select>
         </div>
     </div>
 
-    <div class="form-group">
-        <label for="status-name" class="control-label col-md-4 col-sm-3 col-xs-12">Billing Code</label>
-        <div class="col-md-7 col-sm-6 col-xs-12">
-            <input type="text" name="billingcode" id="billingcode" class="form-control" value="<?php echo $voip_minute_data['billingcode']; ?>"  data-parsley-type="alphanum" >
-        </div>
-    </div>
+
+
 
 
 
@@ -52,4 +39,57 @@ echo $str;
             <button type="button" id="<?php echo 'btnSaveClose' . $key; ?>" class="btn btn-info" onclick="save_button('<?php echo $key; ?>')">Update Tariff</button>
         </div>
     </div>
+    <br>
 </form>
+
+<script>
+    /* fill any one of the two  currency_id or account_id*/
+    var account_id = '<?php echo $accountinfo['account_id']; ?>';
+    var currency_id = '';
+    var existing_value = '<?php echo $voip_minute_data['tariff_id']; ?>';
+
+    $(document).ready(function () {
+        destination_type_changed('tariff_id', account_id, currency_id, existing_value);
+    });
+    /*
+     //if on currency_id change
+     $("#oncurrencychange").change(function() {	
+     currency_id = $('#oncurrencychange').val();
+     destination_type_changed('tariff_id', account_id, currency_id, existing_value); 
+     }); 
+     */
+
+
+    function destination_type_changed(id_tariff, account_id, currency_id, existing_value)
+    {
+
+        {
+            data_array = {
+                action: 'get_tariffs',
+                account_id: account_id,
+                currency_id: currency_id,
+                existing_value: existing_value,
+            };
+            // console.log(data_array);
+            var target = BASE_URL + "crs/ajax/ajax_get_tariff";
+
+            $.ajax({
+                method: "POST",
+                url: target,
+                dataType: 'json',
+                data: data_array
+            })
+                    .done(function (msg) {
+                        //console.log(msg);
+                        if (typeof msg['html'] === 'undefined')
+                        {
+                        } else
+                        {
+                            $('#' + id_tariff).html(msg['html']);
+                        }
+
+                    });
+
+        }
+    }
+</script>

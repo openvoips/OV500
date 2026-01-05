@@ -1,0 +1,16 @@
+/test
+/map/tool
+/map/raw
+/theme/tool
+/theme/thumb
+/todo
+/npm-debug.log
+/benchmark
+/src
+.DS_Store
+Thumbs.db
+Desktop.ini
+/asset/contributing-inspect.png
+CONTRIBUTING.md
+# Hidden files
+.*

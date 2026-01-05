@@ -1,30 +1,13 @@
 <?php
 
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-// OV500 Version 2.0.0
-// Copyright (C) 2019-2021 Openvoips Technologies   
-// http://www.openvoips.com  http://www.openvoips.org
-// 
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
-
+/*
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2026 
+ * http://www.openvoips.com 
+ */
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
@@ -45,6 +28,181 @@ class Reports extends MY_Controller {
         $this->livecall();
     }
 
+    function round_up($value, $precision) {
+        $pow = pow(10, $precision);
+        return ( ceil($pow * $value) + ceil($pow * $value - ceil($pow * $value)) ) / $pow;
+    }
+
+    function accountsummary() {
+
+
+        $page_name = "report_accountsummary";
+        $data['page_name'] = $page_name;
+
+        $logged_account_id = get_logged_account_id();
+        if (!check_logged_account_type(array('CUSTOMER'))) {
+            show_404('dashboard');
+        }
+        $data = $this->report_mod->account_summery($logged_account_id);
+        $this->load->view('basic/header', $data);
+        $this->load->view('reports/accountsummary', $data);
+        $this->load->view('basic/footer', $data);
+    }
+
+    function resellersummary() {
+        $page_name = "report_accountsummary";
+        $data['page_name'] = $page_name;
+        $logged_account_id = get_logged_account_id();
+        if (!check_logged_account_type(array('RESELLER'))) {
+            show_404('dashboard');
+        }
+
+        $data = $this->report_mod->reseller_summery($logged_account_id);
+        $this->load->view('basic/header', $data);
+        $this->load->view('reports/resellersummary', $data);
+        $this->load->view('basic/footer', $data);
+    }
+
+    function customers_status() {
+        $DB1 = $this->load->database('cdrdb', true);
+        $sql = " select concat(( select concat(count(id),'C')  FROM account  where account_level = '1'  and account.account_type = 'CUSTOMER' and status_id = '1'),'/', ( select concat(count(id),'R')  FROM account  where account_level = '1'  and account.account_type = 'RESELLER' and status_id = '1' )) as customer  ; ";
+
+        $result = $this->db->query($sql);
+
+        $customer = $result->result_array();
+
+        echo $customer[0]['customer'];
+    }
+
+    function callusage($arg1 = '', $format = '') {
+
+
+        $page_name = 'report_callusage';
+        $data['page_name'] = $page_name;
+
+        $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
+
+        $logged_customer_type = get_logged_account_type();
+        $logged_account_id = get_logged_account_id();
+        $get_logged_account_level = get_logged_account_level();
+
+///////////////// Searching ////////////////////
+// reservation-time
+        $is_make_search = false;
+        $search_data = array();
+        if (isset($_POST['OkFilter'])) {
+            $_SESSION[$page_name] = array(
+                'time_range' => $_POST['time_range'],
+                'cdr_type' => $_POST['cdr_type'],
+                'customer_company_name' => $_POST['customer_company_name'],
+                'customer_account_id' => $_POST['customer_account_id'],
+                'no_of_records' => $_POST['no_of_rows']
+            );
+            $is_make_search = true;
+        } elseif ($arg1 != 'export' && !isset($_SESSION[$page_name]['time_range'])) {
+//default date is todays date
+            $today_timestamp = strtotime("today");
+            $today = date('Y-m-d', $today_timestamp);
+            $time_range = $today . ' 00:00 - ' . $today . ' 23:59';
+
+            $_SESSION[$page_name] = array(
+                'time_range' => $time_range,
+                'cdr_type' => '',
+                'customer_company_name' => '',
+                'customer_account_id' => '',
+                'no_of_records' => isset($_SESSION[$page_name]['no_of_records']) ? $_SESSION[$page_name]['no_of_records'] : RECORDS_PER_PAGE
+            );
+        } else {
+            $is_make_search = true;
+        }
+
+
+        $search_data = array(
+            'time_range' => $_SESSION[$page_name]['time_range'],
+            'cdr_type' => $_SESSION[$page_name]['cdr_type'],
+        );
+
+        if (!check_logged_account_type(array('CUSTOMER'))) {
+            $search_data['customer_company_name'] = $_SESSION[$page_name]['customer_company_name'];
+            $search_data['customer_account_id'] = $_SESSION[$page_name]['customer_account_id'];
+        }
+
+
+        $is_file_downloaded = false;
+
+        if ($is_file_downloaded === false) {
+
+            $pagination_uri_segment = 3;
+            if (isset($_SESSION[$page_name]['no_of_records']) && $_SESSION[$page_name]['no_of_records'] != '')
+                $per_page = $_SESSION[$page_name]['no_of_records'];
+            else
+                $per_page = RECORDS_PER_PAGE;
+            if ($this->uri->segment($pagination_uri_segment) == '') {
+                $segment = 0;
+            } else {
+                $segment = $this->uri->segment($pagination_uri_segment);
+            }
+
+            $response = $this->report_mod->callusage_mod($search_data, $per_page, $segment);
+            $data['listing_data'] = $response['result'];
+            $total_records = $response['total'];
+            $data['sql'] = $response['sql'];
+            $data['sum_sql'] = $response['sum_sql'];
+
+            $this->load->library('pagination'); // pagination class		
+            $config = array();
+            $config = $this->utils_model->setup_pagination_option($total_records, 'report/callusage', $per_page, $pagination_uri_segment);
+            $this->pagination->initialize($config);
+            $data['pagination'] = $this->pagination->create_links();
+            $data['total_records'] = $total_records;
+
+            $data['sum_result'] = $response['sum_result'];
+
+            $data['currency_options'] = $this->utils_model->get_currencies();
+
+            $this->load->view('basic/header', $data);
+            $this->load->view('reports/callusage', $data);
+            $this->load->view('basic/footer', $data);
+        }
+    }
+
+    function usage() {
+
+        $DB1 = $this->load->database('cdrdb', true);
+        $sql = "select currency_id , symbol from sys_currencies where status_id = '1'";
+
+        $result = $this->db->query($sql);
+        $dd = date('Ym');
+        $i = 0;
+        $currencies = $result->result_array();
+        foreach ($currencies as $currency) {
+            $sql = "select sum(if (reseller1_account_id is not null or reseller1_account_id != '' ,reseller1_callcost_total, customer_callcost_total)) salecost  from " . $dd . "_ratedcdr  where customer_currency_id = '" . $currency['currency_id'] . "' and date(end_time) = '" . date("Y-m-d") . "'";
+
+// $DB1 = $this->load->database('cdrdb', true);
+            $result = $DB1->query($sql);
+            $usage = $result->result_array();
+            $usagedata[$i]['currency'] = $currency['currency_id'] . " (" . $currency['symbol'] . ")";
+            $usagedata[$i]['salecost'] = $this->round_up($usage[0]['salecost'], 4);
+            $sql = "select sum(carrier_callcost_total) buycost  from " . $dd . "_ratedcdr  where carrier_currency_id = '" . $currency['currency_id'] . "' and date(end_time) = '" . date("Y-m-d") . "'";
+//$DB1 = $this->load->database('cdrdb', true);
+            $result = $DB1->query($sql);
+            $usage2 = $result->result_array();
+            $usagedata[$i]['buycost'] = $this->round_up($usage2[0]['buycost'], 4);
+            $i = $i + 1;
+        }
+        $str = '';
+        $str .= '<table class="table table-bordered table-condensed">';
+        $str .= '<tr><td></td><td>Buy</td><td>Sell</td><td>Margin</td></tr>';
+        foreach ($usagedata as $usagedata_array) {
+            if ($usagedata_array['buycost'] > 0 or $usagedata_array['salecost'] > 0) {
+                $str .= '<tr><td>' . $usagedata_array['currency'] . '</td><td>' . round($usagedata_array['buycost'], 4) . '</td><td>' . round($usagedata_array['salecost'], 4) . '</td><td>' . round($usagedata_array['salecost'] - $usagedata_array['buycost'], 4) . '</td></tr>';
+            }
+        }
+        $str .= '<table>';
+        echo $str;
+    }
+
+/////////////////monin_update_05_30/////////////////
     public function monin_new() {
         $data['page_name'] = "monin";
         if (!check_account_permission('reports', 'monin'))
@@ -58,186 +216,6 @@ class Reports extends MY_Controller {
         $this->load->view('basic/footer', $data);
     }
 
-    function ProfitLoss($arg1 = '', $format = '') {
-
-        $data['page_name'] = "ProfitLoss";
-
-        $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-        $this->load->model('carrier_mod');
-        //$response = $this->carrier_mod->get_data('', 0, '', array(), array());
-        // $data['carrier_data'] = $response['result'];
-        $data['currency_data'] = $this->utils_model->get_currencies();
-        $currency_data = $data['currency_data'];
-        ///////////////// Searching ////////////////////
-        // reservation-time
-        $is_make_search = false;
-        $search_data = array();
-        if (isset($_POST['OkFilter'])) {
-            $_SESSION['search_data'] = array(
-                's_call_date' => $_POST['frmtime'],
-                's_carrier' => $_POST['frmcarrier'],
-                's_dest' => $_POST['frmdest'],
-                's_prefix' => $_POST['frmprefix'],
-                's_ctype' => $_POST['frmctype'],
-                's_code' => $_POST['frmcode'],
-                's_customer_company_name' => $_POST['customer_company_name'],
-                's_g_user' => (isset($_POST['g_user']) ? 'Y' : 'N'),
-                's_g_carrier' => (isset($_POST['g_carrier']) ? 'Y' : 'N'),
-                's_g_date' => (isset($_POST['g_date']) ? 'Y' : 'N'),
-                's_g_hour' => (isset($_POST['g_hour']) ? 'Y' : 'N'),
-                's_g_minute' => (isset($_POST['g_minute']) ? 'Y' : 'N'),
-                's_g_prefix' => (isset($_POST['g_prefix']) ? 'Y' : 'N'),
-                's_g_dest' => (isset($_POST['g_dest']) ? 'Y' : 'N'),
-            );
-            $is_make_search = true;
-        } elseif ($arg1 != 'export') {
-            $_SESSION['search_data'] = array(
-                's_call_date' => '',
-                's_carrier' => '',
-                's_dest' => '',
-                's_prefix' => '',
-                's_code' => '',
-                's_g_user' => '',
-                's_g_carrier' => '',
-                's_g_date' => '',
-                's_g_hour' => '',
-                's_g_minute' => '',
-                's_g_prefix' => '',
-                's_g_dest' => '',
-                's_customer_company_name' => '',
-                's_ctype' => '',
-            );
-        } else {
-            $is_make_search = true;
-        }
-
-        $search_data = array(
-            'call_date' => $_SESSION['search_data']['s_call_date'],
-            'carrier_id' => $_SESSION['search_data']['s_carrier'],
-            'account_id' => $_SESSION['search_data']['s_code'],
-            'company_name' => $_SESSION['search_data']['s_customer_company_name'],
-            'account_type' => $_SESSION['search_data']['s_ctype'],
-            'prefix' => $_SESSION['search_data']['s_prefix'],
-            'destination' => $_SESSION['search_data']['s_dest'],
-            'group_by_carrier' => $_SESSION['search_data']['s_g_carrier'],
-            'group_by_user' => $_SESSION['search_data']['s_g_user'],
-            'group_by_hour' => $_SESSION['search_data']['s_g_hour'],
-            'group_by_minute' => $_SESSION['search_data']['s_g_minute'],
-            'group_by_date' => $_SESSION['search_data']['s_g_date'],
-            'group_by_prefix' => $_SESSION['search_data']['s_g_prefix'],
-            'group_by_destination' => $_SESSION['search_data']['s_g_dest'],
-            'logged_customer_type' => get_logged_account_type(),
-            'logged_customer_account_id' => get_logged_account_id(),
-            'logged_customer_level' => get_logged_account_level(),
-        );
-
-        if ($is_make_search) {
-            $response = $this->report_mod->ProfitLoss($search_data);
-            $data['listing_data'] = $response['result'];
-            $data['listing_count'] = $response['total'];
-        }
-        $is_file_downloaded = false;
-
-        //////// add export  ////////////////	
-        if ($arg1 == 'export' && $format != '') {
-            ini_set('memory_limit', '2048M');
-            $response = $this->report_mod->ProfitLoss($search_data);
-            $data['listing_data'] = $response['result'];
-            $data['listing_count'] = $response['total'];
-            $format = param_decrypt($format);
-            $file_name = 'ProfitLoss';
-            $export_header = array();
-            if (isset($_SESSION['search_data']['s_g_user']) && $_SESSION['search_data']['s_g_user'] == 'Y')
-                $export_header[] = 'Customer';
-            if (isset($_SESSION['search_data']['s_g_carrier']) && $_SESSION['search_data']['s_g_carrier'] == 'Y')
-                $export_header[] = 'Carrier';
-            if (isset($_SESSION['search_data']['s_g_date']) && $_SESSION['search_data']['s_g_date'] == 'Y')
-                $export_header[] = 'Date';
-            if (isset($_SESSION['search_data']['s_g_hour']) && $_SESSION['search_data']['s_g_hour'] == 'Y')
-                $export_header[] = 'Hour';
-            if (isset($_SESSION['search_data']['s_g_hour']) && $_SESSION['search_data']['s_g_minute'] == 'Y')
-                $export_header[] = 'Minute';
-            if (isset($_SESSION['search_data']['s_g_prefix']) && $_SESSION['search_data']['s_g_prefix'] == 'Y')
-                $export_header[] = 'Prefix';
-            if (isset($_SESSION['search_data']['s_g_dest']) && $_SESSION['search_data']['s_g_dest'] == 'Y')
-                $export_header[] = 'Destination';
-
-            $export_header[] = 'Total Duration';
-            $export_header[] = 'Total Calls';
-            $export_header[] = 'Ans Calls';
-            $export_header[] = 'Cost';
-            $export_data = array();
-            $currency_abbr = function($id) use ($currency_data) {
-                $key = array_search($id, array_column($currency_data, 'currency_id'));
-                if ($key === false)
-                    return '';
-                else
-                    return $currency_data[$key]['name'];
-            };
-            if (isset($response['result']) && $response['total'] > 0) {
-
-                foreach ($response['result'] as $listing_row) {
-                    $export_data_temp = array();
-                    if (isset($_SESSION['search_data']['s_g_user']) && $_SESSION['search_data']['s_g_user'] == 'Y')
-                        $export_data_temp[] = $listing_row['account_code'];
-                    if (isset($_SESSION['search_data']['s_g_carrier']) && $_SESSION['search_data']['s_g_carrier'] == 'Y')
-                        $export_data_temp[] = $listing_row['carrier_id'];
-                    if (isset($_SESSION['search_data']['s_g_date']) && $_SESSION['search_data']['s_g_date'] == 'Y')
-                        $export_data_temp[] = $listing_row['call_date'];
-                    if (isset($_SESSION['search_data']['s_g_hour']) && $_SESSION['search_data']['s_g_hour'] == 'Y')
-                        $export_data_temp[] = $listing_row['calltime_h'];
-                    if (isset($_SESSION['search_data']['s_g_minute']) && $_SESSION['search_data']['s_g_minute'] == 'Y')
-                        $export_data_temp[] = $listing_row['calltime_m'];
-                    if (isset($_SESSION['search_data']['s_g_prefix']) && $_SESSION['search_data']['s_g_prefix'] == 'Y')
-                        $export_data_temp[] = $listing_row['prefix'];
-                    if (isset($_SESSION['search_data']['s_g_dest']) && $_SESSION['search_data']['s_g_dest'] == 'Y')
-                        $export_data_temp[] = $listing_row['prefix_name'];
-
-                    $export_data_temp[] = $listing_row['total_duration'];
-                    $export_data_temp[] = $listing_row['total_calls'];
-                    $export_data_temp[] = $listing_row['answered_calls'];
-                    $export_data_temp[] = $currency_abbr($listing_row['currency_id']) . ' ' . $listing_row['cost'];
-                    $export_data[] = $export_data_temp;
-                }
-            }
-            if ($_SESSION['search_data']['s_date'] != '')
-                $search_array['Date'] = date('d-m-Y', strtotime($_SESSION['search_data']['s_date']));
-            if ($_SESSION['search_data']['s_time_from'] != '' && $_SESSION['search_data']['s_time_to'] != '')
-                $search_array['Time'] = 'From ' . $_SESSION['search_data']['s_time_from'] . ' To ' . $_SESSION['search_data']['s_time_to'];
-
-
-            if ($_SESSION['search_data']['s_carrier'] != '')
-                $search_array['Carrier ID Name'] = $_SESSION['search_data']['s_carrier'];
-            if ($_SESSION['search_data']['s_code'] != '')
-                $search_array['Account ID'] = $_SESSION['search_data']['s_code'];
-            if ($_SESSION['search_data']['s_customer_company_name'] != '')
-                $search_array['Company Name'] = $_SESSION['search_data']['s_customer_company_name'];
-            if ($_SESSION['search_data']['s_ctype'] != '') {
-                if ($_SESSION['search_data']['s_ctype'] == 'U')
-                    $search_array['Account Type'] = 'User';
-                else
-                    $search_array['Account Type'] = 'Reseller';
-            }
-            if ($_SESSION['search_data']['s_prefix'] != '')
-                $search_array['Prefix'] = $_SESSION['search_data']['s_prefix'];
-            if ($_SESSION['search_data']['s_dest'] != '')
-                $search_array['Destination'] = $_SESSION['search_data']['s_dest'];
-
-            $this->load->library('Export');
-            $downloaded_message = $this->export->download($file_name, $format, $search_array, $export_header, $export_data);
-            if (gettype($downloaded_message) == 'string')
-                $data['err_msgs'] = $downloaded_message;
-            else
-                $is_file_downloaded = true;
-        }
-
-        if ($is_file_downloaded === false) {
-            $this->load->view('basic/header', $data);
-            $this->load->view('reports/ProfitLoss', $data);
-            $this->load->view('basic/footer', $data);
-        }
-    }
-
     public function api_livecall() {
         if (!$this->input->is_ajax_request()) {
             exit('No direct script access allowed');
@@ -247,15 +225,15 @@ class Reports extends MY_Controller {
         $logged_account_id = get_logged_account_id();
         $get_logged_account_level = get_logged_account_level();
 
+        $DB1 = $this->load->database('cdrdb', true);
 
         $sql = "select customer_account_id, customer_src_ip, customer_destination,customer_src_caller, customer_src_callee, carrier_carrier_id, carrier_gateway_ipaddress, carrier_gateway_ipaddress_name, carrier_dialplan_id_name, start_time, answer_time, TIMESTAMPDIFF(SECOND , answer_time, NOW()) as duration, callstatus, fs_host, notes 
 		FROM livecalls 
 		WHERE callstatus in ('answer','ring','progress') ";
 
-
         if (check_logged_user_group(array('RESELLER'))) {
             $sub_sql = "SELECT GROUP_CONCAT(\"'\",account_id,\"'\") account_ids FROM  account WHERE parent_account_id='" . $logged_account_id . "'";
-            /////////////
+/////////////
             $query = $this->db->query($sub_sql);
             if (!$query) {
                 $error_array = $this->db->error();
@@ -263,17 +241,12 @@ class Reports extends MY_Controller {
             }
             $row = $query->row();
             $account_id_str = $row->account_ids;
-            /////////////
+/////////////
             $sql .= " AND customer_account_id IN(" . $account_id_str . ")";
         }
 
-
-
-
-
-
         $sql .= " ORDER BY livecalls_id desc limit 1000";
-
+// $result = $DB1->query($sql);
         $result = $this->db->query($sql);
 
         $return['allCalls'] = $result->num_rows();
@@ -282,17 +255,17 @@ class Reports extends MY_Controller {
         $this->output
                 ->set_content_type('application/json')
                 ->set_output(json_encode($return));
-        //->set_output(json_encode(array('foo' => 'bar')));
+//->set_output(json_encode(array('foo' => 'bar')));
     }
 
     public function livecall() {
         $data['page_name'] = "report_livecall";
 
-        //check page action permission
+//check page action permission
         if (!check_account_permission('reports', 'live'))
             show_404('403');
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-        ///////////////////////////			
+///////////////////////////			
 
         $this->load->view('basic/header', $data);
         $this->load->view('reports/livecall', $data);
@@ -313,7 +286,6 @@ class Reports extends MY_Controller {
         $end_dt = $range_to[0];
         $end_hh = substr($range_to[1], 0, strpos($range_to[1], ':'));
         $end_mm = substr($range_to[1], strpos($range_to[1], ':') + 1);
-
 
         $str = "select sum(totalcalls) as total_calls, sum(answeredcalls) as answered_calls , round((sum(answeredcalls)/sum(totalcalls))*100,2) as asr, ifnull(round((sum(account_duration)/sum(answeredcalls))/60,2),0.00) as acd, ifnull(round(sum(pdd)/sum(totalcalls),2),0.00) as pdd, ";
 
@@ -349,8 +321,8 @@ class Reports extends MY_Controller {
         if ($search_data['group_by_q850'] == 'Y')
             $str .= " ,Q850CODE ";
 
-        //////////////////////////////
-        /// showing account's cost///	
+//////////////////////////////
+/// showing account's cost///	
         if ($search_data['group_by_user'] == 'Y' || $search_data['account_id'] != '') {
             if ($search_data['account_type'] == 'U')
                 $str .= " ,round(sum(account_cost)*1.0000000000000000,2)  as cost ";
@@ -359,8 +331,8 @@ class Reports extends MY_Controller {
 
             $str .= " ,account_currency_id as currency_id";
         }
-        /// showing account's cost///	
-        //////////////////////////////
+/// showing account's cost///	
+//////////////////////////////
 
         $str .= " from switch_calls_statistics where date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) >= '" . $start_dt . " " . $start_hh . ":" . $start_mm . "'
 and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) <= '" . $end_dt . " " . $end_hh . ":" . $end_mm . "'";
@@ -388,15 +360,15 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
         /* ------------------------------ */
 
 
-        ////
+////
         if (isset($search_data['logged_customer_type']) && isset($search_data['logged_customer_account_id']) && isset($search_data['logged_customer_level']) && $search_data['logged_customer_type'] == 'RESELLER' && in_array($search_data['logged_customer_level'], array(1, 2, 3))) {
             $level = $search_data['logged_customer_level'];
             $field_name = 'r' . $level . '_account_id';
 
             $str .= " AND `" . $field_name . "` = '" . $search_data['logged_customer_account_id'] . "'";
         }
-        //
-        ////
+//
+////
 
 
         if ($search_data['carrier_id'] != '')
@@ -442,13 +414,12 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
 
         $orderby = " order by date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) desc ";
         $query = $str . $group_by . $orderby;
-        //echo $query;
+//echo $query;
         $DB1 = $this->load->database('cdrdb', true);
         $result = $DB1->query($query);
 
         $return['total'] = $result->num_rows();
         $return['result'] = $result->result_array();
-
 
         return $return;
     }
@@ -456,20 +427,19 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
     public function CarrQOSR($arg1 = '', $format = '') {
         $data['page_name'] = "CarrQOSR";
 
-        //check page action permission
+//check page action permission
         if (!check_account_permission('reports', 'CarrQOSR'))
             show_404('403');
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-        ///////////////////////////	
+///////////////////////////	
 
         $this->load->model('carrier_mod');
-
 
         $response = $this->carrier_mod->get_data('', 0, '', array(), array());
         $data['carrier_data'] = $response['result'];
         $data['currency_data'] = $this->utils_model->get_currencies();
         $currency_data = $data['currency_data'];
-        ///////////////// Searching ////////////////////
+///////////////// Searching ////////////////////
         $is_make_search = false;
         $search_data = array();
         if (isset($_POST['OkFilter'])) {
@@ -478,7 +448,7 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
                 's_carrier' => $_POST['frmcarrier'],
                 's_dest' => $_POST['frmdest'],
                 's_prefix' => $_POST['frmprefix'],
-                's_code' => $_POST['frmcode'],
+                's_code' => '',
                 's_sip' => $_POST['frmsipcode'],
                 's_q850' => $_POST['frmq850code'],
                 's_g_ip' => (isset($_POST['g_ip']) ? 'Y' : 'N'),
@@ -506,7 +476,10 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
                 's_g_prefix' => '',
                 's_g_dest' => '',
                 's_g_sip' => '',
-                's_g_q850' => ''
+                's_g_q850' => '',
+                's_sip' => '',
+                's_q850' => '',
+                's_g_ip' => ''
             );
         }
         $search_data = array('timerange' => $_SESSION['search_data']['s_time'],
@@ -534,7 +507,7 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
         }
 
         $is_file_downloaded = false;
-        //////// add export  ////////////////	
+//////// add export  ////////////////	
         if ($arg1 == 'export' && $format != '') {
             ini_set('memory_limit', '2048M');
             $format = param_decrypt($format);
@@ -579,7 +552,7 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
 
 
             $export_data = array();
-            $currency_abbr = function($id) use ($currency_data) {
+            $currency_abbr = function ($id) use ($currency_data) {
                 $key = array_search($id, array_column($currency_data, 'currency_id'));
                 if ($key === false)
                     return '';
@@ -590,7 +563,6 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
 
                 foreach ($response['result'] as $listing_row) {
                     $export_data_temp = array();
-
 
                     if (isset($_SESSION['search_data']['s_g_carrier']) && $_SESSION['search_data']['s_g_carrier'] == 'Y')
                         $export_data_temp[] = $listing_row['carrier_id'];
@@ -646,13 +618,12 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
             $this->load->library('Export');
             $downloaded_message = $this->export->download($file_name, $format, $search_array, $export_header, $export_data);
 
-
             if (gettype($downloaded_message) == 'string')
                 $data['err_msgs'] = $downloaded_message;
             else
                 $is_file_downloaded = true;
         }
-        //------------------ end export ----------------------	
+//------------------ end export ----------------------	
 
         if ($is_file_downloaded === false) {
             $this->load->view('basic/header', $data);
@@ -665,21 +636,21 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
         $this->report_mod->monin_data($incoming_calls, $outgoing_calls, $incoming_duration, $outgoing_duration, $gateway_calls, $customer_calls, $show_usage, $customer_call_stat, $carrier_call_stat, $livecalls_destination);
     }
 
+    public function monin_data_reseller($incoming_calls = 'Y', $outgoing_calls = 'Y', $incoming_duration = 'Y', $outgoing_duration = 'Y', $gateway_calls = 'Y', $customer_calls = 'Y', $show_usage = 'Y', $customer_call_stat = 'N', $carrier_call_stat = 'N', $livecalls_destination = 'N') {
+        $this->report_mod->monin_data_reseller($incoming_calls, $outgoing_calls, $incoming_duration, $outgoing_duration, $gateway_calls, $customer_calls, $show_usage, $customer_call_stat, $carrier_call_stat, $livecalls_destination);
+    }
+
     public function CustQOSR($arg1 = '', $format = '') {
         $data['page_name'] = "CustQOSR";
 
-        //  print_r($_POST);
-        //check page action permission
         if (!check_account_permission('reports', 'CustQOSR'))
             show_404('403');
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
         $this->load->model('carrier_mod');
-        //$response = $this->carrier_mod->get_data('', 0, '', array(), array());
-        // $data['carrier_data'] = $response['result'];
+
         $data['currency_data'] = $this->utils_model->get_currencies();
         $currency_data = $data['currency_data'];
-        ///////////////// Searching ////////////////////
-// reservation-time
+
         $is_make_search = false;
         $search_data = array();
         if (isset($_POST['OkFilter'])) {
@@ -760,7 +731,7 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
         }
         $is_file_downloaded = false;
 
-        //////// add export  ////////////////	
+//////// add export  ////////////////	
         if ($arg1 == 'export' && $format != '') {
             ini_set('memory_limit', '2048M');
             $response = $this->report_mod->CustQOSR($search_data);
@@ -799,7 +770,7 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
 
 
             $export_data = array();
-            $currency_abbr = function($id) use ($currency_data) {
+            $currency_abbr = function ($id) use ($currency_data) {
                 $key = array_search($id, array_column($currency_data, 'currency_id'));
                 if ($key === false)
                     return '';
@@ -832,7 +803,6 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
                     $export_data_temp[] = $listing_row['asr'];
                     $export_data_temp[] = $listing_row['pdd'];
                     $export_data_temp[] = $currency_abbr($listing_row['currency_id']) . ' ' . $listing_row['cost'];
-
 
                     if (isset($_SESSION['search_data']['s_g_sip']) && $_SESSION['search_data']['s_g_sip'] == 'Y')
                         $export_data_temp[] = $listing_row['SIPCODE'];
@@ -873,7 +843,6 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
             $this->load->library('Export');
             $downloaded_message = $this->export->download($file_name, $format, $search_array, $export_header, $export_data);
 
-
             if (gettype($downloaded_message) == 'string')
                 $data['err_msgs'] = $downloaded_message;
             else
@@ -892,907 +861,20 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
         if (!check_account_permission('reports', 'monin'))
             show_404('403');
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-        $this->load->view('basic/header', $data);
-        $this->load->view('reports/monin2', $data);
-        $this->load->view('basic/footer', $data);
-    }
 
-    public function calls_connected_in($account_id_temp = '', $format = '') {
-        $arg1 = $account_id_temp;
-        $data['page_name'] = "report_connected_in";
-        $this->load->model('report_mod');
-        //check page action permission
-        //if(!check_account_permission('report','analytics_carrier')) show_404('403');
-        $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-        ///////////////////////////	
-        $logged_customer_type = get_logged_account_type();
-        $get_logged_account_level = get_logged_account_level();
-        $logged_account_id = get_logged_account_id();
-        ///////////////// Searching ////////////////////
-        $is_report_searched = false;
-        $is_file_downloaded = false;
-        $search_data = array();
-        if (isset($_POST['search_action'])) {
-            $_SESSION['search_cdr_in_data'] = array(
-                's_cdr_customer_type' => $_POST['customer_type'],
-                's_cdr_customer_account' => $_POST['customer_account'],
-                's_cdr_dialed_no' => $_POST['dialed_no'],
-                's_cdr_carrier_dst_no' => $_POST['carrier_dst_no'],
-                's_cdr_customer_cli' => $_POST['customer_cli'],
-                's_cdr_carrier_cli' => $_POST['carrier_cli'],
-                's_cdr_carrier' => $_POST['carrier'],
-                's_cdr_carrier_ip' => $_POST['carrier_ip'],
-                's_cdr_customer_ip' => $_POST['customer_ip'],
-                's_cdr_call_duration' => $_POST['call_duration'],
-                's_time_range' => $_POST['time_range'],
-                's_no_of_records' => $_POST['no_of_rows'], //1 no_of_records	
-                's_cdr_customer_company_name' => $_POST['customer_company_name'],
-                's_cdr_call_duration_range' => $_POST['duration_range']
-            );
-        } elseif ($arg1 != 'export' && !isset($_SESSION['search_cdr_in_data']['s_time_range'])) {
-            //default date is todays date
-            $today_timestamp = strtotime("today");
-            $today = date('Y-m-d', $today_timestamp);
-            $time_range = $today . ' 00:00 - ' . $today . ' 23:59';
-            $_SESSION['search_cdr_in_data'] = array('s_cdr_customer_type' => '',
-                's_cdr_customer_account' => '',
-                's_cdr_dialed_no' => '',
-                's_cdr_carrier_dst_no' => '',
-                's_cdr_customer_cli' => '',
-                's_cdr_carrier_cli' => '',
-                's_cdr_carrier' => '',
-                's_cdr_carrier_ip' => '',
-                's_cdr_customer_ip' => '',
-                's_cdr_call_duration' => '',
-                's_time_range' => $time_range,
-                's_no_of_records' => RECORDS_PER_PAGE, //3 no_of_records
-                's_cdr_customer_company_name' => '',
-                's_cdr_call_duration_range' => ''
-            );
-        }
-
-        $search_data = array(
-            's_cdr_customer_type' => $_SESSION['search_cdr_in_data']['s_cdr_customer_type'],
-            's_cdr_customer_account' => $_SESSION['search_cdr_in_data']['s_cdr_customer_account'],
-            's_cdr_dialed_no' => $_SESSION['search_cdr_in_data']['s_cdr_dialed_no'],
-            's_cdr_carrier_dst_no' => $_SESSION['search_cdr_in_data']['s_cdr_carrier_dst_no'],
-            's_cdr_customer_cli' => $_SESSION['search_cdr_in_data']['s_cdr_customer_cli'],
-            's_cdr_carrier_cli' => $_SESSION['search_cdr_in_data']['s_cdr_carrier_cli'],
-            's_cdr_carrier' => $_SESSION['search_cdr_in_data']['s_cdr_carrier'],
-            's_cdr_carrier_ip' => $_SESSION['search_cdr_in_data']['s_cdr_carrier_ip'],
-            's_cdr_customer_ip' => $_SESSION['search_cdr_in_data']['s_cdr_customer_ip'],
-            's_cdr_call_duration' => $_SESSION['search_cdr_in_data']['s_cdr_call_duration'],
-            's_time_range' => $_SESSION['search_cdr_in_data']['s_time_range'],
-            's_cdr_customer_company_name' => $_SESSION['search_cdr_in_data']['s_cdr_customer_company_name'],
-            's_cdr_call_duration_range' => $_SESSION['search_cdr_in_data']['s_cdr_call_duration_range']
-        );
         if (check_logged_user_group(array('RESELLER')))
-            $search_data['s_parent_account_id'] = $logged_account_id;
-
-        ///////////////// Searching ////////////////////
-
-        $all_field_array = array(
-            'Account' => 'Account'
-            , 'SRC-DST' => 'SRC-DST'
-            , 'SRC-CLI' => 'SRC-CLI'
-            , 'Start Time' => 'Start Time'
-            , 'Duration' => 'Duration'
-            , 'C-Duration' => 'C-Duration'
-            , 'hangupby' => 'Hangup By'
-            , 'SRC-IP' => 'SRC-IP'
-            , 'Cost' => 'Cost'
-            , 'Carrier' => 'Carrier'
-            , 'Q850CODE' => 'Q850CODE'
-            , 'SIPCODE' => 'SIPCODE'
-            , 'User-Tariff' => 'User-Tariff'
-            , 'Prefix' => 'Prefix'
-            , 'Destination' => 'Destination'
-            , 'Routing' => 'Routing'
-            , 'C-Tariff' => 'C-Tariff'
-            , 'C-Prefix' => 'C-Prefix'
-            , 'C-Destination' => 'C-Destination'
-            , 'C-Cost' => 'C-Cost'
-            , 'Org-Duration' => 'Org-Duration'
-            , 'C-IP' => 'C-IP'
-            , 'USER-CLI' => 'USER-CLI'
-            , 'User-DST' => 'User-DST'
-            , 'C-CLI' => 'C-CLI'
-            , 'C-DST' => 'C-DST'
-            , 'lrn_number' => 'LRN Number'
-            , 'R1-Account' => 'R1-Account'
-            , 'R1-Tariff' => 'R1-Tariff'
-            , 'R1-Duration' => 'R1-Duration'
-            , 'R1-Cost' => 'R1-Cost'
-            , 'R2-Account' => 'R2-Account'
-            , 'R2-Tariff' => 'R2-Tariff'
-            , 'R2-Duration' => 'R2-Duration'
-            , 'R2-Cost' => 'R2-Cost'
-            , 'R3-Account' => 'R3-Account'
-            , 'R3-Tariff' => 'R3-Tariff'
-            , 'R3-Duration' => 'R3-Duration'
-            , 'R3-Cost' => 'R3-Cost'
-            , 'Incoming-Codecs' => 'Incoming-Codecs'
-            , 'Outgoing-Codecs' => 'Outgoing-Codecs'
-            , "Call's-Codec" => "Call's-Codec"
-        );
-
-        if (check_logged_user_group('RESELLER')) {
-            unset($all_field_array['Routing']);
-            unset($all_field_array['Carrier']);
-            unset($all_field_array['C-Tariff']);
-            unset($all_field_array['C-Prefix']);
-            unset($all_field_array['C-Destination']);
-            unset($all_field_array['C-Duration']);
-            unset($all_field_array['C-Cost']);
-            unset($all_field_array['C-IP']);
-            unset($all_field_array['C-DST']);
-            unset($all_field_array['USER-CLI']);
-            unset($all_field_array['Org-Duration']);
-
-            if ($get_logged_account_level == 1) {
-                unset($all_field_array['R3-Account']);
-                unset($all_field_array['R3-Tariff']);
-                unset($all_field_array['R3-Duration']);
-                unset($all_field_array['R3-Cost']);
-            } elseif ($get_logged_account_level == 2) {
-                unset($all_field_array['R1-Account']);
-                unset($all_field_array['R1-Tariff']);
-                unset($all_field_array['R1-Duration']);
-                unset($all_field_array['R1-Cost']);
-            } else {
-                unset($all_field_array['R1-Account']);
-                unset($all_field_array['R1-Tariff']);
-                unset($all_field_array['R1-Duration']);
-                unset($all_field_array['R1-Cost']);
-                unset($all_field_array['R2-Account']);
-                unset($all_field_array['R2-Tariff']);
-                unset($all_field_array['R2-Duration']);
-                unset($all_field_array['R2-Cost']);
-            }
-        } elseif (check_logged_user_group('CUSTOMER')) {
-            unset($all_field_array['Routing']);
-            unset($all_field_array['Carrier']);
-            unset($all_field_array['C-Tariff']);
-            unset($all_field_array['C-Prefix']);
-            unset($all_field_array['C-Destination']);
-            unset($all_field_array['C-Duration']);
-            unset($all_field_array['C-Cost']);
-            unset($all_field_array['C-IP']);
-            unset($all_field_array['C-DST']);
-            unset($all_field_array['USER-CLI']);
-            unset($all_field_array['Org-Duration']);
-            unset($all_field_array['R1-Account']);
-            unset($all_field_array['R1-Tariff']);
-            unset($all_field_array['R1-Duration']);
-            unset($all_field_array['R1-Cost']);
-            unset($all_field_array['R2-Account']);
-            unset($all_field_array['R2-Tariff']);
-            unset($all_field_array['R2-Duration']);
-            unset($all_field_array['R2-Cost']);
-            unset($all_field_array['R3-Account']);
-            unset($all_field_array['R3-Tariff']);
-            unset($all_field_array['R3-Duration']);
-            unset($all_field_array['R3-Cost']);
-        }
-
-        //////// add export  ////////////////	
-        if ($arg1 == 'export' && $format != '') {
-            ini_set('memory_limit', '2048M');
-            $format = param_decrypt($format);
-
-            $per_page = 100000;
-            $segment = 0;
-
-            $response = $this->report_mod->api_analytics_cdr_in($search_data, $per_page, $segment);
-            $listing_data = $response['result'];
-            $listing_count = $response['total'];
-
-            $export_data = array();
-            if ($listing_count > 0) {
-                foreach ($listing_data as $listing_row) {
-                    $export_data_temp = array();
-                    foreach ($all_field_array as $field_name => $field_lebel) {
-
-                        if ($field_name == 'Account') {
-
-                            if ($listing_row['customer_company_name'] != '') {
-
-                                $export_data_temp[] = $listing_row['customer_company_name'] . ' ( ' . $listing_row[$field_name] . ' ) ';
-                            } else {
-
-                                $export_data_temp[] = $listing_row[$field_name];
-                            }
-                        } else {
-
-                            $export_data_temp[] = $listing_row[$field_name];
-                        }
-                    }
-                    $export_data[] = $export_data_temp;
-                }
-            }
-
-
-            //prepare search data
-            $search_array = array();
-            if ($_SESSION['search_cdr_in_data']['s_cdr_customer_type'] != '') {
-                if ($_SESSION['search_cdr_in_data']['s_cdr_customer_type'] == 'U')
-                    $search_array['User Type'] = 'User';
-                elseif ($_SESSION['search_cdr_in_data']['s_cdr_customer_type'] == 'R1')
-                    $search_array['User Type'] = 'Reseller 1';
-                elseif ($_SESSION['search_cdr_in_data']['s_cdr_customer_type'] == 'R2')
-                    $search_array['User Type'] = 'Reseller 2';
-                elseif ($_SESSION['search_cdr_in_data']['s_cdr_customer_type'] == 'R3')
-                    $search_array['User Type'] = 'Reseller 3';
-            }
-            if ($_SESSION['search_cdr_in_data']['s_cdr_customer_account'] != '')
-                $search_array['User Account'] = $_SESSION['search_cdr_in_data']['s_cdr_customer_account'];
-            if ($_SESSION['search_cdr_in_data']['s_cdr_dialed_no'] != '')
-                $search_array['Dialed No'] = $_SESSION['search_cdr_in_data']['s_cdr_dialed_no'];
-            if ($_SESSION['search_cdr_in_data']['s_cdr_carrier_dst_no'] != '')
-                $search_array['Carrier DST No'] = $_SESSION['search_cdr_in_data']['s_cdr_carrier_dst_no'];
-            if ($_SESSION['search_cdr_in_data']['s_cdr_customer_cli'] != '')
-                $search_array['User Cli'] = $_SESSION['search_cdr_in_data']['s_cdr_customer_cli'];
-            if ($_SESSION['search_cdr_in_data']['s_cdr_carrier_cli'] != '')
-                $search_array['Carrier Cli'] = $_SESSION['search_cdr_in_data']['s_cdr_carrier_cli'];
-            if ($_SESSION['search_cdr_in_data']['s_cdr_carrier'] != '')
-                $search_array['Carrier'] = $_SESSION['search_cdr_in_data']['s_cdr_carrier'];
-            if ($_SESSION['search_cdr_in_data']['s_cdr_carrier_ip'] != '')
-                $search_array['Carrier IP'] = $_SESSION['search_cdr_in_data']['s_cdr_carrier_ip'];
-            if ($_SESSION['search_cdr_in_data']['s_cdr_customer_ip'] != '')
-                $search_array['User IP'] = $_SESSION['search_cdr_in_data']['s_cdr_customer_ip'];
-            if ($_SESSION['search_cdr_in_data']['s_cdr_call_duration'] != '')
-                $search_array['Call Duration'] = $_SESSION['search_cdr_in_data']['s_cdr_call_duration'];
-            if ($_SESSION['search_cdr_in_data']['s_time_range'] != '')
-                $search_array['Time Range'] = $_SESSION['search_cdr_in_data']['s_time_range'];
-
-            if ($_SESSION['search_cdr_in_data']['s_cdr_customer_company_name'] != '')
-                $search_array['Company Name'] = $_SESSION['search_cdr_in_data']['s_cdr_customer_company_name'];
-
-
-            // column titles
-            $export_header = array();
-            foreach ($all_field_array as $field_lebel) {
-                $export_header[] = $field_lebel;
-            }
-
-            $file_name = 'incoming_connected_calls';
-
-            $this->load->library('Export');
-            $downloaded_message = $this->export->download($file_name, $format, $search_array, $export_header, $export_data);
-
-            if (gettype($downloaded_message) == 'string')
-                $data['err_msgs'] = $downloaded_message;
-            else
-                $is_file_downloaded = true;
-        }
-        //////// end export  ////////////////	
-
-
-        if ($is_file_downloaded === false) {
-            /*             * **** pagination code start here ********* */
-            $pagination_uri_segment = 3;
-
-            //4 no_of_records
-
-            if (isset($_SESSION['search_cdr_in_data']['s_no_of_records']) && $_SESSION['search_cdr_in_data']['s_no_of_records'] != '')
-                $per_page = $_SESSION['search_cdr_in_data']['s_no_of_records'];
-            else
-                $per_page = RECORDS_PER_PAGE;
-
-
-            if ($this->uri->segment($pagination_uri_segment) == '') {
-                $segment = 0;
-            } else {
-                $segment = $this->uri->segment($pagination_uri_segment);
-            }
-
-            //echo '<pre>';print_r($search_data);echo '</pre>';
-            $response = $this->report_mod->api_analytics_cdr_in($search_data, $per_page, $segment);
-            $data['listing_data'] = $response['result'];
-            $data['listing_count'] = $response['total'];
-            $data['total_records'] = $response['all_total'];
-
-            $this->load->library('pagination'); // pagination class		
-            $config = array();
-            $config = $this->utils_model->setup_pagination_option($response['all_total'], 'reports/calls_connected_in', $per_page, $pagination_uri_segment);
-            $this->pagination->initialize($config);
-            $data['pagination'] = $this->pagination->create_links();
-
-            $data['is_report_searched'] = $is_report_searched;
-            $data['logged_customer_type'] = $logged_customer_type;
-            $data['get_logged_account_level'] = $get_logged_account_level;
-            $data['all_field_array'] = $all_field_array;
-
-            $this->load->view('basic/header', $data);
-            $this->load->view('reports/calls_connected_in', $data);
-            $this->load->view('basic/footer', $data);
-        }
-    }
-
-    /////////incoming
-    public function calls_connected_in_old() {
-        $data['page_name'] = "report_connected_in";
-        $this->load->model('report_mod');
-        //check page action permission
-        //if(!check_account_permission('report','analytics_carrier')) show_404('403');
-        $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-        ///////////////////////////	
-        $logged_customer_type = get_logged_account_type();
-        $get_logged_account_level = get_logged_account_level();
-        ///////////////// Searching ////////////////////
-        $is_report_searched = false;
-        $search_data = array();
-        //echo '<pre>';print_r($_POST);	echo '</pre>';	
-        if (isset($_POST['OkFilter'])) {
-            $_SESSION['search_cdr_in_data'] = array(
-                's_cdr_customer_type' => $_POST['customer_type'],
-                's_cdr_customer_account' => $_POST['customer_account'],
-                's_cdr_dialed_no' => $_POST['dialed_no'],
-                's_cdr_carrier_dst_no' => $_POST['carrier_dst_no'],
-                's_cdr_customer_cli' => $_POST['customer_cli'],
-                's_cdr_carrier_cli' => $_POST['carrier_cli'],
-                's_cdr_carrier' => $_POST['carrier'],
-                's_cdr_carrier_ip' => $_POST['carrier_ip'],
-                's_cdr_customer_ip' => $_POST['customer_ip'],
-                's_cdr_call_duration' => $_POST['call_duration'],
-                's_time_range' => $_POST['time_range']
-            );
-
-            $search_data = array(
-                's_cdr_customer_type' => $_SESSION['search_cdr_in_data']['s_cdr_customer_type'],
-                's_cdr_customer_account' => $_SESSION['search_cdr_in_data']['s_cdr_customer_account'],
-                's_cdr_dialed_no' => $_SESSION['search_cdr_in_data']['s_cdr_dialed_no'],
-                's_cdr_carrier_dst_no' => $_SESSION['search_cdr_in_data']['s_cdr_carrier_dst_no'],
-                's_cdr_customer_cli' => $_SESSION['search_cdr_in_data']['s_cdr_customer_cli'],
-                's_cdr_carrier_cli' => $_SESSION['search_cdr_in_data']['s_cdr_carrier_cli'],
-                's_cdr_carrier' => $_SESSION['search_cdr_in_data']['s_cdr_carrier'],
-                's_cdr_carrier_ip' => $_SESSION['search_cdr_in_data']['s_cdr_carrier_ip'],
-                's_cdr_customer_ip' => $_SESSION['search_cdr_in_data']['s_cdr_customer_ip'],
-                's_cdr_call_duration' => $_SESSION['search_cdr_in_data']['s_cdr_call_duration'],
-                's_time_range' => $_SESSION['search_cdr_in_data']['s_time_range']
-            );
-            //echo '<pre>';print_r($search_data);	echo '</pre>';				
-            $is_report_searched = true;
-            $response = $this->report_mod->api_analytics_cdr_in($search_data);
-            $data['listing_data'] = $response['result'];
-            $data['listing_count'] = $response['total'];
-        } elseif (isset($_POST['search_action'])) {//coming from reset
-            $_SESSION['search_cdr_in_data'] = array('s_cdr_customer_type' => '',
-                's_cdr_customer_account' => '',
-                's_cdr_dialed_no' => '',
-                's_cdr_carrier_dst_no' => '',
-                's_cdr_customer_cli' => '',
-                's_cdr_carrier_cli' => '',
-                's_cdr_carrier' => '',
-                's_cdr_carrier_ip' => '',
-                's_cdr_customer_ip' => '',
-                's_cdr_call_duration' => '',
-                's_time_range' => ''
-            );
-        } elseif (!isset($_SESSION['search_cdr_in_data'])) {//default data for view seach
-            $_SESSION['search_cdr_in_data'] = array('s_cdr_customer_type' => '',
-                's_cdr_customer_account' => '',
-                's_cdr_dialed_no' => '',
-                's_cdr_carrier_dst_no' => '',
-                's_cdr_customer_cli' => '',
-                's_cdr_carrier_cli' => '',
-                's_cdr_carrier' => '',
-                's_cdr_carrier_ip' => '',
-                's_cdr_customer_ip' => '',
-                's_cdr_call_duration' => '',
-                's_time_range' => ''
-            );
-        }
-        ///////////////// Searching ////////////////////
-
-        $all_field_array = array(
-            'Account' => 'Account'
-            , 'Start Time' => 'Start Time'
-            , 'Q850CODE' => 'Q850CODE'
-            , 'SIPCODE' => 'SIPCODE'
-            , 'SRC-IP' => 'SRC-IP'
-            , 'SRC-CLI' => 'SRC-CLI'
-            , 'SRC-DST' => 'SRC-DST'
-            , 'User-Tariff' => 'User-Tariff'
-            , 'Prefix' => 'Prefix'
-            , 'Destination' => 'Destination'
-            , 'Duration' => 'Duration'
-            , 'Cost' => 'Cost'
-            , 'Routing' => 'Routing'
-            , 'Carrier' => 'Carrier'
-            , 'C-Tariff' => 'C-Tariff'
-            , 'C-Prefix' => 'C-Prefix'
-            , 'C-Destination' => 'C-Destination'
-            , 'C-Duration' => 'C-Duration'
-            , 'C-Cost' => 'C-Cost'
-            , 'Org-Duration' => 'Org-Duration'
-            , 'C-IP' => 'C-IP'
-            , 'USER-CLI' => 'USER-CLI'
-            , 'User-DST' => 'User-DST'
-            , 'C-CLI' => 'C-CLI'
-            , 'C-DST' => 'C-DST'
-            , 'R1-Account' => 'R1-Account'
-            , 'R1-Tariff' => 'R1-Tariff'
-            , 'R1-Duration' => 'R1-Duration'
-            , 'R1-Cost' => 'R1-Cost'
-            , 'R2-Account' => 'R2-Account'
-            , 'R2-Tariff' => 'R2-Tariff'
-            , 'R2-Duration' => 'R2-Duration'
-            , 'R2-Cost' => 'R2-Cost'
-            , 'R3-Account' => 'R3-Account'
-            , 'R3-Tariff' => 'R3-Tariff'
-            , 'R3-Duration' => 'R3-Duration'
-            , 'R3-Cost' => 'R3-Cost'
-            , 'hangupby' => 'Hangup By'
-        );
-
-        if (check_logged_user_group('RESELLER')) {
-            unset($all_field_array['Routing']);
-            unset($all_field_array['Carrier']);
-            unset($all_field_array['C-Tariff']);
-            unset($all_field_array['C-Prefix']);
-            unset($all_field_array['C-Destination']);
-            unset($all_field_array['C-Duration']);
-            unset($all_field_array['C-Cost']);
-            unset($all_field_array['C-IP']);
-            unset($all_field_array['C-DST']);
-            unset($all_field_array['USER-CLI']);
-            unset($all_field_array['Org-Duration']);
-
-            if ($get_logged_account_level == 1) {
-                unset($all_field_array['R3-Account']);
-                unset($all_field_array['R3-Tariff']);
-                unset($all_field_array['R3-Duration']);
-                unset($all_field_array['R3-Cost']);
-            } elseif ($get_logged_account_level == 2) {
-                unset($all_field_array['R1-Account']);
-                unset($all_field_array['R1-Tariff']);
-                unset($all_field_array['R1-Duration']);
-                unset($all_field_array['R1-Cost']);
-            } else {
-                unset($all_field_array['R1-Account']);
-                unset($all_field_array['R1-Tariff']);
-                unset($all_field_array['R1-Duration']);
-                unset($all_field_array['R1-Cost']);
-                unset($all_field_array['R2-Account']);
-                unset($all_field_array['R2-Tariff']);
-                unset($all_field_array['R2-Duration']);
-                unset($all_field_array['R2-Cost']);
-            }
-        } elseif (check_logged_user_group('CUSTOMER')) {
-            unset($all_field_array['Routing']);
-            unset($all_field_array['Carrier']);
-            unset($all_field_array['C-Tariff']);
-            unset($all_field_array['C-Prefix']);
-            unset($all_field_array['C-Destination']);
-            unset($all_field_array['C-Duration']);
-            unset($all_field_array['C-Cost']);
-            unset($all_field_array['C-IP']);
-            unset($all_field_array['C-DST']);
-            unset($all_field_array['USER-CLI']);
-            unset($all_field_array['Org-Duration']);
-            unset($all_field_array['R1-Account']);
-            unset($all_field_array['R1-Tariff']);
-            unset($all_field_array['R1-Duration']);
-            unset($all_field_array['R1-Cost']);
-            unset($all_field_array['R2-Account']);
-            unset($all_field_array['R2-Tariff']);
-            unset($all_field_array['R2-Duration']);
-            unset($all_field_array['R2-Cost']);
-            unset($all_field_array['R3-Account']);
-            unset($all_field_array['R3-Tariff']);
-            unset($all_field_array['R3-Duration']);
-            unset($all_field_array['R3-Cost']);
-        } else {
-            
-        }
-
-
-        $data['is_report_searched'] = $is_report_searched;
-        $data['logged_customer_type'] = $logged_customer_type;
-        $data['get_logged_account_level'] = $get_logged_account_level;
-        $data['all_field_array'] = $all_field_array;
-
-        $this->load->view('basic/header', $data);
-        $this->load->view('reports/calls_connected_in', $data);
-        $this->load->view('basic/footer', $data);
-    }
-
-    public function cdr($account_id = '') {
-        $page_name = "report_cdr";
-        $data['page_name'] = $page_name;
-
-        //	echo get_logged_account_type();die;
-        if (check_logged_user_group(array('RESELLER', 'CUSTOMER')))
-            $account_id = get_logged_account_id();
+            $view_file = 'monin2_reseller';
         else
-            show_404('403');
-
-        $data['search_account_id'] = $account_id;
-        $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-
+            $view_file = 'monin2';
         $this->load->view('basic/header', $data);
-        $this->load->view('reports/cdr', $data);
+        $this->load->view('reports/' . $view_file, $data);
         $this->load->view('basic/footer', $data);
     }
 
-    function call_report($account_id_temp = '') {
-        $page_name = "report_call";
-        $data['page_name'] = $page_name;
-        $this->load->model('report_mod');
-
-
-
-        $logged_account_id = get_logged_account_id();
-
-        $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-        ////////////////////////////////////////////////
-
-
-        if (isset($_POST['search_action'])) {// coming from search button							
-            $_SESSION['search_call_data'] = array('s_yearmonth' => $_POST['yearmonth']);
-            $_SESSION['search_call_data']['s_account_id'] = $_POST['account_id'];
-            $_SESSION['search_call_data']['s_g_user'] = (isset($_POST['g_user']) ? 'Y' : 'N');
-            $_SESSION['search_call_data']['s_cdr_customer_company_name'] = $_POST['customer_company_name'];
-        } else {
-            $_SESSION['search_call_data']['s_yearmonth'] = isset($_SESSION['search_call_data']['s_yearmonth']) ? $_SESSION['search_call_data']['s_yearmonth'] : date("Y-m");
-
-            $_SESSION['search_call_data']['s_account_id'] = isset($_SESSION['search_call_data']['s_account_id']) ? $_SESSION['search_call_data']['s_account_id'] : '';
-
-            if ($account_id_temp != '')
-                $_SESSION['search_call_data']['s_account_id'] = param_decrypt($account_id_temp);
-        }
-        $search_data = array(
-            'customer_account_id' => $_SESSION['search_call_data']['s_account_id'],
-            'action_month' => $_SESSION['search_call_data']['s_yearmonth'],
-            'groupby_account' => $_SESSION['search_call_data']['s_g_user'],
-            'customer_company_name' => $_SESSION['search_call_data']['s_cdr_customer_company_name']
-        );
-
-
-
-
-        if (check_logged_user_group(array('RESELLER')))//,'CUSTOMER'
-            $search_data['parent_account_id'] = $logged_account_id;
-        elseif (check_logged_user_group(array('CUSTOMER')))
-            $search_data['customer_account_id'] = $logged_account_id;
-        elseif (check_logged_user_group(ADMIN_ACCOUNT_ID)) {
-            
-        } else {
-            show_404('403');
-        }
-
-        $report_data = $this->report_mod->call_statistics($search_data);
-
-        $data['call_statistics_data'] = $report_data;
-
-        $this->load->view('basic/header', $data);
-        $this->load->view('reports/call_report', $data);
-        $this->load->view('basic/footer', $data);
-    }
-
-    public function FailCalls($arg1 = '', $format = '') {
-        $this->load->model('report_mod');
-        $data['page_name'] = "report_failed";
-        $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-        $logged_customer_type = get_logged_account_type();
-        $logged_account_id = get_logged_account_id();
-        $get_logged_account_level = get_logged_account_level();
-        $search_data = array();
-        if (isset($_POST['search_action'])) {
-            $_SESSION['search_failed_data'] = array(
-                's_cdr_customer_type' => $_POST['customer_type'],
-                's_cdr_customer_account' => $_POST['customer_account'],
-                's_cdr_dialed_no' => $_POST['dialed_no'],
-                's_cdr_carrier_dst_no' => $_POST['carrier_dst_no'],
-                's_cdr_customer_cli' => $_POST['customer_cli'],
-                's_cdr_carrier_cli' => $_POST['carrier_cli'],
-                's_cdr_carrier' => $_POST['carrier'],
-                's_cdr_carrier_ip' => $_POST['carrier_ip'],
-                's_cdr_customer_ip' => $_POST['customer_ip'],
-                's_cdr_sip_code' => $_POST['sip_code'],
-                's_cdr_Q850CODE' => $_POST['Q850CODE'],
-                's_cdr_fserrorcode' => $_POST['fs_errorcode'],
-                's_time_range' => $_POST['time_range'],
-                's_no_of_records' => $_POST['no_of_rows'],
-                's_cdr_cdr_type' => $_POST['cdr_type'],
-                's_cdr_customer_company_name' => $_POST['customer_company_name']
-            );
-        } elseif ($arg1 == 'export') {
-            
-        } elseif (!isset($_SESSION['search_failed_data'])) {
-            $today_timestamp = strtotime("today");
-            $today = date('Y-m-d', $today_timestamp);
-            $time_range = $today . ' 00:00 - ' . $today . ' 23:59';
-            $_SESSION['search_failed_data'] = array('s_cdr_customer_type' => '',
-                's_cdr_customer_account' => '',
-                's_cdr_dialed_no' => '',
-                's_cdr_carrier_dst_no' => '',
-                's_cdr_customer_cli' => '',
-                's_cdr_carrier_cli' => '',
-                's_cdr_carrier' => '',
-                's_cdr_carrier_ip' => '',
-                's_cdr_customer_ip' => '',
-                's_cdr_sip_code' => '',
-                's_cdr_Q850CODE' => '',
-                's_cdr_fserrorcode' => '',
-                's_time_range' => $time_range,
-                's_no_of_records' => RECORDS_PER_PAGE,
-                's_cdr_customer_company_name' => '',
-                's_cdr_cdr_type' => '',
-            );
-        }
-
-        $search_data = array(
-            's_cdr_customer_type' => $_SESSION['search_failed_data']['s_cdr_customer_type'],
-            's_cdr_customer_account' => $_SESSION['search_failed_data']['s_cdr_customer_account'],
-            's_cdr_dialed_no' => $_SESSION['search_failed_data']['s_cdr_dialed_no'],
-            's_cdr_carrier_dst_no' => $_SESSION['search_failed_data']['s_cdr_carrier_dst_no'],
-            's_cdr_customer_cli' => $_SESSION['search_failed_data']['s_cdr_customer_cli'],
-            's_cdr_carrier_cli' => $_SESSION['search_failed_data']['s_cdr_carrier_cli'],
-            's_cdr_carrier' => $_SESSION['search_failed_data']['s_cdr_carrier'],
-            's_cdr_carrier_ip' => $_SESSION['search_failed_data']['s_cdr_carrier_ip'],
-            's_cdr_customer_ip' => $_SESSION['search_failed_data']['s_cdr_customer_ip'],
-            's_cdr_sip_code' => $_SESSION['search_failed_data']['s_cdr_sip_code'],
-            's_cdr_Q850CODE' => $_SESSION['search_failed_data']['s_cdr_Q850CODE'],
-            's_cdr_fserrorcode' => $_SESSION['search_failed_data']['s_cdr_fserrorcode'],
-            's_time_range' => $_SESSION['search_failed_data']['s_time_range'],
-            's_cdr_customer_company_name' => $_SESSION['search_failed_data']['s_cdr_customer_company_name'],
-            's_cdr_cdr_type' => $_SESSION['search_cdr_data']['s_cdr_cdr_type']
-        );
-
-
-        if (check_logged_user_group(array('RESELLER')))
-            $search_data['s_parent_account_id'] = $logged_account_id;
-
-        if (check_logged_user_group(array('CUSTOMER'))) {
-            $search_data['s_cdr_customer_account'] = $logged_account_id;
-            $search_data['s_cdr_customer_type'] = 'CUSTOMER';
-            $search_data['s_cdr_customer_type_login'] = 'CUSTOMER';
-        }
-        /////////////////determine which fields to display///////////////////////////
-        $all_field_array = array(
-            'Account' => 'Account'
-            , 'cdr_type' => 'CDR-Type'
-            , 'SRC-DST' => 'SRC-DST'
-            , 'SRC-CLI' => 'SRC-CLI'
-            , 'Start Time' => 'Start Time'
-            , 'End Time' => 'End Time'
-            , 'SIPCODE' => 'SIP CODE'
-            , 'FS-Cause' => 'FS-Cause'
-            , 'SRC-IP' => 'SRC-IP'
-            , 'Carrier' => 'Carrier'
-            , 'Q850CODE' => 'Q850 CODE'
-            , 'User-Tariff' => 'User-Tariff'
-            , 'Prefix' => 'Prefix'
-            , 'Destination' => 'Destination'
-            , 'Routing' => 'Routing'
-            , 'C-Tariff' => 'C-Tariff'
-            , 'C-Prefix' => 'C-Prefix'
-            , 'C-Destination' => 'C-Destination'
-            , 'C-IP' => 'C-IP'
-            , 'USER-CLI' => 'USER-CLI'
-            , 'User-DST' => 'User-DST'
-            , 'C-CLI' => 'C-CLI'
-            , 'C-DST' => 'C-DST'
-            , 'R1-Account' => 'R1-Account'
-            , 'R1-Tariff' => 'R1-Tariff'
-            , 'R1-Prefix' => 'R1-Prefix'
-            , 'R1-DST' => 'R1-DST'
-            , 'R2-Account' => 'R2-Account'
-            , 'R2-Tariff' => 'R2-Tariff'
-            , 'R2-Prefix' => 'R2-Prefix'
-            , 'R2-DST' => 'R2-DST'
-            , 'R3-Account' => 'R3-Account'
-            , 'R3-Tariff' => 'R3-Tariff'
-            , 'R3-Prefix' => 'R3-Prefix'
-            , 'R3-DST' => 'R3-DST'
-            , 'hangupby' => 'Hangup By'
-            , 'Incoming-Codecs' => 'Incoming-Codecs'
-            , 'Outgoing-Codecs' => 'Outgoing-Codecs'
-            , "Call's-Codec" => "Call's-Codec"
-        );
-
-        if (check_logged_user_group('RESELLER')) {
-            unset($all_field_array['Routing']);
-            unset($all_field_array['Carrier']);
-            unset($all_field_array['C-Prefix']);
-            unset($all_field_array['C-Destination']);
-            unset($all_field_array['C-IP']);
-            unset($all_field_array['C-DST']);
-            unset($all_field_array['USER-CLI']);
-
-            if ($get_logged_account_level == 1) {
-                unset($all_field_array['R3-Account']);
-                unset($all_field_array['R3-Tariff']);
-                unset($all_field_array['R3-Prefix']);
-                unset($all_field_array['R3-DST']);
-            } elseif ($get_logged_account_level == 2) {
-                unset($all_field_array['R1-Account']);
-                unset($all_field_array['R1-Tariff']);
-                unset($all_field_array['R1-Prefix']);
-                unset($all_field_array['R1-DST']);
-            } else {
-                unset($all_field_array['R1-Account']);
-                unset($all_field_array['R1-Tariff']);
-                unset($all_field_array['R1-Prefix']);
-                unset($all_field_array['R1-DST']);
-
-                unset($all_field_array['R2-Account']);
-                unset($all_field_array['R2-Tariff']);
-                unset($all_field_array['R2-Prefix']);
-                unset($all_field_array['R2-DST']);
-            }
-        } elseif (check_logged_user_group('CUSTOMER')) {
-            unset($all_field_array['Routing']);
-            unset($all_field_array['Carrier']);
-            unset($all_field_array['C-Tariff']);
-            unset($all_field_array['C-Prefix']);
-            unset($all_field_array['C-Destination']);
-            unset($all_field_array['C-IP']);
-            unset($all_field_array['C-DST']);
-            unset($all_field_array['USER-CLI']);
-            unset($all_field_array['R1-Account']);
-            unset($all_field_array['R1-Tariff']);
-            unset($all_field_array['R1-Prefix']);
-            unset($all_field_array['R1-DST']);
-            unset($all_field_array['R2-Account']);
-            unset($all_field_array['R2-Tariff']);
-            unset($all_field_array['R2-Prefix']);
-            unset($all_field_array['R2-DST']);
-            unset($all_field_array['R3-Account']);
-            unset($all_field_array['R3-Tariff']);
-            unset($all_field_array['R3-Prefix']);
-            unset($all_field_array['R3-DST']);
-        } else {
-            
-        }
-
-        ///////////////// Searching ////////////////////
-        $is_file_downloaded = false;
-        if ($arg1 == 'export' && $format != '') {
-            ini_set('memory_limit', '2048M');
-            $format = param_decrypt($format);
-
-            $per_page = 50000;
-            $segment = 0;
-
-            $response = $this->report_mod->FaildCalls($search_data, $per_page, $segment); //???
-            $listing_data = $response['result'];
-            $listing_count = $response['total'];
-
-
-            $search_array = array();
-            if ($_SESSION['search_failed_data']['s_cdr_customer_type'] != '') {
-                if ($_SESSION['search_failed_data']['s_cdr_customer_type'] == 'U')
-                    $search_array['User Type'] = 'User';
-                elseif ($_SESSION['search_failed_data']['s_cdr_customer_type'] == 'R1')
-                    $search_array['User Type'] = 'Reseller 1';
-                elseif ($_SESSION['search_failed_data']['s_cdr_customer_type'] == 'R2')
-                    $search_array['User Type'] = 'Reseller 2';
-                elseif ($_SESSION['search_failed_data']['s_cdr_customer_type'] == 'R3')
-                    $search_array['User Type'] = 'Reseller 3';
-            }
-
-            if ($_SESSION['search_failed_data']['s_cdr_customer_account'] != '')
-                $search_array['User Account'] = $_SESSION['search_failed_data']['s_cdr_customer_account'];
-
-            if ($_SESSION['search_failed_data']['s_cdr_dialed_no'] != '')
-                $search_array['Dialed No'] = $_SESSION['search_failed_data']['s_cdr_dialed_no'];
-            if ($_SESSION['search_failed_data']['s_cdr_carrier_dst_no'] != '')
-                $search_array['Carrier DST No'] = $_SESSION['search_failed_data']['s_cdr_carrier_dst_no'];
-            if ($_SESSION['search_failed_data']['s_cdr_customer_cli'] != '')
-                $search_array['User Cli'] = $_SESSION['search_failed_data']['s_cdr_customer_cli'];
-            if ($_SESSION['search_failed_data']['s_cdr_carrier_cli'] != '')
-                $search_array['Carrier Cli'] = $_SESSION['search_failed_data']['s_cdr_carrier_cli'];
-            if ($_SESSION['search_failed_data']['s_cdr_carrier'] != '')
-                $search_array['Carrier'] = $_SESSION['search_failed_data']['s_cdr_carrier'];
-            if ($_SESSION['search_failed_data']['s_cdr_carrier_ip'] != '')
-                $search_array['Carrier IP'] = $_SESSION['search_failed_data']['s_cdr_carrier_ip'];
-            if ($_SESSION['search_failed_data']['s_cdr_customer_ip'] != '')
-                $search_array['User IP'] = $_SESSION['search_failed_data']['s_cdr_customer_ip'];
-            if ($_SESSION['search_failed_data']['s_cdr_sip_code'] != '')
-                $search_array['SIP Code'] = $_SESSION['search_failed_data']['s_cdr_sip_code'];
-            if ($_SESSION['search_failed_data']['s_cdr_Q850CODE'] != '')
-                $search_array['Q850CODE'] = $_SESSION['search_failed_data']['s_cdr_Q850CODE'];
-            if ($_SESSION['search_failed_data']['s_cdr_fserrorcode'] != '')
-                $search_array['FS Error-Code'] = $_SESSION['search_failed_data']['s_cdr_fserrorcode'];
-            if ($_SESSION['search_failed_data']['s_time_range'] != '')
-                $search_array['Time Range'] = $_SESSION['search_failed_data']['s_time_range'];
-
-            if ($_SESSION['search_failed_data']['s_cdr_customer_company_name'] != '')
-                $search_array['Company Name'] = $_SESSION['search_failed_data']['s_cdr_customer_company_name'];
-
-            // column titles
-            foreach ($all_field_array as $field_lebel) {
-                $export_header[] = $field_lebel;
-            }
-
-
-
-            if (isset($listing_count) && $listing_count > 0) {
-                foreach ($listing_data as $listing_row) {
-                    $export_data_temp = array();
-                    foreach ($all_field_array as $field_name => $field_lebel) {
-
-
-                        if ($field_name == 'Account') {
-
-                            if ($listing_row['customer_company_name'] != '') {
-
-                                $export_data_temp[] = $listing_row['customer_company_name'] . ' ( ' . $listing_row[$field_name] . ' ) ';
-                            } else {
-
-                                $export_data_temp[] = $listing_row[$field_name];
-                            }
-                        } else {
-
-                            $export_data_temp[] = $listing_row[$field_name];
-                        }
-                    }
-                    $export_data[] = $export_data_temp;
-                }
-            } else
-                $export_data[] = array();
-
-
-
-            $file_name = 'Failed Calls';
-
-            $this->load->library('Export');
-            $downloaded_message = $this->export->download($file_name, $format, $search_array, $export_header, $export_data);
-
-
-            if (gettype($downloaded_message) == 'string')
-                $data['err_msgs'] = $downloaded_message;
-            else
-                $is_file_downloaded = true;
-        }
-        if ($is_file_downloaded === false) {
-
-            /*             * **** pagination code start here ********* */
-            $pagination_uri_segment = 3;
-
-            if (isset($_SESSION['search_failed_data']['s_no_of_records']) && $_SESSION['search_failed_data']['s_no_of_records'] != '')
-                $per_page = $_SESSION['search_failed_data']['s_no_of_records'];
-            else
-                $per_page = RECORDS_PER_PAGE;
-
-
-            if ($this->uri->segment($pagination_uri_segment) == '') {
-                $segment = 0;
-            } else {
-                $segment = $this->uri->segment($pagination_uri_segment);
-            }
-            $response = $this->report_mod->FaildCalls($search_data, $per_page, $segment);
-            $data['listing_data'] = $response['result'];
-            $data['listing_count'] = $response['total'];
-            $data['total_records'] = $response['all_total'];
-
-            $this->load->library('pagination'); // pagination class		
-            $config = array();
-            $config = $this->utils_model->setup_pagination_option($response['all_total'], 'reports/FailCalls', $per_page, $pagination_uri_segment);
-            $this->pagination->initialize($config);
-            $data['pagination'] = $this->pagination->create_links();
-            ////////////////
-            //////////fields/////////////
-
-
-
-            $data['logged_customer_type'] = $logged_customer_type;
-            $data['get_logged_account_level'] = $get_logged_account_level;
-            $data['all_field_array'] = $all_field_array;
-
-            $this->load->view('basic/header', $data);
-            $this->load->view('reports/FailCalls', $data);
-            $this->load->view('basic/footer', $data);
-        }
-    }
-
-    public function AnsCalls($account_id_temp = '', $format = '') {
+    public function Calls($account_id_temp = '', $format = '') {
         $arg1 = $account_id_temp;
         $this->load->model('report_mod');
-        $data['page_name'] = "report_connected";
+        $data['page_name'] = "calls";
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
         $logged_customer_type = get_logged_account_type();
         $logged_account_id = get_logged_account_id();
@@ -1800,24 +882,26 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
         $search_data = array();
         if (isset($_POST['search_action'])) {
             $_SESSION['search_cdr_data'] = array(
-                's_cdr_customer_type' => $_POST['customer_type'],
-                's_cdr_customer_account' => $_POST['customer_account'],
+                's_cdr_customer_type' => isset($_POST['customer_type']) ? $_POST['customer_type'] : '',
+                's_cdr_customer_account' => isset($_POST['customer_account']) ? $_POST['customer_account'] : '',
                 's_cdr_dialed_no' => $_POST['dialed_no'],
-                's_cdr_carrier_dst_no' => $_POST['carrier_dst_no'],
+                's_cdr_carrier_dst_no' => isset($_POST['carrier_dst_no']) ? $_POST['carrier_dst_no'] : '',
                 's_cdr_customer_cli' => $_POST['customer_cli'],
-                's_cdr_carrier_cli' => $_POST['carrier_cli'],
-                's_cdr_carrier' => $_POST['carrier'],
-                's_cdr_carrier_ip' => $_POST['carrier_ip'],
+                's_cdr_carrier_cli' => isset($_POST['carrier_cli']) ? $_POST['carrier_cli'] : '',
+                's_cdr_carrier' => isset($_POST['carrier']) ? $_POST['carrier'] : '',
+                's_cdr_carrier_ip' => isset($_POST['carrier_ip']) ? $_POST['carrier_ip'] : '',
                 's_cdr_customer_ip' => $_POST['customer_ip'],
                 's_cdr_call_duration' => $_POST['call_duration'],
                 's_time_range' => $_POST['time_range'],
-                's_no_of_records' => $_POST['no_of_rows'],
-                's_cdr_customer_company_name' => $_POST['customer_company_name'],
+                's_cdr_customer_company_name' => isset($_POST['customer_company_name']) ? $_POST['customer_company_name'] : '',
                 's_cdr_call_duration_range' => $_POST['duration_range'],
                 's_cdr_cdr_type' => $_POST['cdr_type'],
+                'disposition' => $_POST['disposition'],
+                'cdr_type' => $_POST['cdr_type'],
+                's_no_of_records' => $_POST['no_of_rows'],
             );
         } elseif ($arg1 != 'export' && !isset($_SESSION['search_cdr_data']['s_time_range'])) {
-            //default date is todays date
+
             $today_timestamp = strtotime("today");
             $today = date('Y-m-d', $today_timestamp);
             $time_range = $today . ' 00:00 - ' . $today . ' 23:59';
@@ -1835,7 +919,9 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
                 's_no_of_records' => RECORDS_PER_PAGE,
                 's_cdr_customer_company_name' => '',
                 's_cdr_cdr_type' => '',
-                's_cdr_call_duration_range' => ''
+                's_cdr_call_duration_range' => '',
+                'disposition' => '',
+                'cdr_type' => '',
             );
         }
 
@@ -1859,6 +945,8 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
             's_cdr_customer_company_name' => $_SESSION['search_cdr_data']['s_cdr_customer_company_name'],
             's_cdr_call_duration_range' => $_SESSION['search_cdr_data']['s_cdr_call_duration_range'],
             's_cdr_cdr_type' => $_SESSION['search_cdr_data']['s_cdr_cdr_type'],
+            'disposition' => $_SESSION['search_cdr_data']['disposition'],
+            'cdr_type' => $_SESSION['search_cdr_data']['cdr_type'],
         );
 
         if (check_logged_user_group(array('RESELLER')))
@@ -1869,37 +957,40 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
             $search_data['s_cdr_customer_type'] = 'CUSTOMER';
             $search_data['s_cdr_customer_type_login'] = 'CUSTOMER';
         }
-        ///////////////// Searching ////////////////////
+
 
         $all_field_array = array(
             'Account' => 'Account'
+            , 'disposition' => 'Call Status'
+            , 'recording_file' => 'Recording'
             , 'cdr_type' => 'Call-Type'
-            , 'SRC-DST' => 'SRC-DST'
-            , 'SRC-CLI' => 'SRC-CLI'
+            , 'C-CLI' => 'C-CLI'
+            , 'C-DST' => 'C-DST'
+	    ,'digits_dialed' => 'DTMF'
             , 'Start Time' => 'Start Time'
             , 'End Time' => 'End Time'
-            , 'Duration' => 'Duration'
-            , 'C-Duration' => 'C-Duration'
-            , 'hangupby' => 'Hangup By'
-            , 'SRC-IP' => 'Caller-IP'
-            , 'Cost' => 'Cost'
             , 'Carrier' => 'Carrier'
-            , 'Q850CODE' => 'Q850CODE'
-            , 'SIPCODE' => 'SIPCODE'
-            , 'User-Tariff' => 'User-Tariff'
-            , 'Prefix' => 'Prefix'
-            , 'Destination' => 'Destination'
-            , 'Routing' => 'Routing'
+            , 'C-Duration' => 'C-Duration'
+	    , 'pdd'=>'pdd'
             , 'C-Tariff' => 'C-Tariff'
             , 'C-Prefix' => 'C-Prefix'
             , 'C-Destination' => 'C-Destination'
             , 'C-Cost' => 'C-Cost'
-            , 'Org-Duration' => 'Org-Duration'
+            , 'Routing' => 'Routing'
             , 'C-IP' => 'C-IP'
+            , 'SRC-IP' => 'Caller-IP'
+            , 'Duration' => 'Duration'
+            , 'Cost' => 'Cost'
+            , 'Q850CODE' => 'Q850CODE'
+            , 'SIPCODE' => 'SIPCODE'
+            , 'SRC-DST' => 'SRC-DST'
+            , 'SRC-CLI' => 'SRC-CLI'
+            , 'User-Tariff' => 'User-Tariff'
+            , 'Prefix' => 'Prefix'
+            , 'Destination' => 'Destination'
+            , 'Org-Duration' => 'Org-Duration'
             , 'USER-CLI' => 'USER-CLI'
             , 'User-DST' => 'User-DST'
-            , 'C-CLI' => 'C-CLI'
-            , 'C-DST' => 'C-DST'
             , 'R1-Account' => 'R1-Account'
             , 'R1-Tariff' => 'R1-Tariff'
             , 'R1-Duration' => 'R1-Duration'
@@ -1912,9 +1003,17 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
             , 'R3-Tariff' => 'R3-Tariff'
             , 'R3-Duration' => 'R3-Duration'
             , 'R3-Cost' => 'R3-Cost'
-            , 'Incoming-Codecs' => 'Incoming-Codecs'
-            , 'Outgoing-Codecs' => 'Outgoing-Codecs'
-            , "Call's-Codec" => "Call's-Codec"
+            , 'hangupby' => 'Hangup By'
+            , "disposition_cause" => "Disposition"
+            , "src_extension_no" => "SRC Exten-No"
+            , "src_extension_name" => "SRC Name"
+            , "dst_app" => "ViA APP"
+            , "dst_app_number" => "ViA APP-No"
+            , "dst_app_name" => "ViA APP-Name"
+            , "endpoint_app" => "EndPoint APP No"
+            , "endpoint_name" => "EndPoint Name"
+            , "endpoint_number" => "EndPoint Dst"
+            , "endpoint_extension_no" => "EndPoint"
         );
 
         if (check_logged_user_group('RESELLER')) {
@@ -1927,7 +1026,6 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
             unset($all_field_array['C-Cost']);
             unset($all_field_array['C-IP']);
             unset($all_field_array['C-DST']);
-            unset($all_field_array['USER-CLI']);
             unset($all_field_array['Org-Duration']);
 
             if ($get_logged_account_level == 1) {
@@ -1960,7 +1058,7 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
             unset($all_field_array['C-Cost']);
             unset($all_field_array['C-IP']);
             unset($all_field_array['C-DST']);
-            unset($all_field_array['USER-CLI']);
+            unset($all_field_array['C-CLI']);
             unset($all_field_array['Org-Duration']);
             unset($all_field_array['R1-Account']);
             unset($all_field_array['R1-Tariff']);
@@ -1977,18 +1075,20 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
         } else {
             
         }
+
+
         $is_file_downloaded = false;
         if ($arg1 == 'export' && $format != '') {
             ini_set('memory_limit', '2048M');
             $format = param_decrypt($format);
-            $per_page = 60000;
+            $per_page = 600000000;
             $segment = 0;
             $response = $this->report_mod->ConnectedCalls($search_data, $per_page, $segment);
             $listing_data = $response['result'];
             $listing_count = $response['total'];
             $export_data = array();
             if ($listing_count > 0) {
-                //$export_data_temp = array('');
+
                 foreach ($listing_data as $listing_row) {
                     $export_data_temp = array();
                     foreach ($all_field_array as $field_name => $field_lebel) {
@@ -2007,7 +1107,6 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
             }
 
 
-            //prepare search data
             $search_array = array();
             if ($_SESSION['search_cdr_data']['s_cdr_customer_type'] != '') {
                 if ($_SESSION['search_cdr_data']['s_cdr_customer_type'] == 'U')
@@ -2042,29 +1141,25 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
             if ($_SESSION['search_cdr_data']['s_cdr_customer_company_name'] != '')
                 $search_array['Company Name'] = $_SESSION['search_cdr_data']['s_cdr_customer_company_name'];
 
-            // column titles
+
             $export_header = array();
             foreach ($all_field_array as $field_lebel) {
                 $export_header[] = $field_lebel;
             }
 
-            $file_name = 'cdr_report_connected_calls';
+            $file_name = 'cdr_' . date('YmdHis');
 
             $this->load->library('Export');
             $downloaded_message = $this->export->download($file_name, $format, $search_array, $export_header, $export_data);
-
 
             if (gettype($downloaded_message) == 'string')
                 $data['err_msgs'] = $downloaded_message;
             else
                 $is_file_downloaded = true;
-
-            //////////////////
         }
 
         if ($is_file_downloaded === false) {
 
-            /*             * **** pagination code start here ********* */
             $pagination_uri_segment = 3;
             if (isset($_SESSION['search_cdr_data']['s_no_of_records']) && $_SESSION['search_cdr_data']['s_no_of_records'] != '')
                 $per_page = $_SESSION['search_cdr_data']['s_no_of_records'];
@@ -2077,508 +1172,35 @@ and date_add(call_date, interval concat(calltime_h,':',calltime_m) HOUR_MINUTE) 
             }
 
 
-
-//            print_r($search_data);die;
             $response = $this->report_mod->ConnectedCalls($search_data, $per_page, $segment);
             $data['listing_data'] = $response['result'];
             $data['listing_count'] = $response['total'];
             $data['total_records'] = $response['all_total'];
 
-
-            $this->load->library('pagination'); // pagination class		
+            $this->load->library('pagination');
             $config = array();
-            $config = $this->utils_model->setup_pagination_option($response['all_total'], 'reports/AnsCalls', $per_page, $pagination_uri_segment);
+            $config = $this->utils_model->setup_pagination_option($response['all_total'], 'reports/Calls', $per_page, $pagination_uri_segment);
             $this->pagination->initialize($config);
             $data['pagination'] = $this->pagination->create_links();
-
 
             $data['logged_customer_type'] = $logged_customer_type;
             $data['get_logged_account_level'] = $get_logged_account_level;
             $data['all_field_array'] = $all_field_array;
 
-            $this->load->view('basic/header', $data);
-            $this->load->view('reports/AnsCalls', $data);
-            $this->load->view('basic/footer', $data);
-        }
-    }
-
-    public function accounting_billing($arg1 = '', $format = '') {
-        $this->load->model('report_mod');
-
-        $data['page_name'] = "report_accounting_billing";
-
-        //check page action permission
-        //if(!check_account_permission('report','analytics_carrier')) show_404('403');
-        $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-        ///////////////////////////	
-        $logged_customer_type = get_logged_account_type();
-        $get_logged_account_level = get_logged_account_level();
-
-
-        /*         * **** pagination code start here ********* */
-        /* 	$pagination_uri_segment = 3;
-          $per_page = 20;
-          if($this->uri->segment($pagination_uri_segment)==''){ $segment= 0; }
-          else{ $segment= $this->uri->segment($pagination_uri_segment); } */
-
-        ///////////////// Searching ////////////////////
-
-        $search_data = array();
-        if (isset($_POST['OkFilter'])) {
-            $time_range_post = $_POST['year'] . '-' . $_POST['month'];
-            if ($_POST['day'] != '') {
-                $time_range_post = $time_range_post . '-' . $_POST['day'];
-                $time_range = $time_range_post . ' 00:00:00 - ' . $time_range_post . ' 23:59:59';
+            if (check_logged_user_group(array('RESELLER'))) {
+                $this->load->view('basic/header', $data);
+                $this->load->view('reports/callsRC', $data);
+                $this->load->view('basic/footer', $data);
+            } elseif (check_logged_user_group(array('CUSTOMER'))) {
+                $this->load->view('basic/header', $data);
+                $this->load->view('reports/callsC', $data);
+                $this->load->view('basic/footer', $data);
             } else {
-                $time_range = $time_range_post . '-01 00:00:00 - ' . $time_range_post . '-31 23:59:59';
+                $this->load->view('basic/header', $data);
+                $this->load->view('reports/calls', $data);
+                $this->load->view('basic/footer', $data);
             }
-            $_SESSION['search_billing_data'] = array(
-                's_customer_account_id' => $_POST['customer_account_id'],
-                's_carrier_carrier_id' => $_POST['carrier_carrier_id'],
-                's_group_by' => isset($_POST['group_by']) ? $_POST['group_by'] : 'customer_account_id',
-                's_time_range' => $time_range,
-                's_year' => $_POST['year'],
-                's_month' => $_POST['month'],
-                's_day' => $_POST['day'],
-            );
-        } elseif ($arg1 == 'export') {
-            
-        } else {
-            //default date is todays date
-            $today_timestamp = strtotime("today");
-            $today = date('Y-m-d', $today_timestamp);
-            $time_range = $today . ' 00:00 - ' . $today . ' 23:59';
-
-            $today_array = explode('-', $today);
-
-            $_SESSION['search_billing_data'] = array(
-                's_customer_account_id' => isset($_SESSION['search_billing_data']['s_customer_account_id']) ? $_SESSION['search_billing_data']['s_customer_account_id'] : '',
-                's_carrier_carrier_id' => isset($_SESSION['search_billing_data']['s_carrier_carrier_id']) ? $_SESSION['search_billing_data']['s_carrier_carrier_id'] : '',
-                's_group_by' => isset($_SESSION['search_billing_data']['s_group_by']) ? $_SESSION['search_billing_data']['s_group_by'] : 'customer_account_id',
-                's_time_range' => $time_range,
-                's_year' => $today_array['0'],
-                's_month' => $today_array['1'],
-                's_day' => $today_array['2'],
-            );
-        }
-
-        if ($_SESSION['search_billing_data']['s_group_by'] == 'customer_account_id')
-            $group_by = 'customer_account_id, carrier_carrier_id';
-        elseif ($_SESSION['search_billing_data']['s_group_by'] == 'carrier_carrier_id')
-            $group_by = 'carrier_carrier_id, customer_account_id';
-        else
-            $group_by = 'customer_account_id, carrier_carrier_id';
-
-        $search_data = array(
-            'customer_account_id' => $_SESSION['search_billing_data']['s_customer_account_id'],
-            'carrier_carrier_id' => $_SESSION['search_billing_data']['s_carrier_carrier_id'],
-            'group_by' => $group_by,
-            'time_range' => $_SESSION['search_billing_data']['s_time_range'],
-        );
-
-        ///////////////// Searching ////////////////////
-        $is_file_downloaded = false;
-        if ($arg1 == 'export' && $format != '') {
-
-            $is_file_downloaded = true;
-
-            //	die("aa");
-        }
-        if ($is_file_downloaded === false) {
-            $response = $this->report_mod->accounting_billing($search_data, $per_page, $segment);
-
-            $data['listing_data'] = $response['result'];
-            $data['currency_options'] = $this->utils_model->get_currencies();
-            $data['logged_customer_type'] = $logged_customer_type;
-            $data['get_logged_account_level'] = $get_logged_account_level;
-
-            $this->load->view('basic/header', $data);
-            $this->load->view('reports/accounting_billing', $data);
-            $this->load->view('basic/footer', $data);
         }
     }
 
-    public function CarrierUsage($arg1 = '', $format = '') {
-        $this->load->model('report_mod');
-        $data['page_name'] = "CarrierUsage";
-
-        //check page action permission
-        //if(!check_account_permission('report','analytics_carrier')) show_404('403');
-        $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-        ///////////////////////////	
-        $logged_customer_type = get_logged_account_type();
-        $logged_account_id = get_logged_account_id();
-        $get_logged_account_level = get_logged_account_level();
-        ///////////////// Searching ////////////////////
-
-        $search_data = array();
-        //print_r($_POST);
-        if (isset($_POST['search_action'])) {
-            $_SESSION['search_CarrierUsage_data'] = array(
-                's_carrier_account' => $_POST['carrier_account'],
-                's_carrier_name' => $_POST['carrier_name'],
-                's_carrier_currency' => $_POST['currency'],
-                's_calls_date' => $_POST['calls_date'],
-                'carrier_grp_account_id' => (isset($_POST['grp_account_id']) ? 'Y' : 'N'),
-                'carrier_grp_dest' => (isset($_POST['grp_destination']) ? 'Y' : 'N'),
-                'carrier_grp_calls_date' => (isset($_POST['grp_calls_date']) ? 'Y' : 'N'),
-                's_no_of_records' => $_POST['no_of_rows']
-            );
-        } else {
-            //default date is todays date
-            $today_timestamp = strtotime("yesterday");
-            $today = date('Y-m-d', $today_timestamp);
-            $time_range = $today . ' 00:00 - ' . $today . ' 23:59';
-
-
-            $_SESSION['search_CarrierUsage_data']['s_carrier_account'] = isset($_SESSION['search_CarrierUsage_data']['s_carrier_account']) ? $_SESSION['search_CarrierUsage_data']['s_carrier_account'] : '';
-            $_SESSION['search_CarrierUsage_data']['s_carrier_name'] = isset($_SESSION['search_CarrierUsage_data']['s_carrier_name']) ? $_SESSION['search_CarrierUsage_data']['s_carrier_name'] : '';
-
-            $_SESSION['search_CarrierUsage_data']['s_carrier_currency'] = isset($_SESSION['search_CarrierUsage_data']['s_carrier_currency']) ? $_SESSION['search_CarrierUsage_data']['s_carrier_currency'] : '';
-            $_SESSION['search_CarrierUsage_data']['s_calls_date'] = $time_range;
-
-            $_SESSION['search_CarrierUsage_data']['carrier_grp_account_id'] = isset($_SESSION['search_CarrierUsage_data']['carrier_grp_account_id']) ? $_SESSION['search_CarrierUsage_data']['carrier_grp_account_id'] : 'N';
-            $_SESSION['search_CarrierUsage_data']['carrier_grp_dest'] = isset($_SESSION['search_CarrierUsage_data']['carrier_grp_dest']) ? $_SESSION['search_CarrierUsage_data']['carrier_grp_dest'] : 'N';
-            $_SESSION['search_CarrierUsage_data']['carrier_grp_calls_date'] = isset($_SESSION['search_CarrierUsage_data']['carrier_grp_calls_date']) ? $_SESSION['search_CarrierUsage_data']['carrier_grp_calls_date'] : 'N';
-
-            $_SESSION['search_CarrierUsage_data']['s_no_of_records'] = isset($_SESSION['search_CarrierUsage_data']['s_no_of_records']) ? $_SESSION['search_CarrierUsage_data']['s_no_of_records'] : RECORDS_PER_PAGE;
-        }
-
-        $search_data = array(
-            'carrier_account' => $_SESSION['search_CarrierUsage_data']['s_carrier_account'],
-            'carrier_name' => $_SESSION['search_CarrierUsage_data']['s_carrier_name'],
-            'carrier_currency_id' => $_SESSION['search_CarrierUsage_data']['s_carrier_currency'],
-            'calls_date' => $_SESSION['search_CarrierUsage_data']['s_calls_date']
-        );
-
-        if (($_SESSION['search_CarrierUsage_data']['carrier_grp_account_id'] == 'Y') && ($_SESSION['search_CarrierUsage_data']['carrier_grp_dest'] == 'Y') && ($_SESSION['search_CarrierUsage_data']['carrier_grp_calls_date'] == 'Y')) {
-            $search_data['g_account_id'] = $_SESSION['search_CarrierUsage_data']['carrier_grp_account_id'];
-            $search_data['grp_destination'] = $_SESSION['search_CarrierUsage_data']['carrier_grp_dest'];
-            $search_data['grp_calls_date'] = $_SESSION['search_CarrierUsage_data']['carrier_grp_calls_date'];
-        } elseif (($_SESSION['search_CarrierUsage_data']['carrier_grp_account_id'] == 'Y') && ($_SESSION['search_CarrierUsage_data']['carrier_grp_dest'] == 'Y')) {
-            $search_data['g_account_id'] = $_SESSION['search_CarrierUsage_data']['carrier_grp_account_id'];
-            $search_data['grp_destination'] = $_SESSION['search_CarrierUsage_data']['carrier_grp_dest'];
-        } elseif (($_SESSION['search_CarrierUsage_data']['carrier_grp_account_id'] == 'Y') && ($_SESSION['search_CarrierUsage_data']['carrier_grp_calls_date'] == 'Y')) {
-            $search_data['g_account_id'] = $_SESSION['search_CarrierUsage_data']['carrier_grp_account_id'];
-            $search_data['grp_calls_date'] = $_SESSION['search_CarrierUsage_data']['carrier_grp_calls_date'];
-        } elseif (($_SESSION['search_CarrierUsage_data']['carrier_grp_dest'] == 'Y') && ($_SESSION['search_CarrierUsage_data']['carrier_grp_calls_date'] == 'Y')) {
-            $search_data['grp_destination'] = $_SESSION['search_CarrierUsage_data']['carrier_grp_dest'];
-            $search_data['grp_calls_date'] = $_SESSION['search_CarrierUsage_data']['carrier_grp_calls_date'];
-        } elseif ($_SESSION['search_CarrierUsage_data']['carrier_grp_account_id'] == 'Y') {
-            $search_data['g_account_id'] = $_SESSION['search_CarrierUsage_data']['carrier_grp_account_id'];
-        } elseif ($_SESSION['search_CarrierUsage_data']['carrier_grp_dest'] == 'Y') {
-            $search_data['grp_destination'] = $_SESSION['search_CarrierUsage_data']['carrier_grp_dest'];
-        } else {
-            $search_data['grp_calls_date'] = $_SESSION['search_CarrierUsage_data']['carrier_grp_calls_date'];
-        }
-
-        if (check_logged_user_group(array('RESELLER')))
-            $search_data['s_parent_account_id'] = $logged_account_id;
-
-
-        $all_field_array = array(
-            'carrier_account' => 'Carrier Account'
-            , 'carrier_name' => 'Carrier name'
-            , 'prefix' => 'Prefix'
-            , 'destination' => 'Destination'
-            , 'currency_name' => 'Currency'
-            , 'asr' => 'ASR'
-            , 'acd' => 'ACD'
-            , 'answercalls' => 'Calls'
-            , 'out_minute' => 'OutMins'
-            , 'calls_date' => 'Calls Date'
-            , 'carriercost' => 'Cost'
-            , 'code402' => 'code402'
-            , 'code403' => 'code403'
-            , 'code404' => 'code404'
-            , 'code407' => 'code407'
-            , 'code500' => 'code500'
-            , 'code503' => 'code503'
-            , 'code487' => 'code487'
-            , 'code488' => 'code488'
-            , 'code501' => 'code501'
-            , 'code483' => 'code483'
-            , 'code410' => 'code410'
-            , 'code515' => 'CCLimit'
-            , 'code486' => 'code486'
-            , 'code480' => 'code480'
-        );
-
-        if ($_SESSION['search_CarrierUsage_data']['carrier_grp_account_id'] == 'Y' && $_SESSION['search_CarrierUsage_data']['carrier_grp_calls_date'] == 'Y' && $_SESSION['search_CarrierUsage_data']['carrier_grp_dest'] == 'Y') {
-            unset($all_field_array['calls_date']);
-        }
-
-        if ($_SESSION['search_CarrierUsage_data']['carrier_grp_account_id'] == 'Y' && $_SESSION['search_CarrierUsage_data']['carrier_grp_calls_date'] == 'Y') {
-            unset($all_field_array['calls_date']);
-        } elseif ($_SESSION['search_CarrierUsage_data']['carrier_grp_account_id'] == 'Y') {
-            unset($all_field_array['calls_date']);
-            unset($all_field_array['prefix']);
-            unset($all_field_array['code515']);
-        } elseif ($_SESSION['search_CarrierUsage_data']['carrier_grp_dest'] == 'Y') {
-            unset($all_field_array['carrier_account']);
-            unset($all_field_array['prefix']);
-            unset($all_field_array['calls_date']);
-        } elseif ($_SESSION['search_CarrierUsage_data']['carrier_grp_calls_date'] == 'Y') {
-            unset($all_field_array['carrier_account']);
-            unset($all_field_array['prefix']);
-        } else {
-            
-        }
-
-
-        $is_file_downloaded = false;
-        if ($arg1 == 'export' && $format != '') {//die;
-            $format = param_decrypt($format);
-
-            $currency = '';
-            if ($_SESSION['search_CarrierUsage_data']['s_carrier_currency'] != '') {
-                if ($_SESSION['search_CarrierUsage_data']['s_carrier_currency'] == '1')
-                    $currency = 'USD';
-                elseif ($_SESSION['search_CarrierUsage_data']['s_carrier_currency'] == '2')
-                    $currency = 'GBP';
-                elseif ($_SESSION['search_CarrierUsage_data']['s_carrier_currency'] == '3')
-                    $currency = 'EUR';
-                elseif ($_SESSION['search_CarrierUsage_data']['s_carrier_currency'] == '4')
-                    $currency = 'INR';
-            }
-
-            $search_array = array();
-            if ($_SESSION['search_CarrierUsage_data']['s_carrier_account'] != '')
-                $search_array['Carrier Account'] = $_SESSION['search_CarrierUsage_data']['s_carrier_account'];
-            if ($_SESSION['search_CarrierUsage_data']['s_carrier_name'] != '')
-                $search_array['Carrier Name'] = $_SESSION['search_CarrierUsage_data']['s_carrier_name'];
-
-            if ($currency != '')
-                $search_array['Currency'] = $currency;
-            if ($_SESSION['search_CarrierUsage_data']['s_calls_date'] != '')
-                $search_array['Calls Date'] = $_SESSION['search_CarrierUsage_data']['s_calls_date'];
-
-            // column titles
-            $export_header = array();
-            foreach ($all_field_array as $field_lebel) {
-                $export_header[] = $field_lebel;
-            }
-
-            $per_page = 40000;
-            $segment = 0;
-            $response = $this->report_mod->CarrierUsage($search_data, $per_page, $segment);
-            $data['listing_data'] = $response['result'];
-            $export_data = array();
-            if (count($data['listing_data']) > 0) {
-                $export_data_temp = array('');
-                foreach ($data['listing_data'] as $listing_row) {
-                    $export_data_temp = array();
-                    foreach ($all_field_array as $field_name => $field_lebel) {
-                        $display_value = $listing_row[$field_name];
-                        if ($field_name == 'calls_date') {
-                            $display_value = date(DATE_FORMAT_1, strtotime($display_value));
-                        }
-                        $export_data_temp[] = $display_value;
-                    }
-                    $export_data[] = $export_data_temp;
-                }
-            }
-
-            $file_name = 'CarrierUsage';
-            $this->load->library('Export');
-            $downloaded_message = $this->export->download($file_name, $format, $search_array, $export_header, $export_data);
-            if (gettype($downloaded_message) == 'string')
-                $data['err_msgs'] = $downloaded_message;
-            else
-                $is_file_downloaded = true;
-        }
-        if ($is_file_downloaded === false) {
-
-            /*             * *** pagination code start here ********* */
-            $pagination_uri_segment = 3;
-            if (isset($_SESSION['search_CarrierUsage_data']['s_no_of_records']) && $_SESSION['search_CarrierUsage_data']['s_no_of_records'] != '')
-                $per_page = $_SESSION['search_CarrierUsage_data']['s_no_of_records'];
-            else
-                $per_page = RECORDS_PER_PAGE;
-
-
-            if ($this->uri->segment($pagination_uri_segment) == '') {
-                $segment = 0;
-            } else {
-                $segment = $this->uri->segment($pagination_uri_segment);
-            }
-
-            $response = $this->report_mod->CarrierUsage($search_data, $per_page, $segment);
-
-            $data['listing_data'] = $response['result'];
-
-            $totalRows = $this->report_mod->total_count;
-            $this->load->library('pagination'); // pagination class		
-            $config = array();
-            $config = $this->utils_model->setup_pagination_option($totalRows, 'reports/CarrierUsage', $per_page, $pagination_uri_segment);
-            $this->pagination->initialize($config);
-            $data['pagination'] = $this->pagination->create_links();
-
-
-            $data['logged_customer_type'] = $logged_customer_type;
-            $data['get_logged_account_level'] = $get_logged_account_level;
-
-            $data['all_field_array'] = $all_field_array;
-            $data['currency_data'] = $this->utils_model->get_currencies();
-
-            $data['total_records'] = $totalRows;
-
-            $this->load->view('basic/header', $data);
-            $this->load->view('reports/CarrierUsage', $data);
-            $this->load->view('basic/footer', $data);
-        }
-    }
-
-    function topup() {
-        //$this->output->enable_profiler(true);	
-        $page_name = "report_topup";
-        $data['page_name'] = $page_name;
-        $this->load->model('report_mod');
-
-
-
-        $logged_account_id = get_logged_account_id();
-        $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-        ////////////////////////////////////////////////
-
-
-        if (isset($_POST['search_action'])) {// coming from search button								
-            $_SESSION['search_topup_day_data']['s_time_range'] = $_POST['time_range'];
-            $_SESSION['search_topup_day_data']['s_account_id'] = $_POST['account_id'];
-            $_SESSION['search_topup_day_data']['s_account_manager'] = $_POST['account_manager'];
-        } elseif (!isset($_SESSION['search_topup_day_data']['s_time_range'])) {
-            //default date is todays date
-            $today_timestamp = strtotime("today");
-            $today = date('Y-m-d', $today_timestamp);
-
-            $lastday_stamp = $today_timestamp - 30 * 24 * 60 * 60;
-            $lastday = date('Y-m-d', $lastday_stamp);
-
-            $time_range = $lastday . ' 00:00 - ' . $today . ' 23:59';
-
-            $_SESSION['search_topup_day_data']['s_time_range'] = isset($_SESSION['search_topup_day_data']['s_time_range']) ? $_SESSION['search_topup_day_data']['s_time_range'] : $time_range;
-
-            $_SESSION['search_topup_day_data']['s_account_id'] = isset($_SESSION['search_topup_day_data']['s_account_id']) ? $_SESSION['search_topup_day_data']['s_account_id'] : '';
-            $_SESSION['search_topup_day_data']['s_account_manager'] = isset($_SESSION['search_topup_day_data']['s_account_manager']) ? $_SESSION['search_topup_day_data']['s_account_manager'] : '';
-        }
-        $search_data = array('account_id' => $_SESSION['search_topup_day_data']['s_account_id'],
-            'time_range' => $_SESSION['search_topup_day_data']['s_time_range']);
-
-
-        if (check_logged_user_group(array('RESELLER')))
-            $search_data['parent_account_id'] = $logged_account_id;
-        elseif (check_logged_user_group(array('CUSTOMER')))
-            $search_data['account_id'] = $logged_account_id;
-
-
-
-
-        $data['currency_options'] = $this->utils_model->get_currencies();
-        $report_data = $this->report_mod->topup_daily($search_data);
-
-        $data['topup_data'] = $report_data;
-
-        $this->load->view('basic/header', $data);
-        $this->load->view('reports/topup', $data);
-        $this->load->view('basic/footer', $data);
-    }
-
-    function topup_monthly() {
-        $page_name = "report_topup_monthly";
-        $data['page_name'] = $page_name;
-        $this->load->model('report_mod');
-
-        $logged_account_id = get_logged_account_id();
-        $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-        ////////////////////////////////////////////////
-
-
-        if (isset($_POST['search_action'])) {// coming from search button								
-            $_SESSION['search_topup_monthly_data']['s_account_id'] = $_POST['account_id'];
-            $_SESSION['search_topup_monthly_data']['s_account_manager'] = $_POST['account_manager'];
-        } else {
-            $_SESSION['search_topup_monthly_data']['s_account_id'] = isset($_SESSION['search_topup_monthly_data']['s_account_id']) ? $_SESSION['search_topup_monthly_data']['s_account_id'] : '';
-            $_SESSION['search_topup_monthly_data']['s_account_manager'] = isset($_SESSION['search_topup_monthly_data']['s_account_manager']) ? $_SESSION['search_topup_monthly_data']['s_account_manager'] : '';
-        }
-
-        $start_timestamp = strtotime("- 11 month");
-        $start_day = date('Y-m', $start_timestamp);
-        $start_day = $start_day . '-01 00:00:00';
-
-        $end_timestamp = strtotime("last day of this month");
-        $end_day = date('Y-m-d', $end_timestamp);
-        $end_day = $end_day . ' 23:59:59';
-
-        $time_range = $start_day . ' - ' . $end_day;
-
-        $_SESSION['search_topup_monthly_data']['s_time_range'] = $time_range;
-
-
-        $search_data = array('account_id' => $_SESSION['search_topup_monthly_data']['s_account_id'],
-            'time_range' => $_SESSION['search_topup_monthly_data']['s_time_range']);
-
-        if (check_logged_user_group(array('RESELLER')))
-            $search_data['parent_account_id'] = $logged_account_id;
-        elseif (check_logged_user_group(array('CUSTOMER')))
-            $search_data['account_id'] = $logged_account_id;
-        /////
-        //	echo '<pre>'; print_r($search_data);echo '</pre>';
-        $data['currency_options'] = $this->utils_model->get_currencies();
-        $report_data = $this->report_mod->topup_monthly($search_data);
-
-        $data['topup_data'] = $report_data;
-
-        $this->load->view('basic/header', $data);
-        $this->load->view('reports/topup_monthly', $data);
-        $this->load->view('basic/footer', $data);
-    }
-
-    function daily_sales_monthly() {
-        $page_name = "report_daily_sales_monthly";
-        $data['page_name'] = $page_name;
-        $this->load->model('report_mod');
-
-        $logged_account_id = get_logged_account_id();
-        $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-
-        if (isset($_POST['search_action'])) {
-            $_SESSION['search_sales_monthly_data']['s_account_id'] = $_POST['account_id'];
-        } else {
-            $_SESSION['search_sales_monthly_data']['s_account_id'] = isset($_SESSION['search_sales_monthly_data']['s_account_id']) ? $_SESSION['search_sales_monthly_data']['s_account_id'] : '';
-        }
-
-        $start_timestamp = strtotime("- 11 month");
-        $start_day = date('Y-m', $start_timestamp);
-        $start_day = $start_day . '-01 00:00:00';
-
-        $end_timestamp = strtotime("last day of this month");
-        $end_day = date('Y-m-d', $end_timestamp);
-        $end_day = $end_day . ' 23:59:59';
-
-        $time_range = $start_day . ' - ' . $end_day;
-
-        $_SESSION['search_sales_monthly_data']['s_cdr_record_date'] = $time_range;
-
-        $search_data = array('account_id' => $_SESSION['search_sales_monthly_data']['s_account_id'],
-            'record_date' => $_SESSION['search_sales_monthly_data']['s_cdr_record_date'],
-            'g_rec_month' => 'Y');
-
-        if (check_logged_user_group(array('RESELLER')))
-            $search_data['s_parent_account_id'] = $logged_account_id;
-        elseif (check_logged_user_group(array('CUSTOMER')))
-            $search_data['account_id'] = $logged_account_id;
-        else {
-            $search_data['s_parent_account_id'] = '';
-        }
-
-
-
-        $data['currency_options'] = $this->utils_model->get_currencies();
-        $this->load->view('basic/header', $data);
-        $this->load->view('reports/sales_monthly', $data);
-        $this->load->view('basic/footer', $data);
-    }
-
-     
-         
 }

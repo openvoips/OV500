@@ -2,7 +2,7 @@
 
 $menu_title = 'Live System Reports';
 $menu_array[$menu_title] = array(
-    'icon' => '<i class="fa  fa-chevron-down"></i>'
+    'icon' => '<i class="material-icons">call</i>'
 );
 
 if (check_account_permission('reports', 'monin')) {
@@ -19,7 +19,6 @@ if (check_account_permission('reports', 'livecall')) {
         'menu_name' => 'Live Call'
     );
 }
-
 
 if (check_account_permission('reports', 'CustQOSR')) {
     $menu_array[$menu_title]['reports/CustQOSR'] = array(
@@ -38,12 +37,21 @@ if (check_account_permission('reports', 'CarrQOSR')) {
 }
 
 
-////////////////////	
+
+ $menu_array[$menu_title]['causesummary'] = array(
+        'page_name' => array('causesummary'),
+        'page_url' => 'report/causesummary',
+        'menu_name' => 'Cause Summary'
+    );
+
+
+
+
+
 $menu_title = 'Rates & Package';
 $menu_array[$menu_title] = array(
-    'icon' => '<i class="fa fa-registered"></i>'
+    'icon' => '<i class="material-icons">price_check</i>'
 );
-
 
 // For All type User if they have Rate, Tariff and Ratecard management access
 if (check_account_permission('ratecard', 'view')) {
@@ -68,32 +76,25 @@ if (check_account_permission('tariff', 'view')) {
     );
 }
 if (check_account_permission('bundle', 'view')) {
+    /*
     $menu_array[$menu_title]['bundle'] = array(
         'page_name' => array('bundle', 'bundle_index', 'bundle_add', 'bundle_edit'),
         'page_url' => 'bundle',
-        'menu_name' => 'Bundle & Pachage'
-    );
+        'menu_name' => 'Package'
+    );*/
 }
 
 //////////////////////
 
 $menu_title = 'Routing Management';
 $menu_array[$menu_title] = array(
-    'icon' => '<i class="fa fa-exchange"></i>'
+    'icon' => '<i class="material-icons">directions</i>'
 );
 
-
-if (check_logged_user_type(array('ADMIN', 'SUBADMIN'))) {
-$menu_array[$menu_title]['providers'] = array(
-    'page_name' => array('provider_index', 'provider_add', 'provider_edit'),
-    'page_url' => 'providers',
-    'menu_name' => 'Provider'
-);
-}
 if (check_account_permission('carrier', 'view')) {
 
     $menu_array[$menu_title]['carriers'] = array(
-        'page_name' => array('carrier_index', 'carrier_edit', 'carrier_add', 'carrier_editG', 'carrier_addG', 'carrier_editSRCNo', 'carrier_editDSTNo', 'carrier_editINSRCNo', 'carrier_editINDSTNo'),
+        'page_name' => array('diversion_edit', 'diversion_bulkadd', 'diversion_add', 'diversion', 'carrier_index', 'carrier_edit', 'carrier_add', 'carrier_editG', 'carrier_addG', 'carrier_editSRCNo', 'carrier_editDSTNo', 'carrier_editINSRCNo', 'carrier_editINDSTNo'),
         'page_url' => 'carriers',
         'menu_name' => 'Carriers'
     );
@@ -120,7 +121,7 @@ if (check_logged_user_type(array('ADMIN', 'SUBADMIN'))) {
     $menu_array[$menu_title]['dids'] = array(
         'page_name' => array('did_index', 'did_add', 'did_edit'),
         'page_url' => 'dids',
-        'menu_name' => 'Direct Inward dialing'
+        'menu_name' => 'Incoming Numbers (DID)'
     );
 }
 
@@ -132,7 +133,7 @@ if (check_logged_user_type(array('ADMIN', 'SUBADMIN'))) {
 
 $menu_title = 'User Management';
 $menu_array[$menu_title] = array(
-    'icon' => '<i class="fa fa-user"></i>'
+    'icon' => '<i class="material-icons">person_outline</i>'
 );
 
 if (check_account_permission('user', 'view')) {
@@ -147,60 +148,49 @@ if (check_account_permission('user', 'view')) {
 //////////////////////
 $menu_title = 'Call Detail Reports';
 $menu_array[$menu_title] = array(
-    'icon' => '<i class="fa fa-plus-square"></i>'
+    'icon' => '<i class="material-icons">widgets</i>'
 );
 
 if (check_account_permission('reports', 'cdr')) {
 
-    $menu_array[$menu_title]['reports/AnsCalls'] = array(
-        'page_name' => array('cdr_index'),
-        'page_url' => 'reports/AnsCalls',
-        'menu_name' => 'Connected Calls'
+    $menu_array[$menu_title]['reports/Calls'] = array(
+        'page_name' => array('calls'),
+        'page_url' => 'reports/Calls',
+        'menu_name' => 'CDR'
     );
 }
 
-if (check_account_permission('reports', 'fail_calls')) {
-    $menu_array[$menu_title]['reports/FailCalls'] = array(
-        'page_name' => array('report_failed'),
-        'page_url' => 'reports/FailCalls',
-        'menu_name' => 'Failed Calls'
-    );
-}
+
 
 ///////////////////////
 // Invoice And Customer Random CLI Features
 $menu_title = 'Business Report';
 $menu_array[$menu_title] = array(
-    'icon' => '<i class="fa fa-bar-chart"></i>'
+    'icon' => '<i class="material-icons">summarize</i>'
 );
 
-
-
-$menu_array[$menu_title]['reports/ProfitLoss'] = array(
-    'page_name' => array('ProfitLoss'),
-    'page_url' => 'reports/ProfitLoss',
-    'menu_name' => 'Tarffic Profit & Loss'
-);
-
-
-
-
-
-
+//////////////////////
 // Admin/ Subadmin  system management
 
 $menu_title = 'System & Services';
 $menu_array[$menu_title] = array(
-    'icon' => '<i class="fa fa-gear"></i>'
+    'icon' => '<i class="material-icons">settings</i>'
 );
 
 $menu_array[$menu_title]['currency'] = array(
-    'page_name' => array('Currency', 'currency_add'),
-    'page_url' => 'currency',
+    'page_name' => array('Currency', 'currency_add', 'Currencyexc'),
+    'page_url' => 'currency/exc',
     'menu_name' => 'Currency & Exchange Rate'
 );
-
-
-
-
+	
+	$menu_array[$menu_title]['blockcli'] = array(
+        'page_name' => array('blockcli_number','add_blockcli_number'),
+        'page_url' => 'blockcli',
+        'menu_name' => 'Blocked CLI'
+    );
+    $menu_array[$menu_title]['blocknumbers'] = array(
+        'page_name' => array('blocknumbers_number','add_blocknumbers_number'),
+        'page_url' => 'blocknumbers',
+        'menu_name' => 'DNC Numbers'
+    );
 ?>

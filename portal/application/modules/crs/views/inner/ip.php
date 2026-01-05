@@ -1,8 +1,3 @@
-<?php 
-//echo '<pre>';
-//print_r($accountinfo);
-//echo '</pre>';
-?>
 <table class="table table-striped jambo_table table-bordered">
     <thead>
         <tr class="headings thc">
@@ -39,8 +34,7 @@
 
                 <?php
             }
-        }
-        else {
+        } else {
             ?>
             <tr>
                 <td colspan="5" align="center"><strong>No Record Found</strong></td>
@@ -48,10 +42,10 @@
             <?php
         }
         ?>
-
-
     </tbody>
 </table>
 <div class="col-md-12 col-sm-12 col-xs-12 text-right">
     <a href="<?php echo base_url('crs'); ?>/ipAdd/<?php echo param_encrypt($accountinfo['account_id']); ?>/<?php echo $key ?>" ><input type="button" value="Add IP User" name="add_link" class="btn btn-primary"></a>
 </div>
+
+<br><br>

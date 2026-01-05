@@ -61,7 +61,7 @@
                 </select>
             </div>
         </div>   
-        <div class="form-group" id="id_state_div">
+        <div class="form-group hide" id="id_state_div">
             <label class="control-label col-md-4 col-sm-3 col-xs-12" >State </label>
             <div class="col-md-7 col-sm-6 col-xs-12">
                 <select name="state_code_id" id="state_code_id" class="form-control" >
@@ -105,12 +105,12 @@
 
     <div class="ln_solid"></div>
     <div class="form-group">
-        <div class="col-md-12 col-sm-12 col-xs-12 text-right">
+        <div class="col-md-12 col-sm-12 col-xs-12 text-center">
             <?php if (check_account_permission('reseller', 'edit')): ?>	
-                   <button type="button" id="<?php echo 'btnSaveClose'.$key;?>" class="btn btn-info" onclick="save_button('<?php echo $key;?>')">Save</button>
-                <!--                                            <button type="button" id="btnSaveClose3" class="btn btn-info"  >Save & Go Back to Listing Page</button>-->
+                   <button type="button" id="<?php echo 'btnSaveClose'.$key;?>" class="btn btn-info" onclick="save_button('<?php echo $key;?>')">Save Contact Detail</button>
+                
             <?php endif; ?>
         </div>
     </div>
-
+    <br>
 </form>

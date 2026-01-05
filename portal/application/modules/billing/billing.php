@@ -1,16 +1,11 @@
 <?php
-
 /**
- * Plugin Name: Billing & Invoice Management
- * Plugin URI: http://openvoips.org/
- * Version: 1.0
- * Description: Billing & Invoice basic module. Full billing inviceing features available in pro version.
- * Author: Seema Anand  openvoips@gmail.com
- * Author URI: http://openvoips.org/
- */
-?>
-<?php
-
+* Plugin Name: Billing Module
+* Plugin URI: http://openvoips.org/
+* Version: 1.0
+* Description: Billing Module provides all type of recurring billing solution.
+* Author: Seema Anand
+*/
 function plugin_Billingt_install() {
     $ci = & get_instance();
     $sql1 = "CREATE TABLE  IF NOT EXISTS `bill_account_sdr` (
@@ -130,28 +125,7 @@ function plugin_Billingt_install() {
         $error_array = $ci->db->error();
         return $error_array['message'];
     }
-    $sql5 = "CREATE TABLE `bill_customerpricelist` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `customer_account_id` varchar(30) DEFAULT NULL,
-  `price_id` varchar(30) DEFAULT NULL,
-  `item_id` varchar(30) NOT NULL,
-  `quantity` int(11) DEFAULT NULL,
-  `account_id` varchar(30) NOT NULL,
-  `record_type` enum('rate','fixcharge') DEFAULT 'rate',
-  `created_by` varchar(30) NOT NULL,
-  `updated_by` varchar(30) NOT NULL,
-  `created_dt` datetime NOT NULL,
-  `updated_dt` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `price_id` (`item_id`,`customer_account_id`,`record_type`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPACT;
-";
-
-    $query5 = $ci->db->query($sql5);
-    if (!$query5) {
-        $error_array = $ci->db->error();
-        return $error_array['message'];
-    }
+  
     $sql6 = "CREATE TABLE `bill_email_templates` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` varchar(30) DEFAULT NULL,
@@ -261,111 +235,8 @@ function plugin_Billingt_install() {
         return $error_array['message'];
     }
 
-    $sql10 = "CREATE TABLE `bill_pricelist` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `price_id` varchar(30) DEFAULT NULL,
-  `item_id` varchar(30) NOT NULL,
-  `currency_id` varchar(30) DEFAULT '',
-  `description` varchar(250) NOT NULL,
-  `reguler_charges` enum('EMA','EME','NA') DEFAULT 'NA',
-  `free_item` int(4) DEFAULT NULL,
-  `charges` double(20,10) DEFAULT 0.0000000000,
-  `additional_charges_as` enum('SE','NA') DEFAULT 'NA',
-  `additional_charges` double(20,10) DEFAULT 0.0000000000,
-  `account_id` varchar(30) NOT NULL,
-  `created_by` varchar(30) NOT NULL,
-  `updated_by` varchar(30) NOT NULL,
-  `created_dt` datetime NOT NULL,
-  `updated_dt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `price_id` (`price_id`,`account_id`,`currency_id`,`item_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPACT;
-";
+     
 
-
-
-    $query10 = $ci->db->query($sql0);
-    if (!$query10) {
-        $error_array = $ci->db->error();
-        return $error_array['message'];
-    }
-
-
-
-    $sql11 = "  CREATE TABLE `bill_pricelist_customer` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `customer_account_id` varchar(30) DEFAULT NULL,
-  `price_id` varchar(30) DEFAULT NULL,
-  `item_id` varchar(30) NOT NULL,
-  `currency_id` varchar(30) DEFAULT '',
-  `description` varchar(250) NOT NULL,
-  `reguler_charges` enum('EMA','EME','NA') DEFAULT 'NA',
-  `free_item` int(4) DEFAULT NULL,
-  `charges` double(20,10) DEFAULT 0.0000000000,
-  `additional_charges_as` enum('SE','NA') DEFAULT 'NA',
-  `additional_charges` double(20,10) DEFAULT 0.0000000000,
-  `account_id` varchar(30) NOT NULL,
-  `created_by` varchar(30) NOT NULL,
-  `updated_by` varchar(30) NOT NULL,
-  `created_dt` datetime NOT NULL,
-  `updated_dt` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `price_id` (`price_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPACT;
-
-    
-    ";
-
-    $query11 = $ci->db->query($sql11);
-    if (!$query11) {
-        $error_array = $ci->db->error();
-        return $error_array['message'];
-    }
-
-    $sql12 = "   CREATE TABLE `bill_priceplan` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `priceplan_id` varchar(20) NOT NULL,
-  `priceplan_name` varchar(250) NOT NULL,
-  `account_id` varchar(30) NOT NULL,
-  `created_by` varchar(30) NOT NULL,
-  `updated_by` varchar(30) NOT NULL,
-  `created_dt` datetime NOT NULL,
-  `updated_dt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `currency_id` varchar(30) DEFAULT NULL,
-  `status` enum('0','1') DEFAULT '1',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `price_plan_id` (`priceplan_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPACT;
-    ";
-
-    $query12 = $ci->db->query($sql12);
-    if (!$query12) {
-        $error_array = $ci->db->error();
-        return $error_array['message'];
-    }
-
-
-    $sql13 = "  CREATE TABLE `bill_priceplan_item` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `priceplan_item_id` varchar(20) NOT NULL,
-  `priceplan_id` varchar(20) NOT NULL,
-  `item_id` varchar(20) NOT NULL,
-  `price_id` varchar(20) NOT NULL,
-  `account_id` varchar(30) NOT NULL,
-  `created_by` varchar(30) NOT NULL,
-  `updated_by` varchar(30) NOT NULL,
-  `created_dt` datetime NOT NULL,
-  `updated_dt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `price_plan_item_id` (`priceplan_item_id`) USING BTREE,
-  UNIQUE KEY `itemplan_key` (`priceplan_id`,`item_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPACT;";
-
-    $query13 = $ci->db->query($sql13);
-    if (!$query13) {
-        $error_array = $ci->db->error();
-        return $error_array['message'];
-    }
 
 
     $sql14 = "  CREATE TABLE `bill_smtp_config` (

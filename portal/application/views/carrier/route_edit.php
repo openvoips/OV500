@@ -1,29 +1,19 @@
 <script src="<?php echo base_url() ?>theme/vendors/parsleyjs/dist/parsley.min.js"></script>
 
-<div class="">
-    <div class="clearfix"></div>    
-    <div class="col-md-12 col-sm-12 col-xs-12 right">    
-        <div class="x_title">
-            <h2>Route Configuration Management</h2>
-            <ul class="nav navbar-right panel_toolbox">     
-                <li><a href="<?php echo base_url('routes') ?>"><button class="btn btn-danger" type="button" >Back to Dial Route(s) Listing Page</button></a> </li>
-            </ul>
-            <div class="clearfix"></div>
-        </div>
 
+<div class="container-fluid">
+    <div class="block-header">
+        <h2>Route(EDIT) Configuration</h2>
+        <ul class="nav navbar-right panel_toolbox">
+            <li><a href="<?php echo base_url('routes') ?>"><button class="btn btn-primary" type="button" >Back to Dial Route(s) Listing Page</button></a> </li>
+        </ul>
     </div>
-    <div class="row">
-        <div class="col-md-12 col-sm-12 col-xs-12">
-            <div class="x_panel">
-                <div class="x_title">
-                    <h2>Dial Routes Management(EDIT)</h2>
-                    <ul class="nav navbar-right panel_toolbox">
+    <div class="row clearfix">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="card">
+                <div class="header">
 
-                    </ul>
-                    <div class="clearfix"></div>
-                </div>
-                <div class="x_content">
-                    <br />         
+
                     <form action="<?php echo base_url(); ?>routes/editR/<?php echo param_encrypt($data['dialplan_id']); ?>" method="post" name="edit_form" id="edit_form" data-parsley-validate class="form-horizontal form-label-left">
                         <input type="hidden" name="button_action" id="button_action" value="">
                         <input type="hidden" name="action" value="OkSaveData">    
@@ -57,9 +47,9 @@
                             <label for="middle-name" class="control-label col-md-4 col-sm-6 col-xs-12">Status</label>
                             <div class="col-md-6 col-sm-6 col-xs-12">
                                 <div class="radio">
-                                    <label><input type="radio" name="frm_status" id="status1" value="1"  <?php if ($data['dialplan_status'] == 1) { ?> checked="checked" <?php } ?> /> Active</label>
+                                    <input type="radio" class="with-gap"  name="frm_status" id="status1" value="1"  <?php if ($data['dialplan_status'] == 1) { ?> checked="checked" <?php } ?> /> <label for="status1">Active</label>
 
-                                    <label> <input type="radio" name="frm_status" id="status0" value="0" <?php if ($data['dialplan_status'] == 0) { ?> checked="checked" <?php } ?> /> Inactive</label>
+                                    <input type="radio"  class="with-gap" name="frm_status" id="status0" value="0" <?php if ($data['dialplan_status'] == 0) { ?> checked="checked" <?php } ?> /> <label for="status0">Inactive</label>
                                 </div>                     
                             </div>
                         </div>
@@ -77,16 +67,11 @@
         </div>
     </div>
 
-    <div class="col-md-12 col-sm-12 col-xs-12 right">
-        <div class="ln_solid"></div>
-        <div class="x_title">
-            <h2>Route Configuration Management</h2>
-            <ul class="nav navbar-right panel_toolbox">     
-                <li><a href="<?php echo base_url('routes') ?>"><button class="btn btn-danger" type="button" >Back to Dial Route(s) Listing Page</button></a> </li>
-            </ul>
-            <div class="clearfix"></div>
-        </div>
-
+    <div class="block-header">
+        <h2>Route(EDIT) Configuration</h2>
+        <ul class="nav navbar-right panel_toolbox">
+            <li><a href="<?php echo base_url('routes') ?>"><button class="btn btn-primary" type="button" >Back to Dial Route(s) Listing Page</button></a> </li>
+        </ul>
     </div>
 </div>    
 <script>

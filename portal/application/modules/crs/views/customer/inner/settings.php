@@ -1,10 +1,13 @@
-
+<?php
+$tab_index = 0;
+?>
 <form action="" method="post" name="<?php echo 'tab_form_' . $key; ?>" id="<?php echo 'tab_form_' . $key; ?>" data-parsley-validate class="form-horizontal form-label-left">
     <input type="hidden" name="button_action" id="button_action2" value="">
-<input type="hidden" name="tab" value="<?php echo $key;?>">
+    <input type="hidden" name="tab" value="<?php echo $key; ?>">
     <input type="hidden" name="action" value="OkSaveData">
     <input type="hidden" name="account_id" value="<?php echo $data['account_id']; ?>"/>
 
+    <input type="hidden" name="codecs_force" value="0"> 
     <div class="form-group">
         <label class="control-label col-md-4 col-sm-3 col-xs-12" >Account Code</label>
         <div class="col-md-7 col-sm-6 col-xs-12 pad8">
@@ -133,17 +136,7 @@
         </div>
     </div>
 
-    <div class="form-group">
-        <label class="control-label col-md-4 col-sm-3 col-xs-12">Codecs Checking</label>
-        <div class="col-md-7 col-sm-6 col-xs-12">
-            <div class="radio">
-                <label><input type="radio" name="codecs_force" id="codecs_force1" value="1" <?php if ($data['codecs_force'] == 1) { ?> checked="checked" <?php } ?>  /> Yes</label>
 
-                <label> <input type="radio" name="codecs_force" id="codecs_force2" value="0" <?php if ($data['codecs_force'] == 0) { ?> checked="checked" <?php } ?>  /> No</label>
-            </div>
-
-        </div>
-    </div>
 
     <?php
     $codecs_array = array('G729', 'PCMU', 'PCMA', 'G722');
@@ -157,9 +150,7 @@
                     $checked = 'checked="checked"';
                 else
                     $checked = '';
-                echo '<div class="checkbox">' .
-                '<label><input type="checkbox" name="codecs[]" id="codec' . $key . '" value="' . $codec . '" tabindex="' . $tab_index++ . '" ' . $checked . '/> ' . $codec . '</label>' .
-                '</div>';
+                echo '<input type="checkbox" name="codecs[]" id="codec' . $key . '" value="' . $codec . '" tabindex="' . $tab_index++ . '" ' . $checked . '/> <label for="codec' . $key . '">' . $codec . '</label>';
             }
             ?>
             <label>Only possible if G729 codec is installed in system.</label>
@@ -170,9 +161,9 @@
         <label for="middle-name" class="control-label col-md-4 col-sm-3 col-xs-12">Call With Media</label>
         <div class="col-md-7 col-sm-6 col-xs-12">
             <div class="radio">
-                <label><input type="radio" name="media_rtpproxy" id="media_rtpproxy1" value="1" <?php if ($data['media_rtpproxy'] == 1) { ?> checked="checked" <?php } ?>  /> Yes</label>
+                <input  class="with-gap"  type="radio" name="media_rtpproxy" id="media_rtpproxy1" value="1" <?php if ($data['media_rtpproxy'] == 1) { ?> checked="checked" <?php } ?>  /><label for="media_rtpproxy1"> Yes</label>
 
-                <label> <input type="radio" name="media_rtpproxy" id="media_rtpproxy2" value="0" <?php if ($data['media_rtpproxy'] == 0) { ?> checked="checked" <?php } ?>  /> No</label>
+                <input  class="with-gap"  type="radio" name="media_rtpproxy" id="media_rtpproxy2" value="0" <?php if ($data['media_rtpproxy'] == 0) { ?> checked="checked" <?php } ?>  /> <label for="media_rtpproxy2">No</label>
             </div>
 
         </div>
@@ -182,9 +173,9 @@
         <label for="middle-name" class="control-label col-md-4 col-sm-3 col-xs-12">Codecs Transcoding</label>
         <div class="col-md-7 col-sm-6 col-xs-12">
             <div class="radio">
-                <label><input type="radio" name="media_transcoding" id="media_transcoding1" value="1" <?php if ($data['media_transcoding'] == 1) { ?> checked="checked" <?php } ?>  /> Yes</label>
+                <input  class="with-gap"  type="radio" name="media_transcoding" id="media_transcoding1" value="1" <?php if ($data['media_transcoding'] == 1) { ?> checked="checked" <?php } ?>  /> <label for="media_transcoding1">Yes</label>
 
-                <label> <input type="radio" name="media_transcoding" id="media_transcoding2" value="0" <?php if ($data['media_transcoding'] == 0) { ?> checked="checked" <?php } ?>  /> No</label>
+                <input  class="with-gap"  type="radio" name="media_transcoding" id="media_transcoding2" value="0" <?php if ($data['media_transcoding'] == 0) { ?> checked="checked" <?php } ?>  /> <label for="media_transcoding2">No</label>
             </div>
 
         </div>
@@ -194,9 +185,9 @@
         <label class="control-label col-md-4 col-sm-3 col-xs-12">Change CLI Based On DST Prefix</label>
         <div class="col-md-7 col-sm-6 col-xs-12">
             <div class="radio">
-                <label><input type="radio" name="force_dst_src_cli_prefix" id="force_dst_src_cli_prefix1" value="1" <?php if ($data['force_dst_src_cli_prefix'] == 1) { ?> checked="checked" <?php } ?>  /> Yes</label>
+                <input  class="with-gap"  type="radio" name="force_dst_src_cli_prefix" id="force_dst_src_cli_prefix1" value="1" <?php if ($data['force_dst_src_cli_prefix'] == 1) { ?> checked="checked" <?php } ?>  /><label for="force_dst_src_cli_prefix1"> Yes</label>
 
-                <label> <input type="radio" name="force_dst_src_cli_prefix" id="force_dst_src_cli_prefix2" value="0" <?php if ($data['force_dst_src_cli_prefix'] == 0) { ?> checked="checked" <?php } ?>  /> No</label>
+                <input  class="with-gap"  type="radio" name="force_dst_src_cli_prefix" id="force_dst_src_cli_prefix2" value="0" <?php if ($data['force_dst_src_cli_prefix'] == 0) { ?> checked="checked" <?php } ?>  /> <label for="force_dst_src_cli_prefix2">No</label>
             </div>
 
         </div>
@@ -213,14 +204,14 @@
     $logged_account_type = get_logged_user_type();
     $account_status = $data['status_id'];
     $status_update_options_array = array();
-    $status_update_options_array['ADMIN'] = $status_update_options_array['SUBADMIN'] = array(
+$status_update_options_array['RESELLERADMIN'] =    $status_update_options_array['ADMIN'] = $status_update_options_array['SUBADMIN'] = array(
         '-1' => array(),
         '1' => array(0, -2, -3),
         '0' => array(),
         '-2' => array(0, 1, -3),
         '-3' => array(0, -2, 1),
     );
-    $status_update_options_array['CREDITCONTROL'] = array(
+    $status_update_options_array['ACCOUNTMANAGER'] = array(
         '-1' => array(1),
         '1' => array(0, -2, -3),
         '0' => array(),
@@ -263,7 +254,7 @@
                     }
                     ?>
                     <div class="col-md-12 col-sm-6 col-xs-12 radio1">
-                        <label><input type="radio" name="status_id" id="status<?php echo $status_value; ?>" value="<?php echo $status_value; ?>" <?php echo $checked; ?>   /> <?php echo $status_name; ?></label>
+                        <input  class="with-gap"  type="radio" name="status_id" id="status<?php echo $status_value; ?>" value="<?php echo $status_value; ?>" <?php echo $checked; ?>   /> <label for="status<?php echo $status_value; ?>"><?php echo $status_name; ?></label>
                         <?php
                         if ($tooltip != '')
                             echo '<a href="#" data-toggle="tooltip" data-placement="top" title="' . $tooltip . '"><i class="fa fa-question-circle"></i></a>';
@@ -282,15 +273,14 @@
                 }
                 ?>
                 <div class="col-md-12 col-sm-6 col-xs-12 radio1">
-                    <label><input type="radio" name="status_id" id="status<?php echo $account_status; ?>" value="<?php echo $account_status; ?>"  checked="checked"   /> <?php echo $status_name; ?></label>
+                    <input  class="with-gap"  type="radio" name="status_id" id="status<?php echo $account_status; ?>" value="<?php echo $account_status; ?>"  checked="checked"   /><label for="status<?php echo $account_status; ?>"> <?php echo $status_name; ?></label>
                     <?php
                     if ($tooltip != '')
                         echo '<a href="#" data-toggle="tooltip" data-placement="top" title="' . $tooltip . '"><i class="fa fa-question-circle"></i></a>';
                     ?>
                 </div>
                 <?php
-            }
-            else {
+            } else {
                 if (isset($status_name_array[$account_status])) {
                     $status_name = $status_name_array[$account_status]['name'];
                     $tooltip = $status_name_array[$account_status]['tooltip'];
@@ -298,7 +288,7 @@
                     $status_name = $account_status;
                     $tooltip = '';
                 }
-                echo '<div class="col-md-12 col-sm-6 col-xs-12 radio""><label>' . $status_name . '</label> ';
+                echo '<div class="col-md-12 col-sm-6 col-xs-12 radio""><label for="' . $status_name . '">' . $status_name . '</label> ';
                 if ($tooltip != '')
                     echo '<a href="#" data-toggle="tooltip" data-placement="top" title="' . $tooltip . '" ><i class="fa fa-question-circle"></i></a>';
                 echo '<input type="hidden" name="status_id" id="status1" value="' . $account_status . '" /></div>';
@@ -312,9 +302,9 @@
         <label class="control-label col-md-4 col-sm-3 col-xs-12">Allow IP Config to Customer</label>
         <div class="col-md-7 col-sm-6 col-xs-12">
             <div class="radio">
-                <label><input type="radio" name="view_ipdevices" id="codecs_force1" value="1" <?php if ($data['view_ipdevices'] == 1) { ?> checked="checked" <?php } ?>  /> Yes</label>
+                <input  class="with-gap"  type="radio" name="view_ipdevices" id="view_ipdevices1" value="1" <?php if ($data['view_ipdevices'] == 1) { ?> checked="checked" <?php } ?>  /> <label for="view_ipdevices1">Yes</label>
 
-                <label> <input type="radio" name="view_ipdevices" id="codecs_force2" value="0" <?php if ($data['view_ipdevices'] == 0) { ?> checked="checked" <?php } ?>  /> No</label>
+                <input  class="with-gap"  type="radio" name="view_ipdevices" id="view_ipdevices2" value="0" <?php if ($data['view_ipdevices'] == 0) { ?> checked="checked" <?php } ?>  /><label for="view_ipdevices2"> No</label>
             </div>
 
         </div>
@@ -325,9 +315,9 @@
         <label class="control-label col-md-4 col-sm-3 col-xs-12">Allow SIP User Config to Customer</label>
         <div class="col-md-7 col-sm-6 col-xs-12">
             <div class="radio">
-                <label><input type="radio" name="view_sipdevice" id="codecs_force1" value="1" <?php if ($data['view_sipdevice'] == 1) { ?> checked="checked" <?php } ?>  /> Yes</label>
+                <input  class="with-gap"  type="radio" name="view_sipdevice" id="view_sipdevice1" value="1" <?php if ($data['view_sipdevice'] == 1) { ?> checked="checked" <?php } ?>  /> <label for="view_sipdevice1">Yes</label>
 
-                <label> <input type="radio" name="view_sipdevice" id="codecs_force2" value="0" <?php if ($data['view_sipdevice'] == 0) { ?> checked="checked" <?php } ?>  /> No</label>
+                <input  class="with-gap"  type="radio" name="view_sipdevice" id="view_sipdevice2" value="0" <?php if ($data['view_sipdevice'] == 0) { ?> checked="checked" <?php } ?>  /><label for="view_sipdevice2"> No</label>
             </div>
 
         </div>
@@ -338,9 +328,9 @@
         <label class="control-label col-md-4 col-sm-3 col-xs-12">Allow CallerID Rule Config to Customer</label>
         <div class="col-md-7 col-sm-6 col-xs-12">
             <div class="radio">
-                <label><input type="radio" name="view_src_out" id="codecs_force1" value="1" <?php if ($data['view_src_out'] == 1) { ?> checked="checked" <?php } ?>  /> Yes</label>
+                <input  class="with-gap"   type="radio" name="view_src_out" id="view_src_out1" value="1" <?php if ($data['view_src_out'] == 1) { ?> checked="checked" <?php } ?>  /> <label for="view_src_out1">Yes</label>
 
-                <label> <input type="radio" name="view_src_out" id="codecs_force2" value="0" <?php if ($data['view_src_out'] == 0) { ?> checked="checked" <?php } ?>  /> No</label>
+                <input  class="with-gap"  type="radio" name="view_src_out" id="view_src_out2" value="0" <?php if ($data['view_src_out'] == 0) { ?> checked="checked" <?php } ?>  /><label for="view_src_out2"> No</label>
             </div>
 
         </div>
@@ -351,9 +341,9 @@
         <label class="control-label col-md-4 col-sm-3 col-xs-12">Allow Dialed No. Rule Config to Customer</label>
         <div class="col-md-7 col-sm-6 col-xs-12">
             <div class="radio">
-                <label><input type="radio" name="view_dst_out" id="codecs_force1" value="1" <?php if ($data['view_dst_out'] == 1) { ?> checked="checked" <?php } ?>  /> Yes</label>
+                <input  class="with-gap"  type="radio" name="view_dst_out" id="view_dst_out1" value="1" <?php if ($data['view_dst_out'] == 1) { ?> checked="checked" <?php } ?>  /> <label for="view_dst_out1">Yes</label>
 
-                <label> <input type="radio" name="view_dst_out" id="codecs_force2" value="0" <?php if ($data['view_dst_out'] == 0) { ?> checked="checked" <?php } ?>  /> No</label>
+                <input  class="with-gap"  type="radio" name="view_dst_out" id="view_dst_out2" value="0" <?php if ($data['view_dst_out'] == 0) { ?> checked="checked" <?php } ?>  /> <label for="view_dst_out2">No</label>
             </div>
 
         </div>
@@ -364,9 +354,9 @@
         <label class="control-label col-md-4 col-sm-3 col-xs-12">Allow CallerID Rule Config for DID call to Customer</label>
         <div class="col-md-7 col-sm-6 col-xs-12">
             <div class="radio">
-                <label><input type="radio" name="view_src_did" id="codecs_force1" value="1" <?php if ($data['view_src_did'] == 1) { ?> checked="checked" <?php } ?>  /> Yes</label>
+                <input  class="with-gap"  type="radio" name="view_src_did" id="view_src_did1" value="1" <?php if ($data['view_src_did'] == 1) { ?> checked="checked" <?php } ?>  /> <label for="view_src_did1">Yes</label>
 
-                <label> <input type="radio" name="view_src_did" id="codecs_force2" value="0" <?php if ($data['view_src_did'] == 0) { ?> checked="checked" <?php } ?>  /> No</label>
+                <input  class="with-gap"  type="radio" name="view_src_did" id="view_src_did2" value="0" <?php if ($data['view_src_did'] == 0) { ?> checked="checked" <?php } ?>  /> <label for="view_src_did2">No</label>
             </div>
 
         </div>
@@ -376,25 +366,26 @@
         <label class="control-label col-md-4 col-sm-3 col-xs-12">Allow DID No. Rule Config to Customer</label>
         <div class="col-md-7 col-sm-6 col-xs-12">
             <div class="radio">
-                <label><input type="radio" name="view_dst_did" id="codecs_force1" value="1" <?php if ($data['view_dst_did'] == 1) { ?> checked="checked" <?php } ?>  /> Yes</label>
+                <input  class="with-gap"  type="radio" name="view_dst_did" id="view_dst_did1" value="1" <?php if ($data['view_dst_did'] == 1) { ?> checked="checked" <?php } ?>  /><label for="view_dst_did1"> Yes</label>
 
-                <label> <input type="radio" name="view_dst_did" id="codecs_force2" value="0" <?php if ($data['view_dst_did'] == 0) { ?> checked="checked" <?php } ?>  /> No</label>
+                <input  class="with-gap"  type="radio" name="view_dst_did" id="view_dst_did2" value="0" <?php if ($data['view_dst_did'] == 0) { ?> checked="checked" <?php } ?>  /> <label for="view_dst_did2">No</label>
             </div>
 
         </div>
     </div>
-    
-    
-    
+
+
+
 
     <div class="ln_solid"></div>
     <div class="form-group">
-        <div class="col-md-12 col-sm-6 col-xs-12 text-right">
+        <div class="col-md-12 col-sm-6 col-xs-12 text-center">
             <?php if (check_account_permission('customer', 'edit')): ?>	
-                 <button type="button" id="<?php echo 'btnSaveClose'.$key;?>" class="btn btn-info" onclick="save_button('<?php echo $key;?>')">Save</button>
-<!--                <button type="button" id="btnSaveClose2" class="btn btn-info"  >Save & Go Back to Listing Page</button>-->
+                <button type="button" id="<?php echo 'btnSaveClose' . $key; ?>" class="btn btn-info" onclick="save_button('<?php echo $key; ?>')">Save Settings</button>
+
             <?php endif; ?>
         </div>
     </div>
+    <br>
 
 </form>

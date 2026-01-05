@@ -1,0 +1,1 @@
+/usr/bin/c++ -O3 -DNDEBUG  -lodbc -lodbcinst -rdynamic CMakeFiles/my_crash.dir/my_crash.c.o -o my_crash  -Wl,-rpath,"\$ORIGIN" -lodbc -lodbcinst -lodbcinst ../lib/libmyodbc-util.a -lodbcinst 

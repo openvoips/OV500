@@ -1,28 +1,18 @@
-<div class="">
-    <div class="clearfix"></div>    
-    <div class="col-md-12 col-sm-12 col-xs-12 right">
-        <div class="x_title">
-            <h2>Ratecard Configuration Management</h2>
-            <ul class="nav navbar-right panel_toolbox">     
-                <li><a href="<?php echo base_url('ratecard') ?>"><button class="btn btn-danger" type="button" >Back to Ratecard Listing Page</button></a> </li>
-            </ul>
-            <div class="clearfix"></div>
-        </div>
-
+<div class="container-fluid">
+    <div class="block-header">
+        <h2>Ratecard Configuration Management</h2>
+        <ul class="nav navbar-right panel_toolbox">
+            <li><a href="<?php echo base_url('ratecard') ?>"><input class="btn btn-primary" type="button" value="Back to Ratecard Listing Page" name="add_link" class="btn btn-primary"></a></li>
+        </ul>
     </div>
-    <div class="row">
-        <div class="col-md-6 col-sm-12 col-xs-12">
-            <div class="row">
-                <div class="col-md-12 col-sm-12 col-xs-12">
-                    <div class="x_panel">
-                        <div class="x_title">
-                            <h2>Upload Rates</h2>
-                            <ul class="nav navbar-right panel_toolbox">
+    <div class="row clearfix">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="card">
+                <div class="header">
 
-                            </ul>
-                            <div class="clearfix"></div>
-                        </div>
-                        <div class="x_content">
+                    <div class="row col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <h2 style="margin-bottom: 10px;">Update Rate</h2>
                             <form action="<?php echo base_url(); ?>ratecard/editRC/<?php echo param_encrypt($data['ratecard_id']); ?>" method="post" name="upload_form" id="upload_form" data-parsley-validate class="form-horizontal form-label-left" enctype="multipart/form-data">
                                 <input type="hidden" name="button_action" id="button_action" value="">
                                 <input type="hidden" name="action" value="OkUploadData">    
@@ -98,7 +88,7 @@
                                     <label class="control-label col-md-4 col-sm-3 col-xs-12">Delete Existing Rates</label>
                                     <div class="col-md-8 col-sm-6 col-xs-12 text-left">
                                         <div class="checkbox">
-                                            <label><input value="" name="frm_del" id="frm_del" type="checkbox"> Delete all prefix with rates</label>
+                                            <input value="" name="frm_del" id="frm_del" type="checkbox"> <label for="frm_del">Delete all prefix with rates</label>
                                         </div>							
                                     </div>
                                 </div>
@@ -182,24 +172,11 @@
                                 </div>
                             </form>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <div class="col-md-6 col-sm-12 col-xs-12">
-            <div class="row">
-                <div class="col-md-12 col-sm-12 col-xs-12">
-                    <div class="x_panel">
-                        <div class="x_title">
-                            <h2>Ratecard (EDIT)</h2>
-                            <ul class="nav navbar-right panel_toolbox">
 
-                            </ul>
-                            <div class="clearfix"></div>
-                        </div>
-                        <div class="x_content">
-                            <br />         
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <h2 style="margin-bottom: 10px;">Ratecard (EDIT)</h2>
+
                             <form action="<?php echo base_url(); ?>ratecard/editRC/<?php echo param_encrypt($data['ratecard_id']); ?>" method="post" name="edit_form" id="edit_form" data-parsley-validate class="form-horizontal form-label-left">
                                 <input type="hidden" name="button_action" id="button_action" value="">
                                 <input type="hidden" name="action" value="OkSaveData">    
@@ -257,76 +234,26 @@
 
                                 <div class="ln_solid"></div>
                                 <div class="form-group">
-                                    <div class="col-md-8 col-sm-6 col-xs-12 col-md-offset-4">
-                                        <!--<button type="button" id="btnSave" class="btn btn-success">Save</button>-->
+                                    <div class="col-md-8 col-sm-6 col-xs-12 col-md-offset-4">                               
                                         <button type="button" id="btnSaveClose" class="btn btn-info">Save & Go Back to listing Page</button>
 
                                     </div>
                                 </div>
                             </form>
+
                         </div>
-                    </div>
-                </div>
-                <div class="col-md-12 col-sm-12 col-xs-12">
-                    <div class="x_panel">
-                        <div class="x_title">
-                            <h2>Used in Tariff(s)</h2>
-                            <ul class="nav navbar-right panel_toolbox">
 
-                            </ul>
-                            <div class="clearfix"></div>
-                        </div>
-                        <div class="x_content">
 
-                            <div class="table-responsive">
-                                <table class="table table-striped jambo_table bulk_action table-bordered">
-                                    <tbody>
-                                        <?php
-                                        if (count($data_tariff) > 0) {
-                                            for ($i = 0; $i < count($data_tariff); $i++) {
-                                                if ($data_tariff[$i]['status'] == '1')
-                                                    $status = '<span class="label label-success">Active</span>';
-                                                else
-                                                    $status = '<span class="label label-danger">Inactive</span>';
-                                                ?>
-                                                <tr>
-                                                    <td><?php echo $data_tariff[$i]['tariff_name'] . " (" . $data_tariff[$i]['tariff_id'] . ")"; ?></td>
-                                                </tr>
+                    </div><br clear="all"/>
 
-                                                <?php
-                                            }
-                                        }else {
-                                            ?>
-                                            <tr>
 
-                                            </tr>
-                                        <?php } ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
+
+
                 </div>
             </div>
-        </div>		
-
-    </div>
-
-
-
-
-    <div class="col-md-12 col-sm-12 col-xs-12 right">
-        <div class="ln_solid"></div>
-        <div class="x_title">
-            <h2>Ratecard Configuration Management</h2>
-            <ul class="nav navbar-right panel_toolbox">     
-                <li><a href="<?php echo base_url('ratecard') ?>"><button class="btn btn-danger" type="button" >Back to Ratecard Listing Page</button></a> </li>
-            </ul>
-            <div class="clearfix"></div>
         </div>
-
-    </div>
-</div>    
+    </div>    
+</div>
 <script src="<?php echo base_url() ?>theme/vendors/combo-box-typeahead/js/bootstrap-combobox.js"></script>
 <link href="<?php echo base_url() ?>theme/vendors/combo-box-typeahead/css/bootstrap-combobox.css" rel="stylesheet" type="text/css">
 <script src="<?php echo base_url() ?>theme/vendors/parsleyjs/dist/parsley.min.js"></script>

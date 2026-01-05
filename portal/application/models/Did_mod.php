@@ -1,31 +1,12 @@
 <?php
-
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-// OV500 Version 2.0.0
-// Copyright (C) 2019-2021 Openvoips Technologies   
-// http://www.openvoips.com  http://www.openvoips.org
-// 
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
-
-
+/* 
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2023 
+ * http://www.openvoips.com 
+ */
 class Did_mod extends CI_Model {
 
     public $did_id;
@@ -39,7 +20,12 @@ class Did_mod extends CI_Model {
     function get_data($order_by = '', $limit_to = '', $limit_from = '', $filter_data = array(), $option_param = array()) {
         $final_return_array = $carrier_id_array = $did_id_carrier_id_mapping_array = array();
         try {
-            $sql = "SELECT SQL_CALC_FOUND_ROWS * FROM did WHERE 1 ";
+            
+            $final_return_array['result']= Array();
+            $sql = "SELECT SQL_CALC_FOUND_ROWS did.*,
+            (SELECT carrier_name FROM carrier WHERE carrier_id=did.carrier_id) carrier_name,
+            (SELECT company_name FROM customers WHERE account_id=did.account_id) company_name
+             FROM did WHERE 1 ";
             $carrier_ip_sql = '';
             if (count($filter_data) > 0) {
                 foreach ($filter_data as $key => $value) {
@@ -55,6 +41,7 @@ class Did_mod extends CI_Model {
                     }
                 }
             }
+
             if (isset($filter_data['logged_account_type']) && isset($filter_data['logged_current_customer_id']) && isset($filter_data['logged_account_level']) && $filter_data['logged_account_type'] == 'RESELLER' && in_array($filter_data['logged_account_level'], array(1, 2, 3))) {
                 $level = $filter_data['logged_account_level'];
                 $field_name = 'reseller' . $level . '_account_id';
@@ -159,7 +146,30 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
 
                 $prefix_str = implode("','", $did_id_prefix_mapping_array);
                 $prefix_str = "'" . $prefix_str . "'";
-                $sql = "SELECT * FROM did_dst WHERE did_number IN($prefix_str) ";
+                $sql = "SELECT did_dst.*,           
+                CASE 
+                    WHEN did_dst.dst_type='' THEN ''
+                    WHEN did_dst.dst_type IS NULL THEN ''
+                    WHEN did_dst.dst_type='HANGUP' THEN 'Hang Up'
+
+                    WHEN did_dst.dst_type='IPDEVICE' THEN (SELECT ipaddress FROM customer_ips WHERE id=did_dst.dst_destination)
+                    WHEN did_dst.dst_type='SIPDEVICE' THEN (SELECT name FROM customer_devices WHERE extension_id=did_dst.dst_destination)
+                    WHEN did_dst.dst_type='EXTEN' THEN (SELECT CONCAT(name,' [',extension_no,']') FROM customer_devices WHERE extension_id=did_dst.dst_destination)
+                    WHEN did_dst.dst_type='IVR' THEN (SELECT CONCAT(ivr_name,' [',ivr_no,']') FROM ivrs WHERE ivr_id=did_dst.dst_destination)
+                    WHEN did_dst.dst_type='VOICEMESSAGE' THEN (SELECT audio_name FROM audiofiles WHERE audiofile_id=did_dst.dst_destination)
+                    WHEN did_dst.dst_type='ANNOUNCEMENT' THEN (SELECT CONCAT(annumcement_name,' [',announcement_no,']') FROM announcement WHERE announcement_id=did_dst.dst_destination)
+                    WHEN did_dst.dst_type='TIMEROUTE' THEN (SELECT CONCAT(timeconditions_name,' [',timeconditions_number,']') FROM timeconditions WHERE timeconditions_id=did_dst.dst_destination)
+                    WHEN did_dst.dst_type='RINGGROUP' THEN (SELECT CONCAT(ringgroup_name,' [',ringgroup_number,']') FROM ringgroup WHERE ringgroup_id=did_dst.dst_destination)
+                    WHEN did_dst.dst_type='QUEUE' THEN (SELECT CONCAT(queue_name,' [',queue_number,']')  FROM queue WHERE queue_fs_name=did_dst.dst_destination)
+                    WHEN did_dst.dst_type='CONFERENCE' THEN (SELECT CONCAT(conference_name,' [',conference_no,']') FROM conferences WHERE conference_id=did_dst.dst_destination)
+                    WHEN did_dst.dst_type='VOICEMAIL'  THEN  (SELECT CONCAT(vm_name,' [',vm_no,']') FROM voicemail WHERE mailbox=did_dst.dst_destination)
+                    
+                    WHEN did_dst.dst_type='SIPURI' THEN did_dst.dst_destination
+                    WHEN did_dst.dst_type='PSTN' THEN did_dst.dst_destination
+                    ELSE did_dst.dst_destination
+                END AS did_dst_name
+                 FROM did_dst WHERE did_number IN($prefix_str) ";
+               
                 $query = $this->db->query($sql);
                 if (!$query) {
                     $error_array = $this->db->error();
@@ -207,7 +217,7 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
             }
             $incoming_ratecard_id = $row['incoming_ratecard_id'];
             $error_message_array = array();
-			$rate_values='';
+            $rate_values = '';
             for ($i = 1; $i < count($csv_data); $i++) {
                 $data = $csv_data[$i];
                 $lineno = $i + 1;
@@ -273,10 +283,13 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                 $rate_data_array_temp['rate_addition'] = 0;
                 $rate_data_array_temp['rates_status'] = 1;
                 $rate_data_array_temp['create_dt'] = date('Y-m-d H:i:s');
-                $did_array[] = "'" . $did . "'";
+                //////
+                $did_number = "'" . $did . "'";
+
+                $did_array[] = $did_number;
+                $did_array_value[] = $did;
                 $did_data_array[] = $did_data_array_temp;
                 $rate_data_array[] = $rate_data_array_temp;
-
 
                 $rate_data_array_temp_str = "'" . implode("','", $rate_data_array_temp) . "'";
                 if ($rate_values != '')
@@ -287,8 +300,20 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                 $msg = implode('<br>', $error_message_array);
                 throw new Exception($msg);
             }
+
+
+            $duplicate_array = $this->check_array_duplicates($did_array_value);
+            if (count($duplicate_array) > 0) {
+                $duplicate_str = implode(',', $duplicate_array);
+                throw new Exception('Duplicate DID number: ' . $duplicate_str);
+            }
+
+
+
+
             $did_str = implode(', ', $did_array);
             $sql = "SELECT did_number FROM did WHERE did_number IN(" . $did_str . ")";
+
             $query = $this->db->query($sql);
             foreach ($query->result_array() as $row) {
                 $did_number = $row['did_number'];
@@ -329,7 +354,7 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                 $this->db->trans_rollback();
                 return $error_array['message'];
             } else {
-                $this->db->trans_commit();    
+                $this->db->trans_commit();
             }
             return true;
         } catch (Exception $e) {
@@ -400,7 +425,6 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
             }
 
             $sql = "SELECT prefix, rate_id, ratecard_id FROM carrier_rates WHERE prefix ='" . $rate_data_array['prefix'] . "' AND ratecard_id in (" . $incoming_ratecard_id . ")";
-
 
             $query = $this->db->query($sql);
             $row = $query->row_array();
@@ -567,7 +591,7 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                             $api_request['account_id'] = $existing_account_id;
                             $api_request['account_type'] = 'CUSTOMER';
                             $api_request['account_level'] = '';
-                            $api_response = call_billing_api($api_request);                         
+                            $api_response = call_billing_api($api_request);
                             $api_result = json_decode($api_response, true);
                             $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['REQUEST'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
                             if (!isset($api_result['error']) || $api_result['error'] == '1') {
@@ -579,10 +603,10 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                         if ($existing_reseller1_account_id != '') {
                             $api_request['account_id'] = $existing_reseller1_account_id;
                             $api_request['account_type'] = 'RESELLER';
-                            $api_request['account_level'] = '1';                          
+                            $api_request['account_level'] = '1';
                             $api_response = call_billing_api($api_request);
                             $api_result = json_decode($api_response, true);
-                            $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['request'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
+                            $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['REQUEST'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
                             if (!isset($api_result['error']) || $api_result['error'] == '1') {
                                 $this->db->trans_rollback();
                                 throw new Exception('SDR Problem:(' . $api_request['account_id'] . ')' . $api_result['message']);
@@ -595,7 +619,7 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                             $api_request['account_level'] = '2';
                             $api_response = call_billing_api($api_request);
                             $api_result = json_decode($api_response, true);
-                            $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['request'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
+                            $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['REQUEST'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
                             if (!isset($api_result['error']) || $api_result['error'] == '1') {
                                 $this->db->trans_rollback();
                                 throw new Exception('SDR Problem:(' . $api_request['account_id'] . ')' . $api_result['message']);
@@ -605,10 +629,11 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                         if ($existing_reseller3_account_id != '') {
                             $api_request['account_id'] = $existing_reseller3_account_id;
                             $api_request['account_type'] = 'RESELLER';
-                            $api_request['account_level'] = '3';                           
+                            $api_request['account_level'] = '3';
                             $api_response = call_billing_api($api_request);
                             $api_result = json_decode($api_response, true);
-                            $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['request'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
+
+                            $api_log_data_array[] = array('activity_type' => 'SDRAPI', 'sql_table' => $api_request['REQUEST'], 'sql_key' => $api_request['account_id'], 'sql_query' => print_r($api_request, true));
                             if (!isset($api_result['error']) || $api_result['error'] == '1') {
                                 $this->db->trans_rollback();
                                 throw new Exception('SDR Problem:(' . $api_request['account_id'] . ')' . $api_result['message']);
@@ -699,8 +724,6 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
         }
         $incoming_ratecard_id = rtrim($incoming_ratecard_id, ',');
 
-
-
         $sql = "SELECT did_status FROM did where did_number = '" . $did . "' and  account_id = '" . $account_id . "'";
         $query = $this->db->query($sql);
         $row = $query->row_array();
@@ -728,7 +751,6 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                 $user_result = $this->member_mod->get_account_by_key('account_id', $account_id, $option_param);
                 $parent_account_id = $user_result['parent_account_id'];
 
-
                 $didlist = array('did' => $did, 'prefix' => $rs_rates->prefix, 'setup' => number_format($rs_rates->setup_charge, 4, '.', ''), 'rental' => number_format($rs_rates->rental, 4, '.', ''), 'ppm' => number_format($rs_rates->rate, 4, '.', ''), 'ppc' => number_format($rs_rates->connection_charge, 4, '.', ''), 'min' => $rs_rates->minimal_time, 'res' => $rs_rates->resolution_time, 'grace' => $rs_rates->grace_period, 'add' => number_format($rs_rates->rate_addition, 4, '.', ''), 'mul' => number_format($rs_rates->rate_multiplier, 4, '.', ''), 'did_status' => $did_status);
                 $return = array('status' => true, 'msg' => 'DID Rates Found', 'dids' => $didlist);
             } else {
@@ -742,7 +764,8 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
     function getAvailableDID($did, $area_specific = false) {
         $account_type = get_logged_account_type();
         $account_id = get_logged_account_id();
-         $sql = "SELECT ratecard_id FROM tariff_ratecard_map inner join customer_voipminuts on tariff_ratecard_map.tariff_id = customer_voipminuts.tariff_id WHERE  ratecard_for = 'INCOMING' and  customer_voipminuts.account_id = '" . $account_id . "'";
+        //  $sql = "SELECT ratecard_id FROM tariff_ratecard_map inner join account on tariff_ratecard_map.tariff_id = account.tariff_id WHERE  ratecard_for = 'INCOMING' and  account.account_id = '" . $account_id . "'";
+        $sql = "SELECT ratecard_id FROM tariff_ratecard_map inner join customer_voipminuts on tariff_ratecard_map.tariff_id = customer_voipminuts.tariff_id WHERE  ratecard_for = 'INCOMING' and  customer_voipminuts.account_id = '" . $account_id . "'";
 
         $query = $this->db->query($sql);
         $rs = $query->row();
@@ -794,6 +817,9 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                 $query = $this->db->query($sql);
                 $rows = $query->result_array();
 
+//                $return = array('status' => false, 'msg' => 'DID available', 'dids' => $sql);
+//                return $return;
+
 
                 if (count($rows) > 0) {
                     $didlist = array();
@@ -820,272 +846,6 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
         //echo '<pre>';print_r($return);echo '</pre>';
         return $return;
     }
-	
-	
-	 function destination_bulk($data) {
-        try {
-            $log_data_array = array();
-            $did_data_array = array();
-
-            $this->db->trans_begin();
-
-            $account_id = get_logged_account_id();
-            $assign_did_number = $data['assign_did_number'];
-
-            if (!isset($data['assign_did_number']) || $data['assign_did_number'] == '') {
-                throw new Exception('DID Numbers Not Found');
-            }
-
-            $did_data_array['dst_type'] = $data['dst_type'];
-
-            if ($data['dst_type'] == 'IP')
-                $dst_destination = $data['dst_point_ip'];
-            elseif ($data['dst_type'] == 'CUSTOMER')
-                $dst_destination = $data['dst_point_sip'];
-            else
-                $dst_destination = $data['dst_point_pstn'];
-
-
-            $did_data_array['dst_type2'] = $data['dst_type2'];
-            if ($data['dst_type2'] == 'IP')
-                $dst_destination2 = $data['dst_point2_ip'];
-            elseif ($data['dst_type2'] == 'CUSTOMER')
-                $dst_destination2 = $data['dst_point2_sip'];
-            else
-                $dst_destination2 = $data['dst_point2_pstn'];
-
-
-            $assign_did_number_array = explode(',', $assign_did_number);
-            $assign_did_number_str = "'" . implode("','", $assign_did_number_array) . "'";
-
-            $db_array = $add_array = $update_array = array();
-
-            $sql = "SELECT did_number FROM " . $this->db->dbprefix('did_dst') . " WHERE account_id='$account_id' AND did_number IN($assign_did_number_str)";
-
-            $query = $this->db->query($sql);
-            foreach ($query->result_array() as $row) {
-                $db_array[] = $row['did_number'];
-            }
-
-
-
-            $add_array = array_diff($assign_did_number_array, $db_array);
-            $update_array = array_intersect($assign_did_number_array, $db_array);
-
-            $did_add_data_array = $did_update_data_array = array();
-            $did_update_data_array['dst_type'] = $data['dst_type'];
-            $did_update_data_array['dst_destination'] = $dst_destination;
-            $did_update_data_array['dst_type2'] = $data['dst_type2'];
-            $did_update_data_array['dst_destination2'] = $dst_destination2;
-
-            if (count($add_array) > 0) {
-                foreach ($add_array as $did) {
-                    if (trim($did) == '')
-                        continue;
-                    $did_add_data_array[] = array(
-                        'account_id' => $account_id,
-                        'did_number' => $did,
-                        'create_date' => date('Y-m-d'),
-                        'dst_type' => $data['dst_type'],
-                        'dst_destination' => $dst_destination,
-                        'dst_type2' => $data['dst_type2'],
-                        'dst_destination2' => $dst_destination2,
-                    );
-                }
-                $this->db->insert_batch('did_dst', $did_add_data_array);
-            }
-
-            if (count($update_array) > 0) {
-                $update_array_str = "'" . implode("','", $update_array) . "'";
-                $where = " account_id='" . $account_id . "' AND did_number IN($update_array_str)";
-                $str = $this->db->update_string($this->db->dbprefix('did_dst'), $did_update_data_array, $where);
-                $result = $this->db->query($str);
-                if (!$result) {
-                    $error_array = $this->db->error();
-                    throw new Exception($error_array['message']);
-                }
-            }
-
-
-
-            if ($this->db->trans_status() === FALSE) {
-                $error_array = $this->db->error();
-                $this->db->trans_rollback();
-                return $error_array['message'];
-            } else {
-                $this->db->trans_commit();
-                //set_activity_log($log_data_array);
-            }
-            return true;
-        } catch (Exception $e) {
-            $this->db->trans_rollback();
-            return $e->getMessage();
-        }
-    }
-
-    function assignment_bulk($did_data) {
-        try {
-            $account_type = get_logged_account_type();
-            $account_id = get_logged_account_id();
-            $account_level = get_logged_account_level();
-            $this->completed_did_purchase = 0;
-
-            $completed_did_array = array();
-			
-			////find parent
-			$sql = "SELECT parent_account_id, account_type FROM account WHERE account_id='$account_id'";
-			$query = $this->db->query($sql);
-            $parent_account_row = $query->row_array(); 
-			$parent_account_id = $parent_account_row['parent_account_id'];
-			$parent_account_type = $parent_account_row['account_type'];
-			//////
-			
-            foreach ($did_data['did'] as $did) {
-                $this->db->trans_begin();
-                if ($account_type == 'CUSTOMER') {
-                    $sql = "update did set did_status = 'USED', account_id = '" . $account_id . "', assign_date = now() WHERE did_number = '" . $did . "'";
-                } else {
-                    if ($account_level == 1)
-                        $sql = "update did set did_status = 'USED', reseller1_account_id = '" . $account_id . "',reseller1_assign_date = now() WHERE did_number = '" . $did . "'";
-                    elseif ($account_level == 2)
-                        $sql = "update did set did_status = 'USED', reseller2_account_id = '" . $account_id . "', reseller2_assign_date = now() WHERE did_number = '" . $did . "'";
-                    else
-                        $sql = "update did set did_status = 'USED', reseller3_account_id = '" . $account_id . "', reseller3_assign_date = now() WHERE did_number = '" . $did . "'";
-                }
-                $result = $this->db->query($sql);
-                if (!$result) {
-                    $error_array = $this->db->error();
-                    throw new Exception($error_array['message']);
-                }
-
-                if ($this->db->trans_status() === FALSE) {
-                    $error_array = $this->db->error();
-                    $this->db->trans_rollback();
-                    throw new Exception($error_array['message']);
-                } else {                   	
-                    
-				if($account_type == 'CUSTOMER' || $parent_account_id!='')
-				{
-					////customer
-					$api_request=array();
-					$api_request['REQUEST'] = 'NEWDIDSETUP';
-                    $api_request['account_id'] = $account_id;
-                    $api_request['service_number'] = $did;
-                    $api_request['account_type'] = $account_type;
-                    $api_request['account_level'] = $account_level;
-                    $api_response = call_billing_api($api_request);
-					$api_result = json_decode($api_response, true);
-					if (!isset($api_result['error']) || $api_result['error'] == '1') {
-                        $this->db->trans_rollback();
-                        throw new Exception('SDR Problem:' . $api_result['message']);
-                    }   
-					///////
-					//////parent if exists
-					if($parent_account_id!='')
-					{
-						$api_request=array();
-						$api_request['REQUEST'] = 'NEWDIDSETUP';
-						$api_request['account_id'] = $parent_account_id;
-						$api_request['service_number'] = $did;
-						$api_request['account_type'] = $parent_account_type;
-						$api_request['account_level'] = $account_level-1;
-						$api_response = call_billing_api($api_request);
-						$api_result = json_decode($api_response, true);
-					}
-					
-					   
-				}
-					
-					/*echo "---------------------------------1 <br>";
-					
-					echo ( $api_response);
-					
-                    
-						echo "---------------------------------2 <br>";
-					print_r( $api_result);
-					die;*/
-                                     
-                }
-                $this->db->trans_commit();
-                $this->completed_did_purchase = $this->completed_did_purchase + 1;
-                $completed_did_array[] = $did;
-                $did_key = array_search($did, $_SESSION['cart']['did']);
-                if ($did_key !== false)
-                    unset($_SESSION['cart']['did'][$did_key]);
-            }
-
-            if (isset($did_data['id_checkbox_configure_dest']) && $did_data['id_checkbox_configure_dest'] == 'yes') {
-                if (count($completed_did_array) > 0) {
-                    if ($did_data['dst_type'] == 'IP')
-                        $dst_destination = $did_data['dst_point_ip'];
-                    elseif ($did_data['dst_type'] == 'CUSTOMER')
-                        $dst_destination = $did_data['dst_point_sip'];
-                    else
-                        $dst_destination = $did_data['dst_point_pstn'];
-                    if ($did_data['dst_type2'] == 'IP')
-                        $dst_destination2 = $did_data['dst_point2_ip'];
-                    elseif ($did_data['dst_type2'] == 'CUSTOMER')
-                        $dst_destination2 = $did_data['dst_point2_sip'];
-                    else
-                        $dst_destination2 = $did_data['dst_point2_pstn'];
-                    $did_add_data_array = array();
-                    foreach ($completed_did_array as $did) {
-                        if (trim($did) == '')
-                            continue;
-                        $did_add_data_array[] = array(
-                            'account_id' => $account_id,
-                            'did_number' => $did,
-                            'create_date' => date('Y-m-d'),
-                            'dst_type' => $did_data['dst_type'],
-                            'dst_destination' => $dst_destination,
-                            'dst_type2' => $did_data['dst_type2'],
-                            'dst_destination2' => $dst_destination2,
-                        );
-                    }
-                    $this->db->insert_batch('did_dst', $did_add_data_array);
-                }
-            }
-            return true;
-        } catch (Exception $e) {
-            $this->db->trans_rollback();
-
-            if (isset($did_data['id_checkbox_configure_dest']) && $did_data['id_checkbox_configure_dest'] == 'yes') {
-                if (count($completed_did_array) > 0) {
-                    if ($data['dst_type'] == 'IP')
-                        $dst_destination = $did_data['dst_point_ip'];
-                    elseif ($data['dst_type'] == 'CUSTOMER')
-                        $dst_destination = $did_data['dst_point_sip'];
-                    else
-                        $dst_destination = $did_data['dst_point_pstn'];
-
-                    if ($data['dst_type2'] == 'IP')
-                        $dst_destination2 = $did_data['dst_point2_ip'];
-                    elseif ($data['dst_type2'] == 'CUSTOMER')
-                        $dst_destination2 = $did_data['dst_point2_sip'];
-                    else
-                        $dst_destination2 = $did_data['dst_point2_pstn'];
-                    $did_add_data_array = array();
-                    foreach ($completed_did_array as $did) {
-                        if (trim($did) == '')
-                            continue;
-                        $did_add_data_array[] = array(
-                            'account_id' => $account_id,
-                            'did_number' => $did,
-                            'create_date' => date('Y-m-d'),
-                            'dst_type' => $did_data['dst_type'],
-                            'dst_destination' => $dst_destination,
-                            'dst_type2' => $did_data['dst_type2'],
-                            'dst_destination2' => $dst_destination2,
-                        );
-                    }
-                    $this->db->insert_batch('did_dst', $did_add_data_array);
-                }
-            }
-
-            return $e->getMessage();
-        }
-    }
-
 
     function assignment($did, $setup, $rental) {
 
@@ -1113,7 +873,7 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                 $error_array = $this->db->error();
                 $this->db->trans_rollback();
                 throw new Exception($error_array['message']);
-            } else {	
+            } else {
                 $api_request['REQUEST'] = 'NEWDIDSETUP';
                 $api_request['account_id'] = $account_id;
                 $api_request['service_number'] = $did;
@@ -1121,8 +881,9 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                 $api_request['account_level'] = $account_level;
                 $api_response = call_billing_api($api_request);
                 $api_result = json_decode($api_response, true);
-                
-                
+
+                print_r($api_result);
+
                 if (!isset($api_result['error']) || $api_result['error'] == '1') {
                     $this->db->trans_rollback();
                     throw new Exception('SDR Problem:' . $api_result['message']);
@@ -1147,17 +908,11 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                 $did_data_array['dst_destination'] = $data['dst_point_ip'];
             elseif ($data['dst_type'] == 'CUSTOMER')
                 $did_data_array['dst_destination'] = $data['dst_point_sip'];
+            elseif ($data['dst_type'] == 'CAMPAINGN')
+                $did_data_array['dst_destination'] = $data['dst_campaign_id'];
             else
                 $did_data_array['dst_destination'] = $data['dst_point_pstn'];
 
-
-            $did_data_array['dst_type2'] = $data['dst_type2'];
-            if ($data['dst_type2'] == 'IP')
-                $did_data_array['dst_destination2'] = $data['dst_point2_ip'];
-            elseif ($data['dst_type2'] == 'CUSTOMER')
-                $did_data_array['dst_destination2'] = $data['dst_point2_sip'];
-            else
-                $did_data_array['dst_destination2'] = $data['dst_point2_pstn'];;
 
             $this->db->trans_begin();
 
@@ -1182,6 +937,56 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                     $error_array = $this->db->error();
                     throw new Exception($error_array['message']);
                 }
+                $log_data_array[] = array('activity_type' => 'update', 'sql_table' => 'did_dst', 'sql_key' => $where, 'sql_query' => $str);
+            }
+
+            if ($this->db->trans_status() === FALSE) {
+                $error_array = $this->db->error();
+                $this->db->trans_rollback();
+                return $error_array['message'];
+            } else {
+                $this->db->trans_commit();
+                set_activity_log($log_data_array);
+            }
+            return true;
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            return $e->getMessage();
+        }
+    }
+
+    function destination2($data) {
+        try {
+            $log_data_array = array();
+            $did_data_array = array();
+
+            $did_data_array['dst_type'] = $data['dst_type'];
+            $did_data_array['dst_destination'] = isset($_POST['dst_type_dependent_value']) ? $_POST['dst_type_dependent_value'] : '';
+
+            $this->db->trans_begin();
+
+            if ($data['dst_id'] == '') {
+                $did_data_array['account_id'] = get_logged_account_id();
+                $did_data_array['did_number'] = $data['did_number'];
+                $did_data_array['create_date'] = date('Y-m-d');
+
+                $str = $this->db->insert_string('did_dst', $did_data_array);
+                $result = $this->db->query($str);
+                if (!$result) {
+                    $error_array = $this->db->error();
+                    throw new Exception($error_array['message']);
+                }
+                $did_id = $this->db->insert_id();
+                $log_data_array[] = array('activity_type' => 'add', 'sql_table' => 'did_dst', 'sql_key' => $did_id, 'sql_query' => $str);
+            } else {
+                $where = "did_dst_id = '" . $data['dst_id'] . "'";
+                $str = $this->db->update_string('did_dst', $did_data_array, $where);
+                $result = $this->db->query($str);
+                if (!$result) {
+                    $error_array = $this->db->error();
+                    throw new Exception($error_array['message']);
+                }
+                //ddd( $did_data_array);die;
                 $log_data_array[] = array('activity_type' => 'update', 'sql_table' => 'did_dst', 'sql_key' => $where, 'sql_query' => $str);
             }
 
@@ -1274,13 +1079,12 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
                 $api_request['service_number'] = $did_row['did_number'];
                 $api_request['account_type'] = $user_row['account_type'];
                 $api_request['account_level'] = $user_row['account_level'];
-                              $api_response = call_billing_api($api_request);
+                $api_response = call_billing_api($api_request);
                 $api_result = json_decode($api_response, true);
                 if (!isset($api_result['error']) || $api_result['error'] == '1') {
                     $this->db->trans_rollback();
                     throw new Exception('SDR Problem:' . $api_result['message']);
                 }
-
                 $this->db->trans_commit();
                 return true;
             }
@@ -1288,6 +1092,447 @@ INNER JOIN tariff_ratecard_map on tariff_ratecard_map.tariff_id = carrier.tariff
             $this->db->trans_rollback();
             return $e->getMessage();
         }
+    }
+
+    function release_bulk($did_number_str, $account_id) {
+        try {
+
+            $sql = "SELECT account_type,account_level,parent_account_id FROM account WHERE account_id ='" . $account_id . "'";
+            $query = $this->db->query($sql);
+            $user_row = $query->row_array();
+            if (!isset($user_row)) {
+                return 'User Not Found';
+            }
+
+            $cancel_did_number_str = trim($did_number_str);
+
+            if ($cancel_did_number_str == '') {
+                throw new Exception('DID Numbers Not Found');
+            }
+
+            $did_number_array = explode(',', $cancel_did_number_str);
+
+            foreach ($did_number_array as $did_number) {
+                $did_number = trim($did_number);
+                if ($did_number == '')
+                    continue;
+                $this->db->trans_begin();
+                $sql = "SELECT * FROM did WHERE did_number ='" . $did_number . "'";
+                $query = $this->db->query($sql);
+                $did_row = $query->row_array();
+                if (!isset($did_row)) {
+                    throw new Exception('DID Not Found');
+                }
+                $did_id = $did_row['did_id'];
+                $log_data_array = array();
+                $new_status = '';
+                if ($user_row['account_type'] == 'CUSTOMER') {
+                    $new_status = 'NEW';
+                    $sql = "update did set account_id = NULL, assign_date = NULL ";
+                    if ($user_row['parent_account_id'] == '')
+                        $sql .= ", did_status='" . $new_status . "' ";
+                    $sql .= " WHERE did_id='" . $did_id . "' AND account_id = '" . $account_id . "'";
+                    $result = $this->db->query($sql);
+                    if (!$result) {
+                        $error_array = $this->db->error();
+                        throw new Exception($error_array['message']);
+                    }
+
+                    $result = $this->db->delete('did_dst', array('account_id' => $account_id, 'did_number' => $did_row['did_number']));
+                    if (!$result) {
+                        $error_array = $this->db->error();
+                        throw new Exception($error_array['message']);
+                    }
+                    $this->clean_did_related_data($did_row['did_number'], $account_id);
+                } elseif ($user_row['account_type'] == 'RESELLER') {
+                    $sql = "update did set ";
+                    $where = " WHERE did_id='" . $did_id . "' ";
+                    if ($user_row['account_level'] == 1) {
+                        $new_status = 'NEW';
+                        $sql .= " reseller1_account_id =NULL, reseller1_assign_date = NULL, did_status='" . $new_status . "' ";
+                        $where .= " AND reseller1_account_id = '" . $account_id . "' ";
+                    } elseif ($user_row['account_level'] == 2) {
+                        $sql .= "reseller2_account_id =NULL, reseller2_assign_date = NULL";
+                        $where .= " AND reseller2_account_id = '" . $account_id . "' ";
+                    } else {
+                        $sql .= "reseller3_account_id =NULL, reseller3_assign_date = NULL";
+                        $where .= " AND reseller3_account_id = '" . $account_id . "' ";
+                    }
+
+                    $sql .= $where;
+
+                    $result = $this->db->query($sql);
+                    if (!$result) {
+                        $error_array = $this->db->error();
+                        throw new Exception($error_array['message']);
+                    }
+                }
+                if ($this->db->trans_status() === FALSE) {
+                    $error_array = $this->db->error();
+                    $this->db->trans_rollback();
+                    throw new Exception($error_array['message']);
+                } else {
+                    $api_request['REQUEST'] = 'DIDCANCEL';
+                    $api_request['account_id'] = $account_id;
+                    $api_request['service_number'] = $did_row['did_number'];
+                    $api_request['account_type'] = $user_row['account_type'];
+                    $api_request['account_level'] = $user_row['account_level'];
+
+                    $api_response = call_billing_api($api_request);
+                    $api_result = json_decode($api_response, true);
+                    if (!isset($api_result['error']) || $api_result['error'] == '1') {
+                        $this->db->trans_rollback();
+                        throw new Exception('SDR Problem:' . $api_result['message']);
+                    }
+                    $this->db->trans_commit();
+                }
+            }
+            if (count($did_number_array) > 0) {
+                $remove_str = implode("','", $did_number_array);
+                $remove_str = "'" . $remove_str . "'";
+                $str = "DELETE FROM " . $this->db->dbprefix('did_dst') . " WHERE account_id='$account_id' AND did_number IN($remove_str)";
+                $result = $this->db->query($str);
+            }
+            return true;
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            return $e->getMessage();
+        }
+    }
+
+    function destination_bulk($data) {
+
+        try {
+            $log_data_array = array();
+            $did_data_array = array();
+
+            $this->db->trans_begin();
+
+            $account_id = get_logged_account_id();
+            $assign_did_number = $data['assign_did_number'];
+
+            if (!isset($data['assign_did_number']) || $data['assign_did_number'] == '') {
+                throw new Exception('DID Numbers Not Found');
+            }
+
+            $did_data_array['dst_type'] = $data['dst_type'];
+
+            if ($data['dst_type'] == 'IP')
+                $dst_destination = $data['dst_point_ip'];
+            elseif ($data['dst_type'] == 'CUSTOMER')
+                $dst_destination = $data['dst_point_sip'];
+            elseif ($data['dst_type'] == 'CAMPAINGN')
+                $dst_destination = $data['dst_campaign_id'];
+            else
+                $dst_destination = $data['dst_point_pstn'];
+
+
+
+
+            $assign_did_number_array = explode(',', $assign_did_number);
+            $assign_did_number_str = "'" . implode("','", $assign_did_number_array) . "'";
+
+            $db_array = $add_array = $update_array = array();
+
+            $sql = "SELECT did_number FROM " . $this->db->dbprefix('did_dst') . " WHERE account_id='$account_id' AND did_number IN($assign_did_number_str)";
+
+            $query = $this->db->query($sql);
+            foreach ($query->result_array() as $row) {
+                $db_array[] = $row['did_number'];
+            }
+
+
+
+            $add_array = array_diff($assign_did_number_array, $db_array);
+            $update_array = array_intersect($assign_did_number_array, $db_array);
+
+            $did_add_data_array = $did_update_data_array = array();
+            $did_update_data_array['dst_type'] = $data['dst_type'];
+            $did_update_data_array['dst_destination'] = $dst_destination;
+            $did_update_data_array['dst_type2'] = $data['dst_type2'];
+            $did_update_data_array['dst_destination2'] = $dst_destination2;
+
+            if (count($add_array) > 0) {
+                foreach ($add_array as $did) {
+                    if (trim($did) == '')
+                        continue;
+                    $did_add_data_array[] = array(
+                        'account_id' => $account_id,
+                        'did_number' => $did,
+                        'create_date' => date('Y-m-d'),
+                        'dst_type' => $data['dst_type'],
+                        'dst_destination' => $dst_destination,
+                        'dst_type2' => $data['dst_type2'],
+                        'dst_destination2' => $dst_destination2,
+                    );
+                }
+                $this->db->insert_batch('did_dst', $did_add_data_array);
+            }
+
+            if (count($update_array) > 0) {
+                $update_array_str = "'" . implode("','", $update_array) . "'";
+                $where = " account_id='" . $account_id . "' AND did_number IN($update_array_str)";
+                $str = $this->db->update_string($this->db->dbprefix('did_dst'), $did_update_data_array, $where);
+                $result = $this->db->query($str);
+                if (!$result) {
+                    $error_array = $this->db->error();
+                    throw new Exception($error_array['message']);
+                }
+            }
+
+
+
+            if ($this->db->trans_status() === FALSE) {
+                $error_array = $this->db->error();
+                $this->db->trans_rollback();
+                return $error_array['message'];
+            } else {
+                $this->db->trans_commit();
+                //set_activity_log($log_data_array);
+            }
+            return true;
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            return $e->getMessage();
+        }
+    }
+
+    function assignment_bulk($did_data) {
+        try {
+            $account_type = get_logged_account_type();
+            $account_id = get_logged_account_id();
+            $account_level = get_logged_account_level();
+            $this->completed_did_purchase = 0;
+		
+            $completed_did_array = array();
+
+            ////find parent
+            $sql = "SELECT parent_account_id, account_type FROM account WHERE account_id='$account_id'";
+            $query = $this->db->query($sql);
+            $parent_account_row = $query->row_array();
+            $parent_account_id = $parent_account_row['parent_account_id'];
+            $parent_account_type = $parent_account_row['account_type'];
+            //////
+
+            foreach ($did_data['did'] as $did) {
+                $this->db->trans_begin();
+                if ($account_type == 'CUSTOMER') {
+                    $sql = "update did set did_status = 'USED', account_id = '" . $account_id . "', assign_date = now() WHERE did_number = '" . $did . "'";
+                } else {
+                    if ($account_level == 1)
+                        $sql = "update did set did_status = 'USED', reseller1_account_id = '" . $account_id . "',reseller1_assign_date = now() WHERE did_number = '" . $did . "'";
+                    elseif ($account_level == 2)
+                        $sql = "update did set did_status = 'USED', reseller2_account_id = '" . $account_id . "', reseller2_assign_date = now() WHERE did_number = '" . $did . "'";
+                    else
+                        $sql = "update did set did_status = 'USED', reseller3_account_id = '" . $account_id . "', reseller3_assign_date = now() WHERE did_number = '" . $did . "'";
+                }
+                $result = $this->db->query($sql);
+                if (!$result) {
+                    $error_array = $this->db->error();
+                    throw new Exception($error_array['message']);
+                }
+
+                if ($this->db->trans_status() === FALSE) {
+                    $error_array = $this->db->error();
+                    $this->db->trans_rollback();
+                    throw new Exception($error_array['message']);
+                } else {
+
+                    if ($account_type == 'CUSTOMER' || $parent_account_id != '') {
+                        ////customer
+                        $api_request = array();
+                        $api_request['REQUEST'] = 'NEWDIDSETUP';
+                        $api_request['account_id'] = $account_id;
+                        $api_request['service_number'] = $did;
+                        $api_request['account_type'] = $account_type;
+                        $api_request['account_level'] = $account_level;
+                        $api_response = call_billing_api($api_request);
+                        $api_result = json_decode($api_response, true);
+                        if (!isset($api_result['error']) || $api_result['error'] == '1') {
+                            $this->db->trans_rollback();
+                            throw new Exception('SDR Problem:' . $api_result['message']);
+                        }
+                        ///////
+                        //////parent if exists
+                        if ($parent_account_id != '') {
+                            $api_request = array();
+                            $api_request['REQUEST'] = 'NEWDIDSETUP';
+                            $api_request['account_id'] = $parent_account_id;
+                            $api_request['service_number'] = $did;
+                            $api_request['account_type'] = $parent_account_type;
+                            $api_request['account_level'] = $account_level - 1;
+                            $api_response = call_billing_api($api_request);
+                            $api_result = json_decode($api_response, true);
+                        }
+                    }
+
+                    /* echo "---------------------------------1 <br>";
+
+                      echo ( $api_response);
+
+
+                      echo "---------------------------------2 <br>";
+                      print_r( $api_result);
+                      die; */
+                }
+                $this->db->trans_commit();
+                $this->completed_did_purchase = $this->completed_did_purchase + 1;
+                $completed_did_array[] = $did;
+                $did_key = array_search($did, $_SESSION['cart']['did']);
+                if ($did_key !== false)
+                    unset($_SESSION['cart']['did'][$did_key]);
+            }
+
+            if (isset($did_data['id_checkbox_configure_dest']) && $did_data['id_checkbox_configure_dest'] == 'yes') {
+                if (count($completed_did_array) > 0) {
+                    if ($did_data['dst_type'] == 'IP')
+                        $dst_destination = $did_data['dst_point_ip'];
+                    elseif ($did_data['dst_type'] == 'CUSTOMER')
+                        $dst_destination = $did_data['dst_point_sip'];
+                    elseif ($did_data['dst_type'] == 'CAMPAINGN')
+                        $dst_destination = $did_data['dst_campaign_id'];
+                    else
+                        $dst_destination = $did_data['dst_point_pstn'];
+
+                    $did_add_data_array = array();
+                    foreach ($completed_did_array as $did) {
+                        if (trim($did) == '')
+                            continue;
+                        $did_add_data_array[] = array(
+                            'account_id' => $account_id,
+                            'did_number' => $did,
+                            'create_date' => date('Y-m-d'),
+                            'dst_type' => $did_data['dst_type'],
+                            'dst_destination' => $dst_destination,
+                            'dst_type2' => $did_data['dst_type'],
+                            'dst_destination2' => $dst_destination,
+                        );
+                    }
+                    $this->db->insert_batch('did_dst', $did_add_data_array);
+                }
+            }
+            return true;
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+
+            if (isset($did_data['id_checkbox_configure_dest']) && $did_data['id_checkbox_configure_dest'] == 'yes') {
+                if (count($completed_did_array) > 0) {
+                    if ($data['dst_type'] == 'IP')
+                        $dst_destination = $did_data['dst_point_ip'];
+                    elseif ($data['dst_type'] == 'CUSTOMER')
+                        $dst_destination = $did_data['dst_point_sip'];
+                    elseif ($data['dst_type'] == 'CAMPAINGN')
+                        $dst_destination = $data['dst_campaign_id'];
+                    else
+                        $dst_destination = $did_data['dst_point_pstn'];
+
+                    $did_add_data_array = array();
+                    foreach ($completed_did_array as $did) {
+                        if (trim($did) == '')
+                            continue;
+                        $did_add_data_array[] = array(
+                            'account_id' => $account_id,
+                            'did_number' => $did,
+                            'create_date' => date('Y-m-d'),
+                            'dst_type' => $did_data['dst_type'],
+                            'dst_destination' => $dst_destination,
+                            'dst_type2' => $did_data['dst_type'],
+                            'dst_destination2' => $dst_destination,
+                        );
+                    }
+                    $this->db->insert_batch('did_dst', $did_add_data_array);
+                }
+            }
+
+            return $e->getMessage();
+        }
+    }
+
+    function get_cart_dids() {
+
+        try {
+            $account_type = get_logged_account_type();
+            $account_id = get_logged_account_id();
+
+            if (isset($_SESSION['cart']['did']) && count($_SESSION['cart']['did']) > 0) {
+                $did_number_str = implode("','", $_SESSION['cart']['did']);
+                $did_number_str = "'" . $did_number_str . "'";
+            } else {
+                $return = array('status' => false, 'msg' => 'No DID available');
+            }
+
+            $sql = "SELECT ratecard_id FROM tariff_ratecard_map inner join customer_voipminuts on tariff_ratecard_map.tariff_id = customer_voipminuts.tariff_id WHERE  ratecard_for = 'INCOMING' and  customer_voipminuts.account_id = '" . $account_id . "'";
+            $query = $this->db->query($sql);
+            $rs = $query->row();
+            $incoming_ratecard_id = '';
+            foreach ($rs as $key => $value) {
+                $incoming_ratecard_id = "'" . $value . "',";
+            }
+            $incoming_ratecard_id = rtrim($incoming_ratecard_id, ',');
+
+            ////////////////////
+            $user_result = $this->member_mod->get_account_by_key('account_id', $account_id, array());
+            $parent_account_id = $user_result['parent_account_id'];
+
+            if ($account_type == 'CUSTOMER') {
+                if ($parent_account_id == '') {
+                    $sql = "SELECT did_number FROM did where (account_id is NULL OR account_id='') and did_status = 'NEW' ";
+                } else {
+                    $reseller_result = $this->member_mod->get_account_by_key('account_id', $parent_account_id, $option_param);
+                    $parent_level = $reseller_result['account_level'];
+                    $sql = "SELECT did_number FROM did where account_id is null and did_status = 'USED' ";
+                    if ($parent_level == 1)
+                        $sql .= " and reseller1_account_id = '" . $parent_account_id . "'";
+                    elseif ($parent_level == 2)
+                        $sql .= " and reseller2_account_id = '" . $parent_account_id . "'";
+                    else
+                        $sql .= " and reseller3_account_id = '" . $parent_account_id . "'";
+                }
+            } else {
+                $reseller_level = get_logged_account_level();
+                $sql = "SELECT did_number FROM did where (account_id is NULL OR account_id='') ";
+                if ($reseller_level == 1) {
+                    $sql .= " AND did_status = 'NEW' ";
+                } elseif ($reseller_level == 2) {
+                    $sql .= " and did_status = 'USED' and reseller1_account_id = '" . $parent_account_id . "'";
+                } elseif ($reseller_level == 3) {
+                    $sql .= " and did_status = 'USED' and reseller2_account_id = '" . $parent_account_id . "'";
+                }
+            }
+            $sql .= " and did_number IN($did_number_str) limit 500 ";
+            $query = $this->db->query($sql);
+            $rows = $query->result_array();
+
+            if (count($rows) > 0) {
+                $didlist = array();
+                foreach ($rows as $k => $v) {
+                    $sql = "SELECT * FROM customer_rates WHERE ratecard_id in  (" . $incoming_ratecard_id . ") and ('" . $v['did_number'] . "' like concat(prefix,'%') or prefix like '" . $v['did_number'] . "%') ORDER BY LENGTH(prefix) DESC , rate DESC LIMIT 1;";
+                    $query = $this->db->query($sql);
+                    $rs_rates = $query->row();
+
+                    $didlist[] = array('did' => $v['did_number'], 'setup' => number_format($rs_rates->setup_charge, 4, '.', ''), 'rental' => number_format($rs_rates->rental, 4, '.', ''), 'ppm' => number_format($rs_rates->rate, 4, '.', ''), 'ppc' => number_format($rs_rates->connection_charge, 4, '.', ''), 'min' => $rs_rates->minimal_time, 'res' => $rs_rates->resolution_time, 'grace' => $rs_rates->grace_period, 'add' => number_format($rs_rates->rate_addition, 4, '.', ''), 'mul' => number_format($rs_rates->rate_multiplier, 4, '.', ''));
+                }
+                $return = array('status' => true, 'msg' => 'DID available', 'dids' => $didlist);
+            } else {
+                $return = array('status' => false, 'msg' => 'No DID available');
+            }
+
+            //echo '<pre>';print_r($return);echo '</pre>';
+            return $return;
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            return $return = array('status' => false, 'msg' => $e->getMessage());
+        }
+    }
+
+    function check_array_duplicates($array_check) {
+        $array_check_unique = array_unique($array_check);
+
+        if (count($array_check) == count($array_check_unique)) {
+            return array();
+        }
+        $array_diff = array_diff_assoc($array_check, $array_check_unique);
+        return $array_diff;
     }
 
 }

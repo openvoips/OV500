@@ -1,5 +1,7 @@
 html , body{
     height:100%;
+background-image: url("..images/bg.jpg");
+
 }
 .full-width {
     width:100%;
@@ -7,6 +9,16 @@ html , body{
 
 .full-height{
     height:100%;
+}
+
+.detail_row2 {
+  background-color: #32326A;;
+   
+}
+
+.detail_row {
+  background-color: #32326A;;
+   
 }
 .dataTables_paginate span{
     background: #fff!important;
@@ -28,7 +40,7 @@ html , body{
 }
 
 .red1 {
-    color: #DD4814;
+    color: #c10d1e;
 }
 
 
@@ -158,7 +170,7 @@ html , body{
     padding: 0 0 4px 0
 }
 .left_col {
-    background: #DD4814
+    background: #32326A;
 }
 .nav-sm .container.body .col-md-3.left_col {
     min-height: 100%;
@@ -169,7 +181,7 @@ html , body{
 }
 
 .thc{
-    background: #DD4814;
+    background: #32326A;
 }
 .nav-sm .container.body .col-md-3.left_col.menu_fixed {
     position: fixed;
@@ -204,7 +216,7 @@ html , body{
     border-radius: 50%
 }
 .site_title img {
-    max-height: 55px;
+    max-height: 66px;
     max-width: 180px;
     position: absolute;
     top: 0px;
@@ -248,7 +260,7 @@ html , body{
     top: 0;
     width: 210px;
     z-index: 4000;
-    background: #D55F3E;
+    background: #32326A;
     display: none
 }
 .nav-sm ul.nav.child_menu li {
@@ -347,7 +359,7 @@ html , body{
 }
 .nav_menu {
     float: left;
-    background: #EDEDED;
+    background: #CAC9C9;
     border-bottom: 1px solid #D9DEE4;
     margin-bottom: 10px;
     width: 100%;
@@ -381,7 +393,7 @@ body .container.body .right_col {
 .nav_title {
     width: 230px;
     float: left;
-    background: #ECECEC;
+    background: #FBFBFB;
     border-radius: 0;
     height: 57px
 }
@@ -831,7 +843,7 @@ a:focus {
 }
 .nav.side-menu>li.active>a {
     text-shadow: rgba(0, 0, 0, 0.25) 0 -1px 0;
-    /*background: linear-gradient(#334556, #2C4257), #DD4814;*/
+    /*background: linear-gradient(#334556, #2C4257), #32326A;*/
     box-shadow: rgba(0, 0, 0, 0.25) 0 1px 0, inset rgba(255, 255, 255, 0.16) 0 1px 0
 }
 .navbar-brand,
@@ -1353,7 +1365,7 @@ table.jambo_table {
     border: 1px solid rgba(221, 221, 221, 0.78)
 }
 table.jambo_table thead {
-    background: rgba(52, 73, 94, 0.94);
+    background: #32326A;
     color: #ECF0F1
 }
 table.jambo_table tbody tr:hover td {
@@ -4330,11 +4342,11 @@ fieldset[disabled] .btn-primary:focus,
 .btn-primary.disabled.focus,
 .btn-primary[disabled].focus,
 fieldset[disabled] .btn-primary.focus {
-    background-color: #DD4814;
+    background-color: #32326A;
     border-color: #7A7877 ;
 }
 .btn-primary .badge {
-    color: #DD4814;
+    color: #32326A;
     background-color: #fff;
 }
 .btn-primary {
@@ -4369,8 +4381,8 @@ fieldset[disabled] .btn-primary.focus {
     z-index: 3;
     color: #fff;
     cursor: default;
-    background-color: #DD4814;
-    border-color: #DD4814;
+    background-color: #32326A;
+    border-color: #32326A;
 }
 
 .pagination > li > a:hover, .pagination > li > span:hover, .pagination > li > a:focus, .pagination > li > span:focus {
@@ -4387,5 +4399,13 @@ fieldset[disabled] .btn-primary.focus {
     .clockOuter{ display:none;}
 }
 
-.pad8{padding-top: 8px;}
-.required{color:maroon;}
+
+
+.table-bordered > tbody > tr > td, .table-bordered > tbody > tr > th, .table-bordered > tfoot > tr > td, .table-bordered > tfoot > tr > th, .table-bordered > thead > tr > td, .table-bordered > thead > tr > th {
+    border: #fff;          
+}
+
+
+.table-striped > tbody > tr:nth-of-type(2n+1) {
+    background-color: #ede8e8;
+}

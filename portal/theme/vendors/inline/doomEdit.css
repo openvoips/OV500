@@ -1,0 +1,23 @@
+.dedit-simple, .dedit-simple-blur, .dedit-textarea, .dedit-select, .dedit-remote, .dedit-remote-json, .edit-cell-inline {
+	cursor:pointer;
+	background: url(edit.png) no-repeat center right;
+	padding-right:20px;
+}
+
+.dedit-simple:hover, .dedit-simple-blur:hover, .dedit-textarea:hover, .dedit-select:hover, .dedit-remote:hover, .dedit-remote-json:hover, .edit-cell-inline:hover {
+	background:#00bcd4 url(edit.png) no-repeat center right;
+	padding-right:20px;
+}
+
+form {
+	display:inline;
+}
+
+table td {
+	padding:2px;
+	width: 350px;
+	text-align: center;
+}
+
+.save-btn{margin-top:2px;}
+.cancel-btn{margin-left:2px;margin-top:2px;}

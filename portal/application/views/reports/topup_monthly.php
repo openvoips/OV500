@@ -1,4 +1,5 @@
 <script>
+    /*define array for labels and data*/
     var label_array = new Array();
     var final_data_array = new Array();
 </script>
@@ -19,26 +20,32 @@ if (isset($topup_data['result'][2])) {
 }
 
 if (isset($topup_data['result'][3])) {
-    ?><script>var inr_data_array = new Array();</script><?php
-}
-if (isset($topup_data['result'][4])) {
-    ?><script>var susd_data_array = new Array();</script><?php
-}
-
-if (isset($topup_data['result'][5])) {
     ?><script>var eur_data_array = new Array();</script><?php
 }
 
-$table_data_str='';
+if (isset($topup_data['result'][4])) {
+    ?><script>var inr_data_array = new Array();</script><?php
+}
 
-$total_usd =$total_susd = $total_gbp = $total_eur = $total_inr = 0;
+
+//echo '<pre>'; print_r($topup_data);echo '</pre>';
+
+
+/*
+  1: usd
+  2: gbp
+  3: eur
+  4: inr
+ */
+
+///*
+$total_usd = $total_gbp = $total_eur = $total_inr = 0;
 $range = explode(' - ', $_SESSION['search_topup_monthly_data']['s_time_range']);
 $range_from = explode(' ', $range[0]);
 $range_to = explode(' ', $range[1]);
 
 $start_dt = $range[0];
 $end_dt = $range[1];
-
 
 $start_day_stamp = strtotime($start_dt);
 $day_stamp = $start_day_stamp;
@@ -56,8 +63,7 @@ for ($i = 1; $i < 35; $i++) {
     $day_formatted = date('Y-m', $day_stamp);
     $day_formatted_for_label = date('M-Y', $day_stamp);
 
-    $usd = $gbp = $eur = $inr = $susd=0;
-
+    $usd = $gbp = $eur = $inr = 0;
 
     //1: usd
     if (isset($topup_data['result'][1][$day_formatted]['ADDBALANCE']))
@@ -71,54 +77,23 @@ for ($i = 1; $i < 35; $i++) {
     if (isset($topup_data['result'][2][$day_formatted]['REMOVEBALANCE']))
         $gbp -= $topup_data['result'][2][$day_formatted]['REMOVEBALANCE']['sum_amount'];
 
-    ///3: inr
+    ///3: eur
     if (isset($topup_data['result'][3][$day_formatted]['ADDBALANCE']))
-        $inr += $topup_data['result'][3][$day_formatted]['ADDBALANCE']['sum_amount'];
+        $eur += $topup_data['result'][3][$day_formatted]['ADDBALANCE']['sum_amount'];
     if (isset($topup_data['result'][3][$day_formatted]['REMOVEBALANCE']))
-        $inr -= $topup_data['result'][3][$day_formatted]['REMOVEBALANCE']['sum_amount'];
+        $eur -= $topup_data['result'][3][$day_formatted]['REMOVEBALANCE']['sum_amount'];
 
-    //4: S USD
+    //4: inr
     if (isset($topup_data['result'][4][$day_formatted]['ADDBALANCE']))
-        $susd += $topup_data['result'][4][$day_formatted]['ADDBALANCE']['sum_amount'];
+        $inr += $topup_data['result'][4][$day_formatted]['ADDBALANCE']['sum_amount'];
     if (isset($topup_data['result'][4][$day_formatted]['REMOVEBALANCE']))
-        $susd -= $topup_data['result'][4][$day_formatted]['REMOVEBALANCE']['sum_amount'];
-	
-	//5: EUR	
-	if (isset($topup_data['result'][5][$day_formatted]['ADDBALANCE']))
-        $eur += $topup_data['result'][5][$day_formatted]['ADDBALANCE']['sum_amount'];
-    if (isset($topup_data['result'][5][$day_formatted]['REMOVEBALANCE']))
-        $eur -= $topup_data['result'][5][$day_formatted]['REMOVEBALANCE']['sum_amount'];	
+        $inr -= $topup_data['result'][4][$day_formatted]['REMOVEBALANCE']['sum_amount'];
 
 
     $total_usd += $usd;
     $total_gbp += $gbp;
     $total_eur += $eur;
     $total_inr += $inr;
-	$total_susd +=$susd;
-	
-	//////
-	if($usd!=0)
-	{
-		$table_data_str .='<tr><td>'.$day_formatted_for_label.'</td><td>USD</td><td class="text-right">'.number_format($usd,2,".","").'</td></tr>';
-	}
-	if($gbp!=0)
-	{
-		$table_data_str .='<tr><td>'.$day_formatted_for_label.'</td><td>GBP</td><td class="text-right">'.number_format($gbp,2,".","").'</td></tr>';
-	}
-	if($eur!=0)
-	{
-		$table_data_str .='<tr><td>'.$day_formatted_for_label.'</td><td>EURO</td><td class="text-right">'.number_format($eur,2,".","").'</td></tr>';
-	}
-	if($inr!=0)
-	{
-		$table_data_str .='<tr><td>'.$day_formatted_for_label.'</td><td>INR</td><td class="text-right">'.number_format($inr,2,".","").'</td></tr>';
-	}
-	if($susd!=0)
-	{
-		$table_data_str .='<tr><td>'.$day_formatted_for_label.'</td><td>S USD</td><td class="text-right">'.number_format($susd,2,".","").'</td></tr>';
-	}
-	
-	
     ?>
     <script>
         /*making final array
@@ -145,10 +120,6 @@ for ($i = 1; $i < 35; $i++) {
         if (typeof inr_data_array !== 'undefined')
         {
             inr_data_array["<?php echo $i; ?>"] = "<?php echo $inr; ?>";
-        }
-		if (typeof susd_data_array !== 'undefined')
-        {
-            susd_data_array["<?php echo $i; ?>"] = "<?php echo $susd; ?>";
         }
     </script>
     <?php
@@ -185,94 +156,76 @@ for ($i = 1; $i < 35; $i++) {
         final_data_array.push(obj_temp);
         //console.log('inr_data_array');	console.log(inr_data_array);
     }
-	if (typeof susd_data_array !== 'undefined')
-    {
-        susd_data_array.shift();
-        var obj_temp = {label: "S USD (<?php echo $total_inr; ?>)", backgroundColor: "#A0F", data: susd_data_array};
-        final_data_array.push(obj_temp);
-        //console.log('inr_data_array');	console.log(inr_data_array);
-    }
 //console.log(final_data_array);
 </script>
-<div class="col-md-12 col-sm-12 col-xs-12">
-    <div class="x_panel">
-        <div class="x_title">
-            <h2>Topup Monthly Summary</h2>
-            <div class="clearfix"></div>
-        </div>
-        <div class="x_content">
-            <form class="block-content form-horizontal " id="search_form" name="search_form"  method="post" action="">
-                <input type="hidden" name="search_action" value="search" />
 
-                <div class="form-group">
+<div class="container-fluid">
+    <div class="block-header">
+        <h2>Topup Monthly Summary</h2>
+        <ul class="nav navbar-right panel_toolbox">
+
+        </ul>
+    </div>
+    <div class="row clearfix">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="card">
+                <div class="header">
+
+                    <form class="block-content form-horizontal " id="search_form" name="search_form"  method="post" action="">
+                        <input type="hidden" name="search_action" value="search" />
+
+                        <div class="form-group">
 
 
 
 
-                    <?php if (isset($ac_mngrs_data)): ?>
-                        <label class="control-label col-md-2 col-sm-3 col-xs-12">Account Manager</label>
-                        <div class="col-md-2 col-sm-9 col-xs-12">
-                            <select name="account_manager" id="account_manager" class="form-control" tabindex="<?php echo $tab_index++; ?>">
-                                <option value="">Select</option>                    
-                                <?php
-                                $str = '';
-                                if (isset($ac_mngrs_data['result']) && count($ac_mngrs_data['result']) > 0) {
-                                    foreach ($ac_mngrs_data['result'] as $key => $ac_mngr_array) {
-                                        $selected = ' ';
-                                        if ($ac_mngr_array['user_access_id_name'] == $_SESSION['search_topup_monthly_data']['s_account_manager'])
-                                            $selected = '  selected="selected" ';
-                                        $str .= '<option value="' . $ac_mngr_array['user_access_id_name'] . '" ' . $selected . '>' . $ac_mngr_array['name'] . '</option>';
-                                    }
-                                }
-                                echo $str;
+                            <?php if (isset($ac_mngrs_data)): ?>
+                                <label class="control-label col-md-2 col-sm-3 col-xs-12">Account Manager</label>
+                                <div class="col-md-2 col-sm-9 col-xs-12">
+                                    <select name="account_manager" id="account_manager" class="form-control" tabindex="<?php echo $tab_index++; ?>">
+                                        <option value="">Select</option>                    
+                                        <?php
+                                        $str = '';
+                                        if (isset($ac_mngrs_data['result']) && count($ac_mngrs_data['result']) > 0) {
+                                            foreach ($ac_mngrs_data['result'] as $key => $ac_mngr_array) {
+                                                $selected = ' ';
+                                                if ($ac_mngr_array['user_access_id_name'] == $_SESSION['search_topup_monthly_data']['s_account_manager'])
+                                                    $selected = '  selected="selected" ';
+                                                $str .= '<option value="' . $ac_mngr_array['user_access_id_name'] . '" ' . $selected . '>' . $ac_mngr_array['name'] . '</option>';
+                                            }
+                                        }
+                                        echo $str;
+                                        ?>
+                                    </select>
+                                </div>
+                            <?php else:
                                 ?>
-                            </select>
-                        </div>
-                    <?php else:
-                        ?>
-                        <label class="control-label col-md-2 col-sm-3 col-xs-12">Account ID</label>
-                        <div class="col-md-2 col-sm-9 col-xs-12">
-                            <input type="text" class="form-control data-search-field" name="account_id" id="account_id" value="<?php echo $_SESSION['search_topup_monthly_data']['s_account_id']; ?>">
-                        </div>
-                        <input type="hidden" name="account_manager" value="" />
-                    <?php endif; ?>
+                                <label class="control-label col-md-2 col-sm-3 col-xs-12">Account ID</label>
+                                <div class="col-md-2 col-sm-9 col-xs-12">
+                                    <input type="text" class="form-control data-search-field" name="account_id" id="account_id" value="<?php echo $_SESSION['search_topup_monthly_data']['s_account_id']; ?>">
+                                </div>
+                                <input type="hidden" name="account_manager" value="" />
+                            <?php endif; ?>
 
-                    <div class="searchBar">
-                        <input type="submit" value="Search" name="OkFilter" id="OkFilter" class="btn btn-primary">
-                    </div>
+                            <div class="searchBar">
+                                <input type="submit" value="Search" name="OkFilter" id="OkFilter" class="btn btn-primary">
+                            </div>
+                        </div>
+                    </form>
                 </div>
-            </form>
-        </div>
-    </div>
-    <div class="x_panel">
 
-        <div style="height: 400px;">
-            <canvas id="mybarChart"></canvas>
-        </div> 
+                <div class="body">
 
-    </div>
-    <div class="clearfix"></div>
-    <div class="x_panel">
-    	 <div class="x_content"> 
-    	<div class="table-responsive1">
-                <table class="table table-striped jambo_table table-bordered" id="table-sort">                    		
-                    <thead>
-                        	<tr class="headings thc"> <th width="30%" class="column-title">Month</th><th width="30%" class="column-title">Currency</th><th class="text-right column-title">Amount</th></tr>
-                    </thead>
-                     <tbody>
-                            <?php echo $table_data_str;?>
-                    </tbody>
-                </table>
-               
-            </div>                    
-            
-            <div class="clearfix"></div>
-    	</div>
-    </div>
-</div>
-<!-- Chart.js -->
-<script src="<?php echo base_url() ?>theme/vendors/Chart.js/dist/Chart.min.js"></script>
-<script>
+
+                    <div style="height: 400px;">
+                        <canvas id="mybarChart"></canvas>
+                    </div> 
+
+                </div>
+            </div>
+            <!-- Chart.js -->
+            <script src="<?php echo base_url() ?>theme/vendors/Chart.js/dist/Chart.min.js"></script>
+            <script>
     $(document).ready(function () {
 
         if ($("#mybarChart").length) {
@@ -323,4 +276,4 @@ for ($i = 1; $i < 35; $i++) {
             }
         });
     });
-</script>
+            </script>

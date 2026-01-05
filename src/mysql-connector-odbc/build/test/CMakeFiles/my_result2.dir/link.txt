@@ -1,0 +1,1 @@
+/usr/bin/c++ -O3 -DNDEBUG  -lodbc -lodbcinst -rdynamic CMakeFiles/my_result2.dir/my_result2.c.o -o my_result2  -Wl,-rpath,"\$ORIGIN" -lodbc -lodbcinst -lodbcinst ../lib/libmyodbc-util.a -lodbcinst 

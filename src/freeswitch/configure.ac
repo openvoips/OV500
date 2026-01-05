@@ -1,0 +1,2252 @@
+#                                               -*- Autoconf -*-
+# Process this file with autoconf to produce a configure script.
+
+# Must change all of the below together
+# For a release, set revision for that tagged release as well and uncomment
+AC_INIT([freeswitch], [1.10.13-dev-999-caa50b6c4f], bugs@freeswitch.org)
+AC_SUBST(SWITCH_VERSION_MAJOR, [1])
+AC_SUBST(SWITCH_VERSION_MINOR, [10])
+AC_SUBST(SWITCH_VERSION_MICRO, [13])
+AC_SUBST(SWITCH_VERSION_REVISION, [-dev-999-caa50b6c4f])
+AC_SUBST(SWITCH_VERSION_REVISION_HUMAN, ['-dev-999-caa50b6c4f'])
+
+AC_CONFIG_FILES([src/include/switch_version.h.in:src/include/switch_version.h.template])
+
+AC_CONFIG_AUX_DIR(build/config)
+AM_INIT_AUTOMAKE
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+AC_CONFIG_SRCDIR([src/switch.c])
+AC_CONFIG_HEADER([src/include/switch_private.h])
+AC_CONFIG_HEADER([libs/esl/src/include/esl_config_auto.h])
+AC_CONFIG_HEADER([libs/xmlrpc-c/xmlrpc_amconfig.h])
+
+AC_CANONICAL_HOST
+
+# Absolute source/build directory
+switch_srcdir=`(cd $srcdir && pwd)`
+switch_builddir=`pwd`
+AC_SUBST(switch_srcdir)
+AC_SUBST(switch_builddir)
+
+#
+# --enable-64 has been moved up higher prior to AC_PROG_CC so that we can tuck in the -m64 flag 
+# so devs on with Solaris wanting to build 64bit can not bother with adding any additional 
+# flags on the ./configure line.  User friendly.
+#
+
+#  Enable 64 bit build
+AC_ARG_ENABLE(64,
+[AC_HELP_STRING([--enable-64],[build with 64 bit support])],[enable_64="$enable_64"],[enable_64="no"])
+
+if test "${enable_64}" = "yes"; then
+   case "$host" in
+        *-solaris2*)
+	    # All three have to have -m64 for AC_PROG_CC to pick the right libtool
+            CFLAGS="$CFLAGS -m64"
+            LDFLAGS="$LDFLAGS -m64"
+            CXXFLAGS="$CXXFLAGS -m64"
+        ;;
+        *)
+        ;;
+   esac
+fi
+
+# use mtmalloc on Solaris SPARC if available
+AS_CASE([$host], [sparc-*-solaris2*], [AC_CHECK_LIB(mtmalloc, malloc)])
+
+# Whether to follow FHS
+AC_ARG_ENABLE([fhs],[AS_HELP_STRING([--disable-fhs],
+	[Do Not follow the FHS when placing files and directories (default only when not specifying prefix])],[enable_fhs="$enableval"],[enable_fhs="yes"])
+
+AC_PREFIX_DEFAULT(/usr/local/freeswitch)
+# AC_PREFIX_DEFAULT does not get expanded until too late so we need to do this to use prefix in this script
+
+if test "x$prefix" = "xNONE" ; then
+    enable_fhs=no
+    prefix='/usr/local/freeswitch'
+fi
+
+if test "x${exec_prefix}" = "xNONE" ; then
+    exec_prefix="$prefix"
+fi
+
+default_scriptdir="$prefix/scripts"
+default_grammardir="$prefix/grammar"
+default_soundsdir="$prefix/sounds"
+default_htdocsdir="$prefix/htdocs"
+default_modulesdir="$prefix/mod"
+default_dbdir="$prefix/db"
+default_storagedir="$prefix/storage"
+default_cachedir="$prefix/cache"
+default_recordingsdir="$prefix/recordings"
+rundir="$prefix/run"
+logdir="${prefix}/log"
+confdir="$prefix/conf"
+default_certsdir="$prefix/certs"
+default_fontsdir="$prefix/fonts"
+default_imagesdir="$prefix/images"
+
+if test "${enable_fhs}" = "yes"; then
+    eval full_datadir="${datadir}/freeswitch"
+    eval datadir=$full_datadir
+    eval full_localstatedir="${localstatedir}"
+    eval localstatedir=$full_localstatedir
+    eval libdir=$libdir
+    default_cachedir="${localstatedir}/cache/freeswitch"
+    rundir="${localstatedir}/run/freeswitch"
+    logdir="${localstatedir}/log/freeswitch"
+    localstatedir="${localstatedir}/lib/freeswitch"
+    default_scriptdir="${datadir}/scripts"
+    default_grammardir="${datadir}/grammar"
+    default_soundsdir="${datadir}/sounds"
+    default_htdocsdir="${datadir}/htdocs"
+    default_fontsdir="${datadir}/fonts"
+    default_modulesdir="${libdir}/freeswitch/mod"
+    default_dbdir="${localstatedir}/db"
+    default_storagedir="${localstatedir}/storage"
+    default_recordingsdir="${localstatedir}/recordings"
+    default_imagesdir="${localstatedir}/images"
+    eval confdir="${sysconfdir}/freeswitch"
+    eval default_certsdir="${confdir}/tls"
+else
+    if test "$datadir" = "\${datarootdir}" ; then
+        datadir="${prefix}"
+    fi
+    if test "$localstatedir" = "\${prefix}/var" ; then
+        localstatedir="${prefix}"
+    fi
+fi
+
+if test "$includedir" = "\${prefix}/include" ; then
+   includedir="${prefix}/include/freeswitch"
+fi
+
+default_pkgconfigdir="$libdir/pkgconfig"
+default_runtimedir="$rundir"
+default_logfiledir="$logdir"
+
+AC_SUBST(libdir)
+
+# Where to install the modules
+AC_ARG_WITH([modinstdir],
+	[AS_HELP_STRING([--with-modinstdir=DIR], [Install modules into this location (default: $prefix/mod)])], [modulesdir="$withval"], [modulesdir="${default_modulesdir}"])
+eval modulesdir="${modulesdir}"
+AC_SUBST(modulesdir)
+AC_DEFINE_UNQUOTED([SWITCH_MOD_DIR],"${modulesdir}",[where to install the modules to])
+
+# Where to put pidfile
+AC_ARG_WITH([rundir],
+	[AS_HELP_STRING([--with-rundir=DIR], [Put pidfile into this location (default: $prefix/run)])], [runtimedir="$withval"], [runtimedir="${default_runtimedir}"])
+AC_SUBST(runtimedir)
+AC_DEFINE_UNQUOTED([SWITCH_RUN_DIR],"${runtimedir}",[where to put pidfile to])
+
+AC_ARG_WITH([logfiledir],
+	[AS_HELP_STRING([--with-logfiledir=DIR], [Put logfiles into this location (default: $localstatedir/log)])], [logfiledir="$withval"], [logfiledir="${default_logfiledir}"])
+AC_SUBST(logfiledir)
+AC_DEFINE_UNQUOTED([SWITCH_LOG_DIR],"${logfiledir}",[where to put log files])
+
+AC_ARG_WITH([dbdir],
+	[AS_HELP_STRING([--with-dbdir=DIR], [Put database files into this location (default: $prefix/db)])], [dbdir="$withval"], [dbdir="${default_dbdir}"])
+AC_SUBST(dbdir)
+AC_DEFINE_UNQUOTED([SWITCH_DB_DIR],"${dbdir}",[where to put db files])
+
+AC_ARG_WITH([htdocsdir],
+	[AS_HELP_STRING([--with-htdocsdir=DIR], [Put html files into this location (default: $prefix/htdocs)])], [htdocsdir="$withval"], [htdocsdir="${default_htdocsdir}"])
+AC_SUBST(htdocsdir)
+AC_DEFINE_UNQUOTED([SWITCH_HTDOCS_DIR],"${htdocsdir}",[where to put htdocs files])
+
+AC_ARG_WITH([fontsdir],
+	[AS_HELP_STRING([--with-fontsdir=DIR], [Put font files into this location (default: $prefix/fonts)])], [fontsdir="$withval"], [fontsdir="${default_fontsdir}"])
+AC_SUBST(fontsdir)
+AC_DEFINE_UNQUOTED([SWITCH_FONTS_DIR],"${fontsdir}",[where to put font files])
+
+AC_ARG_WITH([soundsdir],
+	[AS_HELP_STRING([--with-soundsdir=DIR], [Put sound files into this location (default: $prefix/sounds)])], [soundsdir="$withval"], [soundsdir="${default_soundsdir}"])
+AC_SUBST(soundsdir)
+AC_DEFINE_UNQUOTED([SWITCH_SOUNDS_DIR],"${soundsdir}",[where to put sounds files])
+
+AC_ARG_WITH([grammardir],
+	[AS_HELP_STRING([--with-grammardir=DIR], [Put grammar files into this location (default: $prefix/grammar)])], [grammardir="$withval"], [grammardir="${default_grammardir}"])
+AC_SUBST(grammardir)
+AC_DEFINE_UNQUOTED([SWITCH_GRAMMAR_DIR],"${grammardir}",[where to put grammar files])
+
+AC_ARG_WITH([certsdir],
+	[AS_HELP_STRING([--with-certsdir=DIR], [Put certs files into this location (default: $prefix/certs)])], [certsdir="$withval"], [certsdir="${default_certsdir}"])
+AC_SUBST(certsdir)
+AC_DEFINE_UNQUOTED([SWITCH_CERTS_DIR],"${certsdir}",[where to put certs files])
+
+AC_ARG_WITH([scriptdir],
+	[AS_HELP_STRING([--with-scriptdir=DIR], [Put script files into this location (default: $prefix/scripts)])], [scriptdir="$withval"], [scriptdir="${default_scriptdir}"])
+AC_SUBST(scriptdir)
+AC_DEFINE_UNQUOTED([SWITCH_SCRIPT_DIR],"${scriptdir}",[where to put script files])
+
+AC_ARG_WITH([recordingsdir],
+	[AS_HELP_STRING([--with-recordingsdir=DIR], [Put recordings files into this location (default: $prefix/recordings)])], [recordingsdir="$withval"], [recordingsdir="${default_recordingsdir}"])
+AC_SUBST(recordingsdir)
+AC_DEFINE_UNQUOTED([SWITCH_RECORDINGS_DIR],"${recordingsdir}",[where to put recording files])
+
+AC_ARG_WITH([imagesdir],
+	[AS_HELP_STRING([--with-imagesdir=DIR], [Put images files into this location (default: $prefix/images)])], [imagesdir="$withval"], [imagesdir="${default_imagesdir}"])
+AC_SUBST(imagesdir)
+AC_DEFINE_UNQUOTED([SWITCH_IMAGES_DIR],"${imagesdir}",[where to put image files])
+
+AC_ARG_WITH([storagedir],
+	[AS_HELP_STRING([--with-storagedir=DIR], [Put storage files into this location (default: $prefix/storage)])], [storagedir="$withval"], [storagedir="${default_storagedir}"])
+AC_SUBST(storagedir)
+AC_DEFINE_UNQUOTED([SWITCH_STORAGE_DIR],"${storagedir}",[where to put storage files])
+
+AC_ARG_WITH([cachedir],
+	[AS_HELP_STRING([--with-cachedir=DIR], [Put cache files into this location (default: $prefix/cache)])], [cachedir="$withval"], [cachedir="${default_cachedir}"])
+AC_SUBST(cachedir)
+AC_DEFINE_UNQUOTED([SWITCH_CACHE_DIR],"${cachedir}",[where to put cache files])
+
+AC_SUBST(confdir)
+AC_DEFINE_UNQUOTED([SWITCH_CONF_DIR],"${confdir}",[directory for configuration files])
+
+AC_SUBST(datadir)
+AC_DEFINE_UNQUOTED([SWITCH_DATA_DIR],"${datadir}",[directory for data files])
+
+AC_SUBST(localstatedir)
+AC_DEFINE_UNQUOTED([SWITCH_LOCALSTATE_DIR],"${localstatedir}",[directory for local state files])
+AC_SUBST(bindir)
+AC_SUBST(includedir)
+
+AC_ARG_WITH([pkgconfigdir],
+	[AS_HELP_STRING([--with-pkgconfigdir=DIR], [Installation directory for pkgconfig file (default: ${libdir}/pkgconfig)])],
+	[case "${withval}" in
+	 yes|no) AC_MSG_ERROR([Invalid value ${withval} for option --with-pkgconfigdir]) ;;
+	 *) pkgconfigdir="${withval}" ;;
+	 esac
+	],
+	[pkgconfigdir="${default_pkgconfigdir}"]
+)
+AC_SUBST([pkgconfigdir])
+
+#Set default language
+AC_LANG_C
+# Checks for programs.
+AC_PROG_CC
+AC_PROG_CXX
+
+#check if the g++ compiler works
+AC_CACHE_CHECK([whether the C++ compiler works], [ac_cv_sys_cxx_works], [
+    AC_LANG_PUSH([C++])
+    AC_COMPILE_IFELSE([AC_LANG_SOURCE([int main() { }])], [ac_cv_sys_cxx_works=yes],
+        [ac_cv_sys_cxx_works=no])
+    AC_LANG_POP([C++])
+    ])
+[ if [ "x$ac_cv_sys_cxx_works" = "xno" ]; then ]
+    AC_MSG_FAILURE([The C++ compiler does not work. Please (re)install the C++ compiler])
+[ fi ]
+
+AC_PROG_AWK
+AC_PROG_MAKE_SET
+AC_PROG_INSTALL
+
+#override some default libtool behavior and invoke AC_PROG_LIBTOOL (see http://lists.gnu.org/archive/html/libtool/2007-03/msg00000.html)
+m4_defun([_LT_AC_LANG_F77_CONFIG], [:])
+m4_defun([_LT_AC_LANG_GCJ_CONFIG], [:])
+m4_defun([_LT_AC_LANG_RC_CONFIG], [:])
+AM_PROG_CC_C_O
+LT_INIT([disable-static])
+
+#Check for compiler vendor
+AX_COMPILER_VENDOR
+
+# Set CC_FOR_BUILD
+if test "x${cross_compiling}" = "xyes"; then
+    CC_FOR_BUILD=${CC_FOR_BUILD-gcc}
+    case "$host" in
+    	 arm*-linux-gnueabi*|arm*-*-linux-gnueabi*)
+		# spandsp modem
+		ac_cv_file__dev_ptmx=yes
+		# libjs
+		export ac_cv_va_copy=yes
+		# srtp
+		export ac_cv_file__dev_urandom=yes
+		# rpl_malloc
+		export ac_cv_func_realloc_0_nonnull=yes
+		export ac_cv_func_malloc_0_nonnull=yes
+		# apr
+		export ac_cv_func_setpgrp_void=yes
+		export ac_cv_file__dev_zero=yes
+		export apr_cv_tcp_nodelay_with_cork=yes
+		export ac_cv_file_dbd_apr_dbd_mysql_c=no
+		export ac_cv_sizeof_ssize_t=4
+		export apr_cv_mutex_recursive=yes
+		export ac_cv_func_pthread_rwlock_init=yes
+		export apr_cv_type_rwlock_t=yes
+		export apr_cv_process_shared_works=yes
+		export apr_cv_mutex_robust_shared=yes
+	 ;;
+    esac
+else
+    CC_FOR_BUILD='$(CC)'
+fi
+AC_SUBST(CC_FOR_BUILD)
+
+if test -n "$lt_sysroot" ; then
+   APR_ADDTO(CFLAGS, --sysroot=$lt_sysroot)
+   APR_ADDTO(CXXFLAGS, --sysroot=$lt_sysroot)
+   APR_ADDTO(CPPFLAGS, --sysroot=$lt_sysroot)
+   APR_ADDTO(LDFLAGS, --sysroot=$lt_sysroot)
+   PKG_CONFIG_SYSROOT_DIR=$lt_sysroot
+fi
+
+#  Optimize
+AC_ARG_ENABLE(optimization,
+[AC_HELP_STRING([--enable-optimization],[Set if you want us to add max optimising compiler flags])],[enable_optimizer="$enableval"],[enable_optimizer="no"])
+
+if test "${enable_optimizer}" = "yes" ; then
+        AC_DEFINE([OPTIMZER],[],[Enable Optimization.])
+        AX_CC_MAXOPT
+fi
+
+# set defaults for use on all platforms
+SWITCH_AM_CFLAGS="-I${switch_srcdir}/src/include -I${switch_builddir}/src/include -I${switch_srcdir}/libs/libteletone/src"
+SWITCH_AM_CXXFLAGS="-I${switch_srcdir}/src/include -I${switch_builddir}/src/include -I${switch_srcdir}/libs/libteletone/src"
+SWITCH_AM_CPPFLAGS="-I${switch_srcdir}/src/include -I${switch_builddir}/src/include -I${switch_srcdir}/libs/libteletone/src"
+SWITCH_AM_LDFLAGS="-lm"
+
+#set SOLINK variable based on compiler and host
+if test "x${ax_cv_c_compiler_vendor}"  =  "xsun" ; then
+    SOLINK="-Bdynamic -dy -G"
+elif test "x${ax_cv_c_compiler_vendor}" = "xclang" ; then
+    case "$host" in
+        *darwin*)
+            SOLINK="-dynamic -force-flat-namespace"
+        ;;
+        *)
+            SOLINK="-shared -Xlinker -x"
+        ;;
+
+    esac
+elif test "x${ax_cv_c_compiler_vendor}" = "xgnu" ; then
+    case "$host" in
+        *-solaris2*)
+            SOLINK="-shared -Xlinker"
+        ;;
+        *)
+            SOLINK="-shared -Xlinker -x"
+        ;;
+    esac
+elif test "x${ax_cv_c_compiler_vendor}" = "xintel" ; then
+    case "$host" in
+        *)
+            SOLINK="-shared -Xlinker -x"
+        ;;
+    esac
+else
+    AC_ERROR([Please update configure.in with SOLINK values for your compiler])
+fi
+
+##
+# detect libtool major version,
+# set libtool library extension based on this
+# to work around some brokeness when using 'la' with libtool-1.5
+#
+AC_MSG_CHECKING([libtool major version])
+libtool="${switch_builddir}/libtool"
+LIBTOOL_MAJOR_VERSION="`$libtool --version 2>/dev/null| sed -e 's/([[^)]]*)//g;s/^[[^0-9]]*//;s/[[- ]].*//g;q'| awk  'BEGIN { FS = "." } { print $1 }' `"
+if test -z "$LIBTOOL_MAJOR_VERSION" ; then
+	LIBTOOL_MAJOR_VERSION="`sed -n -e '/^VERSION/{s/^.*=\"\{0,1\}\([[0-9]]\{1,\}\)\..*/\1/;p;}' ${switch_srcdir}/build/config/ltmain.sh`"
+fi
+if test -z "$LIBTOOL_MAJOR_VERSION" ; then
+	AC_MSG_ERROR([Failed to detect your libtool version, please open a bug report on https://freeswitch.org/jira])
+fi
+AC_MSG_RESULT([${LIBTOOL_MAJOR_VERSION}])
+
+LIBTOOL_LIB_EXTEN=so
+
+if test "${LIBTOOL_MAJOR_VERSION}" = "2" ; then
+   LIBTOOL_LIB_EXTEN="la"
+fi
+AC_MSG_RESULT([using libtool library extension... ${LIBTOOL_LIB_EXTEN}])
+
+if test "$ax_cv_c_compiler_vendor" = "gnu"; then
+  saved_CFLAGS="$CFLAGS"
+  AC_CACHE_CHECK([whether compiler supports -Wno-unused-result],
+    [ac_cv_gcc_supports_w_no_unused_result], [
+      CFLAGS="$CFLAGS -Wno-unused-result -Wno-error=unused-result"
+      AC_TRY_COMPILE([],[return 0;],
+        [ac_cv_gcc_supports_w_no_unused_result=yes],
+        [ac_cv_gcc_supports_w_no_unused_result=no])])
+  CFLAGS="$saved_CFLAGS"
+  AC_MSG_RESULT($ac_cv_gcc_supports_w_no_unused_result)
+
+  saved_CFLAGS="$CFLAGS"
+  AC_CACHE_CHECK([whether compiler supports -Wno-misleading-indentation],
+    [ac_cv_gcc_supports_w_no_misleading_indentation], [
+      CFLAGS="$CFLAGS -Wno-misleading-indentation -Wno-error=misleading-indentation"
+      AC_TRY_COMPILE([],[return 0;],
+        [ac_cv_gcc_supports_w_no_misleading_indentation=yes],
+        [ac_cv_gcc_supports_w_no_misleading_indentation=no])])
+  CFLAGS="$saved_CFLAGS"
+  AC_MSG_RESULT($ac_cv_gcc_supports_w_no_misleading_indentation)
+fi
+
+# tweak compiler specific flags
+if test "x${ax_cv_c_compiler_vendor}"  =  "xsun" ; then
+    APR_ADDTO(SWITCH_AM_CFLAGS, -KPIC)
+    APR_ADDTO(SWITCH_AM_CFLAGS, -DPIC)
+    APR_ADDTO(SWITCH_AM_CFLAGS, -erroff=E_END_OF_LOOP_CODE_NOT_REACHED)
+    APR_ADDTO(SWITCH_AM_CFLAGS, -errtags=yes)
+    APR_ADDTO(SWITCH_AM_CFLAGS, -D__FUNCTION__=__func__ )
+    APR_ADDTO(SWITCH_AM_CFLAGS, -mt)
+    APR_ADDTO(SWITCH_AM_CXXFLAGS, -errtags=yes)
+    APR_ADDTO(SWITCH_AM_CXXFLAGS, -KPIC)
+    APR_ADDTO(SWITCH_AM_CXXFLAGS, -DPIC)
+    APR_ADDTO(SWITCH_AM_CXXFLAGS, "-features=extensions")
+    APR_ADDTO(SWITCH_AM_CXXFLAGS, -D__FUNCTION__=__func__)
+    APR_ADDTO(SWITCH_AM_CXXFLAGS, -mt)
+
+    APR_ADDTO(SWITCH_AM_LDFLAGS, -R${prefix}/lib)
+    if test "${enable_64}" = "yes"; then
+        APR_ADDTO(SWITCH_AM_CFLAGS, -m64)
+        APR_ADDTO(SWITCH_AM_CXXFLAGS, -m64)
+        APR_ADDTO(SWITCH_AM_LDFLAGS, -m64)
+	LIBS="$LIBS -m64"
+    fi
+elif test "x${ax_cv_c_compiler_vendor}" = "xclang" ; then
+    APR_ADDTO(SWITCH_AM_CFLAGS, -fPIC -ffast-math)
+    APR_ADDTO(SWITCH_AM_CXXFLAGS, -fPIC -ffast-math)
+    APR_ADDTO(SWITCH_AM_CFLAGS, -Werror)
+elif test "x${ax_cv_c_compiler_vendor}" = "xgnu" ; then
+    APR_ADDTO(SWITCH_AM_CFLAGS, -fPIC -ffast-math)
+    APR_ADDTO(SWITCH_AM_CXXFLAGS, -fPIC -ffast-math)
+    AC_SUBST([AM_MOD_AVMD_CXXFLAGS], [-std=gnu99])      # FS-8809, needed for MAP_POPULATE
+    if test "$ac_cv_gcc_supports_w_no_unused_result" = yes; then
+      APR_ADDTO(SWITCH_AM_CFLAGS, -Werror)
+      APR_ADDTO(SWITCH_AM_CFLAGS, -Wno-unused-result)
+    fi
+    if test "$ac_cv_gcc_supports_w_no_misleading_indentation" = yes; then
+      APR_ADDTO(SWITCH_AM_CFLAGS, -Wno-misleading-indentation)
+    fi
+    if test "${enable_64}" = "yes"; then
+	case "$host" in
+             *-solaris2*)
+		APR_ADDTO(CFLAGS, -m64)
+		APR_ADDTO(LDFLAGS, -m64)
+		APR_ADDTO(CXXFLAGS, -m64)
+	        ;;
+	     *)
+	     	LIBS="$LIBS -m64"
+	     ;;
+	 esac
+    fi
+fi
+
+case "${ax_cv_c_compiler_vendor}" in
+sun)
+	VISIBILITY_FLAG=-xldscope=hidden
+;;
+*)
+	VISIBILITY_FLAG=-fvisibility=hidden
+;;
+esac
+AC_SUBST(VISIBILITY_FLAG)
+
+#
+# gcc visibility cflag checks
+#
+AC_ARG_ENABLE([visibility],
+	[AS_HELP_STRING([--disable-visibility], [Disable or enable API visibility support (default: use if available)])],
+	[enable_visibility="${enableval}"],
+	[enable_visibility="detect"]
+)
+HAVE_VISIBILITY="no"
+
+if test "x${enable_visibility}" != "xno" ; then
+
+	case "${ax_cv_c_compiler_vendor}" in
+	gnu)
+		save_CFLAGS="${CFLAGS}"
+		CFLAGS="${CFLAGS} -fvisibility=hidden"
+		AC_MSG_CHECKING([whether the compiler supports -fvisibility=hidden])
+		AC_COMPILE_IFELSE(
+			[AC_LANG_PROGRAM(
+				[int foo __attribute__ ((visibility("default")));],
+				[;]
+			)],
+
+			[AC_MSG_RESULT([yes])
+			 APR_ADDTO([SWITCH_AM_CFLAGS],   [-fvisibility=hidden -DSWITCH_API_VISIBILITY=1 -DCJSON_API_VISIBILITY=1 -DHAVE_VISIBILITY=1])
+			 APR_ADDTO([SWITCH_AM_CXXFLAGS], [-fvisibility=hidden -DSWITCH_API_VISIBILITY=1 -DCJSON_API_VISIBILITY=1 -DHAVE_VISIBILITY=1])
+			 HAVE_VISIBILITY="yes"],
+
+			[AC_MSG_RESULT([no])]
+		)
+		CFLAGS="${save_CFLAGS}"
+		;;
+
+	sun)
+	#	save_CFLAGS="${CFLAGS}"
+	#	CFLAGS="${CFLAGS} -xldscope=hidden"
+	#	AC_MSG_CHECKING([whether the compiler supports -xldscope=hidden])
+	#	AC_COMPILE_IFELSE(
+	#		[AC_LANG_PROGRAM(
+	#			[int foo __attribute__ ((visibility("default")));],
+	#			[;]
+	#		)],
+	#
+	#		[AC_MSG_RESULT([yes])
+	#		 APR_ADDTO([SWITCH_AM_CFLAGS],   [-xldscope=hidden -DSWITCH_API_VISIBILITY=1 -DHAVE_VISIBILITY=1])
+	#		 APR_ADDTO([SWITCH_AM_CXXFLAGS], [-xldscope=hidden -DSWITCH_API_VISIBILITY=1 -DHAVE_VISIBILITY=1])
+	#		 HAVE_VISIBILITY="yes"],
+	#
+	#		[AC_MSG_RESULT([no])]
+	#	)
+	#	CFLAGS="${save_CFLAGS}"
+		;;
+
+	*)
+		if test "x${enable_visibility}" = "xyes" ; then
+			AC_MSG_ERROR([Non-GNU / SUN compilers are currently unsupported])
+		else
+			AC_MSG_WARN([Non-GNU / SUN compilers are currently unsupported])
+		fi
+		;;
+	esac
+
+	#
+	# visibility explicitly requested but not supported by this compiler => error
+	#
+	if test "x${enable_visibility}" = "xyes" -a "x${HAVE_VISIBILITY}" = "xno" ; then
+		AC_MSG_ERROR([API visibility not supported by this compiler])
+	fi
+fi
+
+# Enable debugging (default: on)
+# (rename option if the default is changed)
+AC_ARG_ENABLE(debug,
+[AC_HELP_STRING([--disable-debug],[build without debug information])],[enable_debug="$enableval"],[enable_debug="yes"])
+
+if test "${enable_debug}" = "yes"; then
+        AC_DEFINE([DEBUG],[],[Enable extra debugging.])
+	saved_CFLAGS="$CFLAGS"
+	CFLAGS=
+        AX_CFLAGS_WARN_ALL_ANSI
+	SWITCH_ANSI_CFLAGS=$CFLAGS
+	CFLAGS="$saved_CFLAGS"	
+
+	if test "x${ax_cv_c_compiler_vendor}" = "xgnu" ; then
+	    if test "$ac_cv_gcc_supports_w_no_unused_result" = yes; then
+	      APR_ADDTO(SWITCH_AM_CFLAGS, -Wno-unused-result)
+	    fi
+	    APR_ADDTO(SWITCH_AM_CFLAGS, -g -ggdb)
+	    export DEBUG_CFLAGS="-g -ggdb"
+	fi
+
+fi
+
+AC_ARG_ENABLE(libyuv,
+[AC_HELP_STRING([--disable-libyuv],[build without libyuv])],[enable_libyuv="$enableval"],[enable_libyuv="yes"])
+
+AM_CONDITIONAL([ENABLE_LIBYUV],[test "${enable_libyuv}" = "yes"])
+
+AC_ARG_ENABLE(libvpx,
+[AC_HELP_STRING([--disable-libvpx],[build without libvpx])],[enable_libvpx="$enableval"],[enable_libvpx="yes"])
+
+AM_CONDITIONAL([ENABLE_LIBVPX],[test "${enable_libvpx}" = "yes"])
+
+AC_ARG_ENABLE(cpp,
+[AC_HELP_STRING([--disable-cpp],[build without cpp code])],[enable_cpp="$enableval"],[enable_cpp="yes"])
+
+AM_CONDITIONAL([ENABLE_CPP],[test "${enable_cpp}" = "yes"])
+
+AM_CONDITIONAL([DISABLE_CC],[test "${disable_cc}" = "yes"])
+
+AC_ARG_ENABLE([system-xmlrpc-c],
+  [AS_HELP_STRING([--enable-system-xmlrpc-c],
+    [use system lib for xmlrpc-c])],,
+  [enable_xmlrpcc="no"])
+
+if test "${enable_xmlrpcc}" = "yes" ; then
+SYS_XMLRPC_CFLAGS=`xmlrpc-c-config --cflags`
+SYS_XMLRPC_LDFLAGS=`xmlrpc-c-config --libs`
+fi
+AC_SUBST(SYS_XMLRPC_CFLAGS)
+AC_SUBST(SYS_XMLRPC_LDFLAGS)
+AM_CONDITIONAL([SYSTEM_XMLRPCC],[test "${enable_xmlrpcc}" = "yes"])
+
+for luaversion in luajit lua5.3 lua-5.3 lua53 lua5.2 lua-5.2 lua52 lua5.1 lua-5.1 lua; do
+  PKG_CHECK_MODULES([LUA],[${luaversion}],[have_lua=yes],[have_lua=no])
+  if test ${have_lua} = yes; then
+    break
+  fi
+done
+if test x"${LUA_LIBS}" = x"" ; then
+   LUA_LIBS="-llua"
+fi
+
+AC_ARG_ENABLE(srtp,
+[AC_HELP_STRING([--disable-srtp],[build without srtp support])],[enable_srtp="$enableval"],[enable_srtp="yes"])
+
+AM_CONDITIONAL([ENABLE_SRTP],[test "${enable_srtp}" = "yes"])
+
+have_openal=no
+AC_CHECK_LIB(openal, alcLoopbackOpenDeviceSOFT, [have_openal="yes"])
+AM_CONDITIONAL([HAVE_OPENAL],[test "${have_openal}" = "yes"])
+
+PA_LIBS=
+
+PKG_CHECK_MODULES(JACK, jack, have_jack=yes, have_jack=no)
+if test "x$have_jack" = "xyes" ; then
+PA_LIBS+=$JACK_LIBS
+fi
+
+AC_CHECK_LIB(asound, snd_pcm_open, have_alsa=yes, have_alsa=no)
+if test "x$have_alsa" = "xyes"  ; then
+PA_LIBS+=-lasound
+fi
+
+AC_SUBST(PA_LIBS)
+
+AM_CONDITIONAL([WANT_DEBUG],[test "${enable_debug}" = "yes"])
+
+AC_ARG_ENABLE(core-odbc-support,
+  [AS_HELP_STRING([--enable-core-odbc-support], [Compile with ODBC Support (default is optional)])],,[enable_core_odbc_support="optional"])
+if ! test "$enable_core_odbc_support" = "no"; then
+  AX_LIB_ODBC
+  if test "$ac_cv_found_odbc" = "yes" ; then
+    enable_core_odbc_support="yes"
+  elif test "$enable_core_odbc_support" = "yes"; then
+    AC_MSG_ERROR([no usable libodbc; please install unixodbc devel package or equivalent])
+  else
+    enable_core_odbc_support="no"
+  fi
+fi
+
+CHECK_LIBUUID
+SWITCH_AM_LDFLAGS="$LIBUUID_LIBS $SWITCH_AM_LDFLAGS"
+SWITCH_AM_CFLAGS="$LIBUUID_CFLAGS $SWITCH_AM_CFLAGS"
+
+AC_ARG_ENABLE(core-pgsql-pkgconfig,
+	[AS_HELP_STRING([--disable-core-pgsql-pkgconfig], [Use pg_config to get PGQSL build options])],[enable_core_pgsql_pkgconfig="$enableval"],[enable_core_pgsql_pkgconfig="yes"])
+
+path_remove () {
+  echo "$1" | tr ':' '\n' | grep -Fxv "$2" | tr '\n' ':' | sed 's/:$//'
+}
+path_push_unique () {
+  x="$(eval echo \$$1)"
+  x="$(path_remove "$x" "$2")"
+  if test -z "$x"; then
+    eval export $1="$2"
+  else
+    eval export $1="$2:$x"
+  fi
+}
+
+AC_PATH_PROG([PG_CONFIG], [pg_config], [no])
+AC_PATH_PROG([PKG_CONFIG], [pkg-config], [no])
+
+# These 2 x86 libraries are not required on macOS 15 Sequoia on x86 as of June 2025. Not needed on aarch64 systems.
+# They are left here since they are likely required on older macOS systems.
+case $host in
+     x86_64-apple-darwin*)
+	path_push_unique PKG_CONFIG_PATH /usr/local/opt/libpq/lib/pkgconfig
+	path_push_unique PKG_CONFIG_PATH /usr/local/opt/openssl/lib/pkgconfig
+     ;;
+esac
+
+if test "$PKG_CONFIG" = "no" \
+	|| test x"$enable_core_pgsql_pkgconfig" = x"no" \
+	|| ! pkg-config --modversion libpq > /dev/null; then
+	if test "$PG_CONFIG" != "no"; then
+		AC_MSG_CHECKING([for PostgreSQL libraries via pg_config])
+		POSTGRESQL_CFLAGS="-I`$PG_CONFIG --includedir`"
+		POSTGRESQL_LIBDIR="-L`$PG_CONFIG --libdir`"
+		POSTGRESQL_LDFLAGS="-L`$PG_CONFIG --libdir` -lpq"
+		POSTGRESQL_VERSION=`$PG_CONFIG --version | awk '{ print $NF }'`
+		POSTGRESQL_MAJOR_VERSION=`$PG_CONFIG --version | awk '{ print $NF }' | awk -F. '{ print $1 }'`
+		POSTGRESQL_MINOR_VERSION=`$PG_CONFIG --version | awk '{ print $NF }' | awk -F. '{ print $2 }'`
+		POSTGRESQL_PATCH_VERSION=`$PG_CONFIG --version | awk '{ print $NF }' | awk -F. '{ print $3 }'`
+	fi
+else
+	AC_MSG_CHECKING([for PostgreSQL libraries via pkg_config])
+	POSTGRESQL_CFLAGS="`$PKG_CONFIG --cflags libpq`"
+	POSTGRESQL_LIBDIR="`$PKG_CONFIG libpq --libs-only-L`"
+	POSTGRESQL_LDFLAGS="`$PKG_CONFIG --libs libpq`"
+	POSTGRESQL_VERSION="`$PKG_CONFIG --modversion libpq`"
+	POSTGRESQL_MAJOR_VERSION="`echo $POSTGRESQL_VERSION | cut -d. -f1 | sed 's/^\([[0-9]]*\)[[^0-9]].*/\1/'`"
+	POSTGRESQL_MINOR_VERSION="`echo $POSTGRESQL_VERSION | cut -d. -f2 | sed 's/^\([[0-9]]*\)[[^0-9]].*/\1/'`"
+	POSTGRESQL_PATCH_VERSION="`echo $POSTGRESQL_VERSION | cut -d. -f3 | sed 's/^\([[0-9]]*\)[[^0-9]].*/\1/'`"
+	test -n "$POSTGRESQL_PATCH_VERSION" || POSTGRESQL_PATCH_VERSION=0
+fi
+AC_MSG_RESULT([$POSTGRESQL_LIBDIR])
+AC_DEFINE_UNQUOTED([POSTGRESQL_VERSION], "${POSTGRESQL_VERSION}", [Specifies the version of PostgreSQL we are linking against])
+AC_DEFINE_UNQUOTED([POSTGRESQL_MAJOR_VERSION], ${POSTGRESQL_MAJOR_VERSION}, [Specifies the version of PostgreSQL we are linking against])
+AC_DEFINE_UNQUOTED([POSTGRESQL_MINOR_VERSION], ${POSTGRESQL_MINOR_VERSION}, [Specifies the version of PostgreSQL we are linking against])
+AC_DEFINE_UNQUOTED([POSTGRESQL_PATCH_VERSION], ${POSTGRESQL_PATCH_VERSION}, [Specifies the version of PostgreSQL we are linking against])
+have_libpq=no
+save_LIBS="${LIBS}"
+save_CPPFLAGS="${CPPFLAGS}"
+LIBS="${POSTGRESQL_LDFLAGS}"
+CPPFLAGS="${POSTGRESQL_CFLAGS}"
+AC_CHECK_LIB([pq], [PQgetvalue], [have_libpq="yes"])
+LIBS="${save_LIBS}"
+CPPFLAGS="${save_CPPFLAGS}"
+AM_CONDITIONAL([HAVE_PGSQL],[test "${have_libpq}" = "yes"])
+AC_SUBST([POSTGRESQL_CFLAGS], [$POSTGRESQL_CFLAGS])
+AC_SUBST([POSTGRESQL_LDFLAGS], [$POSTGRESQL_LDFLAGS])
+AC_SUBST([POSTGRESQL_LIBDIR], [$POSTGRESQL_LIBDIR])
+
+
+PKG_CHECK_MODULES([MARIADB], [libmariadb >= 3.0.9],[
+  AM_CONDITIONAL([HAVE_MARIADB],[true])],[
+  PKG_CHECK_MODULES([MARIADB], [mariadb >= 3.0.9],[
+    AM_CONDITIONAL([HAVE_MARIADB],[true])],[
+    AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_MARIADB],[false])
+  ])
+])
+
+PKG_CHECK_MODULES([SPANDSP], [spandsp >= 3.0],[
+  AM_CONDITIONAL([HAVE_SPANDSP],[true])],[
+    AC_MSG_ERROR([no usable spandsp; please install spandsp3 devel package or equivalent])
+])
+
+PKG_CHECK_MODULES([SOFIA_SIP], [sofia-sip-ua >= 1.13.17],[
+  AM_CONDITIONAL([HAVE_SOFIA_SIP],[true])],[
+    AC_MSG_ERROR([no usable sofia-sip; please install sofia-sip-ua devel package or equivalent])
+])
+
+AC_ARG_ENABLE(deprecated-core-db-events,
+	[AS_HELP_STRING([--enable-deprecated-core-db-events], [Keep deprecated core db events])],,[enable_deprecated_core_db_events="no"])
+
+if test x"$enable_deprecated_core_db_events" = x"yes" ; then
+        AC_DEFINE([SWITCH_DEPRECATED_CORE_DB], [1], [Define to 1 to enable deprecated core db events])
+fi
+
+ESL_LDFLAGS=
+PLATFORM_CORE_LDFLAGS=
+PLATFORM_CORE_LIBS=
+
+# tweak platform specific flags
+case "$host" in
+    *darwin*)
+        case "$host" in
+          aarch64-apple-darwin*)
+          # Homebrew package required libraries on Apple Silicon
+            APR_ADDTO(CPPFLAGS, -I/opt/homebrew/include)
+            APR_ADDTO(LDFLAGS, -L/opt/homebrew/lib)
+          ;;
+          *)
+          # Default package libraries on Apple x86_64
+          # The following 4 x86_64 libraries are not required on macOS 15 Sequoia as of June 2025.
+          # They are left here since they are likely required on older macOS systems.
+            APR_ADDTO(CPPFLAGS, -I/usr/local/include)  # Xcode 6 drops std lib search, add it to clang
+            APR_ADDTO(LDFLAGS,  -L/usr/local/lib)      # Xcode 6 drops std lib search, add it to clang
+            APR_ADDTO(CPPFLAGS, -I/usr/local/opt/openssl/include)
+            APR_ADDTO(LDFLAGS,  -L/usr/local/opt/openssl/lib)
+          ;;
+        esac
+       # Common Apple Clang flags
+        APR_ADDTO(CFLAGS, -pipe)
+        APR_ADDTO(LDFLAGS, -pipe)
+        APR_ADDTO(CXXFLAGS, -pipe)
+       # Common Apple Darwin settings
+        APR_ADDTO(SWITCH_AM_CFLAGS, -DMACOSX)
+        APR_REMOVEFROM(SWITCH_AM_CFLAGS, -fPIC)
+        if test "x$enable_core_odbc_support" != "xno"; then
+	   APR_ADDTO([PLATFORM_CORE_LDFLAGS], [--framework CoreFoundation])
+	fi
+	APR_ADDTO([PLATFORM_CORE_LIBS], [-ldl])
+    ;;
+    *-solaris2*)
+	if test "${enable_64}" = "yes"; then
+           APR_ADDTO(CPPFLAGS, [-I/opt/64/include])
+           APR_ADDTO(LDFLAGS, [-L/opt/64/lib -Wl,-rpath,/opt/64/lib])
+           APR_ADDTO(SWITCH_AM_CFLAGS, [-I/opt/64/include])
+           APR_ADDTO(SWITCH_AM_LDFLAGS, [-L/opt/64/lib -Wl,-rpath,/opt/64/lib])
+	else
+           APR_ADDTO(CPPFLAGS, [-I/opt/include])
+           APR_ADDTO(LDFLAGS, [-L/opt/lib -Wl,-rpath,/opt/lib])
+           APR_ADDTO(SWITCH_AM_CFLAGS, [-I/opt/include])
+           APR_ADDTO(SWITCH_AM_LDFLAGS, [-L/opt/lib -Wl,-rpath,/opt/lib])
+	fi
+        APR_ADDTO(SWITCH_AM_CFLAGS, -DPATH_MAX=2048 -D__EXTENSIONS__)
+        APR_ADDTO(SWITCH_AM_LDFLAGS, -lsendfile -lresolv -lsocket -lnsl -luuid)
+        APR_ADDTO(ESL_LDFLAGS, -lnsl -lsocket)
+	APR_ADDTO([PLATFORM_CORE_LIBS], [-ldl -lcrypt -lrt -lsendfile -lresolv -lsocket -lnsl -luuid])
+    ;;
+    *dragonfly*)
+        APR_ADDTO(CPPFLAGS, -I/usr/local/include)
+        APR_ADDTO(LDFLAGS, -L/usr/local/lib)
+        APR_ADDTO(SWITCH_AM_CFLAGS, -I/usr/local/include)
+    ;;
+    *openbsd*)
+        APR_ADDTO(CPPFLAGS, -I/usr/local/include)
+        APR_ADDTO(LDFLAGS, -L/usr/local/lib -ltermcap)
+        APR_ADDTO(SWITCH_AM_CFLAGS, -I/usr/local/include)
+    ;;
+    *netbsd*)
+        APR_ADDTO(CPPFLAGS, -I/usr/pkg/include)
+        APR_ADDTO(LDFLAGS, [-L/usr/pkg/lib -Wl,-rpath,/usr/pkg/lib])
+        APR_ADDTO(SWITCH_AM_CFLAGS, -I/usr/pkg/include)
+    ;;
+    *bsd*)
+        APR_ADDTO(CPPFLAGS, -I/usr/local/include)
+        APR_ADDTO(LDFLAGS, -L/usr/local/lib)
+        APR_ADDTO(SWITCH_AM_CFLAGS, -I/usr/local/include)
+	APR_ADDTO([PLATFORM_CORE_LIBS], [-lcrypt -lrt])
+    ;;
+    *linux*)
+	APR_ADDTO([PLATFORM_CORE_LIBS], [-ldl -lcrypt -lrt])
+    ;;
+esac
+
+APR_REMOVEFROM(SWITCH_AM_CXXFLAGS, -std=c99)
+
+# check for usable system MD5 library
+AS_CASE([$host],
+  [*-solaris2*], [AC_CHECK_LIB(md5, MD5Init)],
+  [*-freebsd*], [AC_CHECK_LIB(md, MD5Init)],
+  [*-openbsd*|*-netbsd*], [AC_CHECK_FUNCS([MD5Init])])
+
+AC_CHECK_LIB(z, inflateReset, have_libz=yes, AC_MSG_ERROR([no usable zlib; please install zlib devel package or equivalent]))
+if test "x$have_libz" = "xyes"  ; then
+APR_ADDTO([PLATFORM_CORE_LIBS], [-lz])
+fi
+
+PKG_CHECK_MODULES([MPG123], [libmpg123 >= 1.16.0],[
+  AM_CONDITIONAL([HAVE_MPG123],[true])],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_MPG123],[false])])
+
+PKG_CHECK_MODULES([AMR], [opencore-amrnb >= 0.1.0],[
+		AM_CONDITIONAL([HAVE_AMR],[true])],[
+		AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_AMR],[false])])
+
+PKG_CHECK_MODULES([AMRWB], [opencore-amrwb >= 0.1.0 vo-amrwbenc >= 0.1.0],[
+		AM_CONDITIONAL([HAVE_AMRWB],[true])],[
+		AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_AMRWB],[false])])
+
+PKG_CHECK_MODULES([STIRSHAKEN], [stirshaken],[
+		AM_CONDITIONAL([HAVE_STIRSHAKEN],[true])],[
+		AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_STIRSHAKEN],[false])])
+
+AC_CHECK_LIB(apr-1, apr_pool_mutex_set, use_system_apr=yes, use_system_apr=no)
+AM_CONDITIONAL([SYSTEM_APR],[test "${use_system_apr}" = "yes"])
+
+save_LIBS="$LIBS"
+LIBS=
+
+AC_CHECK_HEADERS([jpeglib.h])
+AC_CHECK_LIB(jpeg, jpeg_std_error,, AC_MSG_ERROR([no usable libjpeg; please install libjpeg devel package or equivalent]))
+
+AC_CHECK_LIB(jbig, jbg_enc_out, have_libjbig=yes, have_libjbig=no)
+if test "x$have_libjbig" = "xyes"  ; then
+SPANDSP_LA_JBIG="-ljbig $LIBS"
+AC_SUBST(SPANDSP_LA_JBIG)
+fi
+LIBS="$save_LIBS"
+
+AC_CHECK_LIB(lzma, lzma_code, have_liblzma=yes, have_liblzma=no)
+if test "x$have_liblzma" = "xyes" ; then
+SPANDSP_LA_LZMA="-llzma"
+AC_SUBST(SPANDSP_LA_LZMA)
+fi
+
+AC_CHECK_LIB(resolv, res_init, have_libresolv=yes, have_libresolv=no)
+if test "x$have_libresolv" = "xyes"  ; then
+APR_ADDTO(SWITCH_AM_LDFLAGS, -lresolv)
+fi
+
+AC_SUBST(SWITCH_AM_CFLAGS)
+AC_SUBST(SWITCH_ANSI_CFLAGS)
+AC_SUBST(SWITCH_AM_CXXFLAGS)
+AC_SUBST(SWITCH_AM_CPPFLAGS)
+AC_SUBST(SWITCH_AM_LDFLAGS)
+AC_SUBST(ESL_LDFLAGS)
+AC_SUBST(PLATFORM_CORE_LDFLAGS)
+AC_SUBST(PLATFORM_CORE_LIBS)
+AC_SUBST(SOLINK)
+AC_SUBST(LIBTOOL_LIB_EXTEN)
+
+# Checks for header files.
+AC_HEADER_DIRENT
+AC_HEADER_STDC
+AC_CHECK_HEADERS([sys/types.h sys/resource.h sched.h wchar.h sys/filio.h sys/ioctl.h sys/prctl.h sys/select.h netdb.h sys/time.h])
+
+# Solaris 11 privilege management
+AS_CASE([$host],
+  [*-*-solaris2.11], [AC_CHECK_HEADER([priv.h], [AC_DEFINE([SOLARIS_PRIVILEGES],[1],[Solaris 11 privilege management])])]
+)
+
+
+if test x"$ac_cv_header_wchar_h" = xyes; then
+  HAVE_WCHAR_H_DEFINE=1
+else
+  HAVE_WCHAR_H_DEFINE=0
+fi
+AC_SUBST(HAVE_WCHAR_H_DEFINE)
+
+# Needed by Abyss on Solaris:
+
+if test x"$ac_cv_header_sys_filio_h" = xyes; then
+  HAVE_SYS_FILIO_H_DEFINE=1
+else
+  HAVE_SYS_FILIO_H_DEFINE=0
+fi
+AC_SUBST(HAVE_SYS_FILIO_H_DEFINE)
+
+# Needed by Abyss on Solaris:
+
+if test x"$ac_cv_header_sys_ioctl_h" = xyes; then
+  HAVE_SYS_IOCTL_H_DEFINE=1
+else
+  HAVE_SYS_IOCTL_H_DEFINE=0
+fi
+AC_SUBST(HAVE_SYS_IOCTL_H_DEFINE)
+
+if test x"$ac_cv_header_sys_select_h" = xyes; then
+  HAVE_SYS_SELECT_H_DEFINE=1
+else
+  HAVE_SYS_SELECT_H_DEFINE=0
+fi
+AC_SUBST(HAVE_SYS_SELECT_H_DEFINE)
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_C_INLINE
+AC_TYPE_SIZE_T
+AC_HEADER_TIME
+AC_STRUCT_TM
+
+# Checks for library functions.
+AC_PROG_GCC_TRADITIONAL
+AC_FUNC_MALLOC
+AC_TYPE_SIGNAL
+AC_FUNC_STRFTIME
+AC_CHECK_FUNCS([gethostname vasprintf mmap mlock mlockall usleep getifaddrs timerfd_create getdtablesize posix_openpt poll])
+AC_CHECK_FUNCS([sched_setscheduler setpriority setrlimit setgroups initgroups getrusage])
+AC_CHECK_FUNCS([wcsncmp setgroups asprintf setenv pselect gettimeofday localtime_r gmtime_r strcasecmp stricmp _stricmp])
+
+# Check availability and return type of strerror_r
+# (NOTE: apr-1-config sets -D_GNU_SOURCE at build-time, need to run the check with it too)
+save_CPPFLAGS="$CPPFLAGS"
+CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
+AC_FUNC_STRERROR_R
+CPPFLAGS="$save_CPPFLAGS"
+
+AX_HAVE_CPU_SET
+
+AC_CHECK_LIB(rt, clock_gettime, [AC_DEFINE(HAVE_CLOCK_GETTIME, 1, [Define if you have clock_gettime()])])
+AC_CHECK_LIB(rt, clock_getres, [AC_DEFINE(HAVE_CLOCK_GETRES, 1, [Define if you have clock_getres()])])
+AC_CHECK_LIB(rt, clock_nanosleep, [AC_DEFINE(HAVE_CLOCK_NANOSLEEP, 1, [Define if you have clock_nanosleep()])])
+AC_CHECK_LIB(pthread, pthread_setschedparam, [AC_DEFINE(HAVE_PTHREAD_SETSCHEDPARAM, 1, [Define if you have pthread_setschedparam()])])
+
+AC_CHECK_FUNC(socket, , AC_CHECK_LIB(socket, socket))
+
+AC_CHECK_FILE(/dev/ptmx, [AC_DEFINE(HAVE_DEV_PTMX, 1, [Define if you have /dev/ptmx])])
+AC_CHECK_LIB(util, openpty, [AC_DEFINE(HAVE_OPENPTY, 1, [Define if you have openpty()])])
+
+AC_CHECK_MEMBERS([struct tm.tm_gmtoff],,,[
+#include <sys/types.h>
+#include <time.h>])
+
+AC_CHECK_MEMBERS([struct tm.tm_zone],,,[
+#include <sys/types.h>
+#include <time.h>])
+
+AC_CHECK_DECL([RLIMIT_MEMLOCK],
+	[AC_DEFINE([HAVE_RLIMIT_MEMLOCK],[1],[RLIMIT_MEMLOCK constant for setrlimit])],,
+	[#ifdef HAVE_SYS_RESOURCE_H
+	 #include <sys/resource.h>
+	 #endif])
+
+AC_CHECK_DECL([SCHED_RR],
+	[AC_DEFINE([HAVE_SCHED_RR],[1],[SCHED_RR constant for sched_setscheduler])],,
+	[#ifdef HAVE_SCHED_H
+	 #include <sched.h>
+	 #endif])
+
+AC_CHECK_DECL([SCHED_FIFO],
+	[AC_DEFINE([HAVE_SCHED_FIFO],[1],[SCHED_FIFO constant for sched_setscheduler])],,
+	[#ifdef HAVE_SCHED_H
+	 #include <sched.h>
+	 #endif])
+
+#
+# use mlockall only on linux (for now; if available)
+#
+if test "x${ac_cv_func_mlockall}" = "xyes"; then
+	AC_MSG_CHECKING([whether to use mlockall])
+	case "$host" in
+	*-linux-*)
+		AC_DEFINE([USE_MLOCKALL],[1],[Enable mlockall support])
+		AC_MSG_RESULT([yes])
+		USE_MLOCKALL=yes
+		;;
+	*-freebsd*)
+		APR_ADDTO(SWITCH_AM_CFLAGS, -fPIC)
+		APR_ADDTO(SWITCH_AM_CXXFLAGS, -fPIC)
+		AC_MSG_RESULT([no, broken for non-root users])
+		;;
+	*)
+		AC_MSG_RESULT([no])
+		;;
+	esac
+
+	#
+	# setrlimit prerequisites
+	#
+	if test "x${USE_MLOCKALL}" = "xyes" -a \
+		"x${ac_cv_func_setrlimit}" = "xyes" -a \
+		"x${ac_cv_have_decl_RLIMIT_MEMLOCK}" = "xyes"
+	then
+		AC_DEFINE([USE_SETRLIMIT],[1],[Use setrlimit to disable mlock limit for non-root users])
+	fi
+fi
+
+#
+# sched_setcheduler + round-robin scheduler prerequisites
+#
+if test "x${ac_cv_func_sched_setscheduler}" = "xyes" -a \
+        "x${ac_cv_have_decl_SCHED_RR}" = "xyes"
+then
+	AC_DEFINE([USE_SCHED_SETSCHEDULER],[1],[Enable round-robin scheduler using sched_setscheduler])
+fi
+#
+# xmlrpc-c checks
+#
+
+AC_CHECK_FUNCS(setenv strtoll strtoull strtoq strtouq __strtoll __strtoull)
+
+HAVE_LIBWWW_SSL_DEFINE=0
+AC_SUBST(HAVE_LIBWWW_SSL_DEFINE)
+
+DIRECTORY_SEPARATOR="/"
+AC_SUBST(DIRECTORY_SEPARATOR)
+
+va_list_is_array=no
+AC_MSG_CHECKING(whether va_list is an array)
+AC_TRY_COMPILE([
+#include <stdarg.h>
+], [va_list list1, list2; list1 = list2;], , 
+va_list_is_array=yes)
+AC_MSG_RESULT($va_list_is_array)
+if test x"$va_list_is_array" = xyes; then
+  VA_LIST_IS_ARRAY_DEFINE=1
+else
+  VA_LIST_IS_ARRAY_DEFINE=0
+fi
+AC_SUBST(VA_LIST_IS_ARRAY_DEFINE)
+
+
+AC_MSG_CHECKING(whether compiler has __attribute__)
+AC_TRY_COMPILE(, [int x __attribute__((__unused__));],
+compiler_has_attribute=yes,
+compiler_has_attribute=no)
+AC_MSG_RESULT($compiler_has_attribute)
+if test x"$compiler_has_attribute" = xyes; then
+    ATTR_UNUSED="__attribute__((__unused__))"
+else
+    ATTR_UNUSED=
+fi
+AC_SUBST(ATTR_UNUSED)
+
+
+saved_CFLAGS="$CFLAGS"
+AC_CACHE_CHECK([whether compiler supports -Wdeclaration-after-statement], [ac_cv_gcc_declaration_after_statement], [
+CFLAGS="$CFLAGS -Wdeclaration-after-statement"
+AC_TRY_COMPILE([],[return 0;],[ac_cv_gcc_declaration_after_statement=yes],[ac_cv_gcc_declaration_after_statement=no])
+])
+AC_MSG_RESULT($ac_cv_gcc_declaration_after_statement)
+if test x"$ac_cv_gcc_declaration_after_statement" = xyes; then
+    APR_ADDTO(SWITCH_ANSI_CFLAGS, -Wdeclaration-after-statement)
+fi
+CFLAGS="$saved_CFLAGS"
+
+if test "x${ax_cv_c_compiler_vendor}" = "xclang" ; then
+     saved_CFLAGS="$CFLAGS"
+     # Next check added for Xcode 5 and systems with clang 5 llvm 3.3 or above, extended offset must be off
+     AC_CACHE_CHECK([whether compiler supports -Wextended-offsetof], [ac_cv_clang_extended_offsetof], [
+       CFLAGS="$CFLAGS -Wno-extended-offsetof"
+       AC_TRY_COMPILE([],[return 0;],[ac_cv_clang_extended_offsetof=yes],[ac_cv_clang_extended_offsetof=no])
+     ])
+     AC_MSG_RESULT($ac_cv_clang_extended_offsetof)
+     if test x"$ac_cv_clang_extended_offsetof" = xyes; then
+         APR_ADDTO(CFLAGS, -Wno-extended-offsetof)
+     fi
+     CFLAGS="$saved_CFLAGS"
+fi
+
+# Tested and fixed lot of modules, but some are untested.  Will be added back when the core team decide it ready
+# Untested modules : mod_osp mod_opal mod_h323
+#                    mod_erlang_event mod_snmp mod_perl mod_java mod_managed
+#
+#saved_CFLAGS="$CFLAGS"
+#AC_CACHE_CHECK([whether compiler supports -Wunused-but-set-variable], [ac_cv_gcc_unused_but_set_variable], [
+#CFLAGS="$CFLAGS -Wunused-but-set-variable"
+#AC_TRY_COMPILE([],[return 0;],[ac_cv_gcc_unused_but_set_variable=yes],[ac_cv_gcc_unused_but_set_variable=no])
+#])
+#AC_MSG_RESULT($ac_cv_gcc_unused_but_set_variable)
+#if test x"$ac_cv_gcc_unused_but_set_variable" = xyes; then
+#    APR_ADDTO(SWITCH_ANSI_CFLAGS, -Wunused-but-set-variable)
+#fi
+#CFLAGS="$saved_CFLAGS"
+
+AC_C_BIGENDIAN(AC_DEFINE([SWITCH_BYTE_ORDER],__BIG_ENDIAN,[Big Endian]),AC_DEFINE([SWITCH_BYTE_ORDER],__LITTLE_ENDIAN,[Little Endian]))
+
+# Checks for integer size
+AC_CHECK_SIZEOF(char, 1)
+AC_CHECK_SIZEOF(int, 4)
+AC_CHECK_SIZEOF(long, 4)
+AC_CHECK_SIZEOF(short, 2)
+AC_CHECK_SIZEOF(long long, 8)
+AC_TYPE_SIZE_T
+AC_CHECK_TYPE(ssize_t, int)
+
+# Checks for pointer size
+AC_CHECK_SIZEOF(void*, 4)
+
+if test "x$ac_cv_sizeof_voidp" != "x"; then
+    voidp_size=$ac_cv_sizeof_voidp
+else
+    AC_ERROR([Cannot determine size of void*])
+fi
+
+if test "$ac_cv_sizeof_short" = "2"; then
+    short_value=short
+fi
+if test "$ac_cv_sizeof_int" = "4"; then
+    int_value=int
+fi
+
+if test "$ac_cv_sizeof_int" = "8"; then
+    int64_t_fmt='#define SWITCH_INT64_T_FMT "d"'
+    uint64_t_fmt='#define SWITCH_UINT64_T_FMT "u"'
+    int64_value="int"
+    long_value=int
+elif test "$ac_cv_sizeof_long" = "8"; then
+    int64_t_fmt='#define SWITCH_INT64_T_FMT "ld"'
+    uint64_t_fmt='#define SWITCH_UINT64_T_FMT "lu"'
+    int64_value="long"
+    long_value=long
+    case "$host" in
+        *pc-solaris2*)
+        ;;
+	sparc-*-solaris2*)
+	;;
+        *-solaris2*|*apple-darwin*|*-openbsd*)
+	    if test "$ac_cv_sizeof_long_long" = "8"; then
+	        int64_t_fmt='#define SWITCH_INT64_T_FMT "lld"'
+		uint64_t_fmt='#define SWITCH_UINT64_T_FMT "llu"'
+		int64_value="long long"
+		long_value="long long"
+	    fi
+	;;
+    esac
+elif test "$ac_cv_sizeof_long_long" = "8"; then
+    int64_t_fmt='#define SWITCH_INT64_T_FMT "lld"'
+    uint64_t_fmt='#define SWITCH_UINT64_T_FMT "llu"'
+    int64_value="long long"
+    long_value="long long"
+elif test "$ac_cv_sizeof_longlong" = "8"; then
+    int64_t_fmt='#define SWITCH_INT64_T_FMT "qd"'
+    uint64_t_fmt='#define SWITCH_UINT64_T_FMT "qu"'
+    int64_value="__int64"
+    long_value="__int64"
+else
+    AC_ERROR([could not detect a 64-bit integer type])
+fi
+
+if test "$ac_cv_type_size_t" = "yes"; then
+    size_t_value="size_t"
+else
+    size_t_value="switch_int32_t"
+fi
+
+if test "$ac_cv_type_ssize_t" = "yes"; then
+    ssize_t_value="ssize_t"
+else
+    ssize_t_value="switch_int32_t"
+fi
+
+APR_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], ssize_t, 8)
+
+if test "$ac_cv_sizeof_ssize_t" = "$ac_cv_sizeof_int"; then
+    ssize_t_fmt='#define SWITCH_SSIZE_T_FMT "d"'
+elif test "$ac_cv_sizeof_ssize_t" = "$ac_cv_sizeof_long"; then
+    ssize_t_fmt='#define SWITCH_SSIZE_T_FMT "ld"'
+else
+    ssize_t_fmt='#error Can not determine the proper size for ssize_t'
+fi
+
+APR_CHECK_SIZEOF_EXTENDED([#include <stddef.h>], size_t, 8)
+
+if test "$ac_cv_sizeof_size_t" = "$ac_cv_sizeof_int"; then
+    size_t_fmt='#define SWITCH_SIZE_T_FMT "d"'
+elif test "$ac_cv_sizeof_size_t" = "$ac_cv_sizeof_long"; then
+    size_t_fmt='#define SWITCH_SIZE_T_FMT "ld"'
+else
+    size_t_fmt='#define SWITCH_SIZE_T_FMT "zu"'
+fi
+
+# Basically, we have tried to figure out the correct format strings
+# for SWITCH types which vary between platforms, but we don't always get 
+# it right.  If you find that we don't get it right for your platform, 
+# you can override our decision below.
+# NOTE: borrowed much of this logic from apr.
+case $host in
+   s390*linux*)
+       # uniquely, the 31-bit Linux/s390 uses "unsigned long int"
+       # for size_t rather than "unsigned int":
+       size_t_fmt='#define SWITCH_SIZE_T_FMT "lu"'
+       ssize_t_fmt='#define SWITCH_SSIZE_T_FMT "ld"'
+       ;;
+   *-os2*)
+       size_t_fmt='#define SWITCH_SIZE_T_FMT "lu"'
+       ;;
+   *-openbsd*)
+       size_t_fmt='#define SWITCH_SIZE_T_FMT "ld"'
+       ;;
+   *aix4*|*aix5*)
+       ssize_t_fmt='#define SWITCH_SSIZE_T_FMT "ld"'
+       size_t_fmt='#define SWITCH_SIZE_T_FMT "ld"'
+       ;;
+    *beos*)
+        ssize_t_fmt='#define SWITCH_SSIZE_T_FMT "ld"'
+        size_t_fmt='#define SWITCH_SIZE_T_FMT "ld"'
+        ;;
+    *apple-darwin*)
+         ssize_t_fmt='#define SWITCH_SSIZE_T_FMT "ld"'
+         size_t_fmt='#define SWITCH_SIZE_T_FMT "lu"'
+        ;;
+esac
+
+AC_SUBST(voidp_size)
+AC_SUBST(short_value)
+AC_SUBST(int_value)
+AC_SUBST(long_value)
+AC_SUBST(int64_value)
+AC_SUBST(size_t_value)
+AC_SUBST(ssize_t_value)
+AC_SUBST(int64_t_fmt) 
+AC_SUBST(uint64_t_fmt) 
+AC_SUBST(ssize_t_fmt) 
+AC_SUBST(size_t_fmt)
+
+case $host in
+   *-openbsd*)
+       # OpenBSD's gunzip and friends don't like -d because its redundant, only gzip does
+       AC_PATH_PROGS(ZCAT, gzip)
+       ;;
+    *)
+       AC_PATH_PROGS(ZCAT, gunzip gzcat gzip zcat)
+       ;;
+esac
+
+AC_PATH_PROGS(BZIP, bzip2)
+AC_PATH_PROGS(XZ, xz)
+AC_PATH_PROGS(TAR, gtar tar)
+AC_PATH_PROGS(WGET, wget)
+AC_PATH_PROGS(CURL, curl)
+GETLIB="cd $switch_srcdir/libs && ${SHELL} $switch_builddir/build/getlib.sh"
+AC_SUBST(GETLIB)
+GETG729="cd $switch_srcdir/libs && ${SHELL} $switch_builddir/build/getg729.sh"
+AC_SUBST(GETG729)
+GETSOUNDS="${SHELL} $switch_builddir/build/getsounds.sh"
+AC_SUBST(GETSOUNDS)
+
+case $host in
+   aarch64-apple-darwin*)
+        path_push_unique PKG_CONFIG_PATH /opt/homebrew/opt/pkgconf/
+        path_push_unique PKG_CONFIG_PATH /opt/homebrew/opt/sqlite/lib/pkgconfig/
+       ;;
+   *-darwin*)
+        path_push_unique PKG_CONFIG_PATH /usr/local/opt/curl/lib/pkgconfig
+        path_push_unique PKG_CONFIG_PATH /usr/local/opt/sqlite/lib/pkgconfig/
+        path_push_unique PKG_CONFIG_PATH /usr/local/opt/ldns/lib/pkgconfig/
+        path_push_unique PKG_CONFIG_PATH /usr/local/opt/ffmpeg/lib/pkgconfig/
+       ;;
+esac
+
+if ! (test -x "$PKG_CONFIG" || test -x "$(which pkg-config)"); then
+  AC_MSG_ERROR([You need to install pkg-config to configure FreeSWITCH.])
+fi
+
+# temporary workaround for Debian libldns-dev package bug
+if test "$cross_compiling" != "yes" && test -f /usr/lib/pkg-config/libldns.pc; then
+  path_push_unique PKG_CONFIG_PATH /usr/lib/pkg-config
+fi
+
+module_enabled() {
+  grep -v -e "\#" -e "^\$" modules.conf | sed 's/|.*//' | sed -e "s|^.*/||" | grep "^${1}\$" >/dev/null
+}
+
+AC_ARG_WITH(png,
+  [AS_HELP_STRING([--without-png],
+    [disable support for libpng])],
+  [with_png="$withval"],
+  [with_png="yes"])
+if test "$with_png" = "yes"; then
+  PKG_CHECK_MODULES([LIBPNG], [libpng >= 1.6.16],[
+    AM_CONDITIONAL([HAVE_PNG],[true])],[
+      PKG_CHECK_MODULES([LIBPNG], [libpng16 >= 1.6.16],[
+        AM_CONDITIONAL([HAVE_PNG],[true])],[
+          PKG_CHECK_MODULES([LIBPNG], [libpng >= 1.2.49],[
+            AM_CONDITIONAL([HAVE_PNG],[true])],[
+            AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_PNG],[false])])])])
+else
+  AM_CONDITIONAL([HAVE_PNG],[false])
+fi
+
+AC_ARG_WITH(freetype,
+  [AS_HELP_STRING([--without-freetype],
+    [disable support for freetype])],
+  [with_freetype="$withval"],
+  [with_freetype="yes"])
+if test "$with_freetype" = "yes"; then
+  PKG_CHECK_MODULES([FREETYPE], [freetype2 >= 2.4.9],[
+    AM_CONDITIONAL([HAVE_FREETYPE],[true])],[
+    AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_FREETYPE],[false])])
+else
+  AM_CONDITIONAL([HAVE_FREETYPE],[false])
+fi
+
+PKG_CHECK_MODULES([GUMBO], [gumbo >= 0.10.1],[
+  AM_CONDITIONAL([HAVE_GUMBO],[true])],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_GUMBO],[false])])
+
+PKG_CHECK_MODULES([FVAD], [libfvad >= 1.0],[
+  AM_CONDITIONAL([HAVE_FVAD],[true])],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_FVAD],[false])])
+
+PKG_CHECK_MODULES([TPL], [libtpl >= 1.5],[
+  AC_DEFINE([HAVE_LIBTPL],[1],[Define to 1 if you have libtpl])],[
+  AC_MSG_RESULT([no])])
+
+PKG_CHECK_MODULES([SQLITE], [sqlite3 >= 3.6.20])
+PKG_CHECK_MODULES([CURL], [libcurl >= 7.19])
+PKG_CHECK_MODULES([PCRE2], [libpcre2-8 >=  10.00])
+PKG_CHECK_MODULES([SPEEX], [speex >= 1.2rc1 speexdsp >= 1.2rc1])
+PKG_CHECK_MODULES([LDNS], [libldns-fs >= 1.6.6],[
+  AM_CONDITIONAL([HAVE_LDNS],[true])],[
+PKG_CHECK_MODULES([LDNS], [libldns >= 1.6.6],[
+  AM_CONDITIONAL([HAVE_LDNS],[true])],[
+  AC_CHECK_LIB([ldns], [ldns_str2rdf_a], [LDNS_LIBS=-lldns])
+  AS_IF([test -z "$LDNS_LIBS"],[
+    if module_enabled mod_enum; then
+      AC_MSG_ERROR([You need to either install libldns-dev or disable mod_enum in modules.conf])
+    else
+      AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_LDNS],[false])
+    fi],[
+    AM_CONDITIONAL([HAVE_LDNS],[true])])])])
+PKG_CHECK_MODULES([SNDFILE], [sndfile >= 1.0.20],[
+  AM_CONDITIONAL([HAVE_SNDFILE],[true])],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_SNDFILE],[false])])
+
+PKG_CHECK_MODULES([MPG123], [libmpg123 >= 1.16.0],[
+  AM_CONDITIONAL([HAVE_MPG123],[true])],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_MPG123],[false])])
+
+PKG_CHECK_MODULES([SHOUT], [shout >= 2.2.2],[
+  AM_CONDITIONAL([HAVE_SHOUT],[true])
+  SHOUT_VERSION="`$PKG_CONFIG --modversion shout`"
+  SHOUT_MAJOR_VERSION="`echo $SHOUT_VERSION | cut -d. -f1`"
+  SHOUT_MINOR_VERSION="`echo $SHOUT_VERSION | cut -d. -f2`"
+  SHOUT_PATCH_VERSION="`echo $SHOUT_VERSION | cut -d. -f3`"
+  test -n "$SHOUT_PATCH_VERSION" || SHOUT_PATCH_VERSION=0
+  AC_MSG_NOTICE([SHOUT version: $SHOUT_VERSION])
+  AC_MSG_NOTICE([SHOUT major version: $SHOUT_MAJOR_VERSION])
+  AC_MSG_NOTICE([SHOUT minor version: $SHOUT_MINOR_VERSION])
+  AC_MSG_NOTICE([SHOUT patch version: $SHOUT_PATCH_VERSION])
+  AC_SUBST([SHOUT_VERSION])
+  AC_SUBST([SHOUT_MAJOR_VERSION])
+  AC_SUBST([SHOUT_MINOR_VERSION])
+  AC_SUBST([SHOUT_PATCH_VERSION])
+  ],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_SHOUT],[false])])
+
+mp3lame=false
+AC_CHECK_LIB([mp3lame], [lame_init],[
+  AC_CHECK_HEADER([lame/lame.h],[
+    mp3lame=true
+    AC_SUBST([MP3LAME_LIBS], [-lmp3lame])
+    AC_SUBST([MP3LAME_CFLAGS], [$CPPFLAGS])])])
+AM_CONDITIONAL([HAVE_MP3LAME],[$mp3lame])
+
+PKG_CHECK_MODULES([AVCODEC], [libavcodec >= 53.35.0],[
+  AM_CONDITIONAL([HAVE_AVCODEC],[true])],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_AVCODEC],[false])])
+
+PKG_CHECK_MODULES([X264], [x264 >= 0.142.2431],[
+  AM_CONDITIONAL([HAVE_X264],[true])],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_X264],[false])])
+
+PKG_CHECK_MODULES([AVFORMAT], [libavformat >= 53.21.1],[
+  AM_CONDITIONAL([HAVE_AVFORMAT],[true])],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_AVFORMAT],[false])])
+
+PKG_CHECK_MODULES([AVUTIL], [libavutil >= 54.3.0],[
+  AM_CONDITIONAL([HAVE_AVUTIL],[true])],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_AVUTIL],[false])])
+
+PKG_CHECK_MODULES([AVRESAMPLE], [libavresample >= 2.1.0],[
+  AM_CONDITIONAL([HAVE_AVRESAMPLE],[true])],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_AVRESAMPLE],[false])])
+
+PKG_CHECK_MODULES([SWRESAMPLE], [libswresample >= 2.1.0],[
+  AM_CONDITIONAL([HAVE_SWRESAMPLE],[true])],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_SWRESAMPLE],[false])])
+
+PKG_CHECK_MODULES([SWSCALE], [libswscale >= 3.0.0],[
+  AM_CONDITIONAL([HAVE_SWSCALE],[true])],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_SWSCALE],[false])])
+
+PKG_CHECK_MODULES([VLC], [libvlc >= 2.1.0],[
+  AM_CONDITIONAL([HAVE_VLC],[true])],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_VLC],[false])])
+
+PKG_CHECK_MODULES([OPENCV], [opencv >= 2.4.5],[
+  AM_CONDITIONAL([HAVE_OPENCV],[true])],[
+  PKG_CHECK_MODULES([OPENCV], [opencv4 >= 2.4.5],[
+    AM_CONDITIONAL([HAVE_OPENCV],[true])],[
+    AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_OPENCV],[false])])])
+
+PKG_CHECK_MODULES([OPUSFILE_DECODE], [opusfile >= 0.5],[
+   AM_CONDITIONAL([HAVE_OPUSFILE_DECODE],[true])],[
+   AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_OPUSFILE_DECODE],[false])])
+PKG_CHECK_MODULES([OPUSFILE_ENCODE], [libopusenc >= 0.1],[
+   AM_CONDITIONAL([HAVE_OPUSFILE_ENCODE],[true])],[
+   AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_OPUSFILE_ENCODE],[false])])
+
+
+PKG_CHECK_MODULES([MAGICK], [ImageMagick >= 6.0.0],[
+  AM_CONDITIONAL([HAVE_MAGICK],[true])],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_MAGICK],[false])])
+
+PKG_CHECK_MODULES([MAGICK7], [ImageMagick >= 7.0.0],[
+  AM_CONDITIONAL([HAVE_MAGICK7],[true])],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_MAGICK7],[false])])
+
+PKG_CHECK_MODULES([SILK], [silk >= 1.0.8],[
+  AM_CONDITIONAL([HAVE_SILK],[true])],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_SILK],[false])])
+
+PKG_CHECK_MODULES([BROADVOICE], [broadvoice >= 0.1.0],[
+  AM_CONDITIONAL([HAVE_BROADVOICE],[true])],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_BROADVOICE],[false])])
+
+PKG_CHECK_MODULES([ILBC], [ilbc2 >= 0.0.1],[
+  AM_CONDITIONAL([HAVE_ILBC],[true])],[
+    PKG_CHECK_MODULES([ILBC], [ilbc >= 0.0.1],[
+      AM_CONDITIONAL([HAVE_ILBC],[true])],[
+      AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_ILBC],[false])])])
+
+PKG_CHECK_MODULES([G7221], [g722_1 >= 0.2.0],[
+  AM_CONDITIONAL([HAVE_G7221],[true])],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_G7221],[false])])
+
+codec2="true"
+PKG_CHECK_MODULES([CODEC2], [codec2 >= 0.5],[],[
+  AC_CHECK_LIB([codec2], [codec2_create],[
+    AC_CHECK_HEADERS([codec2/codec2.h],[
+      CODEC2_LIBS="-lcodec2"
+      CODEC2_CFLAGS=""
+    ], [
+    codec2="false"
+    if module_enabled mod_codec2; then
+        AC_MSG_ERROR([You must install libcodec2-dev to build mod_codec2])
+      else
+        AC_MSG_RESULT([no])
+      fi
+    ])
+  ])
+])
+
+AM_CONDITIONAL([HAVE_CODEC2],[$codec2])
+
+
+PKG_CHECK_MODULES([OPUS], [opus >= 1.1],[
+  AM_CONDITIONAL([HAVE_OPUS],[true])],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_OPUS],[false])])
+
+flite="true"
+PKG_CHECK_MODULES([FLITE], [flite >= 2],[],[
+  AC_CHECK_LIB([flite], [flite_init],[
+    AC_CHECK_HEADERS([flite/flite.h],[      
+      FLITE_LIBS="-lflite -lflite_cmu_grapheme_lang -lflite_cmu_grapheme_lex -lflite_cmu_indic_lang -lflite_cmu_indic_lex -lflite_cmulex -lflite_cmu_time_awb -lflite_cmu_us_awb -lflite_cmu_us_kal16 -lflite_cmu_us_kal -lflite_cmu_us_rms -lflite_cmu_us_slt -lflite_usenglish"
+      FLITE_CFLAGS=""
+    ], [
+    flite="false"
+    if module_enabled mod_flite; then
+        AC_MSG_ERROR([You must install libflite-dev to build mod_flite])
+      else
+        AC_MSG_RESULT([no])
+      fi
+    ])
+  ])
+])
+
+AM_CONDITIONAL([HAVE_FLITE],[$flite])
+
+PKG_CHECK_MODULES([MONGOC], [libmongoc-1.0 >= 1.0.8],[
+  AM_CONDITIONAL([HAVE_MONGOC],[true])],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_MONGOC],[false])])
+
+PKG_CHECK_MODULES([MEMCACHED], [libmemcached >= 0.31],[
+  AM_CONDITIONAL([HAVE_MEMCACHED],[true])
+  MEMCACHED_LIBS="${MEMCACHED_LIBS} -lpthread"
+  save_LIBS="${LIBS}"
+  save_CPPFLAGS="${CPPFLAGS}"
+  LIBS="${MEMCACHED_LIBS}"
+  CPPFLAGS="${MEMCACHED_CFLAGS}"
+  AC_CHECK_FUNCS([memcached_server_name memcached_stat_execute])
+  AC_CHECK_TYPES([memcached_instance_st*],,, [[#include <libmemcached/memcached.h>]])
+  LIBS="${save_LIBS}"
+  CPPFLAGS="${save_CPPFLAGS}"
+],[
+  AC_MSG_RESULT([no])
+  AM_CONDITIONAL([HAVE_MEMCACHED],[false])
+])
+
+PKG_CHECK_MODULES([V8FS_STATIC], [v8-6.1_static >= 6.1.298],[
+  AM_CONDITIONAL([HAVE_V8FS],[true])],[
+  PKG_CHECK_MODULES([V8FS_STATIC], [v8fs_static >= 6.1.298],[
+    AM_CONDITIONAL([HAVE_V8FS],[true])],[
+    PKG_CHECK_MODULES([V8FS_STATIC], [v8 >= 6.1.298],[
+      AM_CONDITIONAL([HAVE_V8FS],[true])],[
+      if module_enabled mod_v8; then
+        AC_MSG_ERROR([You need to either install libv8-6.1-dev (>= 6.1.298), libv8fs-dev (>= 6.1.298) or disable mod_v8 in modules.conf])
+      else
+        AC_MSG_RESULT([no])
+        AM_CONDITIONAL([HAVE_V8FS],[false])
+      fi
+    ])
+  ])
+])
+
+PKG_CHECK_MODULES([KS], [libks2 >= 2.0.0],[
+  AM_CONDITIONAL([HAVE_KS],[true])],[
+  PKG_CHECK_MODULES([KS], [libks >= 1.8.2],[
+    AM_CONDITIONAL([HAVE_KS],[true])],[
+      if module_enabled mod_verto; then
+        AC_MSG_ERROR([You need to either install libks2 or libks or disable mod_verto in modules.conf])
+      else
+        if module_enabled mod_signalwire; then
+          AC_MSG_ERROR([You need to either install libks2 or libks or disable mod_signalwire in modules.conf])
+        else
+          AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_KS],[false])
+        fi
+      fi
+  ])
+])
+
+PKG_CHECK_MODULES([SIGNALWIRE_CLIENT], [signalwire_client2 >= 2.0.0],[
+  AM_CONDITIONAL([HAVE_SIGNALWIRE_CLIENT],[true])],[
+  PKG_CHECK_MODULES([SIGNALWIRE_CLIENT], [signalwire_client >= 1.0.0],[
+    AM_CONDITIONAL([HAVE_SIGNALWIRE_CLIENT],[true])],[
+      if module_enabled mod_signalwire; then
+        AC_MSG_ERROR([You need to either install signalwire-client-c2 or signalwire-client-c or disable mod_signalwire in modules.conf])
+      else
+        AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_SIGNALWIRE_CLIENT],[false])
+      fi
+  ])
+])
+
+PKG_CHECK_MODULES([AMQP], [librabbitmq >= 0.5.2], [
+       AM_CONDITIONAL([HAVE_AMQP], [true])
+       # Extract the version of librabbitmq
+       AMQP_VERSION=`$PKG_CONFIG --modversion librabbitmq`
+       AC_DEFINE_UNQUOTED([AMQP_VERSION], ["$AMQP_VERSION"], [Version of librabbitmq])
+       # Parse major and minor version numbers
+       AMQP_MAJOR_VERSION=`echo $AMQP_VERSION | cut -d. -f1`
+       AMQP_MINOR_VERSION=`echo $AMQP_VERSION | cut -d. -f2`
+       AC_DEFINE_UNQUOTED([AMQP_MAJOR_VERSION], [$AMQP_MAJOR_VERSION], [Major version of librabbitmq])
+       AC_DEFINE_UNQUOTED([AMQP_MINOR_VERSION], [$AMQP_MINOR_VERSION], [Minor version of librabbitmq])
+       AC_SUBST(AMQP_MAJOR_VERSION)
+       AC_SUBST(AMQP_MINOR_VERSION)
+   ], [
+       AC_MSG_RESULT([no])
+       AM_CONDITIONAL([HAVE_AMQP], [false])
+   ])
+
+PKG_CHECK_MODULES([SPHINXBASE], [sphinxbase >= 5],[
+  AM_CONDITIONAL([HAVE_SPHINXBASE],[true])],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_SPHINXBASE],[false])])
+
+PKG_CHECK_MODULES([POCKETSPHINX], [pocketsphinx >= 5],[
+       AM_CONDITIONAL([HAVE_POCKETSPHINX],[true])
+       # Extract the version of pocketsphinx
+       POCKETSPHINX_VERSION=`$PKG_CONFIG --modversion pocketsphinx`
+       AC_DEFINE_UNQUOTED([POCKETSPHINX_VERSION], ["$POCKETSPHINX_VERSION"], [Version of pocketsphinx])
+       AC_MSG_NOTICE([POCKETSPHINX_VERSION is $POCKETSPHINX_VERSION])
+       # Parse major version but take only first digit for now
+       POCKETSPHINX_MAJOR_VERSION=`echo $POCKETSPHINX_VERSION | cut -c1`
+       AC_MSG_NOTICE([POCKETSPHINX_MAJOR_VERSION is $POCKETSPHINX_MAJOR_VERSION])
+       AC_DEFINE_UNQUOTED([POCKETSPHINX_MAJOR_VERSION], [$POCKETSPHINX_MAJOR_VERSION], [Major version of pocketsphinx])
+       AC_SUBST(POCKETSPHINX_MAJOR_VERSION)
+   ], [
+      AC_MSG_RESULT([no])
+      AM_CONDITIONAL([HAVE_POCKETSPHINX],[false])
+   ])
+
+PKG_CHECK_MODULES([H2O], [libh2o-evloop >= 0.11.0],[
+  AM_CONDITIONAL([HAVE_H2O],[true])],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_H2O],[false])])
+
+PKG_CHECK_MODULES([BROTLIENC], [libbrotlienc >= 0.1.0],[
+  AM_CONDITIONAL([HAVE_BROTLIENC],[true])],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_BROTLIENC],[false])])
+
+PKG_CHECK_MODULES([BROTLIDEC], [libbrotlidec >= 0.1.0],[
+  AM_CONDITIONAL([HAVE_BROTLIDEC],[true])],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_BROTLIDEC],[false])])
+
+PKG_CHECK_MODULES([TAP], [tap >= 0.1.0],[
+  AM_CONDITIONAL([HAVE_TAP],[true])],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_TAP],[false])])
+
+PKG_CHECK_MODULES([SMPP34], [libsmpp34 >= 1.10],[
+  AM_CONDITIONAL([HAVE_SMPP34],[true])],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_SMPP34],[false])])
+
+PKG_CHECK_MODULES([HIREDIS], [hiredis >= 0.10.0],[
+  AM_CONDITIONAL([HAVE_HIREDIS],[true])],[
+  AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_HIREDIS],[false])])
+
+AC_ARG_ENABLE(core-libedit-support,     
+  [AS_HELP_STRING([--disable-core-libedit-support], [Compile without libedit Support])])
+
+AS_IF([test "x$enable_core_libedit_support" != "xno"],[
+  PKG_CHECK_MODULES([LIBEDIT], [libedit >= 2.11],,[
+    AC_MSG_RESULT([no])
+    AC_CHECK_LIB([edit], [el_line], [LIBEDIT_LIBS=-ledit])
+    AC_CHECK_LIB([edit], [el_cursor], [ac_cv_has_el_cursor=yes])
+    AC_CHECK_HEADER([histedit.h], [], [unset LIBEDIT_LIBS])
+    AS_IF([test "x$LIBEDIT_LIBS" = "x"], [
+      AC_MSG_ERROR([You need to either install libedit-dev (>= 2.11) or configure with --disable-core-libedit-support])
+      ])])])
+
+AC_ARG_ENABLE(systemd,
+  [AS_HELP_STRING([--enable-systemd], [Compile with systemd notify support])])
+
+AS_IF([test "x$enable_systemd" = "xyes"],[
+  PKG_CHECK_MODULES([SYSTEMD], [libsystemd >= 219], [
+    AC_DEFINE([HAVE_SYSTEMD], [1], [Define to 1 if systemd is available])])
+])
+
+AC_SUBST(SYSTEMD_LIBS)
+
+
+dnl ---------------------------------------------------------------------------
+dnl - OpenLDAP SDK
+dnl ---------------------------------------------------------------------------
+
+AC_CHECK_LIB(ldap, ldap_search, with_ldap=yes)
+dnl Check for other libraries we need to link with to get the main routines.
+test "$with_ldap" != "yes" && { AC_CHECK_LIB(ldap, ldap_open, [with_ldap=yes with_ldap_lber=yes], , -llber) }
+test "$with_ldap" != "yes" && { AC_CHECK_LIB(ldap, ldap_open, [with_ldap=yes with_ldap_lber=yes with_ldap_krb=yes], , -llber -lkrb) }
+test "$with_ldap" != "yes" && { AC_CHECK_LIB(ldap, ldap_open, [with_ldap=yes with_ldap_lber=yes with_ldap_krb=yes with_ldap_des=yes], , -llber -lkrb -ldes) }
+test "$with_ldap_lber" != "yes" && { AC_CHECK_LIB(lber, ber_pvt_opt_on, with_ldap_lber=yes) }
+
+if test "$with_ldap" = "yes"; then
+   if test "$with_ldap_des" = "yes" ; then
+      OPENLDAP_LIBS="${OPENLDAP_LIBS} -ldes"
+   fi
+   if test "$with_ldap_krb" = "yes" ; then
+      OPENLDAP_LIBS="${OPENLDAP_LIBS} -lkrb"
+   fi
+   if test "$with_ldap_lber" = "yes" ; then
+      OPENLDAP_LIBS="${OPENLDAP_LIBS} -llber"
+   fi
+   OPENLDAP_LIBS="${OPENLDAP_LIBS} -lldap"
+fi
+
+AM_CONDITIONAL([HAVE_LDAP],[test "x$with_ldap" = "xyes"])
+
+AC_SUBST(OPENLDAP_LIBS)
+
+AS_IF([test "x$enable_core_libedit_support" != "xno"], [
+  # If making changes here, don't forget to run autoheader and
+  # update libs/esl/src/include/esl_config_auto.h.in manually.
+  AC_DEFINE([HAVE_LIBEDIT], [1], [Define to 1 if you have libedit is available])
+if test x$ac_cv_has_el_cursor = xyes; then
+  AC_DEFINE([HAVE_EL_CURSOR], [1], [Define to 1 if you have libedit el_cursor support])
+fi
+  save_LIBS="${LIBS}"
+  save_CPPFLAGS="${CPPFLAGS}"
+  LIBS="${LIBEDIT_LIBS}"
+  CPPFLAGS="${LIBEDIT_CFLAGS}"
+  AC_CHECK_DECLS([EL_PROMPT_ESC, EL_REFRESH],,, [[#include <histedit.h>]])
+  AC_CHECK_FUNCS([el_wset])
+  LIBS="${save_LIBS}"
+  CPPFLAGS="${save_CPPFLAGS}"
+])
+
+SAC_OPENSSL
+
+if test x$HAVE_OPENSSL = x1; then
+	openssl_CFLAGS="$openssl_CFLAGS -DHAVE_OPENSSL";
+	APR_ADDTO(SWITCH_AM_CFLAGS, -DHAVE_OPENSSL)
+	AC_CHECK_LIB(ssl, SSL_CTX_set_tlsext_use_srtp, AC_DEFINE_UNQUOTED(HAVE_OPENSSL_DTLS_SRTP, 1, HAVE_OPENSSL_DTLS_SRTP), AC_MSG_ERROR([OpenSSL >= 1.0.1e and associated developement headers required]))
+	AC_CHECK_LIB(ssl, DTLSv1_method, AC_DEFINE_UNQUOTED(HAVE_OPENSSL_DTLS, 1, HAVE_OPENSSL_DTLS), AC_MSG_ERROR([OpenSSL >= 1.0.1e and associaed developement headers required]))
+	AC_CHECK_LIB(ssl, DTLSv1_2_method, AC_DEFINE_UNQUOTED(HAVE_OPENSSL_DTLSv1_2_method, 1, [DTLS version 1.2 is available]))
+else
+	AC_MSG_ERROR([OpenSSL >= 1.0.1e and associated developement headers required])
+fi
+
+AX_CHECK_JAVA
+   
+AM_CONDITIONAL([HAVE_ODBC],[test "x$enable_core_odbc_support" != "xno"])
+AM_CONDITIONAL([HAVE_MYSQL],[test "$found_mysql" = "yes"])
+
+#
+# perl checks
+#
+
+AC_CHECK_PROG(PERL,perl,[ac_cv_have_perl=yes],[ac_cv_have_perl=no])
+
+# -a "x$ac_cv_have_EXTERN_h" != "xno"
+
+if test "x$ac_cv_have_perl" != "xno"; then
+   PERL=perl
+   PERL_SITEDIR="`$PERL -MConfig -e 'print $Config{archlib}'`"
+   PERL_LIBDIR="-L`$PERL -MConfig -e 'print $Config{archlib}'`/CORE"
+   PERL_LIBS="`$PERL -MConfig -e 'print $Config{libs}'`"
+   PERL_CFLAGS="-w -DMULTIPLICITY `$PERL -MExtUtils::Embed -e ccopts | sed -e 's|-arch x86_64 -arch i386||'` -DEMBED_PERL"
+   PERL_LDFLAGS="`$PERL -MExtUtils::Embed -e ldopts| sed -e 's|-arch x86_64 -arch i386||'`"
+   PERL_INC="`$PERL -MExtUtils::Embed -e perl_inc`"
+
+   save_CFLAGS="$CFLAGS"
+   CFLAGS="$PERL_CFLAGS"
+   AC_CHECK_HEADER([EXTERN.h], [ac_cv_have_EXTERN_h=yes], [ac_cv_have_EXTERN_h=no], [[#include <EXTERN.h>
+# include <perl.h>]])
+   CFLAGS="$save_CFLAGS"
+
+   save_LDFLAGS="$LDFLAGS"
+   LDFLAGS="$PERL_LDFLAGS"
+   AC_CHECK_LIB([perl], [perl_alloc], ac_cv_use_libperl=yes, ac_cv_use_libperl=no)
+   LDFLAGS="$save_LDFLAGS"
+
+   AC_SUBST(PERL_SITEDIR)
+   AC_SUBST(PERL_LIBDIR)
+   AC_SUBST(PERL_LIBS)
+   AC_SUBST(PERL_CFLAGS)
+   AC_SUBST(PERL_LDFLAGS)
+   AC_SUBST(PERL_INC)
+fi
+
+AM_CONDITIONAL([HAVE_PERL],[test "x$ac_cv_have_perl" != "xno" -a "x$ac_cv_have_EXTERN_h" != "xno" -a "x$ac_cv_use_libperl" != "xno"])
+
+#
+# php checks
+#
+
+AC_CHECK_PROG(PHP,php,[ac_cv_have_php=yes],[ac_cv_have_php=no])
+AC_CHECK_PROG(PHP_CONFIG,php-config,[ac_cv_have_php_config=yes],[ac_cv_have_php_config=no])
+AM_CONDITIONAL([HAVE_PHP],[test "x$ac_cv_have_php" != "xno" -a "x$ac_cv_have_php_config" != "xno"])
+
+if test "x$ac_cv_have_php" != "xno" -a "x$ac_cv_have_php_config" != "xno"; then
+   PHP=php
+   PHP_CONFIG=php-config
+   PHP_LDFLAGS="`$PHP_CONFIG --ldflags`"
+   PHP_LIBS="`$PHP_CONFIG --libs | sed -r 's/ ?-l(bz2|pcre2-8|xml2|gssapi_krb5|krb5|k5crypto|com_err|history|z|readline|gmp|ssl|crypto|argon2|sodium)//g'`"
+   PHP_EXT_DIR="`$PHP_CONFIG --extension-dir`"
+   PHP_INC_DIR="`$PHP -r 'echo ini_get("include_path");' | cut -d: -f2`"
+   PHP_INI_DIR="`$PHP_CONFIG --configure-options | tr " " "\n" | grep -- --with-config-file-scan-dir | cut -f2 -d=`"
+   PHP_CFLAGS="`$PHP_CONFIG --includes`"
+   AC_SUBST(PHP_LDFLAGS)
+   AC_SUBST(PHP_LIBS)
+   AC_SUBST(PHP_EXT_DIR)
+   AC_SUBST(PHP_INC_DIR)
+   AC_SUBST(PHP_INI_DIR)
+   AC_SUBST(PHP_CFLAGS)
+fi
+
+#
+# Python3 checks for mod_python3
+#
+AC_ARG_WITH(
+	[python3],
+	[AS_HELP_STRING([--with-python3], [Use system provided version of python3 (default: try)])],
+	[with_python3="$withval"],
+	[with_python3="try"]
+)
+
+if test "$with_python3" != "no"
+then
+	save_CFLAGS="$CFLAGS"
+	save_LIBS="$LIBS"
+
+	if test "$with_python3" != "yes" -a "$with_python3" != "try" ; then
+		AC_MSG_CHECKING([for python3])
+		if test ! -x "$with_python3" ; then
+			AC_MSG_ERROR([Specified python3 does not exist or is not executable: $with_python3])
+		fi
+		AC_MSG_RESULT([$with_python3])
+		AC_SUBST([PYTHON3], ["$with_python3"])
+	else
+		AC_PATH_PROG([PYTHON3], ["python3"], ["no"], ["$PATH:/usr/bin:/usr/local/bin"])
+	fi
+
+	if test "$PYTHON3" != "no" ; then
+		AC_MSG_CHECKING([python3 version])
+		PYTHON3_VER="`$PYTHON3 -V 2>&1 | cut -d' ' -f2`"
+
+		if test -z "$PYTHON3_VER" ; then
+			AC_MSG_ERROR([Unable to detect python3 version])
+		fi
+		AC_MSG_RESULT([$PYTHON3_VER])
+
+		AC_MSG_CHECKING([for python3 distutils])
+		python3_result="`$PYTHON3 -c 'import distutils;' 2>&1`"
+		if test -z "$python3_result" ; then
+			python3_has_distutils="yes"
+		else
+			python3_has_distutils="no"
+		fi
+		AC_MSG_RESULT([$python3_has_distutils])
+
+		if test "$python3_has_distutils" != "no" ; then
+			AC_MSG_CHECKING([location of python3 site-packages])
+
+			PYTHON3_SITE_DIR="`$PYTHON3 -c 'from distutils import sysconfig; print(sysconfig.get_python_lib(0));'`"
+
+			if test -z "$PYTHON3_SITE_DIR" ; then
+				AC_MSG_ERROR([Unable to detect python3 site-packages path])
+			elif test ! -d "$PYTHON3_SITE_DIR" ; then
+				AC_MSG_ERROR([Path $PYTHON3_SITE_DIR returned by python3 does not exist!])
+			fi
+			AC_MSG_RESULT([$PYTHON3_SITE_DIR])
+			AC_SUBST([PYTHON3_SITE_DIR], [$PYTHON3_SITE_DIR])
+
+			#
+			# python3 distutils found, get settings from python3 directly
+			#
+			PYTHON3_CFLAGS="`$PYTHON3 -c 'from distutils import sysconfig; flags = [[\"-I\" + sysconfig.get_python_inc(0), \"-I\" + sysconfig.get_python_inc(1), \" \".join(sysconfig.get_config_var(\"CFLAGS\").split())]]; print(\" \".join(flags));' | sed -e 's/-arch i386//g;s/-arch x86_64//g'`"
+			PYTHON3_LDFLAGS="`$PYTHON3 -c 'from distutils import sysconfig; ldver = sysconfig.get_config_var(\"LDVERSION\"); libs = sysconfig.get_config_var(\"LIBS\").split() + sysconfig.get_config_var(\"SYSLIBS\").split(); libs.append(\"-lpython\" + [[ldver,sysconfig.get_config_var(\"VERSION\")]][[ldver==None]]); print(\" \".join(libs));'`"
+			PYTHON3_LIB="`$PYTHON3 -c 'from distutils import sysconfig; ldver = sysconfig.get_config_var(\"LDVERSION\"); print(\"python\" + [[ldver,sysconfig.get_config_var(\"VERSION\")]][[ldver==None]]);'`"
+			PYTHON3_LIBDIR="`$PYTHON3 -c 'from distutils import sysconfig; print(sysconfig.get_config_var(\"LIBDIR\"));'`"
+
+			# handle python3 being installed into /usr/local
+			AC_MSG_CHECKING([python3 libdir])
+			if test -z "`echo $PYTHON3_LIBDIR | grep "/usr/lib"`" ; then
+				PYTHON3_LDFLAGS="-L$PYTHON3_LIBDIR $PYTHON3_LDFLAGS"
+				LIBS="-L$PYTHON3_LIBDIR $LIBS"
+			fi
+			AC_MSG_RESULT([$PYTHON3_LIBDIR])
+
+			# check libpython3
+			AC_CHECK_LIB([$PYTHON3_LIB], [main], [has_libpython3="yes"], [has_libpython3="no"])
+
+			if test "$has_libpython3" = "no" ; then
+				AS_IF([test "$with_python3" = "try"],
+				 	[AC_MSG_WARN([$PYTHON3_LIB is unusable])],
+					[AC_MSG_ERROR([$PYTHON3_LIB is unusable])]
+				)
+			fi
+
+			# check whether system libpython3 is usable and has threads support
+			CFLAGS="$PYTHON3_CFLAGS"
+			LIBS="$PYTHON3_LDFLAGS"
+			AC_CHECK_FUNC([PyThread_init_thread], [python3_has_threads="yes"], [python3_has_threads="no"])
+
+			if test "$python3_has_threads" = "no"; then
+				AS_IF([test "$with_python3" = "try"],
+					[AC_MSG_WARN([Your python3 lacks threads support, can not build mod_python3])],
+					[AC_MSG_ERROR([Your python3 lacks threads support, can not build mod_python3])]
+				)
+			else
+				AC_MSG_NOTICE([Your python3 seems OK, do not forget to enable mod_python3 in modules.conf])
+				AC_SUBST([PYTHON3_CFLAGS],  [$PYTHON3_CFLAGS])
+				AC_SUBST([PYTHON3_LDFLAGS], [$PYTHON3_LDFLAGS])
+			fi
+		else
+			AS_IF([test "$with_python3" = "try"],
+				[AC_MSG_WARN([Could not find or use python3 distutils module: $python3_result])],
+				[AC_MSG_ERROR([Could not find or use python3 distutils module: $python3_result])]
+			)
+		fi
+
+		LIBS="$save_LIBS"
+		CFLAGS="$save_CFLAGS"
+
+		unset python3_has_threads
+		unset python3_has_distutils
+		unset python3_result
+	else
+		AS_IF([test "$with_python3" = "try"],
+			[AC_MSG_WARN([Could not find python3, mod_python3 will not build, use --with-python3 to specify the location])],
+			[AC_MSG_ERROR([Could not find python3, use --with-python3 to specify the location])]
+		)
+	fi
+else
+	AC_MSG_WARN([python3 support disabled, building mod_python3 will fail!])
+fi
+
+# pcap lib for unit-testing
+AC_MSG_CHECKING(libpcap)
+AC_CHECK_PROG(HAVE_PCAP_CONFIG,pcap-config,[true],[false])
+if test x"$HAVE_PCAP_CONFIG" = x"true"; then
+   AC_MSG_RESULT(yes)
+   PCAP_CONFIG=pcap-config
+   PCAP_LIBS="`$PCAP_CONFIG --libs`"
+   PCAP_CFLAGS="`$PCAP_CONFIG --cflags`"
+   AM_CONDITIONAL([HAVE_PCAP], [true])
+else
+   AC_MSG_RESULT(no)
+   AM_CONDITIONAL([HAVE_PCAP], [false])
+fi
+AC_SUBST([PCAP_CFLAGS])
+AC_SUBST([PCAP_LIBS])
+
+#
+# SNMP checks for mod_snmp
+#
+AC_PATH_PROG([NET_SNMP_CONFIG], [net-snmp-config], [no])
+if test "$NET_SNMP_CONFIG" != "no"; then
+	AC_MSG_CHECKING([for Net-SNMP libraries via net-snmp-config])
+	SNMP_LIBS="`$NET_SNMP_CONFIG --base-agent-libs`"
+else
+	# net-snmp-config not in path, fallback to sensible defaults
+	SNMP_LIBS="-lnetsnmpmibs -lnetsnmpagent -lnetsnmp"
+fi
+
+# fix linking error on Solaris patched Net-SNMP
+AS_CASE([$host], [*-solaris2*], [AC_CHECK_LIB([dladm], [dladm_open], [SNMP_LIBS="$SNMP_LIBS -ldladm"])])
+AC_SUBST(SNMP_LIBS)
+
+CHECK_ERLANG
+
+#  Enable clang address sanitizer bit build
+AC_ARG_ENABLE(address_sanitizer,
+  [AC_HELP_STRING([--enable-address-sanitizer],[build with address sanitizer])],
+  [enable_address_sanitizer="$enable_address_sanitizer"],
+  [enable_address_sanitizer="no"])
+
+if test "${enable_address_sanitizer}" = "yes"; then
+  APR_ADDTO(CFLAGS, -fsanitize=address -fno-omit-frame-pointer -fstack-protector-strong)
+  APR_ADDTO(CXXFLAGS, -fsanitize=address -fno-omit-frame-pointer -fstack-protector-strong)
+  APR_ADDTO(LDFLAGS, -fsanitize=address)
+fi
+
+#  Enable HEAP profiler (requires libgoogle-perftools-dev package)
+AC_ARG_ENABLE(heap_profiler,
+  [AC_HELP_STRING([--enable-heap-profiler],[build with google heap profiler])],
+  [enable_heap_profiler="$enable_heap_profiler"],
+  [enable_heap_profiler="no"])
+
+#  Enable CPU profiler (requires libgoogle-perftools-dev package)
+AC_ARG_ENABLE(cpu_profiler,
+  [AC_HELP_STRING([--enable-cpu-profiler],[build with google cpu profiler])],
+  [enable_cpu_profiler="$enable_cpu_profiler"],
+  [enable_cpu_profiler="no"])
+
+PKG_CHECK_MODULES([TCMALLOC], [libtcmalloc], [have_tcmalloc=yes], [have_tcmalloc=no])
+
+if test "${enable_heap_profiler}" = "yes" || test "${enable_cpu_profiler}" = "yes"; then
+  if test "x$have_tcmalloc" != "xyes" ; then
+    AC_MSG_ERROR([You must install libgoogle-perftools-dev in order to use heap or cpu profiler])
+  fi
+fi
+
+# WARNING: When both enabled you can NOT link them statically and MUST use the special library
+if test "${enable_heap_profiler}" = "yes" && test "${enable_cpu_profiler}" = "yes"; then
+  APR_ADDTO(CFLAGS, -ltcmalloc_and_profiler)
+  APR_ADDTO(CXXFLAGS, -ltcmalloc_and_profiler)
+  APR_ADDTO(LDFLAGS, -ltcmalloc_and_profiler)
+else
+  if test "${enable_heap_profiler}" = "yes"; then
+    APR_ADDTO(CFLAGS, -ltcmalloc)
+    APR_ADDTO(CXXFLAGS, -ltcmalloc)
+    APR_ADDTO(LDFLAGS, -ltcmalloc)
+  fi
+
+  if test "${enable_cpu_profiler}" = "yes"; then
+    APR_ADDTO(CFLAGS, -lprofiler)
+    APR_ADDTO(CXXFLAGS, -lprofiler)
+    APR_ADDTO(LDFLAGS, -lprofiler)
+  fi
+fi
+
+#  Enable fake dlclose
+AC_ARG_ENABLE(fake_dlclose,
+  [AC_HELP_STRING([--enable-fake-dlclose],[Do not unload dynamic libraries])],
+  [enable_fake_dlclose="$enable_fake_dlclose"],
+  [enable_fake_dlclose="no"])
+
+if test "${enable_fake_dlclose}" = "yes"; then
+  APR_ADDTO(SWITCH_AM_CFLAGS, -DHAVE_FAKE_DLCLOSE)
+fi
+
+AC_ARG_ENABLE(,
+  [AC_HELP_STRING([--enable-pool-sanitizer],[build with sanitizer friendly pool behavior])],
+  [enable_pool_sanitizer="$enable_pool_sanitizer"],
+  [enable_pool_sanitizer="no"])
+
+if test "${enable_pool_sanitizer}" = "yes"; then
+  APR_ADDTO(CFLAGS, -DDESTROY_POOLS)
+  ac_configure_args="$ac_configure_args --enable-pool-debug=yes"
+fi
+
+# we never use this, and hard setting it will make cross compile work better
+ac_cv_file_dbd_apr_dbd_mysql_c=no
+
+AC_CONFIG_FILES([Makefile
+		build/Makefile
+		tests/unit/Makefile
+		src/Makefile
+		src/mod/Makefile
+		src/mod/applications/mod_avmd/Makefile
+		src/mod/applications/mod_bert/Makefile
+		src/mod/applications/mod_blacklist/Makefile
+		src/mod/applications/mod_callcenter/Makefile
+		src/mod/applications/mod_cidlookup/Makefile
+		src/mod/applications/mod_cluechoo/Makefile
+		src/mod/applications/mod_commands/Makefile
+		src/mod/applications/mod_conference/Makefile
+		src/mod/applications/mod_curl/Makefile
+		src/mod/applications/mod_cv/Makefile
+		src/mod/applications/mod_db/Makefile
+		src/mod/applications/mod_directory/Makefile
+		src/mod/applications/mod_distributor/Makefile
+		src/mod/applications/mod_dptools/Makefile
+		src/mod/applications/mod_easyroute/Makefile
+		src/mod/applications/mod_enum/Makefile
+		src/mod/applications/mod_esf/Makefile
+		src/mod/applications/mod_esl/Makefile
+		src/mod/applications/mod_expr/Makefile
+		src/mod/applications/mod_fifo/Makefile
+		src/mod/applications/mod_fsk/Makefile
+		src/mod/applications/mod_fsv/Makefile
+		src/mod/applications/mod_hash/Makefile
+		src/mod/applications/mod_hiredis/Makefile
+		src/mod/applications/mod_httapi/Makefile
+		src/mod/applications/mod_http_cache/Makefile
+		src/mod/applications/mod_lcr/Makefile
+		src/mod/applications/mod_limit/Makefile
+		src/mod/applications/mod_memcache/Makefile
+		src/mod/applications/mod_mongo/Makefile
+		src/mod/applications/mod_nibblebill/Makefile
+		src/mod/applications/mod_osp/Makefile
+		src/mod/applications/mod_prefix/Makefile
+		src/mod/applications/mod_random/Makefile
+		src/mod/applications/mod_redis/Makefile
+		src/mod/applications/mod_skel/Makefile
+		src/mod/applications/mod_signalwire/Makefile
+		src/mod/applications/mod_sms/Makefile
+		src/mod/applications/mod_snapshot/Makefile
+		src/mod/applications/mod_spandsp/Makefile
+		src/mod/applications/mod_spy/Makefile
+		src/mod/applications/mod_test/Makefile
+		src/mod/applications/mod_translate/Makefile
+		src/mod/applications/mod_valet_parking/Makefile
+		src/mod/applications/mod_vmd/Makefile
+		src/mod/applications/mod_voicemail/Makefile
+		src/mod/applications/mod_voicemail_ivr/Makefile
+		src/mod/asr_tts/mod_flite/Makefile
+		src/mod/asr_tts/mod_pocketsphinx/Makefile
+		src/mod/asr_tts/mod_tts_commandline/Makefile
+		src/mod/codecs/mod_amr/Makefile
+		src/mod/codecs/mod_amrwb/Makefile
+		src/mod/codecs/mod_b64/Makefile
+		src/mod/codecs/mod_bv/Makefile
+		src/mod/codecs/mod_codec2/Makefile
+		src/mod/codecs/mod_com_g729/Makefile
+		src/mod/codecs/mod_g723_1/Makefile
+		src/mod/codecs/mod_g729/Makefile
+		src/mod/codecs/mod_ilbc/Makefile
+		src/mod/codecs/mod_opus/Makefile
+		src/mod/codecs/mod_openh264/Makefile
+		src/mod/codecs/mod_silk/Makefile
+		src/mod/codecs/mod_siren/Makefile
+		src/mod/codecs/mod_skel_codec/Makefile
+		src/mod/databases/mod_mariadb/Makefile
+		src/mod/databases/mod_pgsql/Makefile
+		src/mod/dialplans/mod_dialplan_asterisk/Makefile
+		src/mod/dialplans/mod_dialplan_directory/Makefile
+		src/mod/dialplans/mod_dialplan_xml/Makefile
+		src/mod/directories/mod_ldap/Makefile
+		src/mod/endpoints/mod_alsa/Makefile
+		src/mod/endpoints/mod_h323/Makefile
+		src/mod/endpoints/mod_loopback/Makefile
+		src/mod/endpoints/mod_opal/Makefile
+		src/mod/endpoints/mod_reference/Makefile
+		src/mod/endpoints/mod_rtmp/Makefile
+		src/mod/endpoints/mod_skinny/Makefile
+		src/mod/endpoints/mod_sofia/Makefile
+		src/mod/endpoints/mod_rtc/Makefile
+		src/mod/endpoints/mod_verto/Makefile
+		src/mod/event_handlers/mod_amqp/Makefile
+		src/mod/event_handlers/mod_cdr_csv/Makefile
+		src/mod/event_handlers/mod_cdr_mongodb/Makefile
+		src/mod/event_handlers/mod_cdr_pg_csv/Makefile
+		src/mod/event_handlers/mod_cdr_sqlite/Makefile
+		src/mod/event_handlers/mod_erlang_event/Makefile
+		src/mod/event_handlers/mod_event_multicast/Makefile
+		src/mod/event_handlers/mod_event_socket/Makefile
+		src/mod/event_handlers/mod_event_test/Makefile
+		src/mod/event_handlers/mod_fail2ban/Makefile
+		src/mod/event_handlers/mod_format_cdr/Makefile
+		src/mod/event_handlers/mod_json_cdr/Makefile
+		src/mod/event_handlers/mod_odbc_cdr/Makefile
+		src/mod/event_handlers/mod_smpp/Makefile
+		src/mod/event_handlers/mod_snmp/Makefile
+		src/mod/formats/mod_imagick/Makefile
+		src/mod/formats/mod_local_stream/Makefile
+		src/mod/formats/mod_native_file/Makefile
+		src/mod/formats/mod_opusfile/Makefile
+		src/mod/formats/mod_png/Makefile
+		src/mod/formats/mod_shell_stream/Makefile
+		src/mod/formats/mod_shout/Makefile
+		src/mod/formats/mod_sndfile/Makefile
+		src/mod/formats/mod_tone_stream/Makefile
+		src/mod/formats/mod_vlc/Makefile
+		src/mod/languages/mod_java/Makefile
+		src/mod/languages/mod_lua/Makefile
+		src/mod/languages/mod_managed/Makefile
+		src/mod/languages/mod_perl/Makefile
+		src/mod/languages/mod_python3/Makefile
+		src/mod/languages/mod_v8/Makefile
+		src/mod/languages/mod_basic/Makefile
+		src/mod/loggers/mod_console/Makefile
+		src/mod/loggers/mod_graylog2/Makefile
+		src/mod/loggers/mod_logfile/Makefile
+		src/mod/loggers/mod_syslog/Makefile
+		src/mod/say/mod_say_de/Makefile
+		src/mod/say/mod_say_en/Makefile
+		src/mod/say/mod_say_es/Makefile
+		src/mod/say/mod_say_es_ar/Makefile
+		src/mod/say/mod_say_fa/Makefile
+		src/mod/say/mod_say_fr/Makefile
+		src/mod/say/mod_say_he/Makefile
+		src/mod/say/mod_say_hr/Makefile
+		src/mod/say/mod_say_hu/Makefile
+		src/mod/say/mod_say_it/Makefile
+		src/mod/say/mod_say_ja/Makefile
+		src/mod/say/mod_say_nl/Makefile
+		src/mod/say/mod_say_pl/Makefile
+		src/mod/say/mod_say_pt/Makefile
+		src/mod/say/mod_say_ru/Makefile
+		src/mod/say/mod_say_sv/Makefile
+		src/mod/say/mod_say_th/Makefile
+		src/mod/say/mod_say_zh/Makefile
+		src/mod/timers/mod_posix_timer/Makefile
+		src/mod/timers/mod_timerfd/Makefile
+		src/mod/xml_int/mod_xml_cdr/Makefile
+		src/mod/xml_int/mod_xml_curl/Makefile
+		src/mod/xml_int/mod_xml_ldap/Makefile
+		src/mod/xml_int/mod_xml_rpc/Makefile
+		src/mod/xml_int/mod_xml_scgi/Makefile
+		src/mod/applications/mod_av/Makefile
+		src/mod/applications/mod_video_filter/Makefile
+		src/include/switch_am_config.h
+		build/getsounds.sh
+		build/getlib.sh
+		build/getg729.sh
+		build/freeswitch.pc
+		build/standalone_module/freeswitch.pc
+		build/modmake.rules
+                libs/esl/Makefile
+                libs/esl/perl/Makefile
+                libs/esl/php/Makefile
+		libs/xmlrpc-c/include/xmlrpc-c/config.h
+		libs/xmlrpc-c/xmlrpc_config.h
+		libs/xmlrpc-c/config.mk
+		libs/xmlrpc-c/srcdir.mk
+		libs/xmlrpc-c/stamp-h
+		scripts/gentls_cert])
+
+AM_CONDITIONAL(ISLINUX, [test `uname -s` = Linux])
+AM_CONDITIONAL(ISMAC, [test `uname -s` = Darwin])
+AM_CONDITIONAL(ISFREEBSD, [test `uname -s` = FreeBSD])
+AM_CONDITIONAL(IS64BITLINUX, [test `uname -m` = x86_64])
+
+AM_CONDITIONAL(HAVE_G723_1, [ test -d ${switch_srcdir}/libs/libg723_1 ])
+AM_CONDITIONAL(HAVE_G729, [ test -d ${switch_srcdir}/libs/libg729 ])
+
+#some vars to sub into the Makefile.am's
+#LIBS+=> core.log || error="yes";if test -n "$(VERBOSE)" -o "$$error" = "yes";then cat core.log;fi;if test "$$error" = "yes";then exit 1;fi
+LIBTOOL='$(SHELL) $(switch_builddir)/libtool'
+TOUCH_TARGET='if test -f "$@";then touch "$@";fi;'
+CONF_MODULES='$$(grep -v "\#" $(switch_builddir)/modules.conf | sed "s/|.*//" | sed -e "s|^.*/||" | sort | uniq )'
+CONF_DISABLED_MODULES='$$(grep "\#" $(switch_builddir)/modules.conf | grep -v "\#\#" | sed "s/|.*//" | sed "s/\#/\#\//"| sed -e "s|^.*/||" | sort | uniq )'
+OUR_MODS='$$(if test -z "$(MODULES)" ; then tmp_mods="$(CONF_MODULES)"; else tmp_mods="$(MODULES)" ; fi ; mods="$$(for i in $$tmp_mods ; do echo $$i-all ; done )"; echo $$mods )'
+OUR_CLEAN_MODS='$$(if test -z "$(MODULES)" ; then tmp_mods="$(CONF_MODULES)"; else tmp_mods="$(MODULES)" ; fi ; mods="$$(for i in $$tmp_mods ; do echo $$i-clean ; done )"; echo $$mods )'
+OUR_INSTALL_MODS='$$(if test -z "$(MODULES)" ; then tmp_mods="$(CONF_MODULES)"; else tmp_mods="$(MODULES)" ; fi ; mods="$$(for i in $$tmp_mods ; do echo $$i-install ; done)"; echo $$mods )'
+OUR_UNINSTALL_MODS='$$(if test -z "$(MODULES)" ; then tmp_mods="$(CONF_MODULES)"; else tmp_mods="$(MODULES)" ; fi ; mods="$$(for i in $$tmp_mods ; do echo $$i-uninstall ; done)"; echo $$mods )'
+OUR_TEST_MODS='$$(if test -z "$(MODULES)" ; then tmp_mods="$(CONF_MODULES)"; else tmp_mods="$(MODULES)" ; fi ; mods="$$(for i in $$tmp_mods ; do echo $$i-print_tests ; done )"; echo $$mods )'
+OUR_CHECK_MODS='$$(if test -z "$(MODULES)" ; then tmp_mods="$(CONF_MODULES)"; else tmp_mods="$(MODULES)" ; fi ; mods="$$(for i in $$tmp_mods ; do echo $$i-check ; done )"; echo $$mods )'
+OUR_DISABLED_MODS='$$(tmp_mods="$(CONF_DISABLED_MODULES)"; mods="$$(for i in $$tmp_mods ; do echo $$i-all ; done )"; echo $$mods )'
+OUR_DISABLED_CLEAN_MODS='$$(tmp_mods="$(CONF_DISABLED_MODULES)";  mods="$$(for i in $$tmp_mods ; do echo $$i-clean ; done )"; echo $$mods )'
+OUR_DISABLED_INSTALL_MODS='$$(tmp_mods="$(CONF_DISABLED_MODULES)"; mods="$$(for i in $$tmp_mods ; do echo $$i-install ; done)"; echo $$mods )'
+OUR_DISABLED_UNINSTALL_MODS='$$(tmp_mods="$(CONF_DISABLED_MODULES)"; mods="$$(for i in $$tmp_mods ; do echo $$i-uninstall ; done)"; echo $$mods )'
+
+#AM_MAKEFLAGS='"OUR_MODULES=$(OUR_MODS)" "OUR_CLEAN_MODULES=$(OUR_CLEAN_MODS)" "OUR_INSTALL_MODULES=$(OUR_INSTALL_MODS)" "OUR_UNINSTALL_MODULES=$(OUR_UNINSTALL_MODS)" "OUR_DISABLED_MODULES=$(OUR_DISABLED_MODS)" "OUR_DISABLED_CLEAN_MODULES=$(OUR_DISABLED_CLEAN_MODS)" "OUR_DISABLED_INSTALL_MODULES=$(OUR_DISABLED_INSTALL_MODS)" "OUR_DISABLED_UNINSTALL_MODULES=$(OUR_DISABLED_UNINSTALL_MODS)" `test -n "$(VERBOSE)" || echo -s`'
+#AM_MAKEFLAGS='`test -n "$(VERBOSE)" || echo -s`'
+AC_SUBST(LIBTOOL)
+AC_SUBST(TOUCH_TARGET)
+AC_SUBST(CONF_DISABLED_MODULES)
+AC_SUBST(CONF_MODULES)
+
+AC_SUBST(OUR_MODS)
+AC_SUBST(OUR_CLEAN_MODS)
+AC_SUBST(OUR_TEST_MODS)
+AC_SUBST(OUR_CHECK_MODS)
+AC_SUBST(OUR_INSTALL_MODS)
+AC_SUBST(OUR_UNINSTALL_MODS)
+AC_SUBST(OUR_DISABLED_MODS)
+AC_SUBST(OUR_DISABLED_CLEAN_MODS)
+AC_SUBST(OUR_DISABLED_INSTALL_MODS)
+AC_SUBST(OUR_DISABLED_UNINSTALL_MODS)
+AC_SUBST(AM_MAKEFLAGS)
+
+ac_configure_args="$ac_configure_args --with-modinstdir=${modulesdir} CONFIGURE_CFLAGS='$CFLAGS $CPPFLAGS' CONFIGURE_CXXFLAGS='$CXXFLAGS $CPPFLAGS' CONFIGURE_LDFLAGS='$LDFLAGS' "
+
+#	--prefix='$prefix' --exec_prefix='$exec_prefix' --libdir='$libdir' --libexecdir='$libexecdir' --bindir='$bindir' --sbindir='$sbindir' \
+#	--localstatedir='$localstatedir' --datadir='$datadir'"
+
+# Run configure in all the subdirs
+AC_CONFIG_SUBDIRS([libs/srtp])
+if test "$use_system_apr" != "yes"; then
+   AC_CONFIG_SUBDIRS([libs/apr])
+fi
+
+case $host in
+   *-openbsd*|*-netbsd*)
+       # libtool won't link static libs against shared ones on NetBSD/OpenBSD unless we tell it not to be stupid
+       AC_CONFIG_COMMANDS([hacklibtool], [cp libtool libtool.orig  && sed -e "s/deplibs_check_method=.*/deplibs_check_method=pass_all/g" libtool.orig > libtool])
+       ;;
+esac
+
+
+AC_OUTPUT
+
+##
+## Configuration summary
+##
+
+echo
+echo "-------------------------- FreeSWITCH configuration --------------------------"
+echo ""
+echo "  Locations:"
+echo ""
+echo "      prefix:          ${prefix}"
+echo "      exec_prefix:     ${exec_prefix}"
+echo "      bindir:          ${bindir}"
+echo "      confdir:         ${confdir}"
+echo "      libdir:          ${libdir}"
+echo "      datadir:         ${datadir}"
+echo "      localstatedir:   ${localstatedir}"
+echo "      includedir:      ${includedir}"
+echo ""
+echo "      certsdir:        ${certsdir}"
+echo "      dbdir:           ${dbdir}"
+echo "      grammardir:      ${grammardir}"
+echo "      htdocsdir:       ${htdocsdir}"
+echo "      fontsdir:        ${fontsdir}"
+echo "      logfiledir:      ${logfiledir}"
+echo "      modulesdir:      ${modulesdir}"
+echo "      pkgconfigdir:    ${pkgconfigdir}"
+echo "      recordingsdir:   ${recordingsdir}"
+echo "      imagesdir:       ${imagesdir}"
+echo "      runtimedir:      ${runtimedir}"
+echo "      scriptdir:       ${scriptdir}"
+echo "      soundsdir:       ${soundsdir}"
+echo "      storagedir:      ${storagedir}"
+echo "      cachedir:        ${cachedir}"
+echo ""
+echo "------------------------------------------------------------------------------"

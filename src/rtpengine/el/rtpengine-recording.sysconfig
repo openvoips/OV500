@@ -1,0 +1,5 @@
+# For more information on configuring rtpengine see
+# http://github.com/sipwise/rtpengine
+#
+CONFIG_FILE=/etc/rtpengine/rtpengine-recording.conf
+PID_FILE=/run/rtpengine-recording/rtpengine-recording.pid

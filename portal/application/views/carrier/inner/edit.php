@@ -126,62 +126,10 @@
         <div class="col-md-7 col-sm-6 col-xs-12">
             <select name="tariff_id" id="tariff_id" class="combobox form-control" data-parsley-required="" tabindex="<?php echo $tab_index++; ?>">
                 <option value="">Select</option>
-                <?php
-                $str = '';
-                $is_assigned_tariff_found = false;
-                foreach ($tariff_options as $keys => $tariff_name_array) {
-                    if ($data['carrier_currency_id'] != $tariff_name_array['tariff_currency_id'])
-                        continue;
-                    $selected = ' ';
-                    if ($data['tariff_id'] == $tariff_name_array['tariff_id']) {
-                        $selected = '  selected="selected" ';
-                        $is_assigned_tariff_found = true;
-                    }
-                    $str .= '<option value="' . $tariff_name_array['tariff_id'] . '" ' . $selected . '>' . $tariff_name_array['tariff_name'] . '</option>';
-                }
-                if (!$is_assigned_tariff_found && isset($data['tariff']) && count($data['tariff']) > 0) {
-                    $str .= '<option value="' . $data['tariff']['tariff_id'] . '">' . $data['tariff']['tariff_name'] . '</option>';
-                    $tariff_options[] = $data['tariff'];
-                }
-                echo $str;
-                ?>
+
             </select>
         </div>
     </div>
-
-
-
-
-    <div class="form-group">
-        <label class="control-label col-md-5 col-sm-3 col-xs-12">Provider <span class="required">*</span></label>
-        <div class="col-md-7 col-sm-6 col-xs-12">
-            <select name="provider_id" id="provider_id" class="combobox form-control" data-parsley-required="" tabindex="<?php echo $tab_index++; ?>">
-                <option value="" >Select</option>
-                <?php
-                $str = '';
-                if (isset($provider_data['result']) && count($provider_data['result']) > 0) {
-                    foreach ($provider_data['result'] as $provider_array) {
-                        $selected = ' ';
-                        if ($data['provider_id'] == $provider_array['provider_id'])
-                            $selected = '  selected="selected" ';
-                        $currency_id = $provider_array['currency_id'];
-
-                        if ($data['carrier_currency_id'] != $provider_array['currency_id'])
-                            continue;
-
-                        $str .= '<option value="' . $provider_array['provider_id'] . '" ' . $selected . '>' . $provider_array['provider_name'] . '</option>';
-                    }
-                }
-
-
-                echo $str;
-                ?>
-            </select>
-        </div>
-    </div>
-
-
-
 
 
     <div class="form-group">              
@@ -226,16 +174,18 @@
         <label for="middle-name" class="control-label col-md-5 col-sm-3 col-xs-12">Codecs</label>
         <div class="col-md-7 col-sm-6 col-xs-12">
             <?php
-//echo $data['user_codecs'];
+            echo '<div class="checkbox">';
             foreach ($codecs_array as $keys => $codec) {
                 if (strpos($data['carrier_codecs'], $codec) !== FALSE)
                     $checked = 'checked="checked"';
                 else
                     $checked = '';
-                echo '<div class="checkbox">' .
-                '<label><input type="checkbox" name="codecs[]" id="codec' . $keys . '" value="' . $codec . '" tabindex="' . $tab_index++ . '" ' . $checked . '/> ' . $codec . '</label>' .
-                '</div>';
+                echo '' .
+                '<input type="checkbox" name="codecs[]" id="codec' . $keys . '" value="' . $codec . '" tabindex="' . $tab_index++ . '" ' . $checked . '/><label for ="codec' . $keys . '"> ' . $codec . '</label>' .
+                '';
             }
+
+            echo '</div>';
             ?>
         </div>
     </div>
@@ -246,22 +196,81 @@
     $account_status = $data['carrier_status'];
     $status_update_options_array = array();
     $status_update_options_array['SYSTEM'] = array(
-        '1' => array(0, -1),
+        '1' => array(0, 2),
         '0' => array(1),
-        '-1' => array(0, 1),
+        '2' => array(0, 1),
     );
-
 
     $status_name_array = array(
         '1' => array('name' => 'Active', 'tooltip' => 'Carrier is active'),
         '0' => array('name' => 'Closed', 'tooltip' => 'Carrier Closed'),
-        '-1' => array('name' => 'Inactive', 'tooltip' => 'Carrier is Inactive'),
+        '2' => array('name' => 'Inactive', 'tooltip' => 'Carrier is Inactive'),
     );
     ?>
- 
+
+
+    <div class="form-group">
+        <label for="middle-name" class="control-label col-md-5 col-sm-3 col-xs-12">Call Extend Option</label>
+        <div class="col-md-7 col-sm-6 col-xs-10">
+            <div class="radio">
+                <input type="radio" class="with-gap"  name="extend_call_duration" id="extend_call_duration1" value="1" <?php if ($data['extend_call_duration'] == '1') echo ' checked'; ?> /> <label for="extend_call_duration1">Active</label>
+                <input type="radio"  class="with-gap" name="extend_call_duration" id="extend_call_duration0" value="0" <?php if ($data['extend_call_duration'] == '0') echo ' checked'; ?> /> <label for="extend_call_duration0">Inactive</label>
+            </div>                    
+        </div>
+    </div>
+    
+    
+    <div class="extend_call_class">
+          <div class="form-group ">
+            <label for="middle-name" class="control-label col-md-5 col-sm-3 col-xs-12" >Call Extend Duration (Sec.)<span class="required">*</span></label>
+            <div class="col-md-7 col-sm-6 col-xs-10">
+                <input type="text" name="minimumcallduration" id="minimumcallduration" value="<?php echo $data['minimumcallduration']; ?>"  class="form-control" tabindex="<?php echo $tab_index++; ?>">
+            </div>                     
+        </div>
+    </div>    
+    
+    
+    
+
+    <div class="form-group">
+        <label for="middle-name" class="control-label col-md-5 col-sm-3 col-xs-12">Diversion Header Option</label>
+        <div class="col-md-7 col-sm-6 col-xs-10">
+            <div class="radio">
+                <input type="radio" class="with-gap"  name="diversion_header_option" id="diversion_header_option1" value="1" <?php if ($data['diversion_header_option'] == '1') echo ' checked'; ?> /> <label for="diversion_header_option1">Active</label>
+                <input type="radio"  class="with-gap" name="diversion_header_option" id="diversion_header_option0" value="0" <?php if ($data['diversion_header_option'] == '0') echo ' checked'; ?> /> <label for="diversion_header_option0">Inactive</label>
+            </div>                    
+        </div>
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="diversion_class">
+        <div class="form-group">
+            <label for="middle-name" class="control-label col-md-5 col-sm-3 col-xs-12">Diversion Header As</label>
+            <div class="col-md-7 col-sm-6 col-xs-10">
+                <div class="radio">
+                    <input  class="with-gap" type="radio" name="diversion_header_as_comingcli_db" id="diversion_header_as_comingcli_db1" value="1" <?php if ($data['diversion_header_as_comingcli_db'] == '1') echo ' checked'; ?> /> <label for="diversion_header_as_comingcli_db1">As Incoming</label>
+                    <input  class="with-gap" type="radio" name="diversion_header_as_comingcli_db" id="diversion_header_as_comingcli_db0" value="0" <?php if ($data['diversion_header_as_comingcli_db'] == '0') echo ' checked'; ?> /> <label for="diversion_header_as_comingcli_db0">From DB</label>
+                </div>                    
+            </div>
+        </div>
+        <div class="form-group ">
+            <label class="control-label col-md-5 col-sm-3 col-xs-12" >Diversion Header Format<span class="required">*</span></label>
+            <div class="col-md-7 col-sm-6 col-xs-10">
+                <input type="text" name="diversion_header_format" id="diversion_header_format" value="<?php echo $data['diversion_header_format']; ?>"  class="form-control" tabindex="<?php echo $tab_index++; ?>">
+            </div>                     
+        </div>
+    </div>
+    
+    
     <div class="form-group">
         <label class="control-label col-md-5 col-sm-3 col-xs-12">Status</label>
-        <div class="col-md-7 col-sm-6 col-xs-12">
+        <div class="col-md-7 col-sm-6 col-xs-10">
             <?php
             if (isset($status_update_options_array[$logged_account_type][$account_status])) {
                 foreach ($status_update_options_array[$logged_account_type][$account_status] as $status_value) {
@@ -278,13 +287,13 @@
                         $tooltip = '';
                     }
                     ?>
-                    <div class="col-md-12 col-sm-6 col-xs-12 radio1">
-                        <label><input type="radio" name="carrier_status" id="status<?php echo $status_value; ?>" value="<?php echo $status_value; ?>" <?php echo $checked; ?>  tabindex="<?php echo $tab_index++; ?>" /> <?php echo $status_name; ?></label>
-                        <?php
-                        if ($tooltip != '')
-                            echo '<a href="#" data-toggle="tooltip" data-placement="top" title="' . $tooltip . '"><i class="fa fa-question-circle"></i></a>';
-                        ?>
-                    </div>
+
+                    <input type="radio"  class="with-gap" name="carrier_status" id="carrier_status<?php echo $status_value; ?>" value="<?php echo $status_value; ?>" <?php echo $checked; ?>  tabindex="<?php echo $tab_index++; ?>" /> <label for="carrier_status<?php echo $status_value; ?>"><?php echo $status_name; ?></label>
+                    <?php
+                    if ($tooltip != '')
+                        echo '<a href="#" data-toggle="tooltip" data-placement="top" title="' . $tooltip . '"><i class="fa fa-question-circle"></i></a>';
+                    ?>
+
                 <?php }
                 ?>
 
@@ -297,16 +306,15 @@
                     $tooltip = '';
                 }
                 ?>
-                <div class="col-md-12 col-sm-6 col-xs-12 radio1">
-                    <label><input type="radio" name="carrier_status" id="status<?php echo $account_status; ?>" value="<?php echo $account_status; ?>"  checked="checked"  tabindex="<?php echo $tab_index++; ?>" /> <?php echo $status_name; ?></label>
-                    <?php
-                    if ($tooltip != '')
-                        echo '<a href="#" data-toggle="tooltip" data-placement="top" title="' . $tooltip . '"><i class="fa fa-question-circle"></i></a>';
-                    ?>
-                </div>
+
+                <input type="radio"  class="with-gap" name="carrier_status" id="status<?php echo $account_status; ?>" value="<?php echo $account_status; ?>"  checked="checked"  tabindex="<?php echo $tab_index++; ?>" /><label for="status<?php echo $account_status; ?>"> <?php echo $status_name; ?></label>
                 <?php
-            }
-            else {
+                if ($tooltip != '')
+                    echo '<a href="#" data-toggle="tooltip" data-placement="top" title="' . $tooltip . '"><i class="fa fa-question-circle"></i></a>';
+                ?>
+
+                <?php
+            } else {
                 if (isset($status_name_array[$account_status])) {
                     $status_name = $status_name_array[$account_status]['name'];
                     $tooltip = $status_name_array[$account_status]['tooltip'];
@@ -314,7 +322,7 @@
                     $status_name = $account_status;
                     $tooltip = '';
                 }
-                echo '<div class="col-md-12 col-sm-6 col-xs-12 radio"><label>' . $status_name . '</label> ';
+                echo '<div class="col-md-12 col-sm-6 col-xs-12 radio"><label for="status<?php echo $account_status; ?>">' . $status_name . '</label> ';
                 if ($tooltip != '')
                     echo '<a href="#" data-toggle="tooltip" data-placement="top" title="' . $tooltip . '" ><i class="fa fa-question-circle"></i></a>';
                 echo '<input type="hidden" name="carrier_status" id="status1" value="' . $account_status . '" /></div>';
@@ -323,13 +331,82 @@
         </div>
     </div>
 
-    <div class="clearfix"></div>
+    <div class="form-group text-center">                
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <button type="button" id="<?php echo 'btnSaveClose' . $key; ?>" class="btn btn-primary" onclick="save_button('<?php echo $key; ?>')">Save Carrier Detail</button> 
 
-    <div class="form-group">                
-        <div class="col-md-12 col-sm-12 col-xs-12 col-md-offset-8">
-            <button type="button" id="<?php echo 'btnSaveClose' . $key; ?>" class="btn btn-info" onclick="save_button('<?php echo $key; ?>')">Save</button> 
-            <!--            <button type="button" id="btnSaveClose" class="btn btn-info">Save & Go Back to Listing Page</button>-->
         </div>
     </div>
 
+
+
+    </br></br></br>
 </form>
+    
+<script>
+    var account_id = '';
+    var currency_id = '';
+    var existing_value2 = "<?php echo $data['tariff_id']; ?>";
+    ;
+
+    $(document).ready(function () {
+        currency_id = $('#carrier_currency_id').val();
+        if (currency_id != '')
+            destination_type_changed('tariff_id', account_id, currency_id, existing_value2);
+    });
+
+//if on currency_id change
+    $("#carrier_currency_id").change(function () {
+        currency_id = $('#carrier_currency_id').val();
+        destination_type_changed('tariff_id', account_id, currency_id, existing_value2);
+    });
+
+
+
+
+
+
+
+    function destination_type_changed(id_tariff, account_id, currency_id, existing_value2)
+    {
+
+        {
+            data_array = {
+                action: 'get_tariffs',
+                account_id: account_id,
+                currency_id: currency_id,
+                existing_value: existing_value2,
+            };
+            console.log(data_array);
+            var target = BASE_URL + "ajax/ajax_get_tariff";
+
+            $.ajax({
+                method: "POST",
+                url: target,
+                dataType: 'json',
+                data: data_array
+            })
+                    .done(function (msg) {
+                        //console.log(msg);
+                        if (typeof msg['html'] === 'undefined')
+                        {
+                        } else
+                        {
+                            $('#' + id_tariff).html(msg['html']);
+                        }
+
+                    });
+
+        }
+    }
+</script>
+<script>
+    var account_id = '';
+    var currency_id = '';
+
+    $(document).ready(function () {
+        currency_id = $('#carrier_currency_id').val();
+
+    });
+
+</script>

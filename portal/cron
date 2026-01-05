@@ -1,0 +1,7 @@
+* * * * *  for i in {1..12}; do  /usr/bin/php   /var/www/html/portal/index.php Billing  callmanage >/dev/null 2>&1  & sleep 5; done
+*/30  * * * *  /usr/bin/sh /home/OV500/xmlcdr.sh >/dev/null 2>&1
+* * * * *  /usr/bin/lua /home/OV500/monin.lua
+
+*/15 * * * *  /usr/bin/php  /var/www/html/portal/index.php Billing  quickservice >/dev/null 2>&1
+10 0 * * * /usr/bin/php /var/www/html/portal/index.php Billing cron >/dev/null 2>&1
+*/5 * * * * /usr/bin/php /var/www/html/portal/index.php Billing lowbalance_notification > /dev/null 2>&1

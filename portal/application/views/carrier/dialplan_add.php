@@ -1,4 +1,3 @@
-
 <script src="<?php echo base_url() ?>theme/vendors/combo-box-typeahead/js/bootstrap-combobox.js"></script>
 <link href="<?php echo base_url() ?>theme/vendors/combo-box-typeahead/css/bootstrap-combobox.css" rel="stylesheet" type="text/css">
 <script>
@@ -6,39 +5,24 @@
         $('.combobox').combobox()
     });
 </script>
-
-<!-- Parsley -->
 <script src="<?php echo base_url() ?>theme/vendors/parsleyjs/dist/parsley.min.js"></script>
-<!-- bootstrap-daterangepicker -->
 <script src="<?php echo base_url() ?>theme/vendors/moment/min/moment.min.js"></script>
-<!-- bootstrap-datetimepicker -->    
 <script src="<?php echo base_url() ?>theme/vendors/bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
-<div class="">
-    <div class="clearfix"></div>   
 
-    <div class="col-md-12 col-sm-12 col-xs-12 right">
 
-        <div class="x_title">
-            <h2>Dialplan Configuration Management</h2>
-            <ul class="nav navbar-right panel_toolbox">     
-                <li><a href="<?php echo base_url('dialplans/index/') ?>"><button class="btn btn-danger" type="button" >Dialplan Listing Page</button></a> </li>
-            </ul>
-            <div class="clearfix"></div>
-        </div>
-
+<div class="container-fluid">
+    <div class="block-header">
+        <h2>Dialplan Configuration (ADD)</h2>
+        <ul class="nav navbar-right panel_toolbox">
+            <li><a href="<?php echo base_url('dialplans/index/') ?>"><button class="btn btn-primary" type="button" >Dialplan Listing Page</button></a> </li>
+        </ul>
     </div>
-    <div class="row">
-        <div class="col-md-12 col-sm-12 col-xs-12">
-            <div class="x_panel">
-                <div class="x_title">
-                    <h2>Dialplan (ADD)</h2>
-                    <ul class="nav navbar-right panel_toolbox">
-                        
-                    </ul>
-                    <div class="clearfix"></div>
-                </div>
-                <div class="x_content">
-                    <br />         
+    <div class="row clearfix">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="card">
+                <div class="header">
+
+
                     <form action="<?php echo base_url(); ?>dialplans/addD" method="post" name="add_form" id="add_form" data-parsley-validate class="form-horizontal form-label-left">
                         <input type="hidden" name="button_action" id="button_action" value="">
                         <input type="hidden" name="action" value="OkSaveData">  
@@ -47,7 +31,7 @@
                                 <div class="form-group">
                                     <label class="control-label col-md-4 col-sm-3 col-xs-12" for="first-name">Prefix <span class="required">*</span></label>
                                     <div class="col-md-8 col-sm-6 col-xs-12">
-                                        <input type="text" name="frm_prefix" id="frm_prefix" value="<?php echo set_value('frm_prefix'); ?>" data-parsley-required="" data-parsley-length="[1, 10]" data-parsley-type="digits" class="form-control col-md-7 col-xs-12">
+                                        <input type="text" name="frm_prefix" id="frm_prefix" value="<?php echo set_value('frm_prefix'); ?>" data-parsley-required="" data-parsley-length="[1, 15]" data-parsley-required=""  class="form-control col-md-7 col-xs-12">
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -78,7 +62,7 @@
                                             <option value="2" <?php if (set_value('frm_priority') == 2) echo 'selected'; ?>>2</option>
                                             <option value="3" <?php if (set_value('frm_priority') == 3) echo 'selected'; ?>>3</option>
                                             <option value="4" <?php if (set_value('frm_priority') == 4) echo 'selected'; ?>>4</option>
-                        
+
                                         </select>
                                     </div>
                                 </div> 							
@@ -86,8 +70,8 @@
                                     <label for="middle-name" class="control-label col-md-4 col-sm-3 col-xs-12">Status</label>
                                     <div class="col-md-8 col-sm-6 col-xs-12">
                                         <div class="radio">
-                                            <label><input type="radio" name="frm_status" id="status1" value="1"  <?php echo set_radio('frm_status', '1', TRUE); ?> /> Active</label>
-                                            <label> <input type="radio" name="frm_status" id="status0" value="0" <?php echo set_radio('frm_status', '0'); ?> /> Inactive</label>
+                                            <input type="radio"  class="with-gap"  name="frm_status" id="status1" value="1"  <?php echo set_radio('frm_status', '1', TRUE); ?> /> <label for="status1">Active</label>
+                                            <input type="radio"  class="with-gap" name="frm_status" id="status0" value="0" <?php echo set_radio('frm_status', '0'); ?> /> <label for="status0">Inactive</label>
                                         </div>                   
                                     </div>
                                 </div>							
@@ -164,17 +148,12 @@
             </div>
         </div>
     </div>
-    
-       <div class="col-md-12 col-sm-12 col-xs-12 right">
-        <div class="ln_solid"></div>
-        <div class="x_title">
-            <h2>Dialplan Configuration Management</h2>
-            <ul class="nav navbar-right panel_toolbox">     
-                <li><a href="<?php echo base_url('dialplans/index/') ?>"><button class="btn btn-danger" type="button" >Dialplan Listing Page</button></a> </li>
-            </ul>
-            <div class="clearfix"></div>
-        </div>
 
+    <div class="block-header">
+        <h2>Dialplan Configuration (ADD)</h2>
+        <ul class="nav navbar-right panel_toolbox">
+            <li><a href="<?php echo base_url('dialplans/index/') ?>"><button class="btn btn-primary" type="button" >Dialplan Listing Page</button></a> </li>
+        </ul>
     </div>
 </div>    
 <script>

@@ -1,12 +1,11 @@
 <?php
-
-/* Copyright (C) Openvoips Technologies - All Rights Reserved
+/*
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
  * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential, Only allow to use 
- * OV500Pro Version 2.1.0
- * Written by Seema Anand <openvoips@gmail.com> , 2021 
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2026 
  * http://www.openvoips.com 
- * License https://www.openvoips.com/license.html
  */
 
 if (!defined('BASEPATH'))
@@ -164,7 +163,7 @@ class Resellers extends MY_Controller {
             $this->form_validation->set_rules('tax3', 'Tax 3', 'trim|required');
             $this->form_validation->set_rules('status_id', 'Status', 'trim|required');
 
-            $this->form_validation->set_rules('llr_check', 'LLR Check', 'trim|required');
+            $this->form_validation->set_rules('llr_check', 'Don\'t allow Loss Making calls', 'trim|required');
             $this->form_validation->set_rules('media_transcoding', 'Transcoding', 'trim|required');
             $this->form_validation->set_rules('media_rtpproxy', 'With-media', 'trim|required');
 //            $this->form_validation->set_rules('billing_type', 'Billing Type', 'trim|required');
@@ -216,7 +215,7 @@ class Resellers extends MY_Controller {
         //  $logged_account_id = get_logged_account_id();
         $data['country_options'] = $this->utils_model->get_countries();
         $data['currency_options'] = $this->utils_model->get_currencies();
-        $data['state_options'] = $this->utils_model->get_states();
+                
 
 
         /* if(check_logged_user_group(array('RESELLER')))
@@ -342,7 +341,7 @@ class Resellers extends MY_Controller {
             $this->form_validation->set_rules('tax3', 'Tax 3', 'trim|required');
             $this->form_validation->set_rules('vat_flag', 'VAT Flag', 'trim');
             $this->form_validation->set_rules('status_id', 'Status', 'trim|required');
-            $this->form_validation->set_rules('llr_check', 'LLR Check', 'trim|required');
+            $this->form_validation->set_rules('llr_check', 'Don\'t allow Loss Making calls', 'trim|required');
             $this->form_validation->set_rules('media_transcoding', 'Transcoding', 'trim|required');
             $this->form_validation->set_rules('media_rtpproxy', 'With-media', 'trim|required');
             //$this->form_validation->set_rules('billing_type', 'Billing Type', 'trim|required');
@@ -432,7 +431,7 @@ class Resellers extends MY_Controller {
         //   $logged_account_id = get_logged_account_id();
         $data['country_options'] = $this->utils_model->get_countries();
         $data['currency_options'] = $this->utils_model->get_currencies();
-        $data['state_options'] = $this->utils_model->get_states();
+                
         /*
           if (check_logged_user_type(array('ADMIN', 'SUBADMIN', 'NOC'))) {
           $data['tariff_options'] = $this->utils_model->get_tariffs($logged_user_type, 'CUSTOMER');

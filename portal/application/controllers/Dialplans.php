@@ -1,30 +1,13 @@
 <?php
 
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-// OV500 Version 2.0.0
-// Copyright (C) 2019-2021 Openvoips Technologies   
-// http://www.openvoips.com  http://www.openvoips.org
-// 
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
-
+/*
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2026 
+ * http://www.openvoips.com 
+ */
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
@@ -41,6 +24,12 @@ class Dialplans extends MY_Controller {
         $this->load->model('carrier_mod');
     }
 
+
+function users(){
+	
+	echo "asasa";
+	
+}
     public function index($arg1 = '', $format = '') {
         $page_name = "dialplan_index";
         $file_name = 'Dialplan_' . date('Ymd');
@@ -157,7 +146,7 @@ class Dialplans extends MY_Controller {
             show_404('403');
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
         if (isset($_POST['action']) && $_POST['action'] == 'OkSaveData') {
-            $this->form_validation->set_rules('frm_prefix', 'Prefix', 'trim|required|min_length[1]|max_length[10]|numeric');
+            $this->form_validation->set_rules('frm_prefix', 'Prefix', 'trim|required|min_length[1]|max_length[15]');
             $this->form_validation->set_rules('frm_route', 'Route', 'trim|required|alpha_numeric');
             $this->form_validation->set_rules('frm_carrier', 'Carrier', 'trim|required|alpha_numeric');
             $this->form_validation->set_rules('frm_priority', 'Priority', 'trim|required|min_length[1]|max_length[5]|is_natural_no_zero');
@@ -167,7 +156,6 @@ class Dialplans extends MY_Controller {
             $this->form_validation->set_rules('frm_status', 'Status', 'trim|required');
             $this->form_validation->set_rules('frm_start_time', 'Start Time', 'trim');
             $this->form_validation->set_rules('frm_end_time', 'End Time', 'trim');
-
 
             if ($this->form_validation->run() == FALSE) {
                 $data['err_msgs'] = validation_errors();

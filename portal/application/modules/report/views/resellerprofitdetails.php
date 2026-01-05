@@ -1,16 +1,17 @@
-
-<div class="col-md-12 col-sm-6 col-xs-12">
-    <div class="x_panel">
-        <div class="x_title">
-            <h2>Reseller Profit Details</h2>
-            <ul class="nav navbar-right panel_toolbox">
-                <?php //if (check_account_permission('Signup/addplan', 'add')): ?>
-                <li><a href="<?php echo base_url() ?>report"><input type="button" value="Back To Report Page" name="add_link" class="btn btn-danger"></a></li>
-                <?php // endif; ?>
-            </ul>
-            <div class="clearfix"></div>
-        </div>
-        <div class="x_content"> 
+          
+<div class="container-fluid">
+    <div class="block-header">
+         <h2>Reseller Profit Details</h2>
+        <ul class="nav navbar-right panel_toolbox">
+           <li><a href="<?php echo base_url() ?>report"><input type="button" value="Back To Report Page" name="add_link" class="btn btn-primary"></a></li>
+        </ul>
+    </div>
+    <div class="row clearfix">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="card">
+                <div class="header">
+                    
+            
             <form class="block-content form-horizontal " id="search_form" name="search_form"  method="post" action="<?php echo base_url(); ?>report/resellerprofitdetails">
                 <input type="hidden" name="search_action" value="search" />
                 <input type="hidden" name="no_of_rows" id="no_of_rows" value="" />
@@ -32,20 +33,27 @@
                     <div class="col-md-4 col-sm-8 col-xs-12">
                         <input type="text" name="resellertime" id="reservation-time" class="form-control" value="<?php echo $_SESSION[$search_session_key]['resellertime']; ?>" />
                     </div>
-                    <div class="searchBar text-right ">
+                    
+                </div>
+
+                
+                  <div class="form-group">
+
+                   
+                    <div class="searchBar text-center ">
                         <input type="submit" value="Search" name="OkFilter" id="OkFilter" class="btn btn-primary">                          
                         <input type="button" value="Reset" name="search_reset" id="search_reset" class="btn btn-info">                           
 
                     </div>
                 </div>
 
-
             </form> 
 
             <div class="clearfix"></div>
-            <div class="ln_solid"></div>           
+            <div class="ln_solid"></div>    
+            <div class="body"> 
             <div class="row">  
-                <?php dispay_pagination_row($total_records, $_SESSION[$search_session_key]['no_of_rows'], $pagination); ?>
+                <?php dispay_pagination_row_bsd($total_records, $_SESSION[$search_session_key]['no_of_rows'], $pagination); ?>
             </div>
 
             <div class="table-responsive">
@@ -95,9 +103,15 @@
                 </table>
             </div>                    
             <div class="row">  
-                <?php dispay_pagination_row_bottom($total_records, $_SESSION[$search_session_key]['no_of_records'], $pagination); ?>
+                <?php dispay_pagination_row_bsd($total_records, $_SESSION[$search_session_key]['no_of_rows'], $pagination); ?>
             </div> 
         </div><?php //ddd($listing_data['result']);?>
+    </div>
+               <div class="block-header">
+         <h2>Reseller Profit Details</h2>
+        <ul class="nav navbar-right panel_toolbox">
+           <li><a href="<?php echo base_url() ?>report"><input type="button" value="Back To Report Page" name="add_link" class="btn btn-primary"></a></li>
+        </ul>
     </div>
 </div>
 

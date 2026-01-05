@@ -1,0 +1,217 @@
+How to Contribute Patches to FreeSWITCH
+=======================================
+
+Download the Source Code
+------------------------
+
+    git clone https://github.com/signalwire/freeswitch.git
+    cd freeswitch
+
+Ensure Git is Setup
+-------------------
+
+    # tell git your full name and email address; make sure to use your
+    # real name and not a username
+    ./scripts/setup-git.sh
+
+Create Your Commits
+-------------------
+
+    # create a topic/feature branch in your local repository
+    git checkout -b myfeature
+
+    # make your change
+    emacs .
+
+    # commit the results locally; see below for how to write a good
+    # commit message
+    git commit -va
+
+    # create more commits as needed such that each commit represents a
+    # logically separate change
+    #while true; do emacs .; git commit -va; done
+
+    # review changes; ensure your author name is correct
+    git log -p
+
+Create a Pull Request
+---------------------
+
+    # navigate to the FreeSWITCH JIRA
+    chromium https://freeswitch.org/jira
+
+    # create an account in JIRA and create a new issue
+
+    # navigate to FreeSWITCH github
+    chromium https://github.com/signalwire/freeswitch
+
+    # Using your github credentials, login to github; create a forked FS repository; read
+    # the details here:
+    chromium https://freeswitch.org/confluence/display/FREESWITCH/Pull+Requests
+
+    # add your repository as a remote (change to your username)
+    git remote add fs git@github.com:signalwire/freeswitch.git
+
+    # push your changes to a branch
+    git push fs +HEAD:myfeature
+
+    # create a pull request as described here:
+    chromium https://freeswitch.org/confluence/display/FREESWITCH/Pull+Requests
+
+Guidelines for a Good Commit
+----------------------------
+
+To the extent possible and appropriate, address only one issue per
+commit.  When we review your commit, anything that doesn't need to be
+there will only create confusion.
+
+This means that, for example, unrelated refactoring or whitespace
+cleanups should generally happen in separate commits.  Whitespace
+cleanup commits should not change anything other than whitespace, and
+refactoring commits should strive to preserve identical behavior.
+
+However, don't go overboard.  A commit should do some identifiable
+thing completely.  If you're adding a new module, the build changes
+for that module should go in the commit that adds the module itself.
+If you're adding a feature, the feature should work after applying
+that commit.
+
+We don't need to see your missteps and corrections.  Use `git rebase
+-i` to squash those out of your history before submitting the commit
+series to us.  It should look like you got everything right the first
+time.
+
+Use `git log -p` to verify that each diff is correct and minimal, and
+that your git author name is correct and complete.
+
+Writing a Good Commit Message
+-----------------------------
+
+Your commit message consists of two parts: the subject and the body.
+
+The subject is like the subject in an email message.  It should be
+short -- typically less than 50 characters -- and it should concisely
+describe the purpose or effect of your change.
+
+If you're having a difficult time writing a short subject for your
+commit, perhaps your commit should be broken into smaller separate
+commits.
+
+The commit body can be longer and can consist of multiple paragraphs.
+The text of the body should be hard wrapped to 68-72 characters.  (In
+Emacs you can hard wrap text with `M-q`.)
+
+When writing the commit body, describe in detail the problem that your
+commit aims to solve, how your commit solves the problem, and any
+changes in behavior that result from your change, such as new
+variables, command flags, or breaks in backward compatibility.
+
+Your commit message should be written in the present tense in
+imperative style.  Your message should talk about what the patch
+*does*, not what you *did* to write it.
+
+The commit subject is the first line of your commit message, then
+there is an empty line, then your commit body starts.  A good commit
+message might look like this:
+
+    commit b5c64234ea5d4417abe02b282d6f41c019f2252f
+    Author: John Doe <johndoe@example.com>
+    Date:   Tue Jan 19 03:14:07 2014 +0000
+    
+        Add frobinator support to mod_sofia
+        
+        Without proper frobinator support users had to make multiple calls
+        to shell scripts to do the sort of frobbing needed in high call
+        volume environments.
+        
+        With this change, we now link to libfrob and support the IETF
+        draft-cross-voip-frobbing API.
+        
+        After appropriate amounts of frobbing have been done, a new variable
+        `frobbing_done` is set in the caller's channel.
+        
+        FS-XXXX #resolve
+
+Patches Related to JIRA Issues
+------------------------------
+
+When your patch is related to an issue logged in JIRA, add the
+identifier for the issue (e.g. FS-XXXX) to the body of your commit
+message at the beginning of a line, typically the last line or just
+before "Signed-off-by:" and "Thanks-to:" lines.  This helps our JIRA
+bot do useful things by relating the commit to the issue.
+
+If you believe your patch resolves the issue in question, follow the
+issue number with a space and the "#resolve" directive as in the
+example above.
+
+Avoid Merges
+------------
+
+When you've created a local git branch to make and test your changes,
+it can be tempting to merge that branch periodically against our git
+HEAD, particularly if the branch lingers for some time.  Don't do
+this.  Instead, please rebase your branch onto our tree before
+submitting the commits to us.  Random "update branch to master" merges
+make our history hard to understand and make it more difficult to
+isolate regressions with `git-bisect`.
+
+New Module Checklist
+--------------------
+
+When proposing a new module:
+
+ * Add a `Makefile.am` for the module
+ * Add the module to the FS `configure.ac`
+ * Add the module to `build/modules.conf.in` (commented out)
+ * Describe the module in as much detail as possible in the comments
+   at the top of the module
+ * Add our whitespace footer to the module files; ensure the \*.[ch]
+   module files use tabs for indentation and are free of trailing
+   whitespace (e.g. in Emacs, run `M-x whitespace-mode`, then `M-x
+   whitespace-cleanup`)
+ * Remove any unused code left over from debugging
+ * Ensure symbols not meant to be exported are declared `static`
+ * Don't add any files to `conf/vanilla`
+ * Write a commit message body describing the module, why it's useful,
+   what it does, how it works, and any parts not yet implemented
+
+Do As We Say...
+---------------
+
+When you look in our git history, you'll find not all commits follow
+the guidelines here.  Don't be fooled by this.  These guidelines are
+what we want, and your commits should follow them.
+
+It's always difficult to counsel, "do as we say and not as we do," but
+the truth is that the format of your commits will be held to a
+different standard than the commits of people who have written the
+majority of the code in FS.  For one thing, your commits will be
+reviewed, so following a careful format helps us to review and merge
+your patches quickly and efficiently.
+
+We want a clean and sensible git history, and over time more
+contributors will be following the guidelines here.
+
+Where to Go for Help
+--------------------
+
+If you have any questions or run into any roadblocks please reach out
+to us.  You can send an email to our development mailing list:
+
+> http://lists.freeswitch.org/mailman/listinfo/freeswitch-dev
+
+Note that while you're free to send a patch to that list for questions
+or for review, patches sent to the mailing list will not be considered
+for inclusion.  Patches that you want included in FreeSWITCH must be
+submitted to JIRA.
+
+You can also reach us on freenode.net at:
+
+> \#freeswitch-dev
+
+Finally, feel free to join us in our weekly conference call.  Many of
+the core developers are often on the call and you'll have an
+opportunity at the beginning or end of the call to ask your questions:
+
+> https://freeswitch.org/confluence/display/FREESWITCH/ClueCon+Weekly+Conference+call

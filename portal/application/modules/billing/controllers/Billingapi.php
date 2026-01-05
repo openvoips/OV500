@@ -1,5 +1,12 @@
 <?php
-
+/*
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2026 
+ * http://www.openvoips.com 
+ */
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Billingapi extends MY_Controller {
@@ -18,13 +25,14 @@ class Billingapi extends MY_Controller {
             $REQUEST = $_REQUEST;
         }
 
+
+
         $result = $this->Billingapi_mod->billing($REQUEST);
         echo json_encode($result);
     }
 
     public function cron() {
         $date = date('Y-m-d');
-
         $this->Billingapi_mod->carrier_usage_data($date);
         $account = '';
         $account_type = 'CUSTOMER';
@@ -36,6 +44,14 @@ class Billingapi extends MY_Controller {
 
     public function quickservice() {
         $this->Billingapi_mod->creditmanagement();
+    }
+
+    public function callmanage() {
+        $this->Billingapi_mod->callmanage();
+    }
+    
+    public function lowbalance_notification() {
+        $this->Billingapi_mod->lowbalance_notification();
     }
 
     function sendinvoice() {
@@ -206,6 +222,112 @@ GROUP BY service_id, rate, bill_sdr.item_name";
                 $sql = "UPDATE bill_invoice SET status_id='failed', status_message='$message' WHERE account_id ='$account_id' AND invoice_id='$invoice_id'";
                 $query = $DB1->query($sql);
             }
+        }
+    }
+
+    function balance_reconcile($account_id, $forinvoice, $invoice_id) {
+        $DB1 = $this->load->database('default', true);
+        $CDRDB = $this->load->database('cdrdb', true);
+        if (strlen($account_id) == 0)
+            return;
+        try {
+            $openingbalance = $addbalance = $removebalance = $usage = 0;
+            $sdr_terms = array();
+            $query = "SELECT term_group, term, display_text, cost_calculation_formula FROM sys_sdr_terms ORDER BY term_group, term;";
+            echo $query . "\n";
+            $query = $DB1->query($query);
+            $result_data = $query->result_array();
+            foreach ($result_data as $row) {
+                $term = $row['term'];
+                $sdr_terms[$term] = $row;
+            }
+            $query = sprintf("SELECT rule_type, billing_date as action_date, totalcost total_cost, startdate service_startdate, enddate service_stopdate FROM bill_account_sdr WHERE account_id='%s'  and (invoice_id = '' or invoice_id  is NULL  ) and account_id is not null  and rule_type not in ('ADDCREDIT', 'REMOVECREDIT' )  ORDER BY action_date ASC ", $account_id);
+
+            echo $query . "\n";
+            $query = $DB1->query($query);
+            $result_data = $query->result_array();
+            if (count($result_data) > 0) {
+                foreach ($result_data as $sdr_data) {
+                    $rule_type = $sdr_data['rule_type'];
+                    if (isset($sdr_terms[$rule_type])) {
+                        $term_array = $sdr_terms[$rule_type];
+                        $term_group = $term_array['term_group'];
+                        $cost_calculation_formula = trim($term_array['cost_calculation_formula']);
+                        $total_cost = $sdr_data['total_cost'];
+                        if ($term_group == 'opening') {
+                            if ($cost_calculation_formula == '+') {
+                                $openingbalance = $openingbalance + $total_cost;
+                            } elseif ($cost_calculation_formula == '-') {
+                                $openingbalance = $openingbalance - $total_cost;
+                            }
+                        } elseif ($term_group == 'balance') {
+                            if ($cost_calculation_formula == '+') {
+                                $addbalance = $addbalance + $total_cost;
+                            } elseif ($cost_calculation_formula == '-') {
+                                $removebalance = $removebalance + $total_cost;
+                            }
+                        } else {
+                            if ($cost_calculation_formula == '+') {
+                                $usage = $usage + $total_cost;
+                            } elseif ($cost_calculation_formula == '-') {
+                                $usage = $usage + $total_cost;
+                            }
+                        }
+                    }
+                }
+            }
+            $current_balance = $openingbalance + $addbalance - $removebalance - $usage;
+            $cost = 0;
+            $date = date('Y-m-d');
+            $customer_statistics = date('Ym', strtotime($date)) . "_ratedcdr";
+            if ($usertype == 'CUSTOMER') {
+                $query = sprintf("SELECT sum(customer_callcost_total) cost FROM %s where customer_account_id = '%s' and CURDATE() = date(end_time);", $customer_statistics, $account_id);
+            } elseif ($usertype == 'RESELLER1') {
+                $query = sprintf("SELECT sum(reseller1_callcost_total) cost FROM %s where reseller1_account_id = '%s' and CURDATE() = date(end_time);", $customer_statistics, $account_id);
+            } elseif ($usertype == 'RESELLER2') {
+                $query = sprintf("SELECT sum(reseller2_callcost_total) cost FROM %s where reseller2_account_id = '%s' and CURDATE() = date(end_time);", $customer_statistics, $account_id);
+            } elseif ($usertype == 'RESELLER3') {
+                $query = sprintf("SELECT sum(reseller3_callcost_total) cost FROM %s where reseller3_account_id = '%s' and CURDATE() = date(end_time);", $customer_statistics, $account_id);
+            } else {
+                $query = sprintf("SELECT sum(customer_callcost_total) cost FROM %s where customer_account_id = '%s' and CURDATE() = date(end_time);", $customer_statistics, $account_id);
+            }
+            echo $query . "\n";
+            $query = $CDRDB->query($query);
+            $result_data2 = $query->result_array();
+            $cost = '0';
+            foreach ($result_data2 as $row2) {
+                $cost = $row2['cost'];
+            }
+            if ($cost == null or $cost == '')
+                $cost = 0;
+            $balance = $current_balance - $cost;
+            $balance2 = 0 - $balance;
+            $query = sprintf("update customer_balance set balance =  '%s' where account_id = '%s';", $balance2, $account_id);
+            echo $query . "\n";
+            $query = $DB1->query($query);
+
+            $balance2 = 0;
+            $balance = 0;
+            $balance = 0;
+            $current_balance = 0;
+        } catch (Exception $e) {
+            return $e->getMessage();
+        }
+    }
+
+    function ManageBalance() {
+        $forinvoice = '0';
+        $DB1 = $this->load->database('default', true);
+        $query1 = sprintf("select HIGH_PRIORITY  account_id, invoice_id   from bill_account_sdr WHERE   account_id is not null  group by account_id");
+        echo $query1 . "\n";
+        $query = $DB1->query($query1);
+        $sdraccounts = $query->result_array();
+
+        print_r($sdraccounts);
+        foreach ($sdraccounts as $account) {
+            $account_id = $account['account_id'];
+            $this->balance_reconcile($account_id, '0', '');
+            $account_id = '';
         }
     }
 

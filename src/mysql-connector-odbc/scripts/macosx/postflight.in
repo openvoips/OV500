@@ -1,0 +1,122 @@
+#!/bin/sh
+
+# Copyright (c) 2007, 2024, Oracle and/or its affiliates.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, version 2.0, as
+# published by the Free Software Foundation.
+#
+# This program is designed to work with certain software (including
+# but not limited to OpenSSL) that is licensed under separate terms, as
+# designated in a particular file or component or in included license
+# documentation. The authors of MySQL hereby grant you an additional
+# permission to link the program and your derivative works with the
+# separately licensed software that they have either included with
+# the program or referenced in the documentation.
+#
+# Without limiting anything contained in the foregoing, this file,
+# which is part of Connector/ODBC, is also subject to the
+# Universal FOSS Exception, version 1.0, a copy of which can be found at
+# https://oss.oracle.com/licenses/universal-foss-exception.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License, version 2.0, for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+##############################################################################
+#
+#  Post Install file for MySQL Connector ODBC @CONNECTOR_MAJOR@.@CONNECTOR_MINOR@
+#
+##############################################################################
+
+# ----------------------------------------------------------------------
+# ENSURE WE HAVE INI FILES
+#
+# Upon a fresh install of OS X these files do not exist. The ODBC Installer
+# library calls should create these files for us when we do stuff like
+# request to register a driver but this does not seem to happen and the
+# request fails. So we we start by making sure we have some, mostly, empty
+# ini files in place before we make installer calls.
+#
+# Also note that there are many places where these ini files *could* go
+# based upon the search algorithm in the default ODBC system or any other
+# ODBC system which may get installed. We choose the following because they
+# seem to be the ones created when we use the standard ODBC Administrator
+# application.
+# ----------------------------------------------------------------------
+
+libdir=@INSTALLDIR@/lib
+bindir=@INSTALLDIR@/bin
+
+for admdir in ~/Library/ODBC /Library/ODBC
+do
+  echo "Ensuring $admdir, odbcinst.ini and odbc.ini exists..."
+  if [ ! -d $admdir ] ; then
+      mkdir $admdir
+      chmod 775 $admdir
+      chown root:admin $admdir
+  fi
+
+  if [ ! -f $admdir/odbc.ini ] ; then
+      echo "[ODBC Data Sources]"        > $admdir/odbc.ini
+      echo ""                          >> $admdir/odbc.ini
+      echo "[ODBC]"                    >> $admdir/odbc.ini
+      echo "Trace         = 0"         >> $admdir/odbc.ini
+      echo "TraceAutoStop = 0"         >> $admdir/odbc.ini
+      echo "TraceFile     ="           >> $admdir/odbc.ini
+      echo "TraceLibrary  ="           >> $admdir/odbc.ini
+      chmod 664 $admdir/odbc.ini
+      chown root:admin $admdir/odbc.ini
+  fi
+
+  if [ ! -f $admdir/odbcinst.ini ] ; then
+      echo "[ODBC Drivers]"             > $admdir/odbcinst.ini
+      echo ""                          >> $admdir/odbcinst.ini
+      echo "[ODBC Connection Pooling]" >> $admdir/odbcinst.ini
+      echo "PerfMon    = 0"            >> $admdir/odbcinst.ini
+      echo "Retry Wait = "             >> $admdir/odbcinst.ini
+      chmod 664 $admdir/odbcinst.ini
+      chown root:admin $admdir/odbcinst.ini
+  fi
+done
+
+# ----------------------------------------------------------------------
+# SET USER PERMISSIONS
+#
+# Note that if the Mac OS X "ODBC Administrator" is run before this
+# script, and unlocked (root rights), it would save files in the user
+# area with root permissions, causing trouble later when trying to
+# change user settings without unlocking (root rights).
+# ----------------------------------------------------------------------
+if [ "$USER" -a "$GROUPS" ] ; then
+    chown -R $USER:$GROUPS ~/Library/ODBC
+fi
+
+# ----------------------------------------------------------------------
+# REGISTER THE DRIVER
+# ----------------------------------------------------------------------
+
+for driver_type in @CONNECTOR_DRIVER_TYPE@
+do
+  if [ $driver_type = "ANSI" ] ; then
+    suffix=a
+    dsn=myodbca
+  else
+    suffix=w
+    dsn=myodbc
+  fi
+
+  echo "Registering $driver_type driver..."
+  $bindir/myodbc-installer -a -d -n "MySQL ODBC @CONNECTOR_MAJOR@.@CONNECTOR_MINOR@ $driver_type Driver" -t "Driver=$libdir/libmyodbc8$suffix.so;"
+
+# ----------------------------------------------------------------------
+# CREATE A SAMPLE DSN
+# ----------------------------------------------------------------------
+  echo "Ensuring sample data source name (myodbc) exists..."
+  $bindir/myodbc-installer -a -s -c2 -n $dsn -t "Driver=MySQL ODBC @CONNECTOR_MAJOR@.@CONNECTOR_MINOR@ $driver_type Driver;SERVER=localhost;"
+done

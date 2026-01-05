@@ -1,0 +1,30 @@
+#!/bin/sh
+TARGET=$1
+ROOT=$(echo "$TARGET" | sed 's/\.h$//')
+if test "$MAKE" = ""; then
+	# shellcheck disable=SC2209
+	MAKE=make
+fi
+echo "Looking for usable alternative for $TARGET"
+rm -f "$ROOT"-test
+rm -f .stderr.$$
+for x in "$ROOT"*.h; do
+	echo "Trying build with $x"
+	rm -f "$TARGET"
+	(echo '/******** GENERATED FILE ********/'; cat "$x") > "$TARGET"
+	$MAKE "$ROOT"-test 2>> .stderr.$$ && break
+	echo "Failed build with $x"
+	rm -f "$TARGET"
+done
+rm -f "$ROOT"-test
+if test -f "$TARGET"; then
+	rm -f .stderr.$$
+	exit 0
+fi
+echo "Failed to find usable build alternative for $TARGET"
+echo "Collected stderr:"
+echo "--------------------------"
+cat .stderr.$$
+rm -f .stderr.$$
+echo "--------------------------"
+exit 1

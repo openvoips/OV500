@@ -1,31 +1,12 @@
 <?php
-
-// ##############################################################################
-// OV500 - Open Source SIP Switch & Pre-Paid & Post-Paid VoIP Billing Solution
-// OV500 Version 2.0.0
-// Copyright (C) 2019-2021 Openvoips Technologies   
-// http://www.openvoips.com  http://www.openvoips.org
-// 
-// The Initial Developer of the Original Code is
-// Anand Kumar <kanand81@gmail.com> & Seema Anand <openvoips@gmail.com>
-// Portions created by the Initial Developer are Copyright (C)
-// the Initial Developer. All Rights Reserved.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// ##############################################################################
-
-
+/*
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2026 
+ * http://www.openvoips.com 
+ */
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
@@ -161,20 +142,6 @@ class Dialplan_mod extends CI_Model {
     function get_data($order_by, $limit_to, $limit_from, $filter_data, $option_param = array()) {
         try {
             $this->db->select("SQL_CALC_FOUND_ROWS *", FALSE);
-			
-			////
-			$sub = $this->subquery->start_subquery('select');
-            $sub->select('dialplan_name')->from('dialplan');
-            $sub->where('dialplan_prefix_list.dialplan_id = dialplan.dialplan_id');
-            $this->subquery->end_subquery('dialplan_name');
-			////
-			////
-			$sub = $this->subquery->start_subquery('select');
-            $sub->select('carrier_name')->from('carrier');
-            $sub->where('dialplan_prefix_list.carrier_id = carrier.carrier_id');
-            $this->subquery->end_subquery('carrier_name');
-			////
-			
             if (count($filter_data) > 0) {
                 foreach ($filter_data as $key => $value) {
                     if ($value != '') {
@@ -188,7 +155,12 @@ class Dialplan_mod extends CI_Model {
             $this->db->order_by('dial_prefix', 'ASC');
             $this->db->order_by('priority', 'ASC');
             $this->db->limit(intval($limit_from), intval($limit_to));
-            $q = $this->db->get('dialplan_prefix_list');
+
+            $this->db->from('dialplan_prefix_list');
+          
+             
+            $q = $this->db->get();
+
             $final_return_array['result'] = $q->result_array();
             $query = $this->db->query('SELECT FOUND_ROWS() AS Count');
             $final_return_array["total"] = $query->row()->Count;

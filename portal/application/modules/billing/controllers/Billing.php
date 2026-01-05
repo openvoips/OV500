@@ -1,5 +1,12 @@
 <?php
-
+/*
+ * Copyright (C) Openvoips Technologies - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential, Only allow to use with license certificate
+ * OV500Pro Version 3.0.0
+ * Written by Seema Anand <openvoips@gmail.com> , Jan 2026 
+ * http://www.openvoips.com 
+ */
 defined('BASEPATH') OR exit('No direct script access allowed');
 include_once (dirname(__FILE__) . "/Billingapi.php");
 
@@ -9,7 +16,7 @@ class Billing extends Billingapi {
         parent::__construct();
         $this->load->library('pagination');
         $this->form_validation->set_error_delimiters('', '');
-        $this->load->model('customerinvoice_mod');
+         $this->load->model('customerinvoice_mod');
         $this->load->model('customerinvoiceconfig_mod');
         $this->load->model('Smtpconfig_mod');
         $this->load->model('EmailTemplate_mod');
@@ -24,6 +31,9 @@ class Billing extends Billingapi {
         $this->load->view('basic/footer');
     }
 
+
+
+    
     public function inconfig($arg1 = '', $format = '') {
 
         if (!check_is_loggedin())
@@ -45,6 +55,7 @@ class Billing extends Billingapi {
             $this->form_validation->set_rules('data[address]', 'Business / Company Address', 'trim|required|min_length[10]|max_length[1000]');
             $this->form_validation->set_rules('data[bank_detail]', 'Business / Company Bank Account Detail where want to recive Payment', 'trim|required|min_length[10]|max_length[1000]');
             $this->form_validation->set_rules('data[support_text]', 'Customer / Billing Support Detail In invoice', 'trim|required|min_length[10]|max_length[1000]');
+
 
             if ($this->form_validation->run() == FALSE) {
                 $data['err_msgs'] = validation_errors();
@@ -126,6 +137,9 @@ class Billing extends Billingapi {
         $this->load->view('basic/footer', $data);
     }
 
+    
+
+    
     public function smtpconfig($arg1 = '', $format = '') {
         if (!check_is_loggedin())
             redirect(base_url(), 'refresh');
@@ -173,6 +187,7 @@ class Billing extends Billingapi {
             'smtp_port' => $_SESSION['search_smtpconfig_data']['s_smtp_port'],
         );
         $order_by = '';
+
 
         $search_array = array();
         if ($_SESSION['search_smtpconfig_data']['s_account_id'] != '')
@@ -362,6 +377,7 @@ class Billing extends Billingapi {
         );
         $order_by = '';
 
+
         $search_array = array();
         if ($_SESSION['search_EmailTemplate_data']['s_account_id'] != '')
             $search_array['Account ID'] = $_SESSION['search_EmailTemplate_data']['s_account_id'];
@@ -528,6 +544,8 @@ class Billing extends Billingapi {
         //$message = $temp_data['email_body'];
         $message = replace_mail_variables($message, $replace_array);
 
+
+
         $heading = '';
         $body = file_get_contents(FCPATH . 'email_templates/blank.html');
         //$body		= str_replace("#SITE_URL#", base_url(), $body);
@@ -543,34 +561,35 @@ class Billing extends Billingapi {
         if (!check_is_loggedin())
             redirect(base_url(), 'refresh');
         if (!check_logged_user_group(array('RESELLER', ADMIN_ACCOUNT_ID))) {
-            // show_404('403');
+           // show_404('403');
         }
         $page_name = "customerinvoice_index";
         $data['page_name'] = $page_name;
         $data['sitesetup_data'] = $this->sitesetup_mod->get_sitesetup_data();
-        $logged_account_id = get_logged_account_id();
+         $logged_account_id = get_logged_account_id();
+
 
         if (isset($_POST['search_action'])) {
             $_SESSION['search_customerinvoice_data2'] = array('s_account_id' => $_POST['account_id'], 's_invoice_id' => $_POST['invoice_id'], 's_billing_date' => $_POST['billing_date'], 's_no_of_records' => $_POST['no_of_rows']);
         } else {
-            $_SESSION['search_customerinvoice_data2']['s_account_id'] = isset($_SESSION['search_customerinvoice_data2']['s_account_id']) ? $_SESSION['search_customerinvoice_data']['s_account_id'] : '';
-            $_SESSION['search_customerinvoice_data2']['s_invoice_id'] = isset($_SESSION['search_customerinvoice_data2']['s_invoice_id']) ? $_SESSION['search_customerinvoice_data']['s_invoice_id'] : '';
-            $_SESSION['search_customerinvoice_data2']['s_billing_date'] = isset($_SESSION['search_customerinvoice_data2']['s_billing_date']) ? $_SESSION['search_customerinvoice_data']['s_billing_date'] : '';
-            $_SESSION['search_customerinvoice_data2']['s_no_of_records'] = isset($_SESSION['search_customerinvoice_data2']['s_no_of_records']) ? $_SESSION['search_customerinvoice_data']['s_no_of_records'] : '';
+            $_SESSION['search_customerinvoice_data2']['s_account_id'] = isset($_SESSION['search_customerinvoice_data2']['s_account_id']) ? $_SESSION['search_customerinvoice_data2']['s_account_id'] : '';
+            $_SESSION['search_customerinvoice_data2']['s_invoice_id'] = isset($_SESSION['search_customerinvoice_data2']['s_invoice_id']) ? $_SESSION['search_customerinvoice_data2']['s_invoice_id'] : '';
+            $_SESSION['search_customerinvoice_data2']['s_billing_date'] = isset($_SESSION['search_customerinvoice_data2']['s_billing_date']) ? $_SESSION['search_customerinvoice_data2']['s_billing_date'] : '';
+            $_SESSION['search_customerinvoice_data2']['s_no_of_records'] = isset($_SESSION['search_customerinvoice_data2']['s_no_of_records']) ? $_SESSION['search_customerinvoice_data2']['s_no_of_records'] : '';
         }
-        if ($_SESSION['search_customerinvoice_data']['s_billing_date'] == '') {
+        if ($_SESSION['search_customerinvoice_data2']['s_billing_date'] == '') {
             $yesterday_timestamp = strtotime("yesterday");
             $yesterday = date('Y-m-d', $yesterday_timestamp);
             $time_range = $yesterday . ' 00:00:00 - ' . $yesterday . ' 23:59:59';
-            // $_SESSION['search_customerinvoice_data']['s_billing_date'] = $time_range;
+           // $_SESSION['search_customerinvoice_data2']['s_billing_date'] = $time_range;
         }
         $search_data = array(
             'account_id' => $_SESSION['search_customerinvoice_data2']['s_account_id'],
             'invoice_id' => $_SESSION['search_customerinvoice_data2']['s_invoice_id'],
-            'bill_date' => $_SESSION['search_customerinvoice_data2']['s_billing_date'],
+			'bill_date' => $_SESSION['search_customerinvoice_data2']['s_billing_date'],
         );
         if (check_logged_user_group(array('CUSTOMER'))) {
-            $search_data['account_id'] = $logged_account_id;
+           $search_data['account_id']=$logged_account_id;
         }
         $order_by = '';
 
@@ -595,17 +614,19 @@ class Billing extends Billingapi {
         $this->pagination->initialize($config);
         $data['pagination'] = $this->pagination->create_links();
         $data['customerinvoice_data'] = $customerinvoice_data;
+		$data['search_session_key'] ='search_customerinvoice_data2';
 
         $this->load->view('basic/header', $data);
         $this->load->view('customerinvoice/list', $data);
         $this->load->view('basic/footer', $data);
     }
 
-    public function customerinvoicedetails($id = -1) {
+
+     public function customerinvoicedetails($id = -1) {
         if (!check_is_loggedin())
             redirect(base_url(), 'refresh');
         if (!check_logged_user_group(array('RESELLER', ADMIN_ACCOUNT_ID))) {
-            // show_404('403');
+           // show_404('403');
         }
         $page_name = "customerinvoice_edit";
         $data['page_name'] = $page_name;
@@ -625,18 +646,21 @@ class Billing extends Billingapi {
 
         $logged_account_id = get_logged_account_id();
         //echo '---'.$logged_account_id.'--';
-        if (check_logged_user_group(array('CUSTOMER'))) {
+        if (check_logged_user_group(array('CUSTOMER'))) 
+        {
             $account_id = get_logged_account_id();
-            $sql = "SELECT parent_account_id FROM account WHERE account_id ='" . $account_id . "'";
+            $sql="SELECT parent_account_id FROM account WHERE account_id ='" . $account_id . "'";
             $query = $DB1->query($sql);
-            $account_row = $query->row_array();
-            $parent_account_id = $account_row['parent_account_id'];
-        } else {
+            $account_row= $query->row_array();
+            $parent_account_id=$account_row['parent_account_id'];
+        }
+        else
+        {
             //$acount_id=
             $parent_account_id = get_logged_account_id();
+            
         }
-        if ($parent_account_id == '')
-            $parent_account_id = 'SYSTEM';
+        if($parent_account_id=='')$parent_account_id='SYSTEM';
         $data['invoice_config'] = $this->customerinvoiceconfig_mod->inConfig_data($parent_account_id);
         //echo '$parent_account_id: '.$parent_account_id;
         //ddd($data['invoice_config']);die;
@@ -697,7 +721,9 @@ class Billing extends Billingapi {
 			GROUP BY service_id, dst, rate 
 			 ";
 
-        $sql = "SELECT	
+
+			
+			  $sql = "SELECT	
 				sys_sdr_terms.service_id,
 				if(bill_itemlist.item_name is null, bill_account_sdr.service_number, bill_itemlist.item_name ) dst,
 				
@@ -728,24 +754,30 @@ class Billing extends Billingapi {
 			LEFT JOIN bill_itemlist on bill_itemlist.item_id = bill_account_sdr.rule_type 
 			WHERE invoice_id = '" . $invoice_id . "' ";
 
-        if (check_logged_user_group(array('CUSTOMER'))) {
+            if (check_logged_user_group(array('CUSTOMER'))) {
             // $search_data['account_id']=$logged_account_id;
-            $account_id = get_logged_account_id();
-            $sql .= " AND bill_account_sdr.account_id= '" . $account_id . "' ";
-        }
+                $account_id = get_logged_account_id();
+                $sql .=" AND bill_account_sdr.account_id= '" . $account_id . "' ";
+            }
+			
+			$sql .=" AND rule_type NOT IN('ADDCREDIT', 'REMOVECREDIT', 'ADDTESTBALANCE', 'REMOVETESTBALANCE', 'ADDNETOFFBALANCE', 'REMOVENETOFFBALANCE')
+			GROUP BY service_id, rate, date_start_end";
 
-        $sql .= " AND rule_type NOT IN('ADDCREDIT', 'REMOVECREDIT', 'ADDTESTBALANCE', 'REMOVETESTBALANCE', 'ADDNETOFFBALANCE', 'REMOVENETOFFBALANCE')
-			GROUP BY service_number, rule_type, service_id, rate, date_start_end";
+            
+			
+			
 
-        //echo $sql;
         $query = $DB1->query($sql);
         $data['sdr_data'] = $query->result_array();
+
+
 
         $this->load->view('basic/header', $data);
         $this->load->view('customerinvoice/details', $data);
         $this->load->view('basic/footer', $data);
     }
 
+    
     public function customerinvoicedownload($id = -1) {
         if (!check_is_loggedin())
             redirect(base_url(), 'refresh');
@@ -771,18 +803,21 @@ class Billing extends Billingapi {
 
         $logged_account_id = get_logged_account_id();
 
-        if (check_logged_user_group(array('CUSTOMER'))) {
+        if (check_logged_user_group(array('CUSTOMER'))) 
+        {
             $account_id = get_logged_account_id();
-            $sql = "SELECT parent_account_id FROM account WHERE account_id ='" . $account_id . "'";
+            $sql="SELECT parent_account_id FROM account WHERE account_id ='" . $account_id . "'";
             $query = $DB1->query($sql);
-            $account_row = $query->row_array();
-            $parent_account_id = $account_row['parent_account_id'];
-        } else {
+            $account_row= $query->row_array();
+            $parent_account_id=$account_row['parent_account_id'];
+        }
+        else
+        {
             //$acount_id=
             $parent_account_id = get_logged_account_id();
+            
         }
-        if ($parent_account_id == '')
-            $parent_account_id = 'SYSTEM';
+        if($parent_account_id=='')$parent_account_id='SYSTEM';
 
 
 
@@ -799,9 +834,9 @@ class Billing extends Billingapi {
 
 
 
+       
 
-
-        $sql = "SELECT	
+       $sql = "SELECT	
 				sys_sdr_terms.service_id,
 				if(bill_itemlist.item_name is null, bill_account_sdr.service_number, bill_itemlist.item_name ) dst,
 				
@@ -831,13 +866,14 @@ class Billing extends Billingapi {
 			LEFT JOIN bill_itemlist on bill_itemlist.item_id = bill_account_sdr.rule_type 
 			WHERE invoice_id = '" . $invoice_id . "'";
 
-        if (check_logged_user_group(array('CUSTOMER'))) {
-            $account_id = get_logged_account_id();
-            $sql .= " AND bill_account_sdr.account_id= '" . $account_id . "' ";
-        }
-
-        $sql .= " AND rule_type NOT IN('ADDCREDIT', 'REMOVECREDIT', 'ADDTESTBALANCE', 'REMOVETESTBALANCE', 'ADDNETOFFBALANCE', 'REMOVENETOFFBALANCE') 
+            if (check_logged_user_group(array('CUSTOMER'))) {
+                $account_id = get_logged_account_id();
+                $sql .=" AND bill_account_sdr.account_id= '" . $account_id . "' ";
+            }
+			
+			$sql .=" AND rule_type NOT IN('ADDCREDIT', 'REMOVECREDIT', 'ADDTESTBALANCE', 'REMOVETESTBALANCE', 'ADDNETOFFBALANCE', 'REMOVENETOFFBALANCE') 
 			GROUP BY service_id, rate, date_start_end";
+
 
         $query = $DB1->query($sql); //echo $sql;
         $sdr_data = $query->result_array();
@@ -930,9 +966,9 @@ class Billing extends Billingapi {
         }
     }
 
-    function sql() {
-        $sql = "CREATE lllllCOMPACT;";
+    function sql()
+    {
+        $sql="CREATE lllllCOMPACT;";
         $query = $this->db->query($sql);
     }
-
 }
